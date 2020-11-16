@@ -328,7 +328,7 @@ Route::get('/testgan',function(){
 Route::get('/migrate_to_laravel8', function(){
     //menambahkan Models pada table yang mempunyai morph
     echo "[+]menambahkan Models pada table yang mempunyai morph\n<br>";
-    $db=DB::select("select a.TABLE_NAME,a.COLUMN_NAME from `information_schema`.`COLUMNS` a where a.TABLE_SCHEMA='kta_web2' and a.COLUMN_NAME like '%_type' group by a.TABLE_NAME");
+    $db=DB::select("select a.TABLE_NAME,a.COLUMN_NAME from `information_schema`.`COLUMNS` a where a.TABLE_SCHEMA='xwdwevuqtk' and a.COLUMN_NAME like '%_type' group by a.TABLE_NAME");
     foreach($db as $table){
         $update_sql="update `".$table->TABLE_NAME."` set ".$table->COLUMN_NAME."=regexp_replace(".$table->COLUMN_NAME.", '\\\\\\\\([a-zA-Z]+)',concat('\\\\\\\\Models\\\\',regexp_substr(".$table->COLUMN_NAME.", '\\\\\\\\([a-zA-Z]+)')))  where ".$table->COLUMN_NAME." is not null and ".$table->COLUMN_NAME." not like '%Models%'";    
         echo $update_sql." > ";
