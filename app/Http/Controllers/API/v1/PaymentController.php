@@ -31,8 +31,9 @@ class PaymentController extends Controller
         $this->request = $request;
 
         // Set midtrans configuration
-        Veritrans_Config::$serverKey = config('services.midtrans.serverKey');
-        Veritrans_Config::$isProduction = config('services.midtrans.isProduction');
+        //Veritrans_Config::$serverKey = config('services.midtrans.serverKey');
+        Veritrans_Config::$serverKey = "Mid-server-Nm-f1lgAL6i3jYoxDBDBSQUJ";
+        Veritrans_Config::$isProduction = true;
         Veritrans_Config::$isSanitized = config('services.midtrans.isSanitized');
         Veritrans_Config::$is3ds = config('services.midtrans.is3ds');
     }
@@ -608,6 +609,7 @@ class PaymentController extends Controller
 
     public function paymentUrl(Request $request)
     {
+
         if($request->user()->user_activated_at == null){
             $payment_value = setting('admin.member_price');
             $payment_text = "Pembayaran Member KTA";
@@ -643,14 +645,15 @@ class PaymentController extends Controller
                 'email'         => $request->user()->email
             ],
         ];
-        // dd(Veritrans_Snap::createTransaction($payload)->redirect_url);
+        //return $payload;
+        //dd(Veritrans_Snap::createTransaction($payload)->redirect_url);
         do {
             try {
                 $tryAgain = false;
                 $paymentUrl = Veritrans_Snap::createTransaction($payload)->redirect_url;
             } catch (\Exception $e) {
                 $tryAgain = true;
-                // dd($e->getCode());
+                //  dd($e->getCode();
                 if ($e->getCode() == '400') {
                     $uniqueId++;
                     $data->id = $uniqueId;

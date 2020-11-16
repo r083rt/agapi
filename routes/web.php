@@ -326,7 +326,7 @@ Route::get('/testgan',function(){
 });
 
 Route::get('/migrate_to_laravel8', function(){
-    //menambahkan Models pada table yang mempunyai morph
+    // menambahkan Models pada table yang mempunyai morph
     echo "[+]menambahkan Models pada table yang mempunyai morph\n<br>";
     $db=DB::select("select a.TABLE_NAME,a.COLUMN_NAME from `information_schema`.`COLUMNS` a where a.TABLE_SCHEMA='xwdwevuqtk' and a.COLUMN_NAME like '%_type' group by a.TABLE_NAME");
     foreach($db as $table){
@@ -352,6 +352,11 @@ Route::get('/migrate_to_laravel8', function(){
     $update = DB::statement($sql);
     echo $update."<br>\n";
     
+    echo "[+]menambahkan Models pada data json di table data_types voyager\n<br>";
+    $sql="update data_types set model_name=regexp_replace(model_name, 'App\\\\\\\\(?!Models\\\\\\\\)([a-zA-Z]+)',concat('App\\\\\\\\Models\\\\\\\\',replace(regexp_substr(model_name,'App\\\\\\\\([a-zA-Z]+)'),'App\\\\','')));";
+    echo $sql. " > ";
+    $update = DB::statement($sql);
+    echo $update."<br>\n";
 
      //mengedit data pada table Voyager di table voyager
      echo "[+]mengupdate data di table data_types voyager\n<br>";
