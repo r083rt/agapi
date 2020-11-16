@@ -46,19 +46,21 @@ class PaymentController extends Controller
         //
     }
     public function getStatus($userId){
-        
-        $user = User::with(['payments'=>function($query){
-            $query->orderBy('id','DESC');
-            $query->where('value',35000);
-        }])
-        ->whereNull('user_activated_at')
-        ->whereHas('payments',function($query){
-            $query->where('value',35000);
-        })->find($userId);
-        //dd($user);
-        if($user){
-            foreach ($user->payments as $p => $payment) {
-                # code...
+        $user = User::findOrFail($userId);
+        //bayar pendaftaran
+        if($user->user_activated_at==null){
+            $user->load(['payments'=>function($query){
+                $query->orderBy('id','DESC')->where('value',35000);
+            }]);
+        }else{
+            //bayar perpanjangan
+            $user->load(['payments'=>function($query){
+                $query->orderBy('id','DESC')->where('value',65000);
+            }]);
+        }
+        foreach ($user->payments as $p => $payment) {
+            # code...
+            try{
                 $status = Veritrans_Transaction::status($payment->id);
                 // dd($status->transaction_status);
                 if($status->transaction_status == 'settlement'){
@@ -66,10 +68,30 @@ class PaymentController extends Controller
                     $payment->status = 'success';
                     $payment->save();
                     $user->update(['user_activated_at'=>$date]);
-                break;
+                    break;
                 }
+            }catch(\Exception  $e){
+               
             }
+            
         }
+        
+        //dd($user);
+        // if($user){
+           
+        //     foreach ($user->payments as $p => $payment) {
+        //         # code...
+        //         $status = Veritrans_Transaction::status($payment->id);
+        //         // dd($status->transaction_status);
+        //         if($status->transaction_status == 'settlement'){
+        //             $date = $payment->created_at;
+        //             $payment->status = 'success';
+        //             $payment->save();
+        //             $user->update(['user_activated_at'=>$date]);
+        //         break;
+        //         }
+        //     }
+        // }
         return $user;
     }
 
