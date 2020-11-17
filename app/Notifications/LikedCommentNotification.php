@@ -31,6 +31,7 @@ class LikedCommentNotification extends Notification
     public function via($notifiable)
     {
         return ['broadcast','database'];
+        // return ['database'];
     }
 
     /**

@@ -21,6 +21,7 @@ class AssigmentObserver
             if($assigment->user_id!=$assigment->teacher_id){
                 $data = $assigment->loadMissing('user','teacher');
                 $data->user->notify(new AssigmentSharedNotification($data));
+                
             }
         }
         //Log::debug('anjay');

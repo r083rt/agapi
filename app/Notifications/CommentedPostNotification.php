@@ -30,6 +30,7 @@ class CommentedPostNotification extends Notification
      */
     public function via($notifiable)
     {
+        // return ['database'];
         return ['broadcast','database'];
     }
 
