@@ -35,7 +35,10 @@ class CommentLikeController extends Controller
             $like = new Like(['user_id' => $request->user()->id]);
             $comment->likes()->save($like);
             // $comment->likes()->sync($like, false);
-            \App\Models\User::find($comment->user_id)->notify(new LikedCommentNotification($like));
+            // \App\Models\User::find($comment->user_id)->notify(new LikedCommentNotification($like));
+            $like->load('likeable','user');
+            \App\Events\LikedCommentEvent::dispatch($like);
+
 
         }
 

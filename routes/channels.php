@@ -17,10 +17,8 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 
-Broadcast::channel('likedpost.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
-});
-Broadcast::channel('App.Models.User.{id}.likedcomment', function ($user, $id) {
+
+Broadcast::channel('notification.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 Broadcast::channel('App.Models.User.{id}.commentedpost', function ($user, $id) {
@@ -28,6 +26,6 @@ Broadcast::channel('App.Models.User.{id}.commentedpost', function ($user, $id) {
 });
 
 
-Broadcast::channel('test',function($user){
-    return true;
-});
+// Broadcast::channel('test',function($user){
+//     return true;
+// });

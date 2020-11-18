@@ -32,8 +32,10 @@ class PostCommentController extends Controller
         $post = Post::findOrFail($request->post_id);
         $comment = $post->comments()->save($comment);
 
-        \App\Models\User::find($post->author_id)->notify(new CommentedPostNotification($comment));
-        
+        $comment->load('commentable','user');
+        // \App\Models\User::find($post->author_id)->notify(new CommentedPostNotification($comment));
+        \App\Events\CommentedPostEvent::dispatch($comment);
+
         return response()->json($comment->load('likes', 'user')->loadCount('likes', 'liked'));
     }
 
