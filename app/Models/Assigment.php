@@ -61,7 +61,7 @@ class Assigment extends Model
     }
     
     public function question_lists_select_options_only(){
-        return $this->belongsToMany('App\Models\QuestionList','App\Models\AssigmentQuestionList','assigment_id','question_list_id')->withPivot('creator_id','user_id','assigment_type_id')->wherePivotIn('assigment_type_id',\App\AssigmentType::where('description','=','selectoptions')->get()->map(function($data){
+        return $this->belongsToMany('App\Models\QuestionList','App\Models\AssigmentQuestionList','assigment_id','question_list_id')->withPivot('creator_id','user_id','assigment_type_id')->wherePivotIn('assigment_type_id',\App\Models\AssigmentType::where('description','=','selectoptions')->get()->map(function($data){
             return $data->id;
         }));
     

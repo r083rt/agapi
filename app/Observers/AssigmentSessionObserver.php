@@ -18,14 +18,19 @@ class AssigmentSessionObserver
     public function created(AssigmentSession $assigmentSession)
     {
 
-        Log::debug('created assigmentsesionobserver');
+        Log::debug('created assigmentsessionobserver');
         if($assigmentSession->assigment->teacher_id!=null){
-            $data =  $assigmentSession->load(['session.user','teacher']);
-           
-            $data->teacher->notify(new AssigmentNotification($data));
-            //Log::debug($data);
+
+            $assigmentSession->load(['session.user','teacher']);
+            Log::debug($assigmentSession);
+
+            \App\Events\AssigmentTeacherEvent::dispatch($assigmentSession);
+            // $data->teacher->notify(new AssigmentNotification($data));
+            // //Log::debug($data);
             if($assigmentSession->total_score!=null){
-                $data->session->user->notify(new AssigmentNotification($data));
+                // $data->session->user->notify(new AssigmentNotification($data));
+                \App\Events\AssigmentStudentEvent::dispatch($assigmentSession);
+
             }
         }else{
             //Log::debug('teacher_id kosong');
@@ -51,8 +56,10 @@ class AssigmentSessionObserver
           ->where('data','REGEXP','{"data":{"id":\s*'.$assigmentSession->id)->delete();
 
             if($assigmentSession->total_score!==null && $assigmentSession->assigment->teacher_id!==null){
-                $data =  $assigmentSession->loadMissing('session.user','teacher');
-                $data->session->user->notify(new AssigmentNotification($data));
+                $assigmentSession->load('session.user','teacher');
+
+                \App\Events\AssigmentStudentEvent::dispatch($assigmentSession);
+                // $data->session->user->notify(new AssigmentNotification($data));
             }
        
 

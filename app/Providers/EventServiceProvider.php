@@ -29,7 +29,19 @@ class EventServiceProvider extends ServiceProvider
         ],
         'App\Events\LikedCommentEvent'=>[
             'App\Listeners\LikedCommentListener',
-        ]
+        ],
+        'App\Events\AssigmentTeacherEvent'=>[
+            'App\Listeners\AssigmentTeacherListener',
+        ],
+        'App\Events\AssigmentStudentEvent'=>[
+            'App\Listeners\AssigmentStudentListener',
+        ],
+        'App\Events\AssigmentSharedEvent'=>[
+            'App\Listeners\AssigmentSharedListener',
+        ],  
+        'App\Events\CommentedAssigmentEvent'=>[
+            'App\Listeners\CommentedAssigmentListener',
+        ],
     ];
 
     /**

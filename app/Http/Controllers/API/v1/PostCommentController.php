@@ -34,7 +34,7 @@ class PostCommentController extends Controller
 
         $comment->load('commentable','user');
         // \App\Models\User::find($post->author_id)->notify(new CommentedPostNotification($comment));
-        \App\Events\CommentedPostEvent::dispatch($comment);
+        if($comment->commentable->author_id!==$comment->user_id) \App\Events\CommentedPostEvent::dispatch($comment);
 
         return response()->json($comment->load('likes', 'user')->loadCount('likes', 'liked'));
     }

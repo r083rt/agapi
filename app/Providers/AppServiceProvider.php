@@ -3,6 +3,12 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\AssigmentSession;
+use App\Models\Assigment;
+use App\Observers\AssigmentSessionObserver;
+use App\Observers\AssigmentObserver;
+use App\Models\Session;
+use App\Observers\SessionObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,8 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // AssigmentSession::observe(AssigmentSessionObserver::class);
-        // Assigment::observe(AssigmentObserver::class);
-        // Session::observe(SessionObserver::class);
+        AssigmentSession::observe(AssigmentSessionObserver::class);
+        Assigment::observe(AssigmentObserver::class);
+        Session::observe(SessionObserver::class);
     }
 }
