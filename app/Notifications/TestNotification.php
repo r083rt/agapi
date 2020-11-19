@@ -3,11 +3,11 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
-class CommentedPostNotification extends Notification
+class TestNotification extends Notification
 {
     use Queueable;
 
@@ -16,10 +16,9 @@ class CommentedPostNotification extends Notification
      *
      * @return void
      */
-    protected $comment;
-    public function __construct($comment)
+    public function __construct()
     {
-        $this->comment = $comment;
+        //
     }
 
     /**
@@ -31,7 +30,6 @@ class CommentedPostNotification extends Notification
     public function via($notifiable)
     {
         return ['database'];
-        // return ['broadcast','database'];
     }
 
     /**
@@ -57,7 +55,7 @@ class CommentedPostNotification extends Notification
     public function toArray($notifiable)
     {
         return [
-            'data'=>$this->comment,
+            'data'=>'asu'
         ];
     }
 }

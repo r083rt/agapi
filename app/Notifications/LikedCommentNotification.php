@@ -30,7 +30,8 @@ class LikedCommentNotification extends Notification
      */
     public function via($notifiable)
     {
-        return ['broadcast','database'];
+        // return ['broadcast','database'];
+        return ['database'];
     }
 
     /**
@@ -56,7 +57,8 @@ class LikedCommentNotification extends Notification
     public function toArray($notifiable)
     {
         return [
-            'data'=>$this->like->load('likeable','user'),
+            'data'=>$this->like,
         ];
     }
+    
 }

@@ -321,8 +321,10 @@ Route::get('/getcontactnumber',function(){
 
 
 Route::get('/testgan',function(){
-    $db=DB::select("SELECT count(DISTINCT payment_id) as users_count,year(created_at) as `year`, month(created_at) as `month`,UNIX_TIMESTAMP(concat(year(created_at),'-',month(created_at),'-1')) as `timestamp`, concat(year(created_at),'-',month(created_at),'-1') as monthyear FROM `payments` where status='success' and payment_type='App\\\User' and value=35000 group by monthyear order by timestamp desc");
-    return $db;
+    $user = App\Models\User::findOrFail(1);
+    App\Events\TestEvent2::dispatch($user);
+    //return $user->notify(new App\Notifications\TestNotification());
+    
 });
 
 Route::get('/migrate_to_laravel8', function(){
