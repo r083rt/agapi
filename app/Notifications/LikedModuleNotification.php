@@ -3,23 +3,25 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
-class CommentedModuleNotification extends Notification
+class LikedModuleNotification extends Notification
 {
     use Queueable;
-
+    protected $comment;
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    protected $comment;
-    public function __construct($comment)
+    protected $like;
+
+    public function __construct($like)
     {
-        $this->comment = $comment;
+        $this->like = $like;
+
     }
 
     /**
@@ -30,7 +32,6 @@ class CommentedModuleNotification extends Notification
      */
     public function via($notifiable)
     {
-        // return ['broadcast','database'];
         return ['database'];
     }
 
@@ -56,8 +57,8 @@ class CommentedModuleNotification extends Notification
      */
     public function toArray($notifiable)
     {
-        return [
-            'data'=>$this->comment,
+        return [ 
+            'data'=>$this->like,
         ];
     }
 }

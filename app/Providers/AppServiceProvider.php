@@ -8,7 +8,9 @@ use App\Models\Assigment;
 use App\Observers\AssigmentSessionObserver;
 use App\Observers\AssigmentObserver;
 use App\Models\Session;
+// use App\Models\Like;
 use App\Observers\SessionObserver;
+// use App\Observers\LikeObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,5 +34,7 @@ class AppServiceProvider extends ServiceProvider
         AssigmentSession::observe(AssigmentSessionObserver::class);
         Assigment::observe(AssigmentObserver::class);
         Session::observe(SessionObserver::class);
+        // Like::observe(LikeObserver::class);
+
     }
 }

@@ -42,6 +42,16 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\CommentedAssigmentEvent'=>[
             'App\Listeners\CommentedAssigmentListener',
         ],
+        //Module
+        'App\Events\CommentedModuleEvent'=>[
+            'App\Listeners\CommentedModuleListener',
+        ],
+        'App\Events\LikedModuleEvent'=>[
+            'App\Listeners\LikedModuleListener',
+        ],
+        'App\Events\LikedModuleCommentEvent'=>[
+            'App\Listeners\LikedModuleCommentListener',
+        ],
     ];
 
     /**

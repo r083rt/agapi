@@ -2,13 +2,11 @@
 
 namespace App\Listeners;
 
-use App\Events\LikedCommentEvent;
+use App\Events\LikedModuleCommentEvent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use App\Notifications\LikedCommentNotification;
-// use Illuminate\Support\Facades\Log;
 
-class LikedCommentListener
+class LikedModuleCommentListener
 {
     /**
      * Create the event listener.
@@ -23,14 +21,13 @@ class LikedCommentListener
     /**
      * Handle the event.
      *
-     * @param  LikedCommentEvent  $event
+     * @param  LikedModuleCommentEvent  $event
      * @return void
      */
-    public function handle(LikedCommentEvent $event)
+    public function handle(LikedModuleCommentEvent $event)
     {
         $like=$event->data;
         $author_id=$like->likeable->user_id;
-        \App\Models\User::find($author_id)->notify(new \App\Notifications\LikedCommentNotification($like));
-
+        \App\Models\User::find($author_id)->notify(new \App\Notifications\LikedModuleCommentNotification($like));
     }
 }

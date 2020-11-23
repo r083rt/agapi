@@ -21,7 +21,6 @@ class CommentLikeController extends Controller
     {
         //
     }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -36,8 +35,16 @@ class CommentLikeController extends Controller
             $comment->likes()->save($like);
             // $comment->likes()->sync($like, false);
             // \App\Models\User::find($comment->user_id)->notify(new LikedCommentNotification($like));
-            $like->load('likeable','user');
-            if($like->likeable->user_id!==$like->user_id)\App\Events\LikedCommentEvent::dispatch($like);
+            if($like->likeable->user_id!==$like->user_id){
+                $like->load('likeable','user');
+                if($comment->comment_type=="App\\Models\\Module"){
+                    \App\Events\LikedModuleCommentEvent::dispatch($like);
+                }else if($comment->comment_type=="App\\Models\\Assigment"){
+                    // \App\Events\LikedCommentEvent::dispatch($like);
+                }else if($comment->comment_type=="App\\Models\\Post"){
+                    \App\Events\LikedCommentEvent::dispatch($like);
+                }
+            }
 
 
         }
@@ -85,7 +92,7 @@ class CommentLikeController extends Controller
             \App\Models\Notification::whereHasMorph('notifiable', 'App\Models\User',function($query)use($comment){
                 $query->where('id','=',$comment->user->id);  
               })
-              ->where('type','App\Notifications\LikedCommentNotification')
+              ->where('type','REGEXP','App\\\\Notifications\\\\Liked.*?CommentNotification')
               ->where('data','REGEXP','"like_id":\s*'.abs($id))->delete();
         }
        
