@@ -273,7 +273,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'questionnarysesion' => 'QuestionnarySessionController',
             'modules.comments'=>'ModuleCommentController',
             'modules.likes'=>'ModuleLikeController',
-            'bank_account'=>'BankAccountController'
+            'bank_account'=>'BankAccountController',
+            'surah'=>'SurahController',
 
         ]);
 
