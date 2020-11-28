@@ -159,6 +159,11 @@ class LessonPlanController extends Controller
                     $query->select(DB::raw('SUM(value)'));
             }])
             ->findOrFail($id);
+        if($lessonplan->canvas_data==null){
+            $lessonplan->canvas_data = ['items'=>[],'image'=>null];
+        }else{
+            $lessonplan->canvas_data = json_decode($lessonplan->canvas_data);
+        }
         return response()->json($lessonplan);
     }
 
