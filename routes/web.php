@@ -327,44 +327,44 @@ Route::get('/testgan',function(){
     
 });
 
-Route::get('/migrate_to_laravel8', function(){
-    // menambahkan Models pada table yang mempunyai morph
-    echo "[+]menambahkan Models pada table yang mempunyai morph\n<br>";
-    $db=DB::select("select a.TABLE_NAME,a.COLUMN_NAME from `information_schema`.`COLUMNS` a where a.TABLE_SCHEMA='xwdwevuqtk' and a.COLUMN_NAME like '%_type' group by a.TABLE_NAME");
-    foreach($db as $table){
-        $update_sql="update `".$table->TABLE_NAME."` set ".$table->COLUMN_NAME."=regexp_replace(".$table->COLUMN_NAME.", '\\\\\\\\([a-zA-Z]+)',concat('\\\\\\\\Models\\\\',regexp_substr(".$table->COLUMN_NAME.", '\\\\\\\\([a-zA-Z]+)')))  where ".$table->COLUMN_NAME." is not null and ".$table->COLUMN_NAME." not like '%Models%'";    
-        echo $update_sql." > ";
-        $update = DB::statement($update_sql);
-        echo $update."<br>\n";
-    }
+// Route::get('/migrate_to_laravel8', function(){
+//     // menambahkan Models pada table yang mempunyai morph
+//     echo "[+]menambahkan Models pada table yang mempunyai morph\n<br>";
+//     $db=DB::select("select a.TABLE_NAME,a.COLUMN_NAME from `information_schema`.`COLUMNS` a where a.TABLE_SCHEMA='xwdwevuqtk' and a.COLUMN_NAME like '%_type' group by a.TABLE_NAME");
+//     foreach($db as $table){
+//         $update_sql="update `".$table->TABLE_NAME."` set ".$table->COLUMN_NAME."=regexp_replace(".$table->COLUMN_NAME.", '\\\\\\\\([a-zA-Z]+)',concat('\\\\\\\\Models\\\\',regexp_substr(".$table->COLUMN_NAME.", '\\\\\\\\([a-zA-Z]+)')))  where ".$table->COLUMN_NAME." is not null and ".$table->COLUMN_NAME." not like '%Models%'";    
+//         echo $update_sql." > ";
+//         $update = DB::statement($update_sql);
+//         echo $update."<br>\n";
+//     }
 
-    //menambahkan Models pada data json di table data_rows voyager
-    echo "[+]menambahkan Models pada data json di table data_rows voyager\n<br>";
-    $sql="update data_rows set details= 
-    regexp_replace(details, '\"App\\\\\\\\\\\\\\\\([a-zA-Z]+)\"',concat('\"App\\\\\\\\\\\\\\\\Models\\\\\\\\\\\\\\\\',replace(substr(regexp_substr(details, '\"App\\\\\\\\\\\\\\\\([a-zA-Z]+)\"'),7),'\"',''),'\"'))
-    where type='relationship' and details not like '%\\Models\\%';";
-    echo $sql. " > ";
-    $update = DB::statement($sql);
-    echo $update."<br>\n";
+//     //menambahkan Models pada data json di table data_rows voyager
+//     echo "[+]menambahkan Models pada data json di table data_rows voyager\n<br>";
+//     $sql="update data_rows set details= 
+//     regexp_replace(details, '\"App\\\\\\\\\\\\\\\\([a-zA-Z]+)\"',concat('\"App\\\\\\\\\\\\\\\\Models\\\\\\\\\\\\\\\\',replace(substr(regexp_substr(details, '\"App\\\\\\\\\\\\\\\\([a-zA-Z]+)\"'),7),'\"',''),'\"'))
+//     where type='relationship' and details not like '%\\Models\\%';";
+//     echo $sql. " > ";
+//     $update = DB::statement($sql);
+//     echo $update."<br>\n";
     
-    //menambahkan Models pada data json di table notifications
-    echo "[+]menambahkan Models pada data json di table notifications\n<br>";
-    $sql="update notifications set data=regexp_replace(data, '\"App\\\\\\\\\\\\\\\\([a-zA-Z]+)\"', concat('\"App\\\\\\\\\\\\\\\\Models\\\\\\\\\\\\\\\\',regexp_replace(regexp_substr(data,'\"App\\\\\\\\\\\\\\\\([a-zA-Z]+)\"'),'\"App\\\\\\\\\\\\\\\\|\"',''),'\"'));";
-    echo $sql. " > ";
-    $update = DB::statement($sql);
-    echo $update."<br>\n";
+//     //menambahkan Models pada data json di table notifications
+//     echo "[+]menambahkan Models pada data json di table notifications\n<br>";
+//     $sql="update notifications set data=regexp_replace(data, '\"App\\\\\\\\\\\\\\\\([a-zA-Z]+)\"', concat('\"App\\\\\\\\\\\\\\\\Models\\\\\\\\\\\\\\\\',regexp_replace(regexp_substr(data,'\"App\\\\\\\\\\\\\\\\([a-zA-Z]+)\"'),'\"App\\\\\\\\\\\\\\\\|\"',''),'\"'));";
+//     echo $sql. " > ";
+//     $update = DB::statement($sql);
+//     echo $update."<br>\n";
     
-    echo "[+]menambahkan Models pada data json di table data_types voyager\n<br>";
-    $sql="update data_types set model_name=regexp_replace(model_name, 'App\\\\\\\\(?!Models\\\\\\\\)([a-zA-Z]+)',concat('App\\\\\\\\Models\\\\\\\\',replace(regexp_substr(model_name,'App\\\\\\\\([a-zA-Z]+)'),'App\\\\','')));";
-    echo $sql. " > ";
-    $update = DB::statement($sql);
-    echo $update."<br>\n";
+//     echo "[+]menambahkan Models pada data json di table data_types voyager\n<br>";
+//     $sql="update data_types set model_name=regexp_replace(model_name, 'App\\\\\\\\(?!Models\\\\\\\\)([a-zA-Z]+)',concat('App\\\\\\\\Models\\\\\\\\',replace(regexp_substr(model_name,'App\\\\\\\\([a-zA-Z]+)'),'App\\\\','')));";
+//     echo $sql. " > ";
+//     $update = DB::statement($sql);
+//     echo $update."<br>\n";
 
-     //mengedit data pada table Voyager di table voyager
-     echo "[+]mengupdate data di table data_types voyager\n<br>";
-     $db=DB::table('data_types')->where('name','users')->update(['model_name'=>'TCG\\Voyager\\Models\\User',
-     'policy_name'=>'TCG\\Voyager\\Policies\\UserPolicy',
-     'controller'=>'TCG\\Voyager\\Http\\Controllers\\VoyagerUserController']);
-     echo $db."\n<br>";
+//      //mengedit data pada table Voyager di table voyager
+//      echo "[+]mengupdate data di table data_types voyager\n<br>";
+//      $db=DB::table('data_types')->where('name','users')->update(['model_name'=>'TCG\\Voyager\\Models\\User',
+//      'policy_name'=>'TCG\\Voyager\\Policies\\UserPolicy',
+//      'controller'=>'TCG\\Voyager\\Http\\Controllers\\VoyagerUserController']);
+//      echo $db."\n<br>";
 
-}); 
+// }); 
