@@ -73,6 +73,7 @@ Route::middleware([
             'lesson_plans.contents',
             'lesson_plans.grade',
             'lesson_plans.cover',
+            'lesson_plans.template',
             //'lesson_plan_guided_users',
             'follows.lesson_plans.cover',
             'follower',

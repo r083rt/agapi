@@ -39,6 +39,8 @@ class CommentLikeController extends Controller
                 $like->load('likeable','user');
                 if($comment->comment_type=="App\\Models\\Module"){
                     \App\Events\LikedModuleCommentEvent::dispatch($like);
+                }else if($comment->comment_type=="App\\Models\\LessonPlan"){
+                    \App\Events\LikedLessonPlanCommentEvent::dispatch($like);
                 }else if($comment->comment_type=="App\\Models\\Assigment"){
                     // \App\Events\LikedCommentEvent::dispatch($like);
                 }else if($comment->comment_type=="App\\Models\\Post"){

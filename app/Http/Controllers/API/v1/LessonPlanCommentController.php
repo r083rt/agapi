@@ -32,6 +32,11 @@ class LessonPlanCommentController extends Controller
         $lessonplan = LessonPlan::findOrFail($request->lessonplan_id);
         $lessonplan->comments()->save($comment);
 
+        if($comment->commentable->user_id!==$comment->user_id) {
+            $comment->load('commentable','user');
+            \App\Events\CommentedLessonPlanEvent::dispatch($comment);
+        }
+        
         return response()->json($comment->load('likes', 'user')->loadCount('likes', 'liked'));
     }
 

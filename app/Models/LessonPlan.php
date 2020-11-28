@@ -57,5 +57,10 @@ class LessonPlan extends Model
     public function cover(){
         return $this->belongsTo('App\Models\LessonPlanCover','lesson_plan_cover_id','id');
     }
-
+    public function template(){
+        return $this->morphOne('App\Models\Template','template');
+    }
+    public function lesson_plan_cover(){
+        return $this->belongsTo('App\Models\LessonPlanCover');
+    }
 }
