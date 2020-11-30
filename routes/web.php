@@ -321,8 +321,12 @@ Route::get('/getcontactnumber',function(){
 
 
 Route::get('/testgan',function(){
-    $user = App\Models\User::findOrFail(1);
-    App\Events\TestEvent2::dispatch($user);
+    $post = App\Models\Post::findOrFail(37258);
+    $users_comment = \App\Models\User::whereHas('comment',function($query)use($post){
+            $query->where('comment_type','App\Models\Post')->where('comment_id',$post->id);
+    })->where('id','!=',$post->author_id)->get();
+  
+    return $users_comment;
     //return $user->notify(new App\Notifications\TestNotification());
     
 });

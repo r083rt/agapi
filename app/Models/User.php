@@ -173,7 +173,9 @@ class User extends \TCG\Voyager\Models\User
         //return $this->hasMany('App\Models\Assigment')->where('is_publish',false);
         return $this->hasMany('App\Models\Assigment')->where('is_publish',false)->whereNull('teacher_id');
     }
-
+    public function comment(){
+        return $this->hasOne('App\Models\Comment');
+    }
     public function bookmark_posts(){
         return $this->morphedByMany('App\Models\Post','bookmark');
     }
