@@ -92,6 +92,7 @@ class LessonPlanController extends Controller
                     'contents',
                     'grade',
                     'likes',
+                    'template', 
                     'comments' => function($query){
                         $query
                         ->with('likes', 'liked')
@@ -180,6 +181,7 @@ class LessonPlanController extends Controller
         // return $request;
         $lessonplan = LessonPlan::findOrFail($id);
         $lessonplan->fill($request->all());
+        $lessonplan->canvas_data = json_encode($request->canvas_data);
         $lessonplan->save();
 
         foreach ($request->contents as $c => $content) {
