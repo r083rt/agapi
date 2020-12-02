@@ -142,10 +142,10 @@ Route::middleware([
             'books',
             'question_lists'
         ]);
-    $lesson_plans_my_likes_count = Like::where('like_type','=','App\LessonPlan')->where('user_id', Auth::user()->id)->count();
-    $lesson_plans_my_ratings_count = Rating::where('rating_type','=','App\LessonPlan')->where('user_id', Auth::user()->id)->count();
-    $lesson_plans_comments_count = Comment::where('comment_type','=','App\LessonPlan')->where('user_id',Auth::user()->id)->count();
-    $lesson_plans_comments = Comment::where('comment_type','=','App\LessonPlan')->where('user_id',Auth::user()->id)->get();
+    $lesson_plans_my_likes_count = Like::where('like_type','=','App\Models\LessonPlan')->where('user_id', Auth::user()->id)->count();
+    $lesson_plans_my_ratings_count = Rating::where('rating_type','=','App\Models\LessonPlan')->where('user_id', Auth::user()->id)->count();
+    $lesson_plans_comments_count = Comment::where('comment_type','=','App\Models\LessonPlan')->where('user_id',Auth::user()->id)->count();
+    $lesson_plans_comments = Comment::where('comment_type','=','App\Models\LessonPlan')->where('user_id',Auth::user()->id)->get();
     $res->lesson_plans_my_likes_count = $lesson_plans_my_likes_count;
     $res->lesson_plans_my_ratings_count = $lesson_plans_my_ratings_count;
     $res->lesson_plans_comments_count = $lesson_plans_comments_count;
