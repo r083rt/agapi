@@ -321,14 +321,41 @@ Route::get('/getcontactnumber',function(){
 
 
 Route::get('/testgan',function(){
-    $post = App\Models\Post::findOrFail(37258);
-    $users_comment = \App\Models\User::whereHas('comment',function($query)use($post){
-            $query->where('comment_type','App\Models\Post')->where('comment_id',$post->id);
-    })->where('id','!=',$post->author_id)->get();
-  
-    return $users_comment;
+   $client = new GuzzleHttp\Client;
+   $response = $client->request('GET','https://s3.us-west-1.wasabisys.com/agpaiidigital.org/templates/October2020/K3yezCjuoGB9uyYX8UqB.png',[
+       'allow_redirects'=>true,
+       'headers'=>[
+           'User-Agent'=>'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0',
+           'Origin'=>'https://agpaiidigital.org'
+       ]
+
+   ]);
+   $contentType = $response->getHeader('Content-Type')[0];
+   header ('Content-Type: '.$contentType); 
+   echo $response->getBody();
+   die;
     //return $user->notify(new App\Notifications\TestNotification());
     
+});
+Route::get('/reverseproxy', function(Request $request){
+    $url=$request->query('url');
+    $parse_url = parse_url($url);
+    if(isset($parse_url['scheme']) && isset($parse_url['host'])){
+        $client = new GuzzleHttp\Client;
+        $response = $client->request('GET',$url,[
+            'allow_redirects'=>true,
+            'headers'=>[
+                'User-Agent'=>'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0',
+                'Origin'=>'https://agpaiidigital.org'
+            ]
+     
+        ]);
+        $contentType = $response->getHeader('Content-Type')[0];
+        // header ('Content-Type: '.$contentType); 
+        return response($response->getBody())->header('Content-Type',$contentType);
+        // return $
+    }
+  
 });
 
 // Route::get('/migrate_to_laravel8', function(){
