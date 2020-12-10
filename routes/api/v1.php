@@ -481,7 +481,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
     Route::apiResource('/notification','NotificationController');
 
     Route::get('/notification_total',function(){
-        return \App\Models\User::withCount('unreadNotifications')->findOrFail(auth('api')->user()->id);
+        $user_id = auth('api')->user()?auth('api')->user()->id:null;
+        if(!$user_id)return abort(403,"User not authenticated");
+        return \App\Models\User::withCount('unreadNotifications')->findOrFail($user_id);
     });
 
     Route::post('/notification_markasread', function(Request $request){

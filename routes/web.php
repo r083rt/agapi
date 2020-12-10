@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+// use Thumbnail;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -321,19 +321,7 @@ Route::get('/getcontactnumber',function(){
 
 
 Route::get('/testgan',function(){
-   $client = new GuzzleHttp\Client;
-   $response = $client->request('GET','https://s3.us-west-1.wasabisys.com/agpaiidigital.org/templates/October2020/K3yezCjuoGB9uyYX8UqB.png',[
-       'allow_redirects'=>true,
-       'headers'=>[
-           'User-Agent'=>'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0',
-           'Origin'=>'https://agpaiidigital.org'
-       ]
-
-   ]);
-   $contentType = $response->getHeader('Content-Type')[0];
-   header ('Content-Type: '.$contentType); 
-   echo $response->getBody();
-   die;
+//   return 
     //return $user->notify(new App\Notifications\TestNotification());
     
 });
