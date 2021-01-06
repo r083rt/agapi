@@ -42,12 +42,10 @@ class PostController extends Controller
             'likes.user',
         ])->withCount('comments', 'likes', 'liked')
             ->whereHas('authorId', function ($query) {
+                $role_ids = [1,2,7,11];
                 $query
-                    ->where('role_id', 1)
-                    ->orWhere('role_id', 2)
-                    ->orWhere('role_id', 7);
-            })
-            ->orderBy('created_at', 'desc')
+                    ->whereIn('role_id', $role_ids);
+            })->orderBy('id', 'desc')
             ->paginate($request->show ?? 10);
         return response()->json($posts);
     }

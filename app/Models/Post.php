@@ -42,7 +42,9 @@ class Post extends Model
     // {
     //     return $this->belongsToMany('App\Models\Comment', 'App\Models\PostComment')->withPivot('created_at')->withTimestamps();
     // }
-
+    public function comments_from_other(){
+        return $this->morphMany('App\Models\Comment','comment')->where('user_id','!=',auth('api')->user()?auth('api')->user()->id:-1);
+    }
     public function comments(){
         return $this->morphMany('App\Models\Comment','comment');
     }

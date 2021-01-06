@@ -24,96 +24,115 @@ Route::middleware([
     'expired',
     // 'verified'
 ])->get('/user', function (Request $request) {
-    $res = $request->user()
-        ->load([
-            //'bank_account',
-            'pns_status',
-            'role',
-            'bookmark_posts' => function($query){
-                $query->with([
-                    'files',
-                    'authorId.profile',
-                    'comments',
-                    'comments.user',
-                    'likes',
-                ]);
-            },
-            'posts'=>function($query){
-                $query->with([
-                    'likes', 'liked'
-                ])->withCount('likes', 'liked')
+    $query = $request->query("exclude");
+    
+    $loads=[
+        //'bank_account',
+        'pns_status',
+        'role',
+        'bookmark_posts' => function($query){
+            $query->with([
+                'files',
+                'authorId.profile',
+                'comments',
+                'comments.user',
+                'likes',
+            ]);
+        },
+        'posts'=>function($query){
+            $query->with([
+                'likes', 'liked'
+            ])->withCount('likes', 'liked')
+            ->orderBy('created_at', 'desc');
+        },
+        'posts.files',
+        'posts.authorId.role',
+        'posts.authorId.profile',
+        'posts.comments',
+        'posts.comments.user',
+        'posts.likes',
+        'profile.district',
+        'profile.province',
+        'profile.city',
+        'profile.educational_level',
+        'payments' => function ($query) {
+            $query->where('status', 'success');
+        },
+        'events' => function ($query) {
+            $query->orderBy('created_at', 'desc');
+        },
+        'events.users',
+        'guest_events' => function ($query) {
+            $query->orderBy('created_at', 'desc');
+        },
+        'lesson_plans' => function ($query) {
+            $query
+                ->withCount('likes', 'comments')
                 ->orderBy('created_at', 'desc');
-            },
-            'posts.files',
-            'posts.authorId.role',
-            'posts.authorId.profile',
-            'posts.comments',
-            'posts.comments.user',
-            'posts.likes',
-            'profile.district',
-            'profile.province',
-            'profile.city',
-            'profile.educational_level',
-            'payments' => function ($query) {
-                $query->where('status', 'success');
-            },
-            'events' => function ($query) {
-                $query->orderBy('created_at', 'desc');
-            },
-            'events.users',
-            'guest_events' => function ($query) {
-                $query->orderBy('created_at', 'desc');
-            },
-            'lesson_plans' => function ($query) {
-                $query
-                    ->withCount('likes', 'comments')
+        },
+        'lesson_plans.user',
+        'lesson_plans.contents',
+        'lesson_plans.grade',
+        'lesson_plans.cover',
+        'lesson_plans.template',
+        //'lesson_plan_guided_users',
+        'follows.lesson_plans.cover',
+        'follower',
+        'lesson_plans'=>function($query){
+            $query
+            ->orderBy('created_at','desc')
+            ->with([
+                'user.profile',
+                'contents',
+                'grade',
+                'likes',
+                'comments' => function($query){
+                    $query
+                    ->with('likes', 'liked')
+                    ->withCount('likes', 'liked')
                     ->orderBy('created_at', 'desc');
-            },
-            'lesson_plans.user',
-            'lesson_plans.contents',
-            'lesson_plans.grade',
-            'lesson_plans.cover',
-            //'lesson_plan_guided_users',
-            'follows.lesson_plans.cover',
-            'follower',
-            'lesson_plans'=>function($query){
-                $query
-                ->orderBy('created_at','desc')
-                ->with([
-                    'user.profile',
-                    'contents',
-                    'grade',
-                    'likes',
-                    'comments' => function($query){
-                        $query
-                        ->with('likes', 'liked')
-                        ->withCount('likes', 'liked')
-                        ->orderBy('created_at', 'desc');
-                    },
-                    'reviews' => function($query){
-                        $query->orderBy('created_at','desc');
-                    },
-                    'reviews.user',
-                    'comments.user',
-                    'ratings',
-                    'cover'
-                ])
-                ->withCount([
-                    'likes',
-                    'liked',
-                    'comments',
-                    'reviews',
-                    'ratings as ratings_value_count'=>function($query){
-                        $query->select(DB::raw('SUM(value)'));
                 },
-                    'rated as rated_value_count'=>function($query){
-                        $query->select(DB::raw('SUM(value)'));
-                }]);
+                'reviews' => function($query){
+                    $query->orderBy('created_at','desc');
+                },
+                'reviews.user',
+                'comments.user',
+                'ratings',
+                'cover'
+            ])
+            ->withCount([
+                'likes',
+                'liked',
+                'comments',
+                'reviews',
+                'ratings as ratings_value_count'=>function($query){
+                    $query->select(DB::raw('SUM(value)'));
             },
-            'books' => function($query){
-                $query->with(['user','book_category']);
-            },
-        ])
+                'rated as rated_value_count'=>function($query){
+                    $query->select(DB::raw('SUM(value)'));
+            }]);
+        },
+        'books' => function($query){
+            $query->with(['user','book_category']);
+        },
+    ];
+
+    //membuang relasi yang diexclude'kan
+    if(!empty($query)){
+        $excludes = explode(',',$query);
+        foreach($loads as $key=>$load){
+            $relation_name = preg_match('/^[0-9]+$/',$key)?$load:$key;
+            foreach($excludes as $exclude){
+                if(preg_match("/^".preg_quote($exclude)."/i",$relation_name)){
+                    unset($loads[$key]);
+                }
+            }
+        }
+    }
+   
+//    return $loads;
+    $res = $request->user()
+        ->load($loads)
         ->loadCount([
             'lesson_plans',
             'lesson_plans_likes',
@@ -123,10 +142,10 @@ Route::middleware([
             'books',
             'question_lists'
         ]);
-    $lesson_plans_my_likes_count = Like::where('like_type','=','App\LessonPlan')->where('user_id', Auth::user()->id)->count();
-    $lesson_plans_my_ratings_count = Rating::where('rating_type','=','App\LessonPlan')->where('user_id', Auth::user()->id)->count();
-    $lesson_plans_comments_count = Comment::where('comment_type','=','App\LessonPlan')->where('user_id',Auth::user()->id)->count();
-    $lesson_plans_comments = Comment::where('comment_type','=','App\LessonPlan')->where('user_id',Auth::user()->id)->get();
+    $lesson_plans_my_likes_count = Like::where('like_type','=','App\Models\LessonPlan')->where('user_id', Auth::user()->id)->count();
+    $lesson_plans_my_ratings_count = Rating::where('rating_type','=','App\Models\LessonPlan')->where('user_id', Auth::user()->id)->count();
+    $lesson_plans_comments_count = Comment::where('comment_type','=','App\Models\LessonPlan')->where('user_id',Auth::user()->id)->count();
+    $lesson_plans_comments = Comment::where('comment_type','=','App\Models\LessonPlan')->where('user_id',Auth::user()->id)->get();
     $res->lesson_plans_my_likes_count = $lesson_plans_my_likes_count;
     $res->lesson_plans_my_ratings_count = $lesson_plans_my_ratings_count;
     $res->lesson_plans_comments_count = $lesson_plans_comments_count;

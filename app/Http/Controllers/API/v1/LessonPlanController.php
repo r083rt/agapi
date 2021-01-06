@@ -27,6 +27,7 @@ class LessonPlanController extends Controller
                 'contents',
                 'grade',
                 'likes',
+                'template',
                 'comments' => function($query){
                     $query
                     ->with('likes', 'liked')
@@ -65,13 +66,14 @@ class LessonPlanController extends Controller
      */
     public function store(Request $request)
     {
+        // return $request;
         // return response()->json($request->user()->load('profile')->profile);
         $lessonplan = new LessonPlan;
         $lessonplan->fill($request->all());
+        $lessonplan->canvas_data = json_encode($request->canvas_data);
         $lessonplan->creator_id = $request->user()->id;
-        $lessonplan->school = $request->user()->load('profile')->profile->school_place ?? 'Kosong';
+        $lessonplan->school = $request->user()->profile->school_place ?? 'Kosong';
         $lessonplan->effort = 100;
-
         $request->user()->lesson_plans()->save($lessonplan);
 
         if ($request->has('contents')) {
@@ -81,6 +83,8 @@ class LessonPlanController extends Controller
                 $lessonplan->contents()->save($content);
             }
         }
+        \App\Jobs\ProcessTemplateLessonPlan::dispatchSync($lessonplan, $request->canvas_image);
+
         return response()->json(
             $lessonplan
                 ->load([
@@ -88,6 +92,7 @@ class LessonPlanController extends Controller
                     'contents',
                     'grade',
                     'likes',
+                    'template', 
                     'comments' => function($query){
                         $query
                         ->with('likes', 'liked')
@@ -138,7 +143,9 @@ class LessonPlanController extends Controller
                 'reviews.user',
                 'comments.user',
                 'ratings.user',
-                'cover'
+                'cover',
+                'template',
+                'lesson_plan_cover'
             ])
             ->orderBy('created_at', 'desc')
             ->withCount([
@@ -153,6 +160,11 @@ class LessonPlanController extends Controller
                     $query->select(DB::raw('SUM(value)'));
             }])
             ->findOrFail($id);
+        if($lessonplan->canvas_data==null){
+            $lessonplan->canvas_data = ['items'=>[],'image'=>null];
+        }else{
+            $lessonplan->canvas_data = json_decode($lessonplan->canvas_data);
+        }
         return response()->json($lessonplan);
     }
 
@@ -166,8 +178,10 @@ class LessonPlanController extends Controller
     public function update(Request $request, $id)
     {
         //
+        // return $request;
         $lessonplan = LessonPlan::findOrFail($id);
         $lessonplan->fill($request->all());
+        $lessonplan->canvas_data = json_encode($request->canvas_data);
         $lessonplan->save();
 
         foreach ($request->contents as $c => $content) {
@@ -176,12 +190,17 @@ class LessonPlanController extends Controller
             $contents[$c]->fill($content);
             $contents[$c]->save();
         }
+        if(isset($request->canvas_image)){
+            \App\Jobs\ProcessTemplateLessonPlan::dispatchSync($lessonplan, $request->canvas_image);   
+        }
+
         return response()->json(
             $lessonplan
                 ->load([
                     'user.profile',
                     'contents',
                     'grade',
+                    'template',
                     'likes',
                     'comments' => function($query){
                         $query
@@ -218,6 +237,7 @@ class LessonPlanController extends Controller
             'contents',
             'grade',
             'likes',
+            'template',
             'comments' => function($query){
                 $query
                 ->with('likes', 'liked')
@@ -236,6 +256,7 @@ class LessonPlanController extends Controller
         ->orWhereHas('user', function($query)use($key){
             $query->where('name','like','%'.$key.'%');
         })
+        ->orderBy('id','desc')
         ->paginate(10);
         return response()->json($lessonplans);
     }

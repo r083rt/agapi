@@ -29,7 +29,46 @@ class EventServiceProvider extends ServiceProvider
         ],
         'App\Events\LikedCommentEvent'=>[
             'App\Listeners\LikedCommentListener',
-        ]
+        ],
+        'App\Events\AssigmentTeacherEvent'=>[
+            'App\Listeners\AssigmentTeacherListener',
+        ],
+        'App\Events\AssigmentStudentEvent'=>[
+            'App\Listeners\AssigmentStudentListener',
+        ],
+        'App\Events\AssigmentSharedEvent'=>[
+            'App\Listeners\AssigmentSharedListener',
+        ],  
+        'App\Events\CommentedAssigmentEvent'=>[
+            'App\Listeners\CommentedAssigmentListener',
+        ],
+        //Module
+        'App\Events\CommentedModuleEvent'=>[
+            'App\Listeners\CommentedModuleListener',
+        ],
+        'App\Events\LikedModuleEvent'=>[
+            'App\Listeners\LikedModuleListener',
+        ],
+        'App\Events\LikedModuleCommentEvent'=>[
+            'App\Listeners\LikedModuleCommentListener',
+        ],
+        //LessonPlan
+        'App\Events\CommentedLessonPlanEvent'=>[
+            'App\Listeners\CommentedLessonPlanListener',
+        ],
+        'App\Events\LikedLessonPlanEvent'=>[
+            'App\Listeners\LikedLessonPlanListener',
+        ],
+        'App\Events\LikedLessonPlanCommentEvent'=>[
+            'App\Listeners\LikedLessonPlanCommentListener',
+        ],
+        'App\Events\ReviewedLessonPlanEvent'=>[
+            'App\Listeners\ReviewedLessonPlanListener',
+        ],
+        'App\Events\AlsoCommentedPostEvent'=>[
+            'App\Listeners\AlsoCommentedPostListener',
+        ],
+        
     ];
 
     /**

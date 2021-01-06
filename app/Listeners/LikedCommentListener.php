@@ -30,7 +30,7 @@ class LikedCommentListener
     {
         $like=$event->data;
         $author_id=$like->likeable->user_id;
-        \App\Models\User::find($author_id)->notify(new LikedCommentNotification($like));
+        \App\Models\User::find($author_id)->notify(new \App\Notifications\LikedCommentNotification($like));
 
     }
 }

@@ -34,6 +34,10 @@ class LessonPlanLikeController extends Controller
             $like = new Like(['user_id' => $request->user()->id]);
             $lessonplan->likes()->save($like);
             //$lessonplan->likes()->sync($like, false);
+            if($like->likeable->user_id!==$like->user_id){
+                $like->load('likeable.grade','likeable.contents','likeable.user','user');
+                \App\Events\LikedLessonPlanEvent::dispatch($like);
+            }
         }
 
         return response()->json($lessonplan->load('likes')->loadCount('likes', 'liked'));
@@ -72,7 +76,14 @@ class LessonPlanLikeController extends Controller
     {
         //
         $lessonplan = LessonPlan::find($id);
-        $lessonplan->likes()->where('user_id', Auth::user()->id)->delete();
+        if($lessonplan->likes()->where('user_id', Auth::user()->id)->delete()){
+              //remove notification
+              \App\Models\Notification::whereHasMorph('notifiable', 'App\Models\User',function($query)use($lessonplan){
+                $query->where('id','=',$lessonplan->user->id);  
+              })
+              ->where('type','App\Notifications\LikedLessonPlanNotification')
+              ->where('data','REGEXP','"like_id":\s*'.abs($id))->delete();
+        }
         return response()->json($lessonplan->load('likes')->loadCount('likes', 'liked'));
     }
 }

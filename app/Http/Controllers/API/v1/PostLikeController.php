@@ -35,9 +35,11 @@ class PostLikeController extends Controller
             $like = new Like(['user_id' => $request->user()->id]);
             $post->likes()->save($like);
             // $post->likes()->sync($like, false);
-            $like->load('likeable','user');
             // \App\Models\User::find($post->author_id)->notify(new LikedPostNotification($like));
-            \App\Events\LikedPostEvent::dispatch($like);
+            if($like->likeable->author_id!==$like->user_id){
+                $like->load('likeable','user');
+                \App\Events\LikedPostEvent::dispatch($like);
+            }
         }
 
         return response()->json($post->load('likes')->loadCount('likes', 'liked'));

@@ -142,10 +142,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             return $res;
         });
         Route::get('/auth/assigments/unpublished', function(Request $request){
-            return \App\Models\Assigment::with('likes','comments.user','user','grade','assigment_category','question_lists.assigment_types')->where('user_id','=',auth('api')->user()->id)->where('is_publish',false)->whereNull('teacher_id')->paginate();
+            return \App\Models\Assigment::with('likes','comments.user','user','grade','assigment_category','question_lists.assigment_types')->where('user_id','=',auth('api')->user()->id)->where('is_publish',false)->whereNull('teacher_id')->orderBy('id','desc')->paginate();
         });
         Route::get('/auth/assigments/published', function(Request $request){
-            return \App\Models\Assigment::with('likes','comments.user', 'user','grade','assigment_category','question_lists.assigment_types')->where('user_id','=',auth('api')->user()->id)->where('is_publish',true)->whereNull('teacher_id')->paginate();
+            return \App\Models\Assigment::with('likes','comments.user', 'user','grade','assigment_category','question_lists.assigment_types')->where('user_id','=',auth('api')->user()->id)->where('is_publish',true)->whereNull('teacher_id')->orderBy('id','desc')->paginate();
         });
         
         /////////////////////////////////////////////////////////////////////////////////////
@@ -273,7 +273,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'questionnarysesion' => 'QuestionnarySessionController',
             'modules.comments'=>'ModuleCommentController',
             'modules.likes'=>'ModuleLikeController',
-            'bank_account'=>'BankAccountController'
+            'bank_account'=>'BankAccountController',
+            'surah'=>'SurahController',
 
         ]);
 
@@ -480,7 +481,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
     Route::apiResource('/notification','NotificationController');
 
     Route::get('/notification_total',function(){
-        return \App\Models\User::withCount('unreadNotifications')->findOrFail(auth('api')->user()->id);
+        $user_id = auth('api')->user()?auth('api')->user()->id:null;
+        if(!$user_id)return abort(403,"User not authenticated");
+        return \App\Models\User::withCount('unreadNotifications')->findOrFail($user_id);
     });
 
     Route::post('/notification_markasread', function(Request $request){

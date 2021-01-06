@@ -32,7 +32,7 @@
                                     <v-list>
                                         <v-list-item>
                                             <v-list-item-content>
-                                                <v-list-item-title v-text="'Total Semua  Iuran'"></v-list-item-title>
+                                                <v-list-item-title v-text="'Total Semua Iuran DPP'"></v-list-item-title>
                                             </v-list-item-content>
 
                                             <v-list-item-icon>

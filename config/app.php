@@ -165,6 +165,9 @@ return [
         /*
          * Package Service Providers...
          */
+        Barryvdh\DomPDF\ServiceProvider::class,
+        Spatie\Backup\BackupServiceProvider::class,
+        Lakshmaji\Thumbnail\ThumbnailServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -226,6 +229,8 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+        'PDF' => Barryvdh\DomPDF\Facade::class,
+        'Thumbnail' => Lakshmaji\Thumbnail\Facade\Thumbnail::class,
 
     ],
 

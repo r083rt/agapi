@@ -17,10 +17,12 @@ class ModuleCommentController extends Controller
      */
     public function index($id)
     {
-        $module = Module::with('user')->where('user_id','=',auth('api')->user()->id)->findOrFail($id);
+        $module = Module::with('user')->findOrFail($id);
         $comments = Comment::withCount('likes','liked')->with('user')->whereHasMorph('commentable','App\Models\Module',function($query)use($module){
             $query->where('id','=',$module->id);
         })->paginate();
+
+        
         return ['module'=>$module,'comments'=>$comments];
     }
 
@@ -38,10 +40,15 @@ class ModuleCommentController extends Controller
         $comment->value=$request->value;
         $comment->user_id=auth('api')->user()->id;
         //return $comment;
-        $module = Module::where('user_id','=',auth('api')->user()->id)->findOrFail($module_id);
+        $module = Module::findOrFail($module_id);
         $module->comments()->save($comment);
 
-        \App\Models\User::find($module->user_id)->notify(new CommentedModuleNotification($comment));
+
+        // \App\Models\User::find($module->user_id)->notify(new CommentedModuleNotification($comment));
+        if($comment->commentable->user_id!==$comment->user_id) {
+            $comment->load('commentable','user');
+            \App\Events\CommentedModuleEvent::dispatch($comment);
+        }
 
         return response()->json($comment->load('likes', 'user')->loadCount('likes', 'liked'));
     }

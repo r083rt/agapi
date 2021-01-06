@@ -13,13 +13,31 @@ class NotificationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $types=[];
+        if(!empty($request->query('type'))){
+            $exp = explode(',',$request->query('type'));
+            foreach($exp as $v){
+                if(!empty($v))array_push($types, $v);
+            }
+        }
         $user = auth('api')->user();
         if($user){
             $notifications = Notification::whereHasMorph('notifiable', 'App\Models\User',function($query)use($user){
                 $query->where('id','=',$user->id);  
-            })->latest();
+            });
+            if(count($types)>0){
+                $notifications->where(function($query)use($types){
+                    foreach($types as $k=>$type){
+                        if($k==0)$query->where('type','LIKE','%'.$type);
+                        else $query->orWhere('type','LIKE','%'.$type);
+                    }
+                });
+              
+            }
+           
+            $notifications->latest();
             return $notifications->paginate();
         }
     }

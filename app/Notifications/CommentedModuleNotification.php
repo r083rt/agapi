@@ -30,7 +30,8 @@ class CommentedModuleNotification extends Notification
      */
     public function via($notifiable)
     {
-        return ['broadcast','database'];
+        // return ['broadcast','database'];
+        return ['database'];
     }
 
     /**
@@ -56,7 +57,7 @@ class CommentedModuleNotification extends Notification
     public function toArray($notifiable)
     {
         return [
-            'data'=>$this->comment->load('user'),
+            'data'=>$this->comment,
         ];
     }
 }

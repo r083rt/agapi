@@ -30,12 +30,17 @@ class ModuleLikeController extends Controller
      */
     public function store(Request $request, $moduleId)
     {
-        $module=Module::where('user_id','=',auth('api')->user()->id)->findOrFail($moduleId);
+        $module=Module::findOrFail($moduleId);
         $module=$module->loadCount('liked');
         if($module->liked_count==0){
             $like= new \App\Models\Like;
             $like->user_id=auth('api')->user()->id;
             $module->likes()->save($like);
+
+            if($like->likeable->user_id!==$like->user_id){
+                $like->load('likeable','user');
+                \App\Events\LikedModuleEvent::dispatch($like);
+            }
            
         }
         return $module->loadCount('liked','likes','comments');//->load('comments','user','template','module_contents','grade');
@@ -72,7 +77,7 @@ class ModuleLikeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function dislike($moduleId){
-        $module = Module::where('user_id','=',auth('api')->user()->id)->findOrFail($moduleId);
+        $module = Module::findOrFail($moduleId);
         $module->liked()->delete();
         return $module->loadCount('liked','likes','comments');
 
