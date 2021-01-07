@@ -115,6 +115,7 @@ Route::middleware([
         'books' => function($query){
             $query->with(['user','book_category']);
         },
+        'appreciations'
     ];
 
     //membuang relasi yang diexclude'kan

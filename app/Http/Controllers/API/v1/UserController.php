@@ -233,6 +233,7 @@ class UserController extends Controller
             'books' => function($query){
                 $query->with(['user','book_category']);
             },
+            'appreciations'
         ])
             ->loadCount([
                 'lesson_plans',

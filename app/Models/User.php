@@ -219,4 +219,7 @@ class User extends \TCG\Voyager\Models\User
     public function documents(){
         return $this->hasManyThrough('App\Models\File','App\Models\Post','author_id','file_id')->where('file_type','App\Models\Post')->where('files.value','document');
     }
+    public function appreciations(){
+        return $this->belongsToMany(\App\Models\Appreciation::class,'user_appreciations')->orderBy('id','asc');
+    }
 }
