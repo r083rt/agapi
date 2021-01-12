@@ -516,7 +516,14 @@ Route::get('/total_pns_semua_jenjang',function(){
         educational_levels el on el.id=test.educational_level_id
     order by test.educational_level_id
             ");
-    return $data;
+    echo "<table border=1><tr><th>Jenjang</th><th>Jumlah guru pns</th></tr>";
+    $t=0;
+    foreach($data as $d){
+        echo "<tr><td>{$d->name}</td><td>{$d->total_guru_pns}</td></tr>";
+        $t+=$t+$d->total_guru_pns;
+    }
+    echo "</table>";
+    echo "<br>Total: {$t}";
 });
 Route::get('/total_non_pns_semua_jenjang',function(){
     $data=DB::select("with test as
@@ -534,6 +541,13 @@ Route::get('/total_non_pns_semua_jenjang',function(){
         educational_levels el on el.id=test.educational_level_id
     order by test.educational_level_id
             ");
-    return $data;
+            echo "<table border=1><tr><th>Jenjang</th><th>Jumlah guru NON pns</th></tr>";
+            $t=0;
+            foreach($data as $d){
+                echo "<tr><td>{$d->name}</td><td>{$d->total_guru_non_pns}</td></tr>";
+                $t+=$t+$d->total_guru_non_pns;
+            }
+            echo "</table>";
+            echo "<br>Total: {$t}";
 });
 
