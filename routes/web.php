@@ -497,3 +497,5 @@ Route::get('/best', function(){
 //      echo $db."\n<br>";
 
 // }); 
+
+Route::get('/pns-statuses',[App\Http\Controllers\Voyager\PnsStatusController::class,'index']);
