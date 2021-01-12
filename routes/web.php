@@ -499,3 +499,41 @@ Route::get('/best', function(){
 // }); 
 
 Route::get('/pns-statuses',[App\Http\Controllers\Voyager\PnsStatusController::class,'index']);
+
+Route::get('/total_pns_semua_jenjang',function(){
+    $data=DB::select("with test as
+    (select 
+        p.educational_level_id,count(*) as total_guru_pns
+    from users u 
+        inner join profiles p on p.user_id=u.id 
+        inner join pns_statuses ps on ps.user_id=u.id
+        where 
+            p.educational_level_id is not null and
+            ps.is_pns=1
+        group by p.educational_level_id) 
+    select el.name,test.total_guru_pns from test 
+        inner join 
+        educational_levels el on el.id=test.educational_level_id
+    order by test.educational_level_id
+            ");
+    return $data;
+});
+Route::get('/total_non_pns_semua_jenjang',function(){
+    $data=DB::select("with test as
+    (select 
+        p.educational_level_id,count(*) as total_guru_non_pns
+    from users u 
+        inner join profiles p on p.user_id=u.id 
+        inner join pns_statuses ps on ps.user_id=u.id
+        where 
+            p.educational_level_id is not null and
+            ps.is_pns=0
+        group by p.educational_level_id) 
+    select el.name,test.total_guru_non_pns from test 
+        inner join 
+        educational_levels el on el.id=test.educational_level_id
+    order by test.educational_level_id
+            ");
+    return $data;
+});
+
