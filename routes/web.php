@@ -514,8 +514,7 @@ Route::get('/total_pns_semua_jenjang',function(){
     select el.name,test.total_guru_pns from test 
         inner join 
         educational_levels el on el.id=test.educational_level_id
-    order by test.educational_level_id
-            ");
+        order by test.educational_level_id");
     echo "<table border=1><tr><th>Jenjang</th><th>Jumlah guru pns</th></tr>";
     $t=0;
     foreach($data as $d){
@@ -539,8 +538,7 @@ Route::get('/total_non_pns_semua_jenjang',function(){
     select el.name,test.total_guru_non_pns from test 
         inner join 
         educational_levels el on el.id=test.educational_level_id
-    order by test.educational_level_id
-            ");
+        order by test.educational_level_id");
             echo "<table border=1><tr><th>Jenjang</th><th>Jumlah guru NON pns</th></tr>";
             $t=0;
             foreach($data as $d){
