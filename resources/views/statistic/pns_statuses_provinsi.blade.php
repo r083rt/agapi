@@ -95,8 +95,8 @@ jenjang.forEach((v,k)=>{
           borderWidth: 1,
           data: []
         }
-  datasets.push(obj)
-  datasets2.push(obj)
+  datasets.push({...obj,data:[]})
+  datasets2.push({...obj,data:[]})
   
 });
 const province_indexs=Object.keys(data)
