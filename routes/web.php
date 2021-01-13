@@ -501,51 +501,194 @@ Route::get('/best', function(){
 Route::get('/pns-statuses',[App\Http\Controllers\Voyager\PnsStatusController::class,'index']);
 
 Route::get('/total_pns_semua_jenjang',function(){
-    $data=DB::select("with test as
-    (select 
-        p.educational_level_id,count(*) as total_guru_pns
-    from users u 
-        inner join profiles p on p.user_id=u.id 
-        inner join pns_statuses ps on ps.user_id=u.id
-        where 
-            p.educational_level_id is not null and
-            ps.is_pns=1
-        group by p.educational_level_id) 
-    select el.name,test.total_guru_pns from test 
-        inner join 
-        educational_levels el on el.id=test.educational_level_id
-        order by test.educational_level_id");
+    $data=DB::select("select 
+	el.name,count(*) as total_guru_pns
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where 
+		p.educational_level_id is not null and
+        ps.is_pns=1
+	group by p.educational_level_id");
     echo "<table border=1><tr><th>Jenjang</th><th>Jumlah guru pns</th></tr>";
     $t=0;
     foreach($data as $d){
         echo "<tr><td>{$d->name}</td><td>{$d->total_guru_pns}</td></tr>";
-        $t+=$t+$d->total_guru_pns;
+        $t+=$d->total_guru_pns;
     }
     echo "</table>";
     echo "<br>Total: {$t}";
 });
 Route::get('/total_non_pns_semua_jenjang',function(){
-    $data=DB::select("with test as
-    (select 
-        p.educational_level_id,count(*) as total_guru_non_pns
-    from users u 
-        inner join profiles p on p.user_id=u.id 
-        inner join pns_statuses ps on ps.user_id=u.id
-        where 
-            p.educational_level_id is not null and
-            ps.is_pns=0
-        group by p.educational_level_id) 
-    select el.name,test.total_guru_non_pns from test 
-        inner join 
-        educational_levels el on el.id=test.educational_level_id
-        order by test.educational_level_id");
+    $data=DB::select("select 
+	el.name,count(*) as total_guru_non_pns
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where 
+		p.educational_level_id is not null and
+        ps.is_pns=0
+	group by p.educational_level_id");
             echo "<table border=1><tr><th>Jenjang</th><th>Jumlah guru NON pns</th></tr>";
             $t=0;
             foreach($data as $d){
                 echo "<tr><td>{$d->name}</td><td>{$d->total_guru_non_pns}</td></tr>";
-                $t+=$t+$d->total_guru_non_pns;
+                $t+=$d->total_guru_non_pns;
             }
             echo "</table>";
             echo "<br>Total: {$t}";
 });
 
+Route::get('/pemetaan_pns_provinsi',function(){
+    $data= DB::select('select 
+	p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join provinces pr on pr.id=p.province_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where
+        ps.is_pns=1 and 
+        p.educational_level_id is not null and 
+        p.province_id is not null
+    group by p.educational_level_id,p.province_id');
+    $anjay = [];
+    foreach($data as $key=>$val){
+        $jenjang = ['SD'=>0,'SMP'=>0,'SMA'=>0,'SMK'=>0,'TK'=>0,'SLB'=>0];
+        // $index = array_search($val->jenjang,array_keys($jenjang));
+        $anjay[$val->provinsi] = $jenjang;
+        // $jenjang[$val->jenjang] = $val->total;
+        // $anjay[$val->provinsi] =
+    }
+    foreach($data as $key=>$val){
+       
+        $anjay[$val->provinsi][$val->jenjang] = $val->total;
+    }
+    echo "PNS<br><table border=1>
+    <tr>
+    <th>Provinsi</th>
+    <th>SD</th>
+    <th>SMP</th>
+    <th>SMA</th>
+    <th>SMK</th>
+    <th>TK</th>
+    <th>SLB</th></tr>";
+    foreach($anjay as $key=>$val){
+        echo "<tr>
+        <td>{$key}</td>
+        <td>{$val['SD']}</td>
+        <td>{$val['SMP']}</td>
+        <td>{$val['SMA']}</td>
+        <td>{$val['SMK']}</td>
+        <td>{$val['TK']}</td>
+        <td>{$val['SLB']}</td>
+        </tr>";
+    }
+    echo "</table>";
+    // return view('statistic.test');
+});
+Route::get('/pemetaan_non_pns_provinsi',function(){
+    $data= DB::select('select 
+	p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join provinces pr on pr.id=p.province_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where
+        ps.is_pns=0 and 
+        p.educational_level_id is not null and 
+        p.province_id is not null
+    group by p.educational_level_id,p.province_id');
+    $anjay = [];
+    foreach($data as $key=>$val){
+        $jenjang = ['SD'=>0,'SMP'=>0,'SMA'=>0,'SMK'=>0,'TK'=>0,'SLB'=>0];
+        // $index = array_search($val->jenjang,array_keys($jenjang));
+        $anjay[$val->provinsi] = $jenjang;
+        // $jenjang[$val->jenjang] = $val->total;
+        // $anjay[$val->provinsi] =
+    }
+    foreach($data as $key=>$val){
+       
+        $anjay[$val->provinsi][$val->jenjang] = $val->total;
+    }
+    echo "Non-PNS<br><table border=1>
+    <tr>
+    <th>Provinsi</th>
+    <th>SD</th>
+    <th>SMP</th>
+    <th>SMA</th>
+    <th>SMK</th>
+    <th>TK</th>
+    <th>SLB</th></tr>";
+    foreach($anjay as $key=>$val){
+        echo "<tr>
+        <td>{$key}</td>
+        <td>{$val['SD']}</td>
+        <td>{$val['SMP']}</td>
+        <td>{$val['SMA']}</td>
+        <td>{$val['SMK']}</td>
+        <td>{$val['TK']}</td>
+        <td>{$val['SLB']}</td>
+        </tr>";
+    }
+    // echo "</table>";
+    return view('statistic.test');
+});
+
+Route::get('/pemetaan_provinsi',function(){
+    $data = DB::select("select 
+	ps.is_pns,p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join provinces pr on pr.id=p.province_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where
+        ps.is_pns in (0,1) and 
+        p.educational_level_id is not null and 
+        p.province_id is not null
+    group by p.educational_level_id,p.province_id,ps.is_pns") ;
+
+    $anjay = [];
+    foreach($data as $key=>$val){
+        $jenjang = ['SD'=>0,'SMP'=>0,'SMA'=>0,'SMK'=>0,'TK'=>0,'SLB'=>0];
+        // $index = array_search($val->jenjang,array_keys($jenjang));
+        $anjay[$val->provinsi]['pns'] = $jenjang;
+        $anjay[$val->provinsi]['nonpns'] = $jenjang;
+        // $jenjang[$val->jenjang] = $val->total;
+        // $anjay[$val->provinsi] =
+    }
+    foreach($data as $key=>$val){
+        $status_pns = $val->is_pns?'pns':'nonpns';
+        $anjay[$val->provinsi][$status_pns][$val->jenjang] = $val->total;
+    }
+    return view('statistic.pns_statuses_provinsi',['data'=>$anjay]);
+  
+});
+
+Route::get('/pemetaan_jenjang',function(){
+    $data = DB::select("select 
+	el.name as jenjang,ps.is_pns,count(*) as total
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where 
+		p.educational_level_id is not null and
+        ps.is_pns in (0,1)
+	group by p.educational_level_id, ps.is_pns") ;
+
+    $anjay = [];
+    foreach($data as $key=>$val){
+        // $index = array_search($val->jenjang,array_keys($jenjang));
+        $status_pns = $val->is_pns?'pns':'nonpns';
+        $anjay[$val->jenjang][$status_pns] = $val->total;
+        // $jenjang[$val->jenjang] = $val->total;
+        // $anjay[$val->provinsi] =
+    }
+    return view('statistic.pns_statuses_jenjang',['data'=>$anjay]);
+  
+});
