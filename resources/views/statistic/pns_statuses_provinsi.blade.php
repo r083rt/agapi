@@ -5,7 +5,8 @@
 <table class="table table-sm">
   <thead>
     <tr>
-      <th scope="col" rowspan='2'>Provivnsi</th>
+      <th scope="col" rowspan='2'>#</th>
+      <th scope="col" rowspan='2'>Provinsi</th>
       <th scope="col" class="text-center table-primary" colspan='6'>PNS</th>
       <th scope="col" class="text-center table-secondary" colspan='6'>Non-PNS</th>
     </tr>
@@ -25,9 +26,13 @@
     </tr>
   </thead>
   <tbody>
+  @php 
+    $i=1;
+  @endphp 
   @foreach($data as $key=>$val)
   <tr>
-      <th scope="row">{{$key}}</th>
+      <th scope="row">{{$i++}}</th>
+      <td>{{$key}}</td>
       <td class="table-primary">{{$val['pns']['SD']}}</td>
       <td class="table-primary">{{$val['pns']['SMP']}}</td>
       <td class="table-primary">{{$val['pns']['SMA']}}</td>
