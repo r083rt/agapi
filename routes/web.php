@@ -279,17 +279,19 @@ Route::get('/rekap',function(){
 });
 
 // Route::get('/info','API\\v1\\LessonPlanController@information');
-
-Route::get('/command', function () {
-    // $data = ['Bookmark', 'Follow','Murottal','DailyPrayer','File','AssigmentReview','AssigmentGuidedUser','AssigmentCategory','AssigmentType','Assigment','AssigmentComment','AssigmentLike','AssigmentRating','AssigmentChat','QuestionListCategory','QuestionList','AssigmentQuestionList','AnswerList','Session','AssigmentSession','Question','Answer'];
-    $data = ['Questionnary','Ad'];
-    foreach ($data as $val) {
-        Artisan::call("make:seeder", ['name' => $val . "TableSeeder"]);
-        Artisan::call("make:model", ['name' => $val]);
-        Artisan::call("make:controller", ['name' => $val . "Controller", '--resource' => true, '--model'=>$val]);
-        Artisan::call("make:controller", ['name' => "API\\v1\\" . $val . "Controller", '--api' => true, '--model'=>$val]);
-    }
+Route::get('/backup', function(){
+    Artisan::call('backup:run');
 });
+// Route::get('/command', function () {
+//     // $data = ['Bookmark', 'Follow','Murottal','DailyPrayer','File','AssigmentReview','AssigmentGuidedUser','AssigmentCategory','AssigmentType','Assigment','AssigmentComment','AssigmentLike','AssigmentRating','AssigmentChat','QuestionListCategory','QuestionList','AssigmentQuestionList','AnswerList','Session','AssigmentSession','Question','Answer'];
+//     $data = ['Questionnary','Ad'];
+//     foreach ($data as $val) {
+//         Artisan::call("make:seeder", ['name' => $val . "TableSeeder"]);
+//         Artisan::call("make:model", ['name' => $val]);
+//         Artisan::call("make:controller", ['name' => $val . "Controller", '--resource' => true, '--model'=>$val]);
+//         Artisan::call("make:controller", ['name' => "API\\v1\\" . $val . "Controller", '--api' => true, '--model'=>$val]);
+//     }
+// });
 
 Route::group(['middleware' => [
     // 'verified',
