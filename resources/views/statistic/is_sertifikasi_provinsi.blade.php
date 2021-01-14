@@ -1,4 +1,4 @@
-@extends('layouts.pns-statuses.app')
+@extends('layouts.pns-statuses.app2')
 
 @section('content')
 <div class="row">
@@ -7,8 +7,8 @@
     <tr>
       <th scope="col" rowspan='2'>#</th>
       <th scope="col" rowspan='2'>Provinsi</th>
-      <th scope="col" class="text-center table-primary" colspan='6'>PNS</th>
-      <th scope="col" class="text-center table-secondary" colspan='6'>Non-PNS</th>
+      <th scope="col" class="text-center table-primary" colspan='6'>Sudah Sertifikasi</th>
+      <th scope="col" class="text-center table-secondary" colspan='6'>Belum Sertifikasi</th>
     </tr>
     <tr>
     <th scope="col" class="table-primary">SD</th>
@@ -33,18 +33,18 @@
   <tr>
       <th scope="row">{{$i++}}</th>
       <td>{{$key}}</td>
-      <td class="table-primary">{{$val['pns']['SD']}}</td>
-      <td class="table-primary">{{$val['pns']['SMP']}}</td>
-      <td class="table-primary">{{$val['pns']['SMA']}}</td>
-      <td class="table-primary">{{$val['pns']['SMK']}}</td>
-      <td class="table-primary">{{$val['pns']['TK']}}</td>
-      <td class="table-primary">{{$val['pns']['SLB']}}</td>
-        <td class="table-secondary">{{$val['nonpns']['SD']}}</td>
-      <td class="table-secondary">{{$val['nonpns']['SMP']}}</td>
-      <td class="table-secondary">{{$val['nonpns']['SMA']}}</td>
-      <td class="table-secondary">{{$val['nonpns']['SMK']}}</td>
-      <td class="table-secondary">{{$val['nonpns']['TK']}}</td>
-      <td class="table-secondary">{{$val['nonpns']['SLB']}}</td>
+      <td class="table-primary">{{$val['certificated']['SD']}}</td>
+      <td class="table-primary">{{$val['certificated']['SMP']}}</td>
+      <td class="table-primary">{{$val['certificated']['SMA']}}</td>
+      <td class="table-primary">{{$val['certificated']['SMK']}}</td>
+      <td class="table-primary">{{$val['certificated']['TK']}}</td>
+      <td class="table-primary">{{$val['certificated']['SLB']}}</td>
+        <td class="table-secondary">{{$val['noncertificated']['SD']}}</td>
+      <td class="table-secondary">{{$val['noncertificated']['SMP']}}</td>
+      <td class="table-secondary">{{$val['noncertificated']['SMA']}}</td>
+      <td class="table-secondary">{{$val['noncertificated']['SMK']}}</td>
+      <td class="table-secondary">{{$val['noncertificated']['TK']}}</td>
+      <td class="table-secondary">{{$val['noncertificated']['SLB']}}</td>
     </tr>
   @endforeach
 
