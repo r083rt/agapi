@@ -279,9 +279,7 @@ Route::get('/rekap',function(){
 });
 
 // Route::get('/info','API\\v1\\LessonPlanController@information');
-Route::get('/backup____agpaiiiii', function(){
-    Artisan::call('backup:run');
-});
+
 // Route::get('/command', function () {
 //     // $data = ['Bookmark', 'Follow','Murottal','DailyPrayer','File','AssigmentReview','AssigmentGuidedUser','AssigmentCategory','AssigmentType','Assigment','AssigmentComment','AssigmentLike','AssigmentRating','AssigmentChat','QuestionListCategory','QuestionList','AssigmentQuestionList','AnswerList','Session','AssigmentSession','Question','Answer'];
 //     $data = ['Questionnary','Ad'];
