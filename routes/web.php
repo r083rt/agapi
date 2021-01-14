@@ -279,7 +279,7 @@ Route::get('/rekap',function(){
 });
 
 // Route::get('/info','API\\v1\\LessonPlanController@information');
-Route::get('/backup', function(){
+Route::get('/backup____agpaiiiii', function(){
     Artisan::call('backup:run');
 });
 // Route::get('/command', function () {
