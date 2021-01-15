@@ -651,3 +651,79 @@ from users u
     }
     return view('statistic.is_sertifikasi_jenjang',['data'=>$anjay]);
 });
+
+Route::get('/pemetaan_jumlah_guru',function(Request $request){
+   
+    $category1 =  $request->query('category1')=='sertifikasi'?'sertifikasi':'pns';
+    $category2 =  $request->query('category2')=='jenjang'?'jenjang':'provinsi';
+    
+    $column1 = $category1=='pns'?'is_pns':'is_certification';
+
+    if($category2=="provinsi"){
+        $data = DB::select("select 
+	ps.{$column1},p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join provinces pr on pr.id=p.province_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where
+        ps.{$column1} in (0,1) and 
+        p.educational_level_id is not null and 
+        p.province_id is not null
+    group by p.educational_level_id,p.province_id,ps.{$column1}") ;
+
+        $anjay = [];
+        
+        $status = $category1=='pns'?'pns':'certificated';
+        $status_non = $category1=='pns'?'nonpns':'noncertificated';
+        foreach($data as $key=>$val){
+            $jenjang = ['SD'=>0,'SMP'=>0,'SMA'=>0,'SMK'=>0,'TK'=>0,'SLB'=>0];
+            // $index = array_search($val->jenjang,array_keys($jenjang));
+
+            $anjay[$val->provinsi][$status] = $jenjang;
+            $anjay[$val->provinsi][$status_non] = $jenjang;
+            
+        }
+
+        $arr_check = ['pns','nonpns'];
+        if($category1=='sertifikasi')$arr_check = ['certificated','noncertificated'];
+
+        foreach($data as $key=>$val){
+            $status_ = $val->{$column1}?$arr_check[0]:$arr_check[1];
+            $anjay[$val->provinsi][$status_][$val->jenjang] = $val->total;
+        }
+
+        return view('statistic.pemetaan_provinsi',['data'=>$anjay,'category1'=>$category1]);
+        
+    }else{
+        $data = DB::select("select 
+        el.name as jenjang,ps.{$column1},count(*) as total
+    from users u 
+        inner join profiles p on p.user_id=u.id 
+        inner join educational_levels el on el.id=p.educational_level_id
+        inner join pns_statuses ps on ps.user_id=u.id
+        where 
+            p.educational_level_id is not null and
+            ps.{$column1} in (0,1)
+        group by p.educational_level_id, ps.{$column1}");
+
+        $anjay = [];
+
+        $arr_check = ['pns','nonpns'];
+        if($category1=='sertifikasi')$arr_check = ['certificated','noncertificated'];
+
+        foreach($data as $key=>$val){
+            // $index = array_search($val->jenjang,array_keys($jenjang));
+            $status = $val->{$column1}?$arr_check[0]:$arr_check[1];
+            $anjay[$val->jenjang][$status] = $val->total;
+            // $jenjang[$val->jenjang] = $val->total;
+            // $anjay[$val->provinsi] =
+        }
+
+        return view('statistic.pemetaan_jenjang',['data'=>$anjay,'category1'=>$category1]);
+    }
+    
+    // return $anjay;
+    
+});

@@ -1,5 +1,4 @@
-<!doctype html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -7,7 +6,7 @@
     <meta name="author" content="">
     <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
 
-    <title>Pemetaan Jumlah Guru PNS dan Non-PNS</title>
+    <title>Pemetaan Jumlah Guru</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/starter-template/">
 
@@ -26,12 +25,23 @@
 
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item {{request()->is('pemetaan_provinsi*')?'active':''}}">
-            <a class="nav-link" href="/pemetaan_provinsi">Pemetaan Jumlah Guru PNS dan Non-PNS <span class="sr-only">(current)</span></a>
-          </li>
-          <li class="nav-item {{request()->is('pemetaan_jenjang*')?'active':''}}">
-            <a class="nav-link" href="/pemetaan_jenjang">Pemetaan Berdasarkan Jenjang</a>
-          </li>
+        <li class="nav-item dropdown {{$category1=='pns'?'active':''}}">
+          <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Pemetaan Jumlah Guru PNS dan Non-PNS</a>
+          <ul class="dropdown-menu" aria-labelledby="dropdown01">
+            <li><a class="dropdown-item" href="/pemetaan_jumlah_guru?category1=pns&category=provinsi">Berdasarkan Provinsi</a></li>
+            <li><a class="dropdown-item" href="/pemetaan_jumlah_guru?category1=pns&category=provinsi">Berdasarkan Jenjang</a></li>
+            <!-- <li><a class="dropdown-item" href="#">Something else here</a></li> -->
+          </ul>
+        </li>
+        <li class="nav-item dropdown {{$category1=='sertifikasi'?'active':''}}">
+          <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-bs-toggle="dropdown" aria-expanded="false">Pemetaan Jumlah Guru Bersertifikasi dan Belum Sertifikasi</a>
+          <ul class="dropdown-menu" aria-labelledby="dropdown02">
+            <li><a class="dropdown-item" href="/pemetaan_jumlah_guru?category1=sertifikasi&category=provinsi">Berdasarkan Provinsi</a></li>
+            <li><a class="dropdown-item" href="/pemetaan_jumlah_guru?category1=sertifikasi&category=jenjang">Berdasarkan Jenjang</a></li>
+            <!-- <li><a class="dropdown-item" href="#">Something else here</a></li> -->
+          </ul>
+        </li>
+    
           <!-- <li class="nav-item">
             <a class="nav-link disabled" href="#">Disabled</a>
           </li>
@@ -55,10 +65,11 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
+
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="/js/vendor/jquery-slim.min.js"><\/script>')</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+ <!-- JavaScript Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
     @yield('js')
   </body>
 </html>
