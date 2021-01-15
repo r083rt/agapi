@@ -29,7 +29,7 @@
           <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Pemetaan Jumlah Guru PNS dan Non-PNS</a>
           <ul class="dropdown-menu" aria-labelledby="dropdown01">
             <li><a class="dropdown-item" href="/pemetaan_jumlah_guru?category1=pns&category=provinsi">Berdasarkan Provinsi</a></li>
-            <li><a class="dropdown-item" href="/pemetaan_jumlah_guru?category1=pns&category=provinsi">Berdasarkan Jenjang</a></li>
+            <li><a class="dropdown-item" href="/pemetaan_jumlah_guru?category1=pns&category=jenjang">Berdasarkan Jenjang</a></li>
             <!-- <li><a class="dropdown-item" href="#">Something else here</a></li> -->
           </ul>
         </li>
