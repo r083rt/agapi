@@ -56,7 +56,14 @@
        
       </div>
     </nav>
-
+    <div class="my-sm mx-sm" style="color:red">
+    @php 
+      date_default_timezone_set("Asia/Jakarta");
+      $months = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+    
+      echo  '*Data Per '.date('d').' '.$months[intval(date('m'))].' '.date('Y').' Pukul '.date('H:i').' WIB';
+      @endphp 
+    </div>
     <main role="main" class="container-fluid">
     @yield('content')
     </main><!-- /.container -->
