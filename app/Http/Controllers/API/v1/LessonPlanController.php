@@ -20,9 +20,13 @@ class LessonPlanController extends Controller
      */
     public function index(Request $request)
     {
-        //
-        $lessonplans = LessonPlan::
-            with([
+        $user = auth()->user();
+        $educational_level_id = $user->profile->educational_level_id;
+        
+        $lessonplans = LessonPlan::whereHas('grade',function($query)use($educational_level_id){
+            $query->where('educational_level_id',$educational_level_id);
+        })
+        ->with([
                 'user.profile',
                 'contents',
                 'grade',
@@ -229,8 +233,10 @@ class LessonPlanController extends Controller
         return response()->json($lessonplan);
     }
 
-    public function searchbykey($key)
+    public function searchbykey($key,$educational_level_id=null)
     {
+        //jike $educational_level_id NULL, maka pencarian berdasarkan semua jenjang
+        
         $lessonplans = LessonPlan::
         with([
             'user.profile',
@@ -249,15 +255,25 @@ class LessonPlanController extends Controller
             'cover'
         ])
         ->withCount('likes','liked','comments','ratings')
-        ->orWhere('topic','like','%'.$key.'%')
-        ->orWhereHas('grade',function($query)use($key){
-            $query->where('description','like','%'.$key.'%');
-        })
-        ->orWhereHas('user', function($query)use($key){
-            $query->where('name','like','%'.$key.'%');
-        })
-        ->orderBy('id','desc')
-        ->paginate(10);
+        ->where(function($query)use($key){
+            $query->where('topic','like','%'.$key.'%')
+            // ->orWhereHas('grade',function($query)use($key){
+            //     $query->where('description','like','%'.$key.'%');
+            // })
+            ->orWhereHas('user', function($query2)use($key){
+                $query2->where('name','like','%'.$key.'%');
+            });
+        });
+        //cek jenjang
+        if($educational_level_id){
+            $lessonplans = $lessonplans->whereHas('grade',function($query)use($educational_level_id){
+                $query->where('educational_level_id',$educational_level_id);
+            });
+        }
+
+        $lessonplans = $lessonplans->orderBy('id','desc')->paginate(10);
+
+       
         return response()->json($lessonplans);
     }
 
