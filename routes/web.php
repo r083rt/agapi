@@ -320,9 +320,27 @@ Route::get('/getcontactnumber',function(){
 });
 
 
-Route::get('/testgan',function(){
-//   return 
-    //return $user->notify(new App\Notifications\TestNotification());
+Route::get('/testgan/{id}',function($id){
+
+    $data['lessonplan'] = App\Models\LessonPlan::
+            with([
+                'user.profile.province',
+                'contents',
+                'grade',
+                'cover'
+            ])
+            ->findOrFail($id);
+    //[SOLUSI SEMENTATA]proses hapus css white-space agar tidak terjadi konflik dgn bootstrap css
+    foreach($data['lessonplan']->contents as $content){
+            $content->value = preg_replace("#white-space\s*\:\s*\w+\s*#i",'',$content->value);
+    }
+    
+        // dd($lessonplan);
+        // return view('pages.lessonplan.preview',$data);
+        $pdf = PDF::loadView('pages.lessonplan.preview', $data);
+        // return $pdf->download('invoice.pdf');
+        $download = $pdf->stream($data['lessonplan']->user->name."_".$data['lessonplan']->school."_".$data['lessonplan']->topic);
+    return $download;
     
 });
 Route::get('/reverseproxy', function(Request $request){
