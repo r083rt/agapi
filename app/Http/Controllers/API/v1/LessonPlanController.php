@@ -233,8 +233,10 @@ class LessonPlanController extends Controller
         return response()->json($lessonplan);
     }
 
-    public function searchbykey($key,$educational_level_id=null)
+    public function searchbykey(Request $request)
     {
+        $educational_level_id = $request->query('educational_level_id');
+        $key = trim($request->query('key'));
         //jike $educational_level_id NULL, maka pencarian berdasarkan semua jenjang
         
         $lessonplans = LessonPlan::
@@ -265,7 +267,7 @@ class LessonPlanController extends Controller
             });
         });
         //cek jenjang
-        if($educational_level_id){
+        if(!empty($educational_level_id)){
             $lessonplans = $lessonplans->whereHas('grade',function($query)use($educational_level_id){
                 $query->where('educational_level_id',$educational_level_id);
             });
