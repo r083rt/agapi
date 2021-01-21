@@ -712,6 +712,41 @@ from users u
             ps.{$column1} in (0,1)
         group by p.educational_level_id, ps.{$column1}");
 
+
+        if($column1=='is_pns'){
+        //#total user yang aktif dan sudah isi profile tapi belum mengisi status PNS
+            $data2 = DB::select("select 
+                    count(*) as total
+                from users u 
+                where u.user_activated_at is not null and
+                exists (
+                    select 1 from profiles p where p.user_id=u.id
+                ) and 
+                not exists (
+                    select 1 from pns_statuses ps where ps.user_id=u.id
+                )
+                ");
+                
+        }else{
+            //#total user yang aktif dan sudah isi profile, atau sudah isi status PNS, tapi belum mengisi status sertifikasi
+            $data2 = DB::select("
+                select 
+                    count(*) as total
+                from users u 
+                where u.user_activated_at is not null and
+                exists (
+                    select 1 from profiles p where p.user_id=u.id
+                ) and 
+                (not exists (
+                        select 1 from pns_statuses ps where ps.user_id=u.id
+                    ) or
+                    exists (
+                        select 1 from pns_statuses ps where ps.user_id=u.id and ps.is_certification is null
+                    )
+                )
+                ");
+        }
+
         $anjay = [];
 
         $arr_check = ['pns','nonpns'];
@@ -724,8 +759,9 @@ from users u
             // $jenjang[$val->jenjang] = $val->total;
             // $anjay[$val->provinsi] =
         }
+        //$data2 = data jumlah yg belum ngisi $colomn1
 
-        return view('statistic.pemetaan_jenjang',['data'=>$anjay,'category1'=>$category1]);
+        return view('statistic.pemetaan_jenjang',['data'=>$anjay,'category1'=>$category1,'data2'=>$data2]);
     }
     
     // return $anjay;
