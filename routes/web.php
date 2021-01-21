@@ -280,16 +280,16 @@ Route::get('/rekap',function(){
 
 // Route::get('/info','API\\v1\\LessonPlanController@information');
 
-Route::get('/command', function () {
-    // $data = ['Bookmark', 'Follow','Murottal','DailyPrayer','File','AssigmentReview','AssigmentGuidedUser','AssigmentCategory','AssigmentType','Assigment','AssigmentComment','AssigmentLike','AssigmentRating','AssigmentChat','QuestionListCategory','QuestionList','AssigmentQuestionList','AnswerList','Session','AssigmentSession','Question','Answer'];
-    $data = ['Questionnary','Ad'];
-    foreach ($data as $val) {
-        Artisan::call("make:seeder", ['name' => $val . "TableSeeder"]);
-        Artisan::call("make:model", ['name' => $val]);
-        Artisan::call("make:controller", ['name' => $val . "Controller", '--resource' => true, '--model'=>$val]);
-        Artisan::call("make:controller", ['name' => "API\\v1\\" . $val . "Controller", '--api' => true, '--model'=>$val]);
-    }
-});
+// Route::get('/command', function () {
+//     // $data = ['Bookmark', 'Follow','Murottal','DailyPrayer','File','AssigmentReview','AssigmentGuidedUser','AssigmentCategory','AssigmentType','Assigment','AssigmentComment','AssigmentLike','AssigmentRating','AssigmentChat','QuestionListCategory','QuestionList','AssigmentQuestionList','AnswerList','Session','AssigmentSession','Question','Answer'];
+//     $data = ['Questionnary','Ad'];
+//     foreach ($data as $val) {
+//         Artisan::call("make:seeder", ['name' => $val . "TableSeeder"]);
+//         Artisan::call("make:model", ['name' => $val]);
+//         Artisan::call("make:controller", ['name' => $val . "Controller", '--resource' => true, '--model'=>$val]);
+//         Artisan::call("make:controller", ['name' => "API\\v1\\" . $val . "Controller", '--api' => true, '--model'=>$val]);
+//     }
+// });
 
 Route::group(['middleware' => [
     // 'verified',
@@ -321,8 +321,12 @@ Route::get('/getcontactnumber',function(){
 
 
 Route::get('/testgan',function(){
-//   return 
-    //return $user->notify(new App\Notifications\TestNotification());
+
+    date_default_timezone_set("Asia/Jakarta");
+    $months = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  
+    echo  '*Data Per '.date('d').' '.$months[intval(date('m'))].' '.date('Y').' Pukul '.date('H:i').' WIB';
+
     
 });
 Route::get('/reverseproxy', function(Request $request){
@@ -497,3 +501,233 @@ Route::get('/best', function(){
 //      echo $db."\n<br>";
 
 // }); 
+
+Route::get('/pns-statuses',[App\Http\Controllers\Voyager\PnsStatusController::class,'index']);
+
+Route::get('/total_pns_semua_jenjang',function(){
+    $data=DB::select("select 
+	el.name,count(*) as total_guru_pns
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where 
+		p.educational_level_id is not null and
+        ps.is_pns=1
+	group by p.educational_level_id");
+    echo "<table border=1><tr><th>Jenjang</th><th>Jumlah guru pns</th></tr>";
+    $t=0;
+    foreach($data as $d){
+        echo "<tr><td>{$d->name}</td><td>{$d->total_guru_pns}</td></tr>";
+        $t+=$d->total_guru_pns;
+    }
+    echo "</table>";
+    echo "<br>Total: {$t}";
+});
+Route::get('/total_non_pns_semua_jenjang',function(){
+    $data=DB::select("select 
+	el.name,count(*) as total_guru_non_pns
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where 
+		p.educational_level_id is not null and
+        ps.is_pns=0
+	group by p.educational_level_id");
+            echo "<table border=1><tr><th>Jenjang</th><th>Jumlah guru NON pns</th></tr>";
+            $t=0;
+            foreach($data as $d){
+                echo "<tr><td>{$d->name}</td><td>{$d->total_guru_non_pns}</td></tr>";
+                $t+=$d->total_guru_non_pns;
+            }
+            echo "</table>";
+            echo "<br>Total: {$t}";
+});
+
+
+
+
+Route::get('/pemetaan_provinsi',function(){
+    $data = DB::select("select 
+	ps.is_pns,p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join provinces pr on pr.id=p.province_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where
+        ps.is_pns in (0,1) and 
+        p.educational_level_id is not null and 
+        p.province_id is not null
+    group by p.educational_level_id,p.province_id,ps.is_pns") ;
+
+    $anjay = [];
+    foreach($data as $key=>$val){
+        $jenjang = ['SD'=>0,'SMP'=>0,'SMA'=>0,'SMK'=>0,'TK'=>0,'SLB'=>0];
+        // $index = array_search($val->jenjang,array_keys($jenjang));
+        $anjay[$val->provinsi]['pns'] = $jenjang;
+        $anjay[$val->provinsi]['nonpns'] = $jenjang;
+        // $jenjang[$val->jenjang] = $val->total;
+        // $anjay[$val->provinsi] =
+    }
+    foreach($data as $key=>$val){
+        $status_pns = $val->is_pns?'pns':'nonpns';
+        $anjay[$val->provinsi][$status_pns][$val->jenjang] = $val->total;
+    }
+    return view('statistic.pns_statuses_provinsi',['data'=>$anjay]);
+  
+});
+
+Route::get('/pemetaan_jenjang',function(){
+    $data = DB::select("select 
+	el.name as jenjang,ps.is_pns,count(*) as total
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where 
+		p.educational_level_id is not null and
+        ps.is_pns in (0,1)
+	group by p.educational_level_id, ps.is_pns") ;
+
+    $anjay = [];
+    foreach($data as $key=>$val){
+        // $index = array_search($val->jenjang,array_keys($jenjang));
+        $status_pns = $val->is_pns?'pns':'nonpns';
+        $anjay[$val->jenjang][$status_pns] = $val->total;
+        // $jenjang[$val->jenjang] = $val->total;
+        // $anjay[$val->provinsi] =
+    }
+    return view('statistic.pns_statuses_jenjang',['data'=>$anjay]);
+  
+});
+
+Route::get('/pemetaan_provinsi/sertifikasi', function(){
+    $data = DB::select("select 
+	ps.is_certification,p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join provinces pr on pr.id=p.province_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where
+        ps.is_certification in (0,1) and 
+        p.educational_level_id is not null and 
+        p.province_id is not null
+    group by p.educational_level_id,p.province_id,ps.is_certification") ;
+
+    $anjay = [];
+    foreach($data as $key=>$val){
+        $jenjang = ['SD'=>0,'SMP'=>0,'SMA'=>0,'SMK'=>0,'TK'=>0,'SLB'=>0];
+        // $index = array_search($val->jenjang,array_keys($jenjang));
+        $anjay[$val->provinsi]['certificated'] = $jenjang;
+        $anjay[$val->provinsi]['noncertificated'] = $jenjang;
+        // $jenjang[$val->jenjang] = $val->total;
+        // $anjay[$val->provinsi] =
+    }
+    foreach($data as $key=>$val){
+        $status_sertfifikasi = $val->is_certification?'certificated':'noncertificated';
+        $anjay[$val->provinsi][$status_sertfifikasi][$val->jenjang] = $val->total;
+    }
+    return view('statistic.is_sertifikasi_provinsi',['data'=>$anjay]);
+});
+
+Route::get('/pemetaan_jenjang/sertifikasi', function(){
+    $data = DB::select("select 
+	el.name as jenjang,ps.is_certification,count(*) as total
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where 
+		p.educational_level_id is not null and
+        ps.is_certification in (0,1)
+	group by p.educational_level_id, ps.is_certification") ;
+
+    $anjay = [];
+    foreach($data as $key=>$val){
+        // $index = array_search($val->jenjang,array_keys($jenjang));
+        $status_sertfifikasi = $val->is_certification?'certificated':'noncertificated';
+        $anjay[$val->jenjang][$status_sertfifikasi] = $val->total;
+        // $jenjang[$val->jenjang] = $val->total;
+        // $anjay[$val->provinsi] =
+    }
+    return view('statistic.is_sertifikasi_jenjang',['data'=>$anjay]);
+});
+
+Route::get('/pemetaan_jumlah_guru',function(Request $request){
+   
+    $category1 =  $request->query('category1')=='sertifikasi'?'sertifikasi':'pns';
+    $category2 =  $request->query('category2')=='jenjang'?'jenjang':'provinsi';
+    
+    $column1 = $category1=='pns'?'is_pns':'is_certification';
+
+    if($category2=="provinsi"){
+        $data = DB::select("select 
+	ps.{$column1},p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
+from users u 
+	inner join profiles p on p.user_id=u.id 
+    inner join educational_levels el on el.id=p.educational_level_id
+    inner join provinces pr on pr.id=p.province_id
+    inner join pns_statuses ps on ps.user_id=u.id
+    where
+        ps.{$column1} in (0,1) and 
+        p.educational_level_id is not null and 
+        p.province_id is not null
+    group by p.educational_level_id,p.province_id,ps.{$column1}") ;
+
+        $anjay = [];
+        
+        $status = $category1=='pns'?'pns':'certificated';
+        $status_non = $category1=='pns'?'nonpns':'noncertificated';
+        foreach($data as $key=>$val){
+            $jenjang = ['SD'=>0,'SMP'=>0,'SMA'=>0,'SMK'=>0,'TK'=>0,'SLB'=>0];
+            // $index = array_search($val->jenjang,array_keys($jenjang));
+
+            $anjay[$val->provinsi][$status] = $jenjang;
+            $anjay[$val->provinsi][$status_non] = $jenjang;
+            
+        }
+
+        $arr_check = ['pns','nonpns'];
+        if($category1=='sertifikasi')$arr_check = ['certificated','noncertificated'];
+
+        foreach($data as $key=>$val){
+            $status_ = $val->{$column1}?$arr_check[0]:$arr_check[1];
+            $anjay[$val->provinsi][$status_][$val->jenjang] = $val->total;
+        }
+
+        return view('statistic.pemetaan_provinsi',['data'=>$anjay,'category1'=>$category1]);
+        
+    }else{
+        $data = DB::select("select 
+        el.name as jenjang,ps.{$column1},count(*) as total
+    from users u 
+        inner join profiles p on p.user_id=u.id 
+        inner join educational_levels el on el.id=p.educational_level_id
+        inner join pns_statuses ps on ps.user_id=u.id
+        where 
+            p.educational_level_id is not null and
+            ps.{$column1} in (0,1)
+        group by p.educational_level_id, ps.{$column1}");
+
+        $anjay = [];
+
+        $arr_check = ['pns','nonpns'];
+        if($category1=='sertifikasi')$arr_check = ['certificated','noncertificated'];
+
+        foreach($data as $key=>$val){
+            // $index = array_search($val->jenjang,array_keys($jenjang));
+            $status = $val->{$column1}?$arr_check[0]:$arr_check[1];
+            $anjay[$val->jenjang][$status] = $val->total;
+            // $jenjang[$val->jenjang] = $val->total;
+            // $anjay[$val->provinsi] =
+        }
+
+        return view('statistic.pemetaan_jenjang',['data'=>$anjay,'category1'=>$category1]);
+    }
+    
+    // return $anjay;
+    
+});

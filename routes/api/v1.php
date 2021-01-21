@@ -366,7 +366,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::post('/makeThumbnail/{bookId}', 'BookController@makeThumbnail'); // MAKE PDF THUMBNAIL
 
-        Route::get('/lessonplans/search/{key}', 'LessonPlanController@searchbykey'); // SEARCH LESSONPLAN BY GIVEN KEY
+        Route::get('/lessonplans/search', 'LessonPlanController@searchbykey'); // SEARCH LESSONPLAN BY GIVEN KEY
 
         Route::get('/lessonplans/information', 'LessonPlanController@information'); // GET INFORMATION FOR RPP APPS
 
