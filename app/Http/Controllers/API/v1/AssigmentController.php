@@ -221,28 +221,63 @@ class AssigmentController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'audio.*'=>'nullable|mimes:mp4,mp3'
+        ]);
+
+        // return count($request->audio);
+        // foreach($request->audio as $key=>$audio){
+        //    if($request->hasFile("audio.{$key}")){
+        //         echo $key."file\n";
+        //    }else{
+        //        echo $key." not file\n";
+        //    }
+        // }
+        // return;
         //
         # code...
+        // return $request->user()->id;
+        $data = (array)json_decode($request->data);
+        // return $data;
         $assigment = new Assigment();
-        $assigment->fill($request->all());
-        if($request->has('password')) $assigment->password = bcrypt($request->password);
+        // $assigment->fill($request->all());
+        $assigment->fill($data);
+        if($request->has('password')) $assigment->password = bcrypt($data->password);
         $assigment->code = base_convert($request->user()->id.time(), 10, 36);
         $request->user()->assigments()->save($assigment);
-        foreach ($request->question_lists as $ql => $question_list) {
+        foreach ($data['question_lists'] as $ql => $question_list) {
+
+              
             # code...
             $item_question_list = new QuestionList();
-            $item_question_list->fill($question_list);
+            $item_question_list->fill((array)$question_list);
             $item_question_list->save();
-            $assigment->question_lists()->attach([$item_question_list->id => [
-                'creator_id' => $question_list['pivot']['creator_id'],
-                'user_id' => $question_list['pivot']['user_id'],
-                'assigment_type_id' => $question_list['pivot']['assigment_type_id'],
-            ]]);
 
-            foreach ($question_list['answer_lists'] as $al => $answer_list) {
+                         
+            // upload audio //
+            if($request->hasFile("audio.{$ql}")){
+                $file = new \App\Models\File;
+                $file->type = 'audio/m4a';
+                $path = $request->file("audio.{$ql}")->store('files', 'wasabi');
+                // return $path;
+                if($path){
+                    $file->src = $path;
+                    $item_question_list->audio()->save($file);
+                }   
+            }           
+            ////////////////////
+
+            $assigment->question_lists()->attach([$item_question_list->id => [
+                'creator_id' => $question_list->pivot->creator_id,
+                'user_id' => $question_list->pivot->user_id,
+                'assigment_type_id' => $question_list->pivot->assigment_type_id,
+            ]]);
+          
+
+            foreach ($question_list->answer_lists as $al => $answer_list) {
                 # code...
                 $item_answer_list = new AnswerList();
-                $item_answer_list->fill($answer_list);
+                $item_answer_list->fill((array)$answer_list);
                 $item_question_list->answer_lists()->save($item_answer_list);
             }
         }
@@ -253,6 +288,7 @@ class AssigmentController extends Controller
                     'grade',
                     'assigment_category',
                     'question_lists.answer_lists',
+                    'question_lists.audio',
                     'likes',
                     'comments.user',
                     'comments' => function ($query) {

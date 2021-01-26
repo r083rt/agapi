@@ -33,4 +33,8 @@ class QuestionList extends Model
         return $this->hasMany('App\Models\QuestionnaryQuestionList');
     }
 
+    public function audio(){
+        return $this->morphOne(\App\Models\File::class,'file')->where('type','audio/m4a');
+    }
+
 }
