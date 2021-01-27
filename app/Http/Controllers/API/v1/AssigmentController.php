@@ -219,22 +219,60 @@ class AssigmentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    public function store2($request){
+        $assigment = new Assigment();
+        $assigment->fill($request->all());
+        if($request->has('password')) $assigment->password = bcrypt($request->password);
+        $assigment->code = base_convert($request->user()->id.time(), 10, 36);
+        $request->user()->assigments()->save($assigment);
+        foreach ($request->question_lists as $ql => $question_list) {
+            # code...
+            $item_question_list = new QuestionList();
+            $item_question_list->fill($question_list);
+            $item_question_list->save();
+            $assigment->question_lists()->attach([$item_question_list->id => [
+                'creator_id' => $question_list['pivot']['creator_id'],
+                'user_id' => $question_list['pivot']['user_id'],
+                'assigment_type_id' => $question_list['pivot']['assigment_type_id'],
+            ]]);
+
+            foreach ($question_list['answer_lists'] as $al => $answer_list) {
+                # code...
+                $item_answer_list = new AnswerList();
+                $item_answer_list->fill($answer_list);
+                $item_question_list->answer_lists()->save($item_answer_list);
+            }
+        }
+        return response()->json(
+            $assigment
+                ->load([
+                    'user',
+                    'grade',
+                    'assigment_category',
+                    'question_lists.answer_lists',
+                    'likes',
+                    'comments.user',
+                    'comments' => function ($query) {
+                        $query
+                            ->with('likes', 'liked')
+                            ->withCount('likes', 'liked')
+                            ->orderBy('created_at', 'desc');
+                    },
+                ])
+                ->loadCount('comments', 'likes', 'liked')
+        );
+    }
     public function store(Request $request)
     {
+        //jika pakai apk yg lama, maka memakai API store2()
+        if(!$request->audio){
+            return $this->store2($request);
+        }
+
         $request->validate([
             'audio.*'=>'nullable|mimes:mp4,mp3'
         ]);
 
-        // return count($request->audio);
-        // foreach($request->audio as $key=>$audio){
-        //    if($request->hasFile("audio.{$key}")){
-        //         echo $key."file\n";
-        //    }else{
-        //        echo $key." not file\n";
-        //    }
-        // }
-        // return;
-        //
         # code...
         // return $request->user()->id;
         $data = (array)json_decode($request->data);
