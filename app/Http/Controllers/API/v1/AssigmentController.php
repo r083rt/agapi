@@ -404,7 +404,7 @@ class AssigmentController extends Controller
                     //masih bisa melihat jawaban untuk soal text
                 }
             },
-            'question_lists',
+            'question_lists.audio',
             'likes',
             'comments.user',
             'comments' => function ($query) {
@@ -448,7 +448,7 @@ class AssigmentController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $assigment = Assigment::findOrFail($id);
+        $assigment = Assigment::where('user_id',$request->user()->id)->findOrFail($id);
         $assigment->fill($request->all());
         $assigment->password = bcrypt($request->password);
         $assigment->code = base_convert($request->user()->id.time(), 10, 36);
@@ -458,17 +458,18 @@ class AssigmentController extends Controller
             $item_question_list = QuestionList::findOrFail($question_list['id']);
             $item_question_list->fill($question_list);
             $item_question_list->save();
-            $assigment->question_lists()->attach([$item_question_list->id => [
-                'creator_id' => $question_list['pivot']['creator_id'],
-                'user_id' => $question_list['pivot']['user_id'],
-                'assigment_type_id' => $question_list['pivot']['assigment_type_id'],
-            ]]);
+            // $assigment->question_lists()->attach([$item_question_list->id => [
+            //     'creator_id' => $question_list['pivot']['creator_id'],
+            //     'user_id' => $question_list['pivot']['user_id'],
+            //     'assigment_type_id' => $question_list['pivot']['assigment_type_id'],
+            // ]]);
 
             foreach ($question_list['answer_lists'] as $al => $answer_list) {
                 # code...
                 $item_answer_list = AnswerList::findOrFail($answer_list['id']);
-                $item_answer_list->fill($answer_list);
-                $item_question_list->answer_lists()->save($item_answer_list);
+                $item_answer_list->name = $answer_list['name'];
+                $item_answer_list->save();
+                // $item_question_list->answer_lists()->save($item_answer_list);
             }
         }
         return response()->json(
