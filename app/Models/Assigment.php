@@ -90,4 +90,7 @@ class Assigment extends Model
     public function latest_auth_session(){
         return $this->auth_sessions()->limit(1);
     }
+
+  
+    // public function 
 }

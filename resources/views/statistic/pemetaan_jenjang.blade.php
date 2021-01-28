@@ -32,9 +32,15 @@ $cok = $category1=='pns'?['PNS','Non-PNS']:['Sertifikasi','Belum Sertifikasi'];
 
   </tbody>
   <tfoot>
-    <td>Jumlah</td>
+    <tr>
+    <td width="300px">Jumlah keseluruhan</td>
     <th class="text-center">{{$t_}}</th>
     <th class="text-center">{{$t_non}}</th>
+    </tr>
+    <tr>
+    <td width="300px">Jumlah yang belum isi data</td>
+    <th class="text-center" colspan=2>{{$data2[0]->total}}</th>
+    </tr>
   </tfoot>
 </table>
 @stop

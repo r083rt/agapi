@@ -219,10 +219,7 @@ class AssigmentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        //
-        # code...
+    public function store2($request){
         $assigment = new Assigment();
         $assigment->fill($request->all());
         if($request->has('password')) $assigment->password = bcrypt($request->password);
@@ -253,6 +250,83 @@ class AssigmentController extends Controller
                     'grade',
                     'assigment_category',
                     'question_lists.answer_lists',
+                    'likes',
+                    'comments.user',
+                    'comments' => function ($query) {
+                        $query
+                            ->with('likes', 'liked')
+                            ->withCount('likes', 'liked')
+                            ->orderBy('created_at', 'desc');
+                    },
+                ])
+                ->loadCount('comments', 'likes', 'liked')
+        );
+    }
+    public function store(Request $request)
+    {
+        //jika pakai apk yg lama, maka memakai API store2()
+        if(!$request->audio){
+            return $this->store2($request);
+        }
+
+        $request->validate([
+            'audio.*'=>'nullable|mimes:mp4,mp3'
+        ]);
+
+        # code...
+        // return $request->user()->id;
+        $data = (array)json_decode($request->data);
+        // return $data;
+        $assigment = new Assigment();
+        // $assigment->fill($request->all());
+        $assigment->fill($data);
+        if($request->has('password')) $assigment->password = bcrypt($data->password);
+        $assigment->code = base_convert($request->user()->id.time(), 10, 36);
+        $request->user()->assigments()->save($assigment);
+        foreach ($data['question_lists'] as $ql => $question_list) {
+
+              
+            # code...
+            $item_question_list = new QuestionList();
+            $item_question_list->fill((array)$question_list);
+            $item_question_list->save();
+
+                         
+            // upload audio //
+            if($request->hasFile("audio.{$ql}")){
+                $file = new \App\Models\File;
+                $file->type = 'audio/m4a';
+                $path = $request->file("audio.{$ql}")->store('files', 'wasabi');
+                // return $path;
+                if($path){
+                    $file->src = $path;
+                    $item_question_list->audio()->save($file);
+                }   
+            }           
+            ////////////////////
+
+            $assigment->question_lists()->attach([$item_question_list->id => [
+                'creator_id' => $question_list->pivot->creator_id,
+                'user_id' => $question_list->pivot->user_id,
+                'assigment_type_id' => $question_list->pivot->assigment_type_id,
+            ]]);
+          
+
+            foreach ($question_list->answer_lists as $al => $answer_list) {
+                # code...
+                $item_answer_list = new AnswerList();
+                $item_answer_list->fill((array)$answer_list);
+                $item_question_list->answer_lists()->save($item_answer_list);
+            }
+        }
+        return response()->json(
+            $assigment
+                ->load([
+                    'user',
+                    'grade',
+                    'assigment_category',
+                    'question_lists.answer_lists',
+                    'question_lists.audio',
                     'likes',
                     'comments.user',
                     'comments' => function ($query) {
@@ -330,7 +404,7 @@ class AssigmentController extends Controller
                     //masih bisa melihat jawaban untuk soal text
                 }
             },
-            'question_lists',
+            'question_lists.audio',
             'likes',
             'comments.user',
             'comments' => function ($query) {
@@ -374,7 +448,7 @@ class AssigmentController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $assigment = Assigment::findOrFail($id);
+        $assigment = Assigment::where('user_id',$request->user()->id)->findOrFail($id);
         $assigment->fill($request->all());
         $assigment->password = bcrypt($request->password);
         $assigment->code = base_convert($request->user()->id.time(), 10, 36);
@@ -384,17 +458,18 @@ class AssigmentController extends Controller
             $item_question_list = QuestionList::findOrFail($question_list['id']);
             $item_question_list->fill($question_list);
             $item_question_list->save();
-            $assigment->question_lists()->attach([$item_question_list->id => [
-                'creator_id' => $question_list['pivot']['creator_id'],
-                'user_id' => $question_list['pivot']['user_id'],
-                'assigment_type_id' => $question_list['pivot']['assigment_type_id'],
-            ]]);
+            // $assigment->question_lists()->attach([$item_question_list->id => [
+            //     'creator_id' => $question_list['pivot']['creator_id'],
+            //     'user_id' => $question_list['pivot']['user_id'],
+            //     'assigment_type_id' => $question_list['pivot']['assigment_type_id'],
+            // ]]);
 
             foreach ($question_list['answer_lists'] as $al => $answer_list) {
                 # code...
                 $item_answer_list = AnswerList::findOrFail($answer_list['id']);
-                $item_answer_list->fill($answer_list);
-                $item_question_list->answer_lists()->save($item_answer_list);
+                $item_answer_list->name = $answer_list['name'];
+                $item_answer_list->save();
+                // $item_question_list->answer_lists()->save($item_answer_list);
             }
         }
         return response()->json(
