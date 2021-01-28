@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateConservationsTable extends Migration
+class CreateConversationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateConservationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('conservations', function (Blueprint $table) {
+        Schema::create('conversations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('creator_id')->nullable();
             $table->string('name')->nullable();
@@ -24,7 +24,6 @@ class CreateConservationsTable extends Migration
             $table->timestamps();
 
             $table->foreign('creator_id')->references('id')->on('users')->onDelete('cascade');
-
         });
     }
 
@@ -35,6 +34,6 @@ class CreateConservationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('conservations');
+        Schema::dropIfExists('conversations');
     }
 }
