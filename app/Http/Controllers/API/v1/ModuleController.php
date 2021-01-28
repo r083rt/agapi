@@ -39,8 +39,73 @@ class ModuleController extends Controller
      */
     public function store(Request $request)
     {
-        //$input = $request->input();
-        //return $request;
+         //jika pakai apk yg lama, maka memakai API store2()
+         if(!$request->audio){
+            return $this->store2($request);
+        }
+        //validasi pertama
+        $request->validate([
+            'audio.*'=>'nullable|mimes:mp4,mp3',
+            'data'=>'json'
+        ]);
+
+        $data = json_decode($request->data);
+        //validasi kedua, untuk data json
+        $validator = Validator::make((array)$data, [
+            'selected_template'=>['required'],
+            'name'=>['required'],
+            'grade'=>['required'],
+        ]);
+        if($validator->fails()){
+            return $validator->errors();
+        }
+        //$image_path=Hash::make(Carbon::now()->toDateTimeString().auth('api')->user()->id);      
+        //$p = Storage::disk('s3')->put('filepath/' . $imageName, $image, 'public');
+        //$isImageSaved = Storage::disk('wasabi')->put('files/'.$image_path.'.png', base64_decode($request->canvas_image));
+        //if(!$isImageSaved)return abort(500,'Gambar gagal diupload');
+        $module = new Module;
+        $module->user_id=auth('api')->user()->id;
+        $module->name = $data->name;
+        $module->grade_id = $data->grade->id;
+        $module->description = $data->description;
+        $module->is_publish=  $data->is_publish;
+        $module->subject = $data->subject;
+        $module->year = date('Y');
+        //$module->master_template=$request->selected_template['id'];
+        $module->canvas_data = json_encode($data->canvas_data);
+        $module->save();
+        ProcessTemplateModule::dispatchSync($module, $data->canvas_image);
+
+        // $template = new \App\Models\Template;
+        // $template->creator_id=$module->user_id;
+        // $template->image = 'files/'.$image_path.'.png';
+        // $template->name = 'custom template';
+        // $module->template()->save($template);
+        foreach($data->contents as $key=>$content){
+            $content_db = new \App\Models\ModuleContent;
+            $content_db->name = $data->contents[$key]->name;
+            $content_db->value = $data->contents[$key]->value;
+            $module->module_contents()->save($content_db);
+
+             // upload audio //
+             if($request->hasFile("audio.{$key}")){
+                $file = new \App\Models\File;
+                $file->type = 'audio/m4a';
+                $path = $request->file("audio.{$key}")->store('files', 'wasabi');
+                // return $path;
+                if($path){
+                    $file->src = $path;
+                    $content_db->audio()->save($file);
+                }   
+            }      
+            ////////////////////     
+
+        }
+       
+        return $module;
+    }
+    public function store2(Request $request)
+    {
         $request->validate([
             'selected_template'=>['required'],
             'name'=>['required'],
