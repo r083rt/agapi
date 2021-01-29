@@ -322,10 +322,8 @@ Route::get('/getcontactnumber',function(){
 
 Route::get('/testgan',function(){
 
-    date_default_timezone_set("Asia/Jakarta");
-    $months = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-  
-    echo  '*Data Per '.date('d').' '.$months[intval(date('m'))].' '.date('Y').' Pukul '.date('H:i').' WIB';
+    $module = App\Models\Module::where('user_id',1)->findOrFail(860);
+    return $module->loadCount('liked','likes','comments')->load('comments','user','template','module_contents.audio','grade');
 
     
 });
