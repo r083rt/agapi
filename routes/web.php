@@ -322,8 +322,12 @@ Route::get('/getcontactnumber',function(){
 
 Route::get('/testgan',function(){
 
-    $module = App\Models\Module::where('user_id',1)->findOrFail(860);
-    return $module->loadCount('liked','likes','comments')->load('comments','user','template','module_contents.audio','grade');
+    DB::enableQueryLog(); // Enab
+    $a = App\Models\User::where('role_id',2)->where('user_activated_at', '!=', null)
+        ->whereHas('lesson_plans')->count();
+    dd(DB::getQueryLog()); // Show results of log
+    return $a;
+
 
     
 });
