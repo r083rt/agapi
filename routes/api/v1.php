@@ -440,6 +440,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/modules/getalllatest','ModuleController@getalllatest');
         Route::get('/modules/getbyeducationallevel/{educationalLevelId}/{search?}','ModuleController@getbyeducationallevel');
         Route::get('/modules/read/{id}','ModuleController@readModule');
+
         //Route::get('/modules/s/{educationalLevelId}/{search?}','ModuleController@getbyeducationallevel');
         //Route::get('/modules/')
         //Route::get('/modules/{moduleId}/getcomments','ModuleController@getbyeducationallevel');

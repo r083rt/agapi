@@ -221,15 +221,28 @@ class AssigmentController extends Controller
      */
     public function store2($request){
         $assigment = new Assigment();
+        // return $request;
         $assigment->fill($request->all());
         if($request->has('password')) $assigment->password = bcrypt($request->password);
         $assigment->code = base_convert($request->user()->id.time(), 10, 36);
         $request->user()->assigments()->save($assigment);
         foreach ($request->question_lists as $ql => $question_list) {
             # code...
+            
             $item_question_list = new QuestionList();
             $item_question_list->fill($question_list);
             $item_question_list->save();
+
+            //mendapatkan parent question_lists untuk mengecek audio'nya
+            $parent_item_question_list = QuestionList::findOrFail($question_list['id']);
+            if($parent_item_question_list->audio)
+            {
+                $file = new \App\Models\File;
+                $file->type = 'audio/m4a';
+                $file->src = $parent_item_question_list->audio->src;
+                $item_question_list->audio()->save($file);
+            }
+
             $assigment->question_lists()->attach([$item_question_list->id => [
                 'creator_id' => $question_list['pivot']['creator_id'],
                 'user_id' => $question_list['pivot']['user_id'],
@@ -264,7 +277,7 @@ class AssigmentController extends Controller
     }
     public function store(Request $request)
     {
-        //jika pakai apk yg lama, maka memakai API store2()
+        //jika pakai apk yg lama atau rakit soal, maka memakai API store2()
         if(!$request->audio){
             return $this->store2($request);
         }
