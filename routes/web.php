@@ -321,12 +321,7 @@ Route::get('/getcontactnumber',function(){
 
 
 Route::get('/testgan',function(){
-
-    DB::enableQueryLog(); // Enab
-    $a = App\Models\User::where('role_id',2)->where('user_activated_at', '!=', null)
-        ->whereHas('lesson_plans')->count();
-    dd(DB::getQueryLog()); // Show results of log
-    return $a;
+    // $a = 2020-07-20 16:25:20
 
 
     
