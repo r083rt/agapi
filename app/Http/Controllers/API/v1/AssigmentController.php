@@ -815,19 +815,41 @@ class AssigmentController extends Controller
         ->setCellValue('A9','Dikerjakan sebanyak')->setCellValue('B9',$assigment->sessions_count)
         ->setCellValue('A10','Nilai tertinggi')->setCellValue('B10',$info->max_score)
         ->setCellValue('A11','Nilai rata-rata')->setCellValue('B11',$info->avg_score)
-        ->setCellValue('A12','Nama')->setCellValue('B12','Nilai');
+        ->setCellValue('A13','Nama')->setCellValue('B13','Nilai');
 
-        $index=13;
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+
+        $spreadsheet->getActiveSheet()->getStyle('A2')->getAlignment()->setHorizontal('center');
+        $index=14;
         foreach($sessions as $key=>$session){
             $spreadsheet->getActiveSheet()->
             setCellValue("A{$index}",$session->user->name)
             ->setCellValue("B{$index}",$session->assigments[0]->pivot->total_score);
             $index++;
         }
-        $writer = new Xlsx($spreadsheet);
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '00000000'],
+                ],
+            ],
+        ];
+
+        $spreadsheet->getActiveSheet()->getStyle("A13:B".($index-1))->applyFromArray($styleArray);
+
+        $title = 'Data tgl '.date('Y-m-d').' '.time();
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment;filename=\"$title.xlsx\"");
+        header('Cache-Control: max-age=0');
+    
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+
         // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         // header('Content-Disposition: attachment; filename="'.$title.'.xlsx"');
-            $writer->save('testgan.xlsx');
+        $writer->save('php://output');
+
 
 
     }
