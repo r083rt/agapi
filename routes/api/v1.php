@@ -275,6 +275,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'modules.likes'=>'ModuleLikeController',
             'bank_account'=>'BankAccountController',
             'surah'=>'SurahController',
+            'conversation'=>'ConversationController',
 
         ]);
 
