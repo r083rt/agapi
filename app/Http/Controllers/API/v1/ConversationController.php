@@ -19,14 +19,52 @@ class ConversationController extends Controller
 
         $conversations = Conversation::with(['users'=>function($query){
             $query->where('users.id','!=',auth()->user()->id);
-        }])->whereHas('users',function($query){
+        },'participants'])->whereHas('users',function($query){
             $query->where('users.id',auth()->user()->id);
-        })->where('type','personal')->orderBy('id','desc')->paginate();
+        })->where('type','personal')->orderBy('updated_at','desc')->paginate();
+        
         
         return $conversations;
 
     }
+    private function getPersonalConversation($participant_id_1, $participant_id_2){
+        $conversation = Conversation::where('type','personal')
+        ->whereExists(function($query)use($participant_id_1){
+            $query->select(DB::raw(1))
+                     ->from('user_conversations')
+                     ->where('user_conversations.user_id',$participant_id_1)
+                     ->whereColumn('user_conversations.conversation_id', 'conversations.id');
+        })
+        ->whereExists(function($query)use($participant_id_2){
+            $query->select(DB::raw(1))
+                     ->from('user_conversations')
+                     ->where('user_conversations.user_id',$participant_id_2)
+                     ->whereColumn('user_conversations.conversation_id', 'conversations.id');
+        });
+        if($conversation->exists()){
+            $conversation->with(['users'=>function($query){
+                $query->where('users.id','!=',auth()->user()->id);
+            }]);
+            return $conversation->first();
+        }
+        return null;
+    }
+    private function verifyConversation($conversation_id,$participant_id){
+        // mengecek apakah user benar2 bagian dari participant conversation {conversation_id}
+        $conversation = Conversation::where('type','personal')
+        ->whereExists(function($query)use($participant_id){
+            $query->select(DB::raw(1))
+                     ->from('user_conversations')
+                     ->where('user_conversations.user_id',$participant_id)
+                     ->whereColumn('user_conversations.conversation_id', 'conversations.id');
+        })->where('id',$conversation_id);
+        if($conversation->exists()){
+            return $conversation->first();
+        }
+        return null;
+        
 
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -38,32 +76,14 @@ class ConversationController extends Controller
         $request->validate([
             'invited_user_id'=>'required'
         ]);
-        // $conversation = Conversation::where('creator_id',auth()->user()->id)
-        // ->where('type','personal')
-        // ->whereHas('users',function($query)use($request){
-        //    $query->where('users.id',$request->invited_user_id);
-        // });
-        $conversation = Conversation::where('type','personal')
-        ->whereExists(function($query)use($request){
-            $query->select(DB::raw(1))
-                     ->from('user_conversations')
-                     ->where('user_conversations.user_id',$request->invited_user_id)
-                     ->whereColumn('user_conversations.conversation_id', 'conversations.id');
-        })
-        ->whereExists(function($query){
-            $query->select(DB::raw(1))
-                     ->from('user_conversations')
-                     ->where('user_conversations.user_id',auth()->user()->id)
-                     ->whereColumn('user_conversations.conversation_id', 'conversations.id');
-        });
-        // return $conversation->exists();
-        if($conversation->exists()){
-            $conversation->with(['users'=>function($query){
-                $query->where('users.id','!=',auth()->user()->id);
-            }]);
-            return $conversation->first();
+        
+        // cek apakah ada personal conversation antara 2 participant (sender dan receiver)
+        $conversation = $this->getPersonalConversation(auth()->user()->id, $request->invited_user_id);
+        if($conversation){
+            return $conversation;
         }
 
+        // jika tidak ada personal conversation antara 2 participant (sender dan receiver), maka buat baru
         $conversation = new Conversation;
         $conversation->creator_id =  auth()->user()->id;
         $conversation->type = 'personal';
@@ -88,9 +108,10 @@ class ConversationController extends Controller
      */
     public function show($conversation_id)
     {
+        
         $conversation = Conversation::with(['users'=>function($query){
             $query->where('users.id','!=',auth()->user()->id);
-        }])
+        },'participants'])
         //check apakah masuk dalam user_conversations sbg penerima/pengirim
         ->whereHas('users',function($query){
             $query->where('users.id',auth()->user()->id);
@@ -108,9 +129,23 @@ class ConversationController extends Controller
      * @param  \App\Models\Conversation  $conversation
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Conversation $conversation)
+    public function update(Request $request, $conversation_id)
     {
-        //
+        
+        $request->validate([
+            'latest_message_at'=>'digits:13' //13 karena panjang dari hasil `new Date().getTime()` adalah 13
+        ]);
+        // mengecek apakah user benar2 bagian dari participant conversation {conversation_id}
+        $conversation = $this->verifyConversation($conversation_id,auth()->user()->id);
+        if($conversation){
+            // return $request->latest_message_at;
+            $latest_message_at = date("Y-m-d h:i:s",$request->latest_message_at/1000);
+            $conversation->updated_at = $latest_message_at;
+            $conversation->save();
+            return $conversation;
+        }
+        return null;
+        
     }
 
     /**
