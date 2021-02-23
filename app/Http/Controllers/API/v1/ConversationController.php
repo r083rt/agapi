@@ -158,4 +158,11 @@ class ConversationController extends Controller
     {
         //
     }
+    public function getUnreadCount(){
+        $conversations = Conversation::whereNull('read_at')->whereHas('users',function($query){
+            $query->where('users.id',auth()->user()->id);
+        })->count();
+        return ['unread_count'=>$conversations];
+        
+    }
 }
