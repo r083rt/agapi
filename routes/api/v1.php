@@ -147,7 +147,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/auth/assigments/published', function(Request $request){
             return \App\Models\Assigment::with('likes','comments.user', 'user','grade','assigment_category','question_lists.assigment_types')->where('user_id','=',auth('api')->user()->id)->where('is_publish',true)->whereNull('teacher_id')->orderBy('id','desc')->paginate();
         });
-        
+
         /////////////////////////////////////////////////////////////////////////////////////
         Route::get('/auth/lessonplan', function (Request $request) { // GET USER AUTH FOR RPP APPS
             return $request->user();
@@ -171,14 +171,14 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         // Route::get('/auth/assigment/student/finishedtoday', function(Request $request){
         //      $userProfile = auth('api')->user()->load('profile');
         //      $educationalLevelId = $userProfile->profile->educational_level_id;
-             
+
         //      //paket soal utama
         //      $res = \App\Models\Session::withCount('questions')->with('assigments.grade')->where('user_id',auth('api')->user()->id)
         //      ->whereDate('created_at',\Carbon\Carbon::today())
         //      ->whereHas('assigments',function($query)use($educationalLevelId){
         //          $query->whereNotNull('teacher_id')->whereHas('grade', function($query)use($educationalLevelId){
         //             $query->where('educational_level_id',$educationalLevelId);
-        //          });        
+        //          });
         //      })->whereHas('assigment_session',function($query){
         //         $query->whereNotNull('total_score');  //hanya mengambil paket soal yang telah dinilai oleh guru, yaitu jika total_score'nya TIDAK null
         //      });
@@ -189,7 +189,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         //      ->whereHas('assigments',function($query)use($educationalLevelId){
         //          $query->whereNull('teacher_id')->whereHas('grade', function($query)use($educationalLevelId){
         //             $query->where('educational_level_id',$educationalLevelId);
-        //          });        
+        //          });
         //      })->whereHas('assigment_session',function($query){
         //         $query->whereNotNull('total_score');  //hanya mengambil paket soal latihan mandiri yang telah dinilai oleh guru, yaitu jika total_score'nya TIDAK null
         //      });
@@ -208,7 +208,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             ->whereHas('assigments',function($query)use($educationalLevelId){
                 $query->whereNotNull('teacher_id')->whereHas('grade', function($query2)use($educationalLevelId){
                    $query2->where('educational_level_id', $educationalLevelId);
-                });        
+                });
             });
             // ->whereHas('assigment_session',function($query){
             //    $query->whereNotNull('total_score');  //hanya mengambil paket soal yang telah dinilai oleh guru atau telah melalui proses penilaian otomatis, yaitu jika total_score'nya TIDAK null
@@ -220,7 +220,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             ->whereHas('assigments',function($query)use($educationalLevelId){
                 $query->whereNull('teacher_id')->whereHas('grade', function($query)use($educationalLevelId){
                    $query->where('educational_level_id',$educationalLevelId);
-                });        
+                });
             })->whereHas('assigment_session',function($query){
                $query->whereNotNull('total_score');  //hanya mengambil paket soal latihan mandiri yang telah dinilai oleh guru, yaitu jika total_score'nya TIDAK null
             });
@@ -305,7 +305,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/ownstudentpost', 'PostController@ownstudentpost');
         Route::get('/mediapost', 'PostController@mediapost');
         Route::get('/assigments/search/{key}', 'AssigmentController@search');
-        
+
 
         /////////////////API PUBLISH untuk GURU///////////////////
         Route::get('/assigments/publish', 'AssigmentController@publish');
@@ -391,7 +391,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/payments/getpaymentreportforcity/{cityId}', 'PaymentController@getPaymentReportForCity');
 
         Route::get('/payments/bymonthyear/{month?}/{year?}', 'PaymentController@getPaymentByMonthYear');
-        
+
         Route::get('/payments/bymonthyear/city/{province_id?}/{month?}/{year?}', 'PaymentController@getPaymentCityByMonthYear');
 
         Route::get('/payments/bymonthyear/cityusers/{city_id?}/{month?}/{year?}', 'PaymentController@getPaymentCityUsersByMonthYear');
@@ -418,8 +418,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::get('/payments/getcitypayment','PaymentController@getCityPayment');
 
+        Route::post('/payments/getuniquepayment','PaymentController@makeUniquePayment');
 
-    
+        Route::post('/payments/confirmuniquepayment','PaymentController@confirmUniquePayment');
+
+
 
         Route::get('/lessonplans/getbyeducationallevel/{id}', 'LessonPlanController@getByEducationalLevel'); // GET RPP BY EDUCATIONAL LEVEL
 
@@ -452,7 +455,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         //Route::get('/modules/s/{educationalLevelId}/{search?}','ModuleController@getbyeducationallevel');
         //Route::get('/modules/')
         //Route::get('/modules/{moduleId}/getcomments','ModuleController@getbyeducationallevel');
-        //api untuk semua modul 
+        //api untuk semua modul
         //Route::get('/template/owned','TemplateController@owned');
 
     });
@@ -510,7 +513,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
            $query->withCount('answers');
        }])->has('answer_lists')->whereHas('questionnaries',function($query){
         $query->where('questionnary_id','=',1);
-       });  
+       });
         return $res->get();
         return $res->assigment->code;
         $a = \App\Models\Post::find(1);

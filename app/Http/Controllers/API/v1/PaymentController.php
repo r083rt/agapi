@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\API\v1;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Payment;
-use Veritrans_Config;
-use Veritrans_Snap;
-use Veritrans_Notification;
-use Veritrans_Transaction;
 use App\Jobs\ProcessHandlePayment;
-use stdClass;
-use Illuminate\Support\Collection;
+use App\Models\Payment;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use stdClass;
+use Veritrans_Config;
+use Veritrans_Notification;
+use Veritrans_Snap;
+use Veritrans_Transaction;
+use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
@@ -46,41 +46,42 @@ class PaymentController extends Controller
     {
         //
     }
-    public function getStatus($userId){
+    public function getStatus($userId)
+    {
         $user = User::findOrFail($userId);
         //bayar pendaftaran
-        if($user->user_activated_at==null){
-            $user->load(['payments'=>function($query){
-                $query->orderBy('id','DESC')->where('value',35000);
+        if ($user->user_activated_at == null) {
+            $user->load(['payments' => function ($query) {
+                $query->orderBy('id', 'DESC')->where('value', 35000);
             }]);
-        }else{
+        } else {
             //bayar perpanjangan
-            $user->load(['payments'=>function($query){
-                $query->orderBy('id','DESC')->where('value',65000);
+            $user->load(['payments' => function ($query) {
+                $query->orderBy('id', 'DESC')->where('value', 65000);
             }]);
         }
         foreach ($user->payments as $p => $payment) {
             # code...
-            try{
+            try {
                 $status = Veritrans_Transaction::status($payment->id);
                 // dd($status->transaction_status);
-                if($status->transaction_status == 'settlement'){
+                if ($status->transaction_status == 'settlement') {
                     $date = $payment->created_at;
                     $payment->status = 'success';
                     $payment->save();
-                    $user->update(['user_activated_at'=>$date]);
+                    $user->update(['user_activated_at' => $date]);
                     $user->payment_success = $payment;
                     break;
                 }
-            }catch(\Exception  $e){
-               
+            } catch (\Exception $e) {
+
             }
-            
+
         }
-        
+
         //dd($user);
         // if($user){
-           
+
         //     foreach ($user->payments as $p => $payment) {
         //         # code...
         //         $status = Veritrans_Transaction::status($payment->id);
@@ -97,7 +98,8 @@ class PaymentController extends Controller
         return $user;
     }
 
-    public function getPaymentReport($from,$to){
+    public function getPaymentReport($from, $to)
+    {
         // -- Semua pembayaran beserta yang bayar beberapa kali untuk satu aktivasi jadi keitung
         // $results = Payment::with(['user.profile.province','user.profile.city','user.profile.district'])
         // ->where('status','success')
@@ -107,19 +109,19 @@ class PaymentController extends Controller
         // -------------------------------------------------------------------------------------
 
         // -- Hitung yang melakukan aktivasi saja
-        $users = User::with(['payments'=>function($query)use($from,$to){
+        $users = User::with(['payments' => function ($query) use ($from, $to) {
             $query
-            ->where('status','success')
-            ->where('value',35000)
-            ->whereBetween('updated_at',[date($from),date($to)]);
-        },'payments.user'])
-        ->whereHas('payments',function($query)use($from,$to){
-            $query
-            ->where('status','success')
-            ->where('value',35000)
-            ->whereBetween('updated_at',[date($from),date($to)]);
-        })
-        ->get();
+                ->where('status', 'success')
+                ->where('value', 35000)
+                ->whereBetween('updated_at', [date($from), date($to)]);
+        }, 'payments.user'])
+            ->whereHas('payments', function ($query) use ($from, $to) {
+                $query
+                    ->where('status', 'success')
+                    ->where('value', 35000)
+                    ->whereBetween('updated_at', [date($from), date($to)]);
+            })
+            ->get();
         // --------------------------------------
 
         $results = collect([]);
@@ -130,7 +132,8 @@ class PaymentController extends Controller
         return response()->json($results);
     }
 
-    public function getPaymentReportByProvince($from,$to,$provinceId){
+    public function getPaymentReportByProvince($from, $to, $provinceId)
+    {
         // $results = Payment::with(['user.profile.province','user.profile.city','user.profile.district'])
         // ->where('status','success')
         // ->where('value',35000)
@@ -141,23 +144,23 @@ class PaymentController extends Controller
         // ->get();
 
         // -- Hitung yang melakukan aktivasi saja
-        $users = User::with(['payments'=>function($query)use($from,$to){
+        $users = User::with(['payments' => function ($query) use ($from, $to) {
             $query
-            ->where('status','success')
-            ->where('value',35000)
-            ->whereBetween('updated_at',[date($from),date($to)]);
-        },'payments.user'])
-        ->whereHas('payments',function($query)use($from,$to){
-            $query
-            ->where('status','success')
-            ->where('value',35000)
-            ->whereBetween('updated_at',[date($from),date($to)]);
-        })
-        ->whereHas('profile.province',function($query)use($provinceId){
-            $query
-            ->where('id',$provinceId);
-        })
-        ->get();
+                ->where('status', 'success')
+                ->where('value', 35000)
+                ->whereBetween('updated_at', [date($from), date($to)]);
+        }, 'payments.user'])
+            ->whereHas('payments', function ($query) use ($from, $to) {
+                $query
+                    ->where('status', 'success')
+                    ->where('value', 35000)
+                    ->whereBetween('updated_at', [date($from), date($to)]);
+            })
+            ->whereHas('profile.province', function ($query) use ($provinceId) {
+                $query
+                    ->where('id', $provinceId);
+            })
+            ->get();
         // --------------------------------------
 
         $results = collect([]);
@@ -169,7 +172,8 @@ class PaymentController extends Controller
         return response()->json($results);
     }
 
-    public function getPaymentReportByCity($from,$to,$cityId){
+    public function getPaymentReportByCity($from, $to, $cityId)
+    {
         // $results = Payment::with(['user.profile.province','user.profile.city','user.profile.district'])
         // ->where('status','success')
         // ->where('value',35000)
@@ -179,22 +183,22 @@ class PaymentController extends Controller
         // })
         // ->get();
         // -- Hitung yang melakukan aktivasi saja
-        $users = User::with(['payments'=>function($query)use($from,$to){
+        $users = User::with(['payments' => function ($query) use ($from, $to) {
             $query
-            ->where('status','success')
-            ->where('value',35000)
-            ->whereBetween('updated_at',[date($from),date($to)]);
-        },'payments.user'])
-        ->whereHas('payments',function($query)use($from,$to){
-            $query
-            ->where('status','success')
-            ->where('value',35000)
-            ->whereBetween('updated_at',[date($from),date($to)]);
-        })
-        ->whereHas('profile.city',function($query)use($cityId){
-            $query->where('id',$cityId);
-        })
-        ->get();
+                ->where('status', 'success')
+                ->where('value', 35000)
+                ->whereBetween('updated_at', [date($from), date($to)]);
+        }, 'payments.user'])
+            ->whereHas('payments', function ($query) use ($from, $to) {
+                $query
+                    ->where('status', 'success')
+                    ->where('value', 35000)
+                    ->whereBetween('updated_at', [date($from), date($to)]);
+            })
+            ->whereHas('profile.city', function ($query) use ($cityId) {
+                $query->where('id', $cityId);
+            })
+            ->get();
         // --------------------------------------
 
         $results = collect([]);
@@ -205,7 +209,8 @@ class PaymentController extends Controller
         return response()->json($results);
     }
 
-    public function getPaymentReportForArdata(){
+    public function getPaymentReportForArdata()
+    {
         // $payments = Payment::with('user')
         // ->where('status','success')
         // ->where('value',35000)
@@ -251,24 +256,24 @@ class PaymentController extends Controller
         // }
 
         // -- Hitung yang melakukan aktivasi saja
-        $users = User::with(['payments'=>function($query){
+        $users = User::with(['payments' => function ($query) {
             $query
-            ->where('status','success')
-            ->where('value',35000);
-        },'payments.user'])
-        ->whereHas('payments',function($query){
-            $query
-            ->where('status','success')
-            ->where('value',35000);
-        })
-        ->get();
+                ->where('status', 'success')
+                ->where('value', 35000);
+        }, 'payments.user'])
+            ->whereHas('payments', function ($query) {
+                $query
+                    ->where('status', 'success')
+                    ->where('value', 35000);
+            })
+            ->get();
         // --------------------------------------
 
         $results = collect([]);
         foreach ($users as $u => $user) {
             # code...
             // isi tanggal
-            $date = date('F Y',strtotime($user->payments[0]->updated_at));
+            $date = date('F Y', strtotime($user->payments[0]->updated_at));
             $object = new stdClass();
             $object->date = $date;
             $object->total = 0;
@@ -283,9 +288,9 @@ class PaymentController extends Controller
         foreach ($users as $u => $user) {
             # code...
             // menjumlahkan yang harus dibayar dan mengisi pembayaran apa saja didalamnya
-            $date = date('F Y',strtotime($user->payments[0]->updated_at));
-            $results->map(function($result)use($date,$user){
-                if($result->date == $date){
+            $date = date('F Y', strtotime($user->payments[0]->updated_at));
+            $results->map(function ($result) use ($date, $user) {
+                if ($result->date == $date) {
                     // -- tambah 20000 jika  pembayarannya 35000, tambah 30000 jika pembayarannya 65000
                     // $result->toPaid += $payment->value == 35000 ? 20000 : 30000;
                     // $result->toReceive += $payment->value == 35000 ? 10000 : 30000;
@@ -306,31 +311,32 @@ class PaymentController extends Controller
         return response()->json($results);
     }
 
-    public function getPaymentReportForDpp(){
+    public function getPaymentReportForDpp()
+    {
         // $payments = Payment::with('user')
         // ->where('status','success')
         // ->where('value',35000)
         // ->get();
 
         // -- Hitung yang melakukan aktivasi saja
-        $users = User::with(['payments'=>function($query){
+        $users = User::with(['payments' => function ($query) {
             $query
-            ->where('status','success')
-            ->where('value',35000);
-        },'payments.user'])
-        ->whereHas('payments',function($query){
-            $query
-            ->where('status','success')
-            ->where('value',35000);
-        })
-        ->get();
+                ->where('status', 'success')
+                ->where('value', 35000);
+        }, 'payments.user'])
+            ->whereHas('payments', function ($query) {
+                $query
+                    ->where('status', 'success')
+                    ->where('value', 35000);
+            })
+            ->get();
         // --------------------------------------
 
         $results = collect([]);
         foreach ($users as $u => $user) {
             # code...
             // isi tanggal
-            $date = date('F Y',strtotime($user->payments[0]->updated_at));
+            $date = date('F Y', strtotime($user->payments[0]->updated_at));
             $object = new stdClass();
             $object->date = $date;
             $object->toPaid = 0;
@@ -342,9 +348,9 @@ class PaymentController extends Controller
         foreach ($users as $u => $user) {
             # code...
             // menjumlahkan yang harus dibayar dan mengisi pembayaran apa saja didalamnya
-            $date = date('F Y',strtotime($user->payments[0]->updated_at));
-            $results->map(function($result)use($date,$user){
-                if($result->date == $date){
+            $date = date('F Y', strtotime($user->payments[0]->updated_at));
+            $results->map(function ($result) use ($date, $user) {
+                if ($result->date == $date) {
                     // -- tambah 20000 jika  pembayarannya 35000, tambah 30000 jika pembayarannya 65000
                     // $result->toPaid += $payment->value == 35000 ? 4000 : 8000;
                     //---------------------------------------------------------------------------------
@@ -361,7 +367,8 @@ class PaymentController extends Controller
         return response()->json($results);
     }
 
-    public function getPaymentReportForProvince($provinceId){
+    public function getPaymentReportForProvince($provinceId)
+    {
         // $payments = Payment::with('user')
         // ->where('status','success')
         // ->where('value',35000)
@@ -403,27 +410,27 @@ class PaymentController extends Controller
         // }
 
         // -- Hitung yang melakukan aktivasi saja
-        $users = User::with(['payments'=>function($query){
+        $users = User::with(['payments' => function ($query) {
             $query
-            ->where('status','success')
-            ->where('value',35000);
-        },'payments.user'])
-        ->whereHas('payments',function($query){
-            $query
-            ->where('status','success')
-            ->where('value',35000);
-        })
-        ->whereHas('profile.province',function($query)use($provinceId){
-            $query->where('id',$provinceId);
-        })
-        ->get();
+                ->where('status', 'success')
+                ->where('value', 35000);
+        }, 'payments.user'])
+            ->whereHas('payments', function ($query) {
+                $query
+                    ->where('status', 'success')
+                    ->where('value', 35000);
+            })
+            ->whereHas('profile.province', function ($query) use ($provinceId) {
+                $query->where('id', $provinceId);
+            })
+            ->get();
         // --------------------------------------
 
         $results = collect([]);
         foreach ($users as $u => $user) {
             # code...
             // isi tanggal
-            $date = date('F Y',strtotime($user->payments[0]->updated_at));
+            $date = date('F Y', strtotime($user->payments[0]->updated_at));
             $object = new stdClass();
             $object->date = $date;
             $object->toPaid = 0;
@@ -435,9 +442,9 @@ class PaymentController extends Controller
         foreach ($users as $u => $user) {
             # code...
             // menjumlahkan yang harus dibayar dan mengisi pembayaran apa saja didalamnya
-            $date = date('F Y',strtotime($user->payments[0]->updated_at));
-            $results->map(function($result)use($date,$user){
-                if($result->date == $date){
+            $date = date('F Y', strtotime($user->payments[0]->updated_at));
+            $results->map(function ($result) use ($date, $user) {
+                if ($result->date == $date) {
                     // -- tambah 20000 jika  pembayarannya 35000, tambah 30000 jika pembayarannya 65000
                     // $result->toPaid += $payment->value == 35000 ? 4000 : 8000;
                     //---------------------------------------------------------------------------------
@@ -454,7 +461,8 @@ class PaymentController extends Controller
         return response()->json($results);
     }
 
-    public function getPaymentReportForCity($cityId){
+    public function getPaymentReportForCity($cityId)
+    {
         // $payments = Payment::with('user')
         // ->where('status','success')
         // ->where('value',35000)
@@ -464,27 +472,27 @@ class PaymentController extends Controller
         // ->get();
 
         // -- Hitung yang melakukan aktivasi saja
-        $users = User::with(['payments'=>function($query){
+        $users = User::with(['payments' => function ($query) {
             $query
-            ->where('status','success')
-            ->where('value',35000);
-        },'payments.user'])
-        ->whereHas('payments',function($query){
-            $query
-            ->where('status','success')
-            ->where('value',35000);
-        })
-        ->whereHas('profile.city',function($query)use($cityId){
-            $query->where('id',$cityId);
-        })
-        ->get();
+                ->where('status', 'success')
+                ->where('value', 35000);
+        }, 'payments.user'])
+            ->whereHas('payments', function ($query) {
+                $query
+                    ->where('status', 'success')
+                    ->where('value', 35000);
+            })
+            ->whereHas('profile.city', function ($query) use ($cityId) {
+                $query->where('id', $cityId);
+            })
+            ->get();
         // --------------------------------------
 
         $results = collect([]);
         foreach ($users as $u => $user) {
             # code...
             // isi tanggal
-            $date = date('F Y',strtotime($user->payments[0]->updated_at));
+            $date = date('F Y', strtotime($user->payments[0]->updated_at));
             $object = new stdClass();
             $object->date = $date;
             $object->toPaid = 0;
@@ -496,9 +504,9 @@ class PaymentController extends Controller
         foreach ($users as $u => $user) {
             # code...
             // menjumlahkan yang harus dibayar dan mengisi pembayaran apa saja didalamnya
-            $date = date('F Y',strtotime($user->payments[0]->updated_at));
-            $results->map(function($result)use($date,$user){
-                if($result->date == $date){
+            $date = date('F Y', strtotime($user->payments[0]->updated_at));
+            $results->map(function ($result) use ($date, $user) {
+                if ($result->date == $date) {
                     // -- tambah 20000 jika  pembayarannya 35000, tambah 30000 jika pembayarannya 65000
                     // $result->toPaid += $payment->value == 35000 ? 4000 : 8000;
                     //---------------------------------------------------------------------------------
@@ -533,10 +541,10 @@ class PaymentController extends Controller
         //     $payment_text = "Pembayaran Member KTA";
         // }
 
-        if($request->user()->user_activated_at == null){
+        if ($request->user()->user_activated_at == null) {
             $payment_value = setting('admin.member_price');
             $payment_text = "Pembayaran Member KTA";
-        } else{
+        } else {
             $payment_value = setting('admin.extend_member_period');
             $payment_text = "Pembayaran Iuran Anggota Selama 6 Bulan";
         }
@@ -560,21 +568,21 @@ class PaymentController extends Controller
 
         $payload = [
             'transaction_details' => [
-                'order_id'      => $data->id,
-                'gross_amount'  => $payment->value,
+                'order_id' => $data->id,
+                'gross_amount' => $payment->value,
             ],
             'customer_details' => [
-                'first_name'    => $request->user()->name,
-                'email'         => $request->user()->email
+                'first_name' => $request->user()->name,
+                'email' => $request->user()->email,
             ],
             'item_details' => [
                 [
-                    'id'       => $payment->id,
-                    'price'    => $payment->value,
+                    'id' => $payment->id,
+                    'price' => $payment->value,
                     'quantity' => 1,
-                    'name'     => ucwords(str_replace('_', ' ', $payment_text))
-                ]
-            ]
+                    'name' => ucwords(str_replace('_', ' ', $payment_text)),
+                ],
+            ],
         ];
 
         do {
@@ -592,7 +600,7 @@ class PaymentController extends Controller
                     $payload['transaction_details']['order_id'] = $data->id;
                     $snapToken = Veritrans_Snap::getSnapToken($payload);
                     // $paymentUrl = Veritrans_Snap::createTransaction($payload)->redirect_url;
-                } else{
+                } else {
                     break;
                 }
             }
@@ -611,10 +619,10 @@ class PaymentController extends Controller
     public function paymentUrl(Request $request)
     {
 
-        if($request->user()->user_activated_at == null){
+        if ($request->user()->user_activated_at == null) {
             $payment_value = setting('admin.member_price');
             $payment_text = "Pembayaran Member KTA";
-        } else{
+        } else {
             $payment_value = setting('admin.extend_member_period');
             $payment_text = "Pembayaran Iuran Anggota Selama 6 Bulan";
         }
@@ -638,12 +646,12 @@ class PaymentController extends Controller
 
         $payload = [
             'transaction_details' => [
-                'order_id'      => $data->id,
-                'gross_amount'  => $payment->value,
+                'order_id' => $data->id,
+                'gross_amount' => $payment->value,
             ],
             'customer_details' => [
-                'first_name'    => $request->user()->name,
-                'email'         => $request->user()->email
+                'first_name' => $request->user()->name,
+                'email' => $request->user()->email,
             ],
         ];
         //return $payload;
@@ -661,7 +669,7 @@ class PaymentController extends Controller
                     $data->update();
                     $payload['transaction_details']['order_id'] = $data->id;
                     $paymentUrl = Veritrans_Snap::createTransaction($payload)->redirect_url;
-                }else {
+                } else {
                     break;
                 }
             }
@@ -771,7 +779,8 @@ class PaymentController extends Controller
         return;
     }
 
-    public function notificationQueueHandler(Request $request){
+    public function notificationQueueHandler(Request $request)
+    {
         ProcessHandlePayment::dispatch();
         return;
     }
@@ -780,22 +789,27 @@ class PaymentController extends Controller
     /*                Rieqy Muwachid Erysya                       */
     //Menampilkan detail pembayaran berdasarkan waktu dan daerah  //
     //Hanya menampilkan data, tidak ada pengolahan data          //
-    public function getPaymentByMonthYear(Request $request, $month=null, $year=null){
+    public function getPaymentByMonthYear(Request $request, $month = null, $year = null)
+    {
         //return "s";
         //DB::connection()->enableQueryLog();
-        $threshold=$request->query('threshold');
-        if(!empty($threshold))$threshold=intval($threshold);
-        else $threshold=65000;
-        if($month==null || $year==null){
-            $db=DB::select("SELECT count(DISTINCT payment_id) as users_count,year(created_at) as `year`, month(created_at) as `month`,UNIX_TIMESTAMP(concat(year(created_at),'-',month(created_at),'-1')) as `timestamp`, concat(year(created_at),'-',month(created_at),'-1') as monthyear FROM `payments` where status='success' and payment_type='App\\\Models\\\User' and value='$threshold' group by monthyear order by timestamp desc");
+        $threshold = $request->query('threshold');
+        if (!empty($threshold)) {
+            $threshold = intval($threshold);
+        } else {
+            $threshold = 65000;
+        }
+
+        if ($month == null || $year == null) {
+            $db = DB::select("SELECT count(DISTINCT payment_id) as users_count,year(created_at) as `year`, month(created_at) as `month`,UNIX_TIMESTAMP(concat(year(created_at),'-',month(created_at),'-1')) as `timestamp`, concat(year(created_at),'-',month(created_at),'-1') as monthyear FROM `payments` where status='success' and payment_type='App\\\Models\\\User' and value='$threshold' group by monthyear order by timestamp desc");
             //return DB::getQueryLog();
-            
+
             return $db;
-        }else{
+        } else {
             //script dibawah ini menampilkan jumlah orang yg punya payment, meskipun 1 orang payment'nya ada banyak, tetap dihitung 1 data
-            return \App\Models\Province::withCount(['users'=>function($query)use($month,$year,$threshold){
-                $query->whereHas('payments',function($query2)use($month,$year,$threshold){
-                    $query2->where('status','=','success')->where('value','=',$threshold)->whereMonth('created_at',$month)->whereYear('created_at',$year);
+            return \App\Models\Province::withCount(['users' => function ($query) use ($month, $year, $threshold) {
+                $query->whereHas('payments', function ($query2) use ($month, $year, $threshold) {
+                    $query2->where('status', '=', 'success')->where('value', '=', $threshold)->whereMonth('created_at', $month)->whereYear('created_at', $year);
                 });
             }])->get();
 
@@ -804,177 +818,292 @@ class PaymentController extends Controller
             // return $res;
         }
     }
-    public function getPaymentCityByMonthYear(Request $request, $province_id=null, $month=null, $year=null){
+    public function getPaymentCityByMonthYear(Request $request, $province_id = null, $month = null, $year = null)
+    {
         //return "s";
-        $threshold=$request->query('threshold');
-        if(!empty($threshold))$threshold=intval($threshold);
-        else $threshold=65000;
-        if($month && $year && $province_id){
+        $threshold = $request->query('threshold');
+        if (!empty($threshold)) {
+            $threshold = intval($threshold);
+        } else {
+            $threshold = 65000;
+        }
 
-            return \App\Models\City::withCount(['users'=>function($query)use($month,$year,$threshold){
-                $query->whereHas('payments',function($query2)use($month,$year,$threshold){
-                    $query2->where('status','=','success')->where('value','=',$threshold)->whereMonth('created_at',$month)->whereYear('created_at',$year);
+        if ($month && $year && $province_id) {
+
+            return \App\Models\City::withCount(['users' => function ($query) use ($month, $year, $threshold) {
+                $query->whereHas('payments', function ($query2) use ($month, $year, $threshold) {
+                    $query2->where('status', '=', 'success')->where('value', '=', $threshold)->whereMonth('created_at', $month)->whereYear('created_at', $year);
                 });
-            }])->where('province_id','=',$province_id)->get();
+            }])->where('province_id', '=', $province_id)->get();
 
         }
     }
-    public function getPaymentCityUsersByMonthYear($city_id=null, $month=null, $year=null){
+    public function getPaymentCityUsersByMonthYear($city_id = null, $month = null, $year = null)
+    {
         //return "s";
-        if($month && $year && $city_id){
-            return \App\Models\City::with(['users'=>function($query)use($month,$year){
-                $query->whereHas('payments',function($query2)use($month,$year){
-                    $query2->where('status','=','success')->where('value','=',65000)->whereMonth('created_at',$month)->whereYear('created_at',$year);
-                })->where('user_activated_at','!=',null)
-                ->whereIn('role_id',[2,7,9,10,11])
+        if ($month && $year && $city_id) {
+            return \App\Models\City::with(['users' => function ($query) use ($month, $year) {
+                $query->whereHas('payments', function ($query2) use ($month, $year) {
+                    $query2->where('status', '=', 'success')->where('value', '=', 65000)->whereMonth('created_at', $month)->whereYear('created_at', $year);
+                })->where('user_activated_at', '!=', null)
+                    ->whereIn('role_id', [2, 7, 9, 10, 11])
                 //->with(['books','posts.files','events','guest_events'])
-                ->withCount(['books','events','guest_events','lesson_plans','question_lists','posts'=>function($query){
-                    $query->has('files');
-                }]);
+                    ->withCount(['books', 'events', 'guest_events', 'lesson_plans', 'question_lists', 'posts' => function ($query) {
+                        $query->has('files');
+                    }]);
             }])->find($city_id);
         }
     }
     ///////////////////-------END-------------////////////////////
     /*                Rieqy Muwachid Erysya                      */
     //Menampilkan detail pembayaran berdasarkan waktu dan daerah //
-    public function getProvincePayment(Request $request){
-        $threshold=$request->query('threshold');
-        if(!empty($threshold))$threshold=intval($threshold);
-        else $threshold=65000;
+    public function getProvincePayment(Request $request)
+    {
+        $threshold = $request->query('threshold');
+        if (!empty($threshold)) {
+            $threshold = intval($threshold);
+        } else {
+            $threshold = 65000;
+        }
 
         //jika memakai inner join, maka waktu eksekusi jauh lebih lama
-        $db=DB::select("SELECT c.id,count(DISTINCT b.id) as users_count,c.name from payments a inner join users b on a.payment_id=b.id inner join provinces c on c.id=(select province_id from profiles where user_id=b.id limit 1) WHERE a.payment_type='App\\\Models\\\User' and a.status='success' and a.value=? GROUP by c.id", [$threshold]);
+        $db = DB::select("SELECT c.id,count(DISTINCT b.id) as users_count,c.name from payments a inner join users b on a.payment_id=b.id inner join provinces c on c.id=(select province_id from profiles where user_id=b.id limit 1) WHERE a.payment_type='App\\\Models\\\User' and a.status='success' and a.value=? GROUP by c.id", [$threshold]);
 
         return $db;
     }
-    public function getCityPayment(Request $request){
-        $threshold=$request->query('threshold');
-        $province_id=$request->query('province_id');
-        if(!empty($threshold))$threshold=intval($threshold);
-        else $threshold=65000;
-        if(empty($province_id))return abort(404);
+    public function getCityPayment(Request $request)
+    {
+        $threshold = $request->query('threshold');
+        $province_id = $request->query('province_id');
+        if (!empty($threshold)) {
+            $threshold = intval($threshold);
+        } else {
+            $threshold = 65000;
+        }
+
+        if (empty($province_id)) {
+            return abort(404);
+        }
 
         $province = \App\Models\Province::findOrFail($province_id);
 
-        $db=DB::select("SELECT c.id,c.province_id as province_id,count(DISTINCT b.id) as users_count,c.name from payments a inner join users b on a.payment_id=b.id inner join cities c on c.id=(select city_id from profiles where user_id=b.id limit 1) WHERE a.payment_type='App\\\Models\\\User' and a.status='success' and a.value=? GROUP by c.id having province_id=? ", [$threshold, $province->id]);
+        $db = DB::select("SELECT c.id,c.province_id as province_id,count(DISTINCT b.id) as users_count,c.name from payments a inner join users b on a.payment_id=b.id inner join cities c on c.id=(select city_id from profiles where user_id=b.id limit 1) WHERE a.payment_type='App\\\Models\\\User' and a.status='success' and a.value=? GROUP by c.id having province_id=? ", [$threshold, $province->id]);
 
         return $db;
     }
-    public function transfer(Request $request){
+    public function transfer(Request $request)
+    {
 
         //return $request;
-        if(empty($request->from) || empty($request->to)){
-            return response()->json(['error'=>'Rekening sumber dan Rekening tujuan tidak boleh kosong']);
+        if (empty($request->from) || empty($request->to)) {
+            return response()->json(['error' => 'Rekening sumber dan Rekening tujuan tidak boleh kosong']);
         }
         $from = \App\Models\BankAccount::findOrFail($request->from['id']);
         $to = \App\Models\BankAccount::findOrFail($request->to['id']);
-        
+
         $transaction = new \App\Models\Transaction;
         $transaction->bank_account_from_id = $from->id;
         $transaction->bank_account_to_id = $to->id;
 
-        $necessary  = \App\Models\Necessary::where('name','transfer')->first();
-        if(!$necessary)return response()->json(['error'=>'Necessary tidak ada']);
+        $necessary = \App\Models\Necessary::where('name', 'transfer')->first();
+        if (!$necessary) {
+            return response()->json(['error' => 'Necessary tidak ada']);
+        }
 
-        $transaction->description = $from->name.' '.$necessary->name.' ke '.$to->name.' sebesar '.$request->transfer_value;
+        $transaction->description = $from->name . ' ' . $necessary->name . ' ke ' . $to->name . ' sebesar ' . $request->transfer_value;
         $transaction->save();
 
         $payment = new Payment;
         $payment->necessary_id = $necessary->id;
-        $payment->type='OUT';
-        $payment->value=intval($request->transfer_value);
+        $payment->type = 'OUT';
+        $payment->value = intval($request->transfer_value);
         $transaction->payment()->save($payment);
         return $transaction->load('payment');
         //$payment->status='pend
     }
-    public function transferDpw(Request $request){
+    public function transferDpw(Request $request)
+    {
 
         //return $request;
-        if(empty($request->from) || empty($request->to)){
-            return response()->json(['error'=>'Rekening sumber dan Rekening tujuan tidak boleh kosong']);
+        if (empty($request->from) || empty($request->to)) {
+            return response()->json(['error' => 'Rekening sumber dan Rekening tujuan tidak boleh kosong']);
         }
         $from = \App\Models\BankAccount::findOrFail($request->from['id']);
         $to = \App\Models\BankAccount::findOrFail($request->to['id']);
-        
+
         $transaction = new \App\Models\Transaction;
         $transaction->bank_account_from_id = $from->id;
         $transaction->bank_account_to_id = $to->id;
 
-        $necessary  = \App\Models\Necessary::where('name','transfer')->first();
-        if(!$necessary)return response()->json(['error'=>'Necessary tidak ada']);
+        $necessary = \App\Models\Necessary::where('name', 'transfer')->first();
+        if (!$necessary) {
+            return response()->json(['error' => 'Necessary tidak ada']);
+        }
 
-        $transaction->description = $from->name.' '.$necessary->name.' ke '.$to->name.' sebesar '.$request->transfer_value;
+        $transaction->description = $from->name . ' ' . $necessary->name . ' ke ' . $to->name . ' sebesar ' . $request->transfer_value;
         $transaction->save();
 
         $payment = new Payment;
         $payment->necessary_id = $necessary->id;
-        $payment->type='OUT';
-        $payment->value=intval($request->transfer_value);
+        $payment->type = 'OUT';
+        $payment->value = intval($request->transfer_value);
         $transaction->payment()->save($payment);
         return $transaction->load('payment');
         //$payment->status='pend
     }
-    public function transferDpd(Request $request){
+    public function transferDpd(Request $request)
+    {
 
         //return $request;
-        if(empty($request->from) || empty($request->to)){
-            return response()->json(['error'=>'Rekening sumber dan Rekening tujuan tidak boleh kosong']);
+        if (empty($request->from) || empty($request->to)) {
+            return response()->json(['error' => 'Rekening sumber dan Rekening tujuan tidak boleh kosong']);
         }
         $from = \App\Models\BankAccount::findOrFail($request->from['id']);
         $to = \App\Models\BankAccount::findOrFail($request->to['id']);
-        
+
         $transaction = new \App\Models\Transaction;
         $transaction->bank_account_from_id = $from->id;
         $transaction->bank_account_to_id = $to->id;
 
-        $necessary  = \App\Models\Necessary::where('name','transfer')->first();
-        if(!$necessary)return response()->json(['error'=>'Necessary tidak ada']);
+        $necessary = \App\Models\Necessary::where('name', 'transfer')->first();
+        if (!$necessary) {
+            return response()->json(['error' => 'Necessary tidak ada']);
+        }
 
-        $transaction->description = $from->name.' '.$necessary->name.' ke '.$to->name.' sebesar '.$request->transfer_value;
+        $transaction->description = $from->name . ' ' . $necessary->name . ' ke ' . $to->name . ' sebesar ' . $request->transfer_value;
         $transaction->save();
 
         $payment = new Payment;
         $payment->necessary_id = $necessary->id;
-        $payment->type='OUT';
-        $payment->value=intval($request->transfer_value);
+        $payment->type = 'OUT';
+        $payment->value = intval($request->transfer_value);
         $transaction->payment()->save($payment);
         return $transaction->load('payment');
         //$payment->status='pend
     }
-    public function history(){
-        $transactions = \App\Models\Transaction::with('payment.necessary','bank_account_from','bank_account_to')->orderBy('id','desc')->whereHas('bank_account_to', function($query){
+    public function history()
+    {
+        $transactions = \App\Models\Transaction::with('payment.necessary', 'bank_account_from', 'bank_account_to')->orderBy('id', 'desc')->whereHas('bank_account_to', function ($query) {
             $query->whereNull('bank_account_type');
         })->get();
         return $transactions;
     }
-    public function historyDpw($province_id){
-        $province=\App\Models\Province::findOrFail($province_id);
+    public function historyDpw($province_id)
+    {
+        $province = \App\Models\Province::findOrFail($province_id);
         // return $province
-        $transactions = \App\Models\Transaction::with('payment.necessary','bank_account_from','bank_account_to')->whereHas('bank_account_to',function($query)use($province){
-          $query->where('bank_account_type','App\\Models\\Province')->where('bank_account_id',$province->id);
-        })->orderBy('id','desc')->get();
+        $transactions = \App\Models\Transaction::with('payment.necessary', 'bank_account_from', 'bank_account_to')->whereHas('bank_account_to', function ($query) use ($province) {
+            $query->where('bank_account_type', 'App\\Models\\Province')->where('bank_account_id', $province->id);
+        })->orderBy('id', 'desc')->get();
         return $transactions;
     }
-    public function historyDpd($city_id){
-        $city=\App\Models\City::findOrFail($city_id);
+    public function historyDpd($city_id)
+    {
+        $city = \App\Models\City::findOrFail($city_id);
         // return $province
-        $transactions = \App\Models\Transaction::with('payment.necessary','bank_account_from','bank_account_to')->whereHas('bank_account_to',function($query)use($city){
-          $query->where('bank_account_type','App\\Models\\City')->where('bank_account_id',$city->id);
-        })->orderBy('id','desc')->get();
+        $transactions = \App\Models\Transaction::with('payment.necessary', 'bank_account_from', 'bank_account_to')->whereHas('bank_account_to', function ($query) use ($city) {
+            $query->where('bank_account_type', 'App\\Models\\City')->where('bank_account_id', $city->id);
+        })->orderBy('id', 'desc')->get();
         return $transactions;
     }
-    public function paymenttransactiontotal(){
-        $db=DB::select("select sum(a.value) as total_payment_out from payments a inner join transactions b on a.payment_id=b.id inner join bank_accounts c on c.id=b.bank_account_to_id WHERE a.type='OUT' and a.payment_type='App\\\Models\\\Transaction' and c.bank_account_type is null");
+    public function paymenttransactiontotal()
+    {
+        $db = DB::select("select sum(a.value) as total_payment_out from payments a inner join transactions b on a.payment_id=b.id inner join bank_accounts c on c.id=b.bank_account_to_id WHERE a.type='OUT' and a.payment_type='App\\\Models\\\Transaction' and c.bank_account_type is null");
         return response()->json($db[0]);
     }
-    public function paymenttransactiontotalDPW($province_id){
-        $province=\App\Models\Province::findOrFail($province_id);
-        $db=DB::select("select if(sum(a.value),sum(a.value),0) as total_payment_out from payments a inner join transactions b on a.payment_id=b.id inner join bank_accounts c on c.id=b.bank_account_to_id WHERE a.type='OUT' and a.payment_type='App\\\Models\\\Transaction' and c.bank_account_type='App\\\Models\\\Province' and c.bank_account_id=?",[$province->id]);
+    public function paymenttransactiontotalDPW($province_id)
+    {
+        $province = \App\Models\Province::findOrFail($province_id);
+        $db = DB::select("select if(sum(a.value),sum(a.value),0) as total_payment_out from payments a inner join transactions b on a.payment_id=b.id inner join bank_accounts c on c.id=b.bank_account_to_id WHERE a.type='OUT' and a.payment_type='App\\\Models\\\Transaction' and c.bank_account_type='App\\\Models\\\Province' and c.bank_account_id=?", [$province->id]);
         return response()->json($db[0]);
     }
-    public function paymenttransactiontotalDPD($city_id){
-        $city=\App\Models\City::findOrFail($city_id);
-        $db=DB::select("select if(sum(a.value),sum(a.value),0) as total_payment_out from payments a inner join transactions b on a.payment_id=b.id inner join bank_accounts c on c.id=b.bank_account_to_id WHERE a.type='OUT' and a.payment_type='App\\\Models\\\Transaction' and c.bank_account_type='App\\\Models\\\City' and c.bank_account_id=?",[$city->id]);
+    public function paymenttransactiontotalDPD($city_id)
+    {
+        $city = \App\Models\City::findOrFail($city_id);
+        $db = DB::select("select if(sum(a.value),sum(a.value),0) as total_payment_out from payments a inner join transactions b on a.payment_id=b.id inner join bank_accounts c on c.id=b.bank_account_to_id WHERE a.type='OUT' and a.payment_type='App\\\Models\\\Transaction' and c.bank_account_type='App\\\Models\\\City' and c.bank_account_id=?", [$city->id]);
         return response()->json($db[0]);
+    }
+
+    public function makeUniquePayment(Request $request)
+    {
+        if ($request->user()->user_activated_at == null) {
+            $payment_value = setting('admin.member_price');
+            $payment_text = "Pembayaran Member KTA";
+        } else {
+            $payment_value = setting('admin.extend_member_period');
+            $payment_text = "Pembayaran Iuran Anggota Selama 6 Bulan";
+        }
+
+        $uniquePayment = null;
+        do {
+            $payment = DB::select("select count(*) as total from payments where date(created_at) = CURDATE() and value = $payment_value");
+            if ($payment[0]->total) {
+                $payment_value++;
+            } else {
+                $uniquePayment = $payment_value;
+            }
+
+        } while ($uniquePayment == null);
+
+        $data = new Payment(['value' => $uniquePayment]);
+        $store = $request->user()->payment()->save($data);
+
+        return response()->json($store);
+    }
+
+    public function confirmUniquePayment(Request $request)
+    {
+        $items = Payment::whereDate('created_at',Carbon::today())->whereHas('user',function($query)use($request){
+            $query->where('id',$request->user()->id);
+        })->get();
+        $items[2]->value = 10000;
+
+        // return response()->json($items);
+        $paid = false;
+        foreach($items as $item){
+            $data = array(
+                "search" => array(
+                    // "date" => array(
+                    //     "from" => date("Y-m-d") . " 00:00:00",
+                    //     "to" => date("Y-m-d") . " 23:59:59",
+                    // ),
+                    "service_code" => "bni",
+                    "account_number" => "0262628673",
+                    "amount" => $item->value,
+                ),
+            );
+
+            $ch = curl_init();
+            curl_setopt_array($ch, array(
+                CURLOPT_URL => "https://api.cekmutasi.co.id/v1/bank/search",
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => http_build_query($data),
+                CURLOPT_HTTPHEADER => ["Api-Key: 69b336a06dc19b4a50f73212bf629978605c40613f6c4", "Accept: application/json"], // tanpa tanda kurung
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HEADER => false,
+                CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+            ));
+            $result = curl_exec($ch);
+            $result = json_decode($result, true);
+            curl_close($ch);
+
+            if (count($result['response'])) {
+                $payment = Payment::whereDate('created_at', Carbon::today())->where('value', (int)$result['response'][0]['amount'])->first();
+                $payment->setSuccess();
+            }
+
+            if(count($result['response'])) $paid = true;
+        }
+
+        if($paid){
+            $user = User::find($request->user()->id);
+            $user->payment_success = $payment;
+            return $user;
+        } else {
+            return abort(404,'Belum ada yang dibayarkan');
+        }
+
+        // return response()->json($paid);
+        // return response()->json((int)$result['response'][0]['amount']);
     }
 }
