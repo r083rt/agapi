@@ -1056,17 +1056,17 @@ class PaymentController extends Controller
         $items = Payment::whereDate('created_at',Carbon::today())->whereHas('user',function($query)use($request){
             $query->where('id',$request->user()->id);
         })->get();
-        $items[2]->value = 10000;
+        // $items[2]->value = 10000;
 
         // return response()->json($items);
         $paid = false;
         foreach($items as $item){
             $data = array(
                 "search" => array(
-                    // "date" => array(
-                    //     "from" => date("Y-m-d") . " 00:00:00",
-                    //     "to" => date("Y-m-d") . " 23:59:59",
-                    // ),
+                    "date" => array(
+                        "from" => date("Y-m-d") . " 00:00:00",
+                        "to" => date("Y-m-d") . " 23:59:59",
+                    ),
                     "service_code" => "bni",
                     "account_number" => "0262628673",
                     "amount" => $item->value,
