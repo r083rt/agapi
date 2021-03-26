@@ -275,6 +275,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'modules.likes'=>'ModuleLikeController',
             'bank_account'=>'BankAccountController',
             'surah'=>'SurahController',
+            'conversation'=>'ConversationController',
 
         ]);
 
@@ -304,10 +305,15 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/ownstudentpost', 'PostController@ownstudentpost');
         Route::get('/mediapost', 'PostController@mediapost');
         Route::get('/assigments/search/{key}', 'AssigmentController@search');
+        
 
         /////////////////API PUBLISH untuk GURU///////////////////
         Route::get('/assigments/publish', 'AssigmentController@publish');
         Route::get('/assigments/publish2', 'AssigmentController@publish2'); //perbaikan dari endpoint atas dgn menghilangkan nested-loop
+        Route::post('/assigments/{id}/softdelete', 'AssigmentController@softDelete');
+        Route::post('/assigments/{id}/restore', 'AssigmentController@restore');
+        Route::get('/assigments/getdeleteditems', 'AssigmentController@getDeletedItems');
+
         ////////////////////////////////////////////////////////////////////
 
         /////////////////API UNPUBLISH untuk GURU///////////////////
@@ -440,6 +446,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/modules/getalllatest','ModuleController@getalllatest');
         Route::get('/modules/getbyeducationallevel/{educationalLevelId}/{search?}','ModuleController@getbyeducationallevel');
         Route::get('/modules/read/{id}','ModuleController@readModule');
+
+        Route::get('/conversations/get_unread_count','ConversationController@getUnreadCount');
+
         //Route::get('/modules/s/{educationalLevelId}/{search?}','ModuleController@getbyeducationallevel');
         //Route::get('/modules/')
         //Route::get('/modules/{moduleId}/getcomments','ModuleController@getbyeducationallevel');
@@ -491,6 +500,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
     });
 
     Route::get('/assigments/statistics', 'AssigmentController@statistics');
+    Route::get('/assigments/{id}/{teacher_id}/downloadexcel', 'AssigmentController@downloadexcel');
 
 
     Route::get('/testgan',function(){

@@ -195,11 +195,11 @@ class ModuleController extends Controller
     public function show($moduleId)
     {
         $module = Module::where('user_id',auth('api')->user()->id)->findOrFail($moduleId);
-        return $module->loadCount('liked','likes','comments')->load('comments','user','template','module_contents','grade');
+        return $module->loadCount('liked','likes','comments')->load('comments','user','template','module_contents.audio','grade');
     }
     public function readModule($moduleId){
         $module = Module::where('is_publish',true)->findOrFail($moduleId);
-        return $module->loadCount('liked','likes','comments')->load('comments','user','template','module_contents','grade');
+        return $module->loadCount('liked','likes','comments')->load('comments','user','template','module_contents.audio','grade');
     }
 
     /**
@@ -211,12 +211,106 @@ class ModuleController extends Controller
      */
     public function update(Request $request, $module_id)
     {
+        
+        if(!$request->audio){
+            return $this->update2($request, $module_id);
+        }
+
+        foreach($request->audio as $key=>$audio){
+            //jika mengandung file, extensi file hrus audio 
+            if($request->hasFile("audio.{$key}")){
+                $request->validate([
+                    "audio.{$key}"=>'nullable|mimes:mp4,mp3',
+                ]);
+            }else{
+                $request->validate([
+                    "audio.{$key}"=>'nullable|string',
+                ]);
+            }
+        }
+        //validasi data json
+        $request->validate([
+            "data"=>'json'
+        ]);
+       
+        $data = json_decode($request->data);
+        //validasi kedua, untuk data json
+        $validator = Validator::make((array)$data, [
+            // 'template'=>['required'],
+            'name'=>['required'],
+            'grade'=>['required'],
+        ]);
+        if($validator->fails()){
+            return $validator->errors();
+        }
+       
+    
+        $module =  Module::where('user_id','=',auth('api')->user()->id)->findOrFail($module_id);
+        //return $module;
         //return $request;
-        // $request->validate([
-        //     'template'=>['required'],
-        //     'name'=>['required'],
-        //     'grade'=>['required']
-        // ]);
+        //$module->user_id=auth('api')->user()->id;
+        $module->name = $data->name;
+        if(isset($data->grade->id))$module->grade_id = $data->grade->id;
+        if(isset($data->description))$module->description = $data->description;
+        if(isset($data->is_publish))$module->is_publish = $data->is_publish;
+        if(isset($data->subject))$module->subject = $data->subject;
+        //$module->year = date('Y');
+        //$module->template_id=$request->template['id'];
+        if(isset($data->canvas_data)) $module->canvas_data = json_encode($data->canvas_data);
+        $module->save();
+        $modulecontent_ids=[];
+        if(isset($data->module_contents)){
+            foreach($data->module_contents as $key=>$module_content){
+                if(isset($module_content->id)){
+                    $content_db = \App\Models\ModuleContent::where('module_id','=',$module->id)->findOrFail($module_content->id);
+                }else{
+                    $content_db = new \App\Models\ModuleContent;
+                }
+                //$content_db = \App\Models\ModuleContent::firstOrNew(['id'=>$module_content['id']]);
+                $content_db->fill((array)$module_content);
+                $module->module_contents()->save($content_db);
+
+                // upload audio baru //
+                if($request->hasFile("audio.{$key}")){
+                    $file = new \App\Models\File;
+                    $file->type = 'audio/m4a';
+                    $path = $request->file("audio.{$key}")->store('files', 'wasabi');
+                    //jika sukses upload, simpan path di db dan hapus file lama
+                    if($path){
+                        $old_audio = $content_db->audio;
+                        if($old_audio!=null){
+                            Storage::disk('wasabi')->delete($old_audio->src);
+                            $content_db->audio()->delete();
+                        }
+                        $content_db->audio()->delete();
+
+                        $file->src = $path;
+                        $content_db->audio()->save($file);
+                    }   
+                //jika audio kosong, maka hapus audio
+                }else if($request->audio[$key]==null){
+                    $old_audio = $content_db->audio;
+                    if($old_audio!=null){
+                        Storage::disk('wasabi')->delete($old_audio->src);
+                        $content_db->audio()->delete();
+                    }
+
+                }
+                ////////////////////     
+                array_push($modulecontent_ids, $content_db->id);
+            
+            }
+            $deletedRows = \App\Models\ModuleContent::where('module_id','=',$module->id)->whereNotIn('id',$modulecontent_ids)->delete();
+        }
+
+        if(isset($data->canvas_image))ProcessTemplateModule::dispatch($module, $data->canvas_image)->onConnection('sync');
+        //return $deletedRows;
+        //return $module_ids;
+
+        return $module;
+    }
+    public function update2(Request $request, $module_id)
+    {
     
         $module =  Module::where('user_id','=',auth('api')->user()->id)->findOrFail($module_id);
         //return $module;

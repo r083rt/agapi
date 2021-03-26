@@ -4,16 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Assigment extends Model
 {
     //
+    use SoftDeletes;
     protected $fillable = ['user_id', 'teacher_id', 'grade_code', 'grade_id','assigment_category_id','topic','subject','indicator','password','start_at','end_at','description','note','timer','code','is_publish','semester','education_year','name','is_public'];
 
     public function grade(){
         return $this->belongsTo('App\Models\Grade');
     }
 
+    //pembuat soal, bukan pemberi soal ke murid
     public function user(){
         return $this->belongsTo('App\Models\User');
     }

@@ -14,6 +14,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Style;
 
 class AssigmentController extends Controller
 {
@@ -221,15 +226,28 @@ class AssigmentController extends Controller
      */
     public function store2($request){
         $assigment = new Assigment();
+        // return $request;
         $assigment->fill($request->all());
         if($request->has('password')) $assigment->password = bcrypt($request->password);
         $assigment->code = base_convert($request->user()->id.time(), 10, 36);
         $request->user()->assigments()->save($assigment);
         foreach ($request->question_lists as $ql => $question_list) {
             # code...
+            
             $item_question_list = new QuestionList();
             $item_question_list->fill($question_list);
             $item_question_list->save();
+
+            //mendapatkan parent question_lists untuk mengecek audio'nya
+            $parent_item_question_list = QuestionList::findOrFail($question_list['id']);
+            if($parent_item_question_list->audio)
+            {
+                $file = new \App\Models\File;
+                $file->type = 'audio/m4a';
+                $file->src = $parent_item_question_list->audio->src;
+                $item_question_list->audio()->save($file);
+            }
+
             $assigment->question_lists()->attach([$item_question_list->id => [
                 'creator_id' => $question_list['pivot']['creator_id'],
                 'user_id' => $question_list['pivot']['user_id'],
@@ -264,7 +282,7 @@ class AssigmentController extends Controller
     }
     public function store(Request $request)
     {
-        //jika pakai apk yg lama, maka memakai API store2()
+        //jika pakai apk yg lama atau rakit soal, maka memakai API store2()
         if(!$request->audio){
             return $this->store2($request);
         }
@@ -504,7 +522,32 @@ class AssigmentController extends Controller
         $assigment->delete();
         return response($assigment);
     }
-
+    public function softDelete($id){
+        $assigment = Assigment::withCount(['sessions'=>function($query){
+            $query->has('questions');
+        }])
+        ->withCount(['sessions as daily_sessions_count'=>function($query){
+            $query->whereDate('sessions.created_at',\Carbon\Carbon::now()->toDateString());
+        }])
+        ->with('sessions','grade')->where(function($query){
+            $query->where('teacher_id',auth('api')->user()->id)->orWhere('teacher_id',auth('api')->user()->id);
+        })->findOrFail($id);
+        $assigment->delete();
+        return $assigment;
+    }
+    public function restore($id){
+        $assigment = Assigment::onlyTrashed()->withCount(['sessions'=>function($query){
+            $query->has('questions');
+        }])
+        ->withCount(['sessions as daily_sessions_count'=>function($query){
+            $query->whereDate('sessions.created_at',\Carbon\Carbon::now()->toDateString());
+        }])
+        ->with('sessions','grade')->where(function($query){
+            $query->where('teacher_id',auth('api')->user()->id)->orWhere('teacher_id',auth('api')->user()->id);
+        })->findOrFail($id);
+        $assigment->restore();
+        return $assigment;
+    }
     public function search($key){
         $userProfile = auth('api')->user()->load('profile');
         $educationalLevelId = $userProfile->profile->educational_level_id;
@@ -522,11 +565,25 @@ class AssigmentController extends Controller
        // return auth('api')->user()->id;
         $res = Assigment::withCount(['sessions'=>function($query){
             $query->has('questions');
-        }])->with('sessions','grade')->where('teacher_id',auth('api')->user()->id)->orderBy('id','desc')->paginate();
+        }])
+        ->withCount(['sessions as daily_sessions_count'=>function($query){
+            $query->whereDate('sessions.created_at',\Carbon\Carbon::now()->toDateString());
+        }])
+        ->with('sessions','grade')->where('teacher_id',auth('api')->user()->id)->orderBy('id','desc')->paginate();
 
         return $res;
     }
+    public function getDeletedItems(){
+        $res = Assigment::onlyTrashed()->withCount(['sessions'=>function($query){
+            $query->has('questions');
+        }])
+        ->withCount(['sessions as daily_sessions_count'=>function($query){
+            $query->whereDate('sessions.created_at',\Carbon\Carbon::now()->toDateString());
+        }])
+        ->with('sessions','grade')->where('teacher_id',auth('api')->user()->id)->orderBy('id','desc')->paginate();
 
+        return $res;
+    }
     public function getMasterAssigment($subject=null){
         //$res = Assigment::with(['grade','assigment_session.latest_session'])->where('is_publish',1)->where('is_lock',0)->orderBy('id','desc');  
         //is_publish = true -> paket soal
@@ -723,5 +780,78 @@ class AssigmentController extends Controller
         $db = DB::select('select a.*,UNIX_TIMESTAMP(a.updated_at)*1000 as timestamp from assigment_sessions a inner join sessions b on a.session_id=b.id where b.user_id=? and  (select teacher_id from assigments where id=a.assigment_id) is not null order by timestamp asc',[auth('api')->user()->id]);
         return $db;
         return \App\Models\Session::where('user_id','=',auth('api')->user()->id)->get();
+    }
+    public function downloadexcel($id, $teacher_id){
+        $assigment = Assigment::withCount(['sessions'=>function($query){
+            $query->has('questions');
+        }])->with('grade','teacher')->findOrFail($id);
+        $info = $this->getAssigmentInfoById($id);
+        $sessions = \App\Models\Session::with('user','questions.answer','assigments')->whereHas('assigments',function($query)use($id,$teacher_id){
+            $query->where('assigments.id','=',$id)->where('teacher_id',$teacher_id); 
+        })->has('questions')->get();
+        // return $sessions;
+        // return $assigment;
+        $spreadsheet = new Spreadsheet();
+        //Specify the properties for this document
+        $spreadsheet->getProperties()
+        ->setTitle('testgan')
+        ->setSubject('A PHPExcel example')
+        ->setDescription('AGPAII Digital')
+        ->setCreator('CV Ardata Media')
+        ->setLastModifiedBy('CV Ardata Media');
+
+         //Adding data to the excel sheet
+        $tgl = "* Data Per ".\Carbon\Carbon::now()->toDateTimeString();
+        $spreadsheet->setActiveSheetIndex(0);
+        $spreadsheet->getActiveSheet()
+        ->setCellValue('A1', $tgl)
+        ->setCellValue('A2', $assigment->name)->mergeCells('A2:B2')
+        ->setCellValue('A3','Oleh')->setCellValue('B3',$assigment->teacher->name)
+        ->setCellValue('A4','Tgl paket soal dibuat')->setCellValue('B4',$assigment->created_at)
+        ->setCellValue('A5','Untuk kelas')->setCellValue('B5',$assigment->grade->description)
+        ->setCellValue('A6','Semester')->setCellValue('B6',$assigment->semester)
+        ->setCellValue('A7','Tahun ajaran')->setCellValue('B7',$assigment->education_year)
+        ->setCellValue('A8','Kode')->setCellValue('B8',$assigment->code)
+        ->setCellValue('A9','Dikerjakan sebanyak')->setCellValue('B9',$assigment->sessions_count)
+        ->setCellValue('A10','Nilai tertinggi')->setCellValue('B10',$info->max_score)
+        ->setCellValue('A11','Nilai rata-rata')->setCellValue('B11',$info->avg_score)
+        ->setCellValue('A13','Nama')->setCellValue('B13','Nilai');
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+
+        $spreadsheet->getActiveSheet()->getStyle('A2')->getAlignment()->setHorizontal('center');
+        $index=14;
+        foreach($sessions as $key=>$session){
+            $spreadsheet->getActiveSheet()->
+            setCellValue("A{$index}",$session->user->name)
+            ->setCellValue("B{$index}",$session->assigments[0]->pivot->total_score);
+            $index++;
+        }
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '00000000'],
+                ],
+            ],
+        ];
+
+        $spreadsheet->getActiveSheet()->getStyle("A13:B".($index-1))->applyFromArray($styleArray);
+
+        $title = 'Data tgl '.date('Y-m-d').' '.time();
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment;filename=\"$title.xlsx\"");
+        header('Cache-Control: max-age=0');
+    
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+
+        // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        // header('Content-Disposition: attachment; filename="'.$title.'.xlsx"');
+        $writer->save('php://output');
+        exit();
+
+
+
     }
 }

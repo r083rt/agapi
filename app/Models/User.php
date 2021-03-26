@@ -222,4 +222,8 @@ class User extends \TCG\Voyager\Models\User
     public function appreciations(){
         return $this->belongsToMany(\App\Models\Appreciation::class,'user_appreciations')->orderBy('id','asc');
     }
+    public function conversations(){
+        return $this->belongsToMany(\App\Models\Conversation::class,'user_conversations')->orderBy('id','asc')->withPivot('is_admin','is_archived','is_muted','is_accepted')->withTimestamps();
+    }
+    
 }
