@@ -185,6 +185,6 @@ Route::group(['namespace'=>'API\\v1'],function(){
     // END API WITHOUT SECURITY ------------------------------------------------------------------------
 });
 
-
+Route::middleware('checkWhiteListIp')->post('/paymenthandler', [App\Http\Controllers\API\v1\PaymentController::class,'paymentHandler']);
 //test
 
