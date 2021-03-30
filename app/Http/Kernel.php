@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'expired' => \App\Http\Middleware\CheckMemberExpiredTime::class,
         'checkSurveyor'=>\App\Http\Middleware\checkSurveyor::class,
         'checkSubAdmin'=>\App\Http\Middleware\checkSubAdmin::class,
+        'checkWhiteListIp'=>\App\Http\Middleware\WhiteListIpMiddleware::class,
     ];
 }
