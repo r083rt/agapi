@@ -231,7 +231,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::apiResources([
             'role' => 'RoleController',
             'user' => 'UserController',
-            'user.document' => 'UserDocumentController',	            'profile' => 'ProfileController',
+            'user.document' => 'UserDocumentController',
+            'profile' => 'ProfileController',
             'grade' => 'GradeController',
             'subject' => 'SubjectController',
             'payment' => 'PaymentController',
@@ -276,7 +277,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'bank_account'=>'BankAccountController',
             'surah'=>'SurahController',
             'conversation'=>'ConversationController',
-
+            'paymentvendor'=>'PaymentVendorController'
         ]);
 
         Route::delete('module/{moduleId}/dislike','ModuleLikeController@dislike');
@@ -421,6 +422,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::post('/payments/getuniquepayment','PaymentController@makeUniquePayment');
 
         Route::post('/payments/confirmuniquepayment','PaymentController@confirmUniquePayment');
+
+        Route::post('/payments/confirmovopayment','PaymentController@confirmOvoPayment');
 
 
 

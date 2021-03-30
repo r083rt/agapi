@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Jobs\ProcessHandlePayment;
 use App\Models\Payment;
 use App\Models\User;
+use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use stdClass;
@@ -13,7 +15,6 @@ use Veritrans_Config;
 use Veritrans_Notification;
 use Veritrans_Snap;
 use Veritrans_Transaction;
-use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
@@ -52,12 +53,12 @@ class PaymentController extends Controller
         //bayar pendaftaran
         if ($user->user_activated_at == null) {
             $user->load(['payments' => function ($query) {
-                $query->orderBy('id', 'DESC')->where('value', 35000);
+                $query->orderBy('id', 'DESC')->where('master_payment_id', null)->where('value', 35000);
             }]);
         } else {
             //bayar perpanjangan
             $user->load(['payments' => function ($query) {
-                $query->orderBy('id', 'DESC')->where('value', 65000);
+                $query->orderBy('id', 'DESC')->where('master_payment_id', null)->where('value', 65000);
             }]);
         }
         foreach ($user->payments as $p => $payment) {
@@ -1034,41 +1035,53 @@ class PaymentController extends Controller
             $payment_text = "Pembayaran Iuran Anggota Selama 6 Bulan";
         }
 
-        $uniquePayment = null;
+        $try = true;
         do {
-            $payment = DB::select("select count(*) as total from payments where date(created_at) = CURDATE() and value = $payment_value");
-            if ($payment[0]->total) {
-                $payment_value++;
-            } else {
-                $uniquePayment = $payment_value;
+            # code...
+            $client = new Client();
+            $res = $client->post('http://phpstack-530371-1844729.cloudwaysapps.com/createpayment', [
+                'json' => [
+                    'value' => $payment_value,
+                    'payment_vendor' => $request->payment_vendor,
+                ],
+            ]);
+            $data = json_decode($res->getBody(), true);
+
+            try {
+                //code...
+                $data = new Payment(['payment_vendor_id' => $request->payment_vendor, 'master_payment_id' => $data['id'], 'value' => $data['value']]);
+                $store = $request->user()->payment()->save($data);
+                if ($store) {
+                    $try = false;
+                }
+
+            } catch (\Throwable $th) {
+                //throw $th;
+                $try = true;
             }
+        } while ($try);
 
-        } while ($uniquePayment == null);
-
-        $data = new Payment(['value' => $uniquePayment]);
-        $store = $request->user()->payment()->save($data);
-
-        return response()->json($store);
+        return response()->json($store->load('payment_vendor'));
     }
 
     public function confirmUniquePayment(Request $request)
     {
-        $items = Payment::whereDate('created_at',Carbon::today())->whereHas('user',function($query)use($request){
-            $query->where('id',$request->user()->id);
-        })->get();
+        $items = Payment::where('master_payment_id', '!=', null)->has('payment_vendor')->whereDate('created_at', Carbon::today())->whereHas('user', function ($query) use ($request) {
+            $query->where('id', $request->user()->id);
+        })->with('payment_vendor')->get();
         // $items[2]->value = 10000;
 
         // return response()->json($items);
         $paid = false;
-        foreach($items as $item){
+        foreach ($items as $item) {
             $data = array(
                 "search" => array(
-                    "date" => array(
-                        "from" => date("Y-m-d") . " 00:00:00",
-                        "to" => date("Y-m-d") . " 23:59:59",
-                    ),
-                    "service_code" => "bni",
-                    "account_number" => "0262628673",
+                    // "date" => array(
+                    //     "from" => date("Y-m-d") . " 00:00:00",
+                    //     "to" => date("Y-m-d") . " 23:59:59",
+                    // ),
+                    "service_code" => $item->payment_vendor->service_code,
+                    "account_number" => $item->payment_vendor->account_number,
                     "amount" => $item->value,
                 ),
             );
@@ -1088,22 +1101,51 @@ class PaymentController extends Controller
             curl_close($ch);
 
             if (count($result['response'])) {
-                $payment = Payment::whereDate('created_at', Carbon::today())->where('value', (int)$result['response'][0]['amount'])->first();
+                $payment = Payment::whereDate('created_at', Carbon::today())->where('value', (int) $result['response'][0]['amount'])->first();
                 $payment->setSuccess();
             }
 
-            if(count($result['response'])) $paid = true;
+            if (count($result['response'])) {
+                $paid = true;
+            }
+
         }
 
-        if($paid){
+        if ($paid) {
             $user = User::find($request->user()->id);
             $user->payment_success = $payment;
             return $user;
         } else {
-            return abort(404,'Belum ada yang dibayarkan');
+            return abort(404, 'Belum ada yang dibayarkan');
         }
+    }
 
-        // return response()->json($paid);
-        // return response()->json((int)$result['response'][0]['amount']);
+    public function confirmOvoPayment()
+    {
+        $data = array(
+            "search" => array(
+                // "date" => array(
+                //     "from" => date("Y-m-d") . " 00:00:00",
+                //     "to" => date("Y-m-d") . " 23:59:59",
+                // ),
+                "account_number" => "089682169754",
+                "amount" => "200000.00",
+            ),
+        );
+
+        $ch = curl_init();
+        curl_setopt_array($ch, array(
+            CURLOPT_URL => "https://api.cekmutasi.co.id/v1/ovo/search",
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => http_build_query($data),
+            CURLOPT_HTTPHEADER => ["Api-Key: 69b336a06dc19b4a50f73212bf629978605c40613f6c4", "Accept: application/json"], // tanpa tanda kurung
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+        ));
+        $result = curl_exec($ch);
+        $result = json_decode($result, true);
+        curl_close($ch);
+        return response()->json($result);
     }
 }

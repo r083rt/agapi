@@ -8,6 +8,10 @@ class Payment extends Model
 {
     protected $guarded = [];
 
+    public function payment_vendor(){
+        return $this->belongsTo('App\Models\PaymentVendor','payment_vendor_id','id');
+    }
+
     public function user(){
     	return $this->belongsTo('App\Models\User','payment_id','id');
     }
