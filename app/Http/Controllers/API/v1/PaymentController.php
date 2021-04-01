@@ -1121,17 +1121,23 @@ class PaymentController extends Controller
         }
 
         if ($paid) {
+            $user = User::findOrFail($user->id);
             $user->payment_success = $payment;
+            return $user;
            
+        }else{
+            return abort(404, 'Belum ada yang dibayarkan');
         }
-        $user = User::findOrFail($user->id);
-        return $user;
-        //  else {
-        //     return abort(404, 'Belum ada yang dibayarkan');
-        // }
+      
+      
     }
     public function paymentHandler(Request $request){
-        $master_payment_id = $request->master_payment_id;
+        $request->validate([
+            'master_payment_id'=>'required',
+            'data.'
+        ]);
+        // $master_payment_id = $request->master_payment_id;
+        
 
     }
 
