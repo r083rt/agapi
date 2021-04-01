@@ -30,7 +30,7 @@ class CreatePaymentVendorsTable extends Migration
 
         if (!Schema::hasColumn('payments', 'master_payment_id')) {
             Schema::table('payments', function (Blueprint $table) {
-               $table->bigInteger('master_payment_id')->nullable()->unique();
+               $table->unsignedBigInteger('master_payment_id')->nullable()->unique();
             });
         }
     }

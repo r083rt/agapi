@@ -47,6 +47,10 @@ class PaymentController extends Controller
     {
         //
     }
+    
+    /*
+    Mengecek status dari midtrans
+    */
     public function getStatus($userId)
     {
         $user = User::findOrFail($userId);
@@ -1023,11 +1027,20 @@ class PaymentController extends Controller
         $city = \App\Models\City::findOrFail($city_id);
         $db = DB::select("select if(sum(a.value),sum(a.value),0) as total_payment_out from payments a inner join transactions b on a.payment_id=b.id inner join bank_accounts c on c.id=b.bank_account_to_id WHERE a.type='OUT' and a.payment_type='App\\\Models\\\Transaction' and c.bank_account_type='App\\\Models\\\City' and c.bank_account_id=?", [$city->id]);
         return response()->json($db[0]);
-    }
+    }   
 
     public function makeUniquePayment(Request $request)
     {
-        if ($request->user()->user_activated_at == null) {
+        $user = $request->user();
+
+        // jika dalam 1 hari ini ada payment pending, ambil payment itu
+        $last_today_pending_payment = $user->getTodayPendingPayment()->first();
+        if($last_today_pending_payment){
+            $last_today_pending_payment->load('payment_vendor');
+            return $last_today_pending_payment;
+        }
+
+        if ($user->user_activated_at == null) {
             $payment_value = setting('admin.member_price');
             $payment_text = "Pembayaran Member KTA";
         } else {
@@ -1039,7 +1052,7 @@ class PaymentController extends Controller
         do {
             # code...
             $client = new Client();
-            $res = $client->post('http://phpstack-530371-1844729.cloudwaysapps.com/createpayment', [
+            $res = $client->post(env('MASTER_PAYMENT_URL','https://phpstack-530371-1844729.cloudwaysapps.com').'/createpayment', [
                 'json' => [
                     'value' => $payment_value,
                     'payment_vendor' => $request->payment_vendor,
@@ -1063,89 +1076,63 @@ class PaymentController extends Controller
 
         return response()->json($store->load('payment_vendor'));
     }
-
+    // public function checkUserIsExpired($user)
+    /* cek pembayaran hanya hari ini
+    / jika tgl 1 user A membuat transaksi 35001, tpi ditransfer tgl 2, maka transaksi tsb tidak terbaca
+    */
     public function confirmUniquePayment(Request $request)
     {
-        $items = Payment::where('master_payment_id', '!=', null)->has('payment_vendor')->whereDate('created_at', Carbon::today())->whereHas('user', function ($query) use ($request) {
-            $query->where('id', $request->user()->id);
-        })->with('payment_vendor')->get();
+        $user = $request->user();
+
+        $items = Payment::with('payment_vendor')->where('master_payment_id', '!=', null)
+        ->has('payment_vendor')->whereDate('created_at', Carbon::today())
+        ->whereHas('user', function ($query) use ($user) {
+            $query->where('users.id', $user->id);
+        })
+        ->orderBy('id','DESC') // harus di `order by payments.id DESC` agar payment 'perpanjang' berada di urutan atas
+        ->get();
+        // return $items;die;
         // $items[2]->value = 10000;
 
         // return response()->json($items);
         $paid = false;
+        $payment = null;
         foreach ($items as $item) {
-            $data = array(
-                "search" => array(
-                    // "date" => array(
-                    //     "from" => date("Y-m-d") . " 00:00:00",
-                    //     "to" => date("Y-m-d") . " 23:59:59",
-                    // ),
-                    "service_code" => $item->payment_vendor->service_code,
-                    "account_number" => $item->payment_vendor->account_number,
-                    "amount" => $item->value,
-                ),
-            );
 
-            $ch = curl_init();
-            curl_setopt_array($ch, array(
-                CURLOPT_URL => "https://api.cekmutasi.co.id/v1/bank/search",
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => http_build_query($data),
-                CURLOPT_HTTPHEADER => ["Api-Key: 69b336a06dc19b4a50f73212bf629978605c40613f6c4", "Accept: application/json"], // tanpa tanda kurung
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER => false,
-                CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-            ));
-            $result = curl_exec($ch);
-            $result = json_decode($result, true);
-            curl_close($ch);
+            $url = env('MASTER_PAYMENT_URL','https://phpstack-530371-1844729.cloudwaysapps.com');
 
-            if (count($result['response'])) {
-                $payment = Payment::whereDate('created_at', Carbon::today())->where('value', (int) $result['response'][0]['amount'])->first();
-                $payment->setSuccess();
+            $client = new \GuzzleHttp\Client();
+            $res = $client->get($url."/checkstatus/{$item->master_payment_id}");
+            $result_json = json_decode($res->getBody());
+
+            if(json_last_error() != JSON_ERROR_NONE){
+                return abort(500, 'Format JSON dari master payment invalid');
             }
 
-            if (count($result['response'])) {
+            // print_r($result_json);die;
+            if($result_json->status=='success'){
+                // set payment ke sukses dan set user_activated_at berdasarkan unix_timestamp payment tsb dibuat
+                $item->setSuccess($result_json->cekmutasi_response[0]->unix_timestamp);
                 $paid = true;
+                $payment = $item;
+                break;
             }
 
         }
 
         if ($paid) {
-            $user = User::find($request->user()->id);
             $user->payment_success = $payment;
-            return $user;
-        } else {
-            return abort(404, 'Belum ada yang dibayarkan');
+           
         }
+        $user = User::findOrFail($user->id);
+        return $user;
+        //  else {
+        //     return abort(404, 'Belum ada yang dibayarkan');
+        // }
+    }
+    public function paymentHandler(Request $request){
+        $master_payment_id = $request->master_payment_id;
+
     }
 
-    public function confirmOvoPayment()
-    {
-        $data = array(
-            "search" => array(
-                // "date" => array(
-                //     "from" => date("Y-m-d") . " 00:00:00",
-                //     "to" => date("Y-m-d") . " 23:59:59",
-                // ),
-                "account_number" => "089682169754",
-                "amount" => "200000.00",
-            ),
-        );
-
-        $ch = curl_init();
-        curl_setopt_array($ch, array(
-            CURLOPT_URL => "https://api.cekmutasi.co.id/v1/ovo/search",
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => http_build_query($data),
-            CURLOPT_HTTPHEADER => ["Api-Key: 69b336a06dc19b4a50f73212bf629978605c40613f6c4", "Accept: application/json"], // tanpa tanda kurung
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HEADER => false,
-            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-        ));
-        $result = curl_exec($ch);
-        $result = json_decode($result, true);
-        curl_close($ch);
-        return response()->json($result);
-    }
 }

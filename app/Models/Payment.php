@@ -34,10 +34,11 @@ class Payment extends Model
      *
      * @return void
      */
-    public function setSuccess()
+    public function setSuccess($unix_timestamp)
     {
+
         $this->attributes['status'] = 'success';
-        $date = date('Y-m-d h:i:s');
+        $date = date('Y-m-d H:i:s', $unix_timestamp);
         $user = $this->user()->update(['user_activated_at'=>$date]);
         self::save();
     }

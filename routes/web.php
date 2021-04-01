@@ -322,6 +322,10 @@ Route::get('/getcontactnumber',function(){
 
 Route::get('/testgan',function(){
     // $a = 2020-07-20 16:25:20
+    $user = App\Models\User::findOrFail(152534);
+    $a = $user->getTodayPendingPayment()->first();
+    $a->load('payment_vendor');
+    return $a;
 
 
     

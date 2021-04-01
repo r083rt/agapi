@@ -442,6 +442,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         });
 
         Route::get('/payments/getstatus/{userId}','PaymentController@getStatus');
+        // Route::get('/payments/getstatusfrombank/{userId}','PaymentController@getStatus');
 
 
         Route::get('/modules/getmodulescount','ModuleController@getmodulescount');
