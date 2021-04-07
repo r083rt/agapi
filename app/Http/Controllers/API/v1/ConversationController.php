@@ -154,9 +154,10 @@ class ConversationController extends Controller
      * @param  \App\Models\Conversation  $conversation
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Conversation $conversation)
+    public function destroy($conversation_id)
     {
-        //
+        $conversation = Conversation::where('creator_id',auth()->user()->id)->findOrFail($conversation_id);
+        return $conversation->delete();
     }
     public function getUnreadCount(){
         $conversations = Conversation::whereNull('read_at')->whereHas('users',function($query){

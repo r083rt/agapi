@@ -455,7 +455,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/modules/read/{id}','ModuleController@readModule');
 
         Route::get('/conversations/get_unread_count','ConversationController@getUnreadCount');
-
+        // Route::delete('/conversations/{conversation_id}', 'ConversationController@destroy');
         //Route::get('/modules/s/{educationalLevelId}/{search?}','ModuleController@getbyeducationallevel');
         //Route::get('/modules/')
         //Route::get('/modules/{moduleId}/getcomments','ModuleController@getbyeducationallevel');
