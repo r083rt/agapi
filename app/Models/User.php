@@ -92,7 +92,7 @@ class User extends \TCG\Voyager\Models\User
     }
     public function lesson_plans_likes_without_auth(){
         return $this->hasManyThrough('App\Models\Like','App\Models\LessonPlan','user_id','like_id')->where('like_type','=','App\Models\LessonPlan');
- 
+
      }
 
     // public function lesson_plans_ratings(){
@@ -227,7 +227,10 @@ class User extends \TCG\Voyager\Models\User
     }
     public function getTodayPendingPayment(){
         $date_now = date('Y-m-d');
-        return $this->payments()->where('status','pending')->whereDate('created_at', $date_now);
+        return $this->payments()->where('status','pending')->where('master_payment_id','!=',null)->whereDate('created_at', $date_now);
     }
-    
+    public function rooms(){
+        return $this->belongsToMany('App\Models\Room','user_rooms','user_id','room_id')->withPivot('is_admin');
+    }
+
 }

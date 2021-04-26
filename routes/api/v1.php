@@ -277,7 +277,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'bank_account'=>'BankAccountController',
             'surah'=>'SurahController',
             'conversation'=>'ConversationController',
-            'paymentvendor'=>'PaymentVendorController'
+            'paymentvendor'=>'PaymentVendorController',
+            'room'=>'RoomController',
         ]);
 
         Route::delete('module/{moduleId}/dislike','ModuleLikeController@dislike');
@@ -301,6 +302,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'question' => 'QuestionController',
             'answer' => 'AnswerController',
         ]);
+
+        Route::post('/rooms/join','RoomController@join');
 
         Route::get('/studentpost', 'PostController@studentpost');
         Route::get('/ownstudentpost', 'PostController@ownstudentpost');

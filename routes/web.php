@@ -282,7 +282,7 @@ Route::get('/rekap',function(){
 
 // Route::get('/command', function () {
 //     // $data = ['Bookmark', 'Follow','Murottal','DailyPrayer','File','AssigmentReview','AssigmentGuidedUser','AssigmentCategory','AssigmentType','Assigment','AssigmentComment','AssigmentLike','AssigmentRating','AssigmentChat','QuestionListCategory','QuestionList','AssigmentQuestionList','AnswerList','Session','AssigmentSession','Question','Answer'];
-//     $data = ['Questionnary','Ad'];
+//     $data = ['Room','UserRoom'];
 //     foreach ($data as $val) {
 //         Artisan::call("make:seeder", ['name' => $val . "TableSeeder"]);
 //         Artisan::call("make:model", ['name' => $val]);
