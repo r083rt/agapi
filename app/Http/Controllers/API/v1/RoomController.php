@@ -15,12 +15,14 @@ class RoomController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $type = $request->query('type');
+        if(empty($type))$type = 'meeting';
         //
         $res = Room::withCount('users')->with('users')->whereHas('users',function($query){
             $query->where('user_id',Auth::user()->id);
-        })->orderBy('id','desc')->get();
+        })->where('type',$type)->orderBy('id','desc')->get();
         return response()->json($res);
     }
 
@@ -36,6 +38,9 @@ class RoomController extends Controller
         $room = new Room();
         $room->name = $request->name;
         $room->code = Str::random(5);
+        if(isset($request->type)){
+            $room->type = $request->type;
+        }
         $room->save();
 
         $res = $request->user()->rooms()->attach($room->id,['is_admin'=>true]);
@@ -80,7 +85,7 @@ class RoomController extends Controller
 
     public function join(Request $request){
         $room = Room::where('code',$request->code)->first();
-        $res = $request->user()->rooms()->sync($room->id,false);
+        $res = $request->user()->rooms()->syncWithoutDetaching($room->id);
         return response()->json($room->load('users')->loadCount('users'));
     }
 }

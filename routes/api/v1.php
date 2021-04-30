@@ -131,7 +131,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/auth/assigment_lite', function (Request $request) {
             $user_id = $request->user()->id;
             $res = $request->user()
-                ->load(['profile','role']);
+                ->load(['profile','role'])->loadCount(['rooms'=>function($query){
+                    $query->where('type','class');
+                }]);
             $res->count_question_lists=\App\Models\QuestionList::whereHas('assigments',function($query)use($user_id){
                 $query->where('assigments.user_id','=',$user_id);
             })->count();
@@ -279,6 +281,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'conversation'=>'ConversationController',
             'paymentvendor'=>'PaymentVendorController',
             'room'=>'RoomController',
+            'student/room'=>'Student\RoomController'
         ]);
 
         Route::delete('module/{moduleId}/dislike','ModuleLikeController@dislike');
@@ -304,6 +307,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         ]);
 
         Route::post('/rooms/join','RoomController@join');
+        Route::get('/student/getjoinedrooms', 'Student\RoomController@getJoinedRooms');
+        Route::post('/student/rooms/join', 'Student\RoomController@join');
 
         Route::get('/studentpost', 'PostController@studentpost');
         Route::get('/ownstudentpost', 'PostController@ownstudentpost');

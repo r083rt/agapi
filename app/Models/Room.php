@@ -18,4 +18,7 @@ class Room extends Model
     {
         return $this->belongsToMany('App\Models\User', 'user_rooms', 'room_id', 'user_id')->withPivot('is_admin');
     }
+    public function admin_users(){
+        return $this->belongsToMany('App\Models\User', 'user_rooms', 'room_id', 'user_id')->withPivot('is_admin')->wherePivot('is_admin',true);
+    }
 }
