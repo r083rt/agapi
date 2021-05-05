@@ -70,7 +70,7 @@ class AssigmentQuestionListController extends Controller
     public function search($key){
         $question_lists = QuestionList::
         with('assigments','answer_lists')->
-        whereHas('assigments')
+        has('assigments')
         ->where('name','like','%'.$key.'%')
         ->whereHas('assigment_question_lists',function($query){
             $query->where('creator_id','!=',Auth::user()->id)->where('user_id','!=',Auth::user()->id);

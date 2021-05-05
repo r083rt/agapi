@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class QuestionList extends Model
 {
     //
-    protected $fillable = ['name','description'];
+    protected $fillable = ['name','description','ref_id'];
 
     public function answer_lists(){
         return $this->hasMany('App\Models\AnswerList');
@@ -35,6 +35,10 @@ class QuestionList extends Model
 
     public function audio(){
         return $this->morphOne(\App\Models\File::class,'file')->where('type','audio/m4a');
+    }
+
+    public function questions(){
+        return $this->hasMany('App\Models\Question','question_list_id');
     }
 
 }

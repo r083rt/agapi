@@ -86,6 +86,7 @@ class SessionController extends Controller
         $total_score = 0;
         foreach($request["questions"] as $key=>$question){
             if($question['assigment_question_list']['assigment_type']['description']=="selectoptions" && $question['answer']['value']==100){
+            // cari di table questions
                $masterQuestion = $session->questions()->find($question['id']);
                $masterQuestion->score=100;
                $masterQuestion->save();
@@ -95,6 +96,7 @@ class SessionController extends Controller
                 
                 $score = intval($question['score']);
                 if($score>=0 && $score<=100){
+                    // cari di table questions
                     $masterQuestion = $session->questions()->find($question['id']);
                     $masterQuestion->score=$question['score'];
                     $total_score += $question['score'];

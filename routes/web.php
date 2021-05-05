@@ -63,6 +63,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('reset/password/{email}','SecureController@resetPassword');
         Route::get('makeThumbnails/{id}','SecureController@makeThumbnails');
         Route::get('userreport','Admin\\UserReportAdminController@index')->name('voyager.userreport.index');
+
+        Route::get('question_analytic', function(){
+            return view('question_analytic.index');
+        })->name('voyager.questionanalytic');
     });
 });
 
@@ -320,16 +324,7 @@ Route::get('/getcontactnumber',function(){
 });
 
 
-Route::get('/testgan',function(){
-    // $a = 2020-07-20 16:25:20
-    $user = App\Models\User::findOrFail(152534);
-    $a = $user->getTodayPendingPayment()->first();
-    $a->load('payment_vendor');
-    return $a;
-
-
-    
-});
+Route::get('/testgan','API\\Admin\\QuestionAnalyticController@index');
 Route::get('/reverseproxy', function(Request $request){
     $url=$request->query('url');
     $parse_url = parse_url($url);

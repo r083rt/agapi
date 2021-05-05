@@ -236,6 +236,7 @@ class AssigmentController extends Controller
             
             $item_question_list = new QuestionList();
             $item_question_list->fill($question_list);
+            $item_question_list->ref_id = $question_list['pivot']['question_list_id']; // ref_id merujuk ke referensi master soal
             $item_question_list->save();
 
             //mendapatkan parent question_lists untuk mengecek audio'nya
@@ -282,7 +283,7 @@ class AssigmentController extends Controller
     }
     public function store(Request $request)
     {
-        //jika pakai apk yg lama atau rakit soal, maka memakai API store2()
+        //jika pakai apk yg lama atau REQUEST dari rakit soal, maka memakai API store2()
         if(!$request->audio){
             return $this->store2($request);
         }
@@ -290,7 +291,7 @@ class AssigmentController extends Controller
         $request->validate([
             'audio.*'=>'nullable|mimes:mp4,mp3'
         ]);
-
+        // return 'jancok';
         # code...
         // return $request->user()->id;
         $data = (array)json_decode($request->data);
@@ -307,6 +308,7 @@ class AssigmentController extends Controller
             # code...
             $item_question_list = new QuestionList();
             $item_question_list->fill((array)$question_list);
+            // $item_question_list->ref_id = $question_list->pivot->question_list_id; // ref_id merujuk ke referensi master soal
             $item_question_list->save();
 
                          
