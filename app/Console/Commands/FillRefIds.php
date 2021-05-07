@@ -76,7 +76,7 @@ class FillRefIds extends Command
             // }
         }
         // echo count($slave);
-        echo $update_command;
+        // echo $update_command;
         return 0;
     }
 }

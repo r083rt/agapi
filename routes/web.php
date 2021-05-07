@@ -67,6 +67,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('question_analytic', function(){
             return view('question_analytic.index');
         })->name('voyager.questionanalytic');
+
+        Route::prefix('api')->group(function(){
+            Route::get('question_analytic','API\\Admin\\QuestionAnalyticController@index');
+        });
     });
 });
 
@@ -325,6 +329,8 @@ Route::get('/getcontactnumber',function(){
 
 
 Route::get('/testgan','API\\Admin\\QuestionAnalyticController@index');
+
+
 Route::get('/reverseproxy', function(Request $request){
     $url=$request->query('url');
     $parse_url = parse_url($url);
