@@ -70,6 +70,7 @@ Route::group(['prefix' => 'admin'], function () {
 
         Route::prefix('api')->group(function(){
             Route::get('question_analytic','API\\Admin\\QuestionAnalyticController@index');
+            Route::get('question_package_analytic','API\\Admin\\QuestionPackageAnalyticController@index');
         });
     });
 });

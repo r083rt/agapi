@@ -16,8 +16,8 @@ select aql.id,aql.question_list_id,aql.assigment_id,u.name as user_name,g.descri
 where 
 	exists(select 1 from assigment_types where id=assigment_type_id and (`description`='textarea' or `description`='textfield')) AND #hanya memilih soal yang uraian/teks
 	a.user_id=aql.creator_id
-    AND a.is_publish=0 
-#having scores is not null
+    AND a.is_publish=0 #is_publish = 0 yaitu butir soal
+having scores is not null
     
     
 ORDER BY scores_count desc

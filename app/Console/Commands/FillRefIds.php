@@ -48,11 +48,11 @@ class FillRefIds extends Command
         
     ORDER BY aql.id desc");
     
-        $slave = DB::select("select * from question_lists q where exists(
+        $slave = DB::select("select * from question_lists q where ref_id is null and exists(
             select 1 from assigment_question_lists aql 
                 inner join assigments a on a.id=aql.assigment_id 
             where 
-                aql.question_list_id=q.id and a.user_id!=aql.creator_id and a.is_publish=1
+                aql.question_list_id=q.id and a.is_publish=1
         ) order by q.id desc;");
         $has_master_count=0;
         $update_command = "";

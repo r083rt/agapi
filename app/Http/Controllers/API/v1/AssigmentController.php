@@ -361,7 +361,9 @@ class AssigmentController extends Controller
     }
     public function share(Request $request){
 
-        $masterAssigment = Assigment::findOrFail($request->id);
+        // return 'cok';
+        $masterAssigment = Assigment::whereNull('teacher_id')->findOrFail($request->id);
+        // $masterAssigment->load('question_lists');
         $masterUser = User::findOrFail($masterAssigment->user_id);
         //return $request->all();
         $newAssigment = new Assigment;
@@ -379,6 +381,7 @@ class AssigmentController extends Controller
             # code...
             $item_question_list = new QuestionList();
             $item_question_list->fill($question_list->toArray());
+            $item_question_list->ref_id = $question_list->ref_id;
             $item_question_list->save();
             $newAssigment->question_lists()->attach([$item_question_list->id => [
                 'creator_id' => $question_list['pivot']['creator_id'],
