@@ -18,10 +18,10 @@ select aql.id,aql.question_list_id,aql.assigment_id,u.name as user_name,g.descri
     inner join users u on u.id=a.user_id
     inner join grades g on g.id=a.grade_id
 where 
-	exists(select 1 from assigment_types where id=assigment_type_id and (`description`='textarea' or `description`='textfield')) AND #hanya memilih soal yang uraian/teks
+	#exists(select 1 from assigment_types where id=assigment_type_id and (`description`='textarea' or `description`='textfield')) AND #hanya memilih soal yang uraian/teks
 	a.user_id=aql.creator_id
     AND a.is_publish=0 
 #having scores is not null
     
     
-ORDER BY aql.id desc
+ORDER BY scores_count desc

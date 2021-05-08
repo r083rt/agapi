@@ -365,10 +365,11 @@ class AssigmentController extends Controller
         $masterAssigment = Assigment::whereNull('teacher_id')->findOrFail($request->id);
         // $masterAssigment->load('question_lists');
         $masterUser = User::findOrFail($masterAssigment->user_id);
-        //return $request->all();
+        // return $request->all();
         $newAssigment = new Assigment;
         $newAssigment->fill($masterAssigment->toArray());
-        $newAssigment->fill($request->all());
+        // $newAssigment->fill($request->all());
+        $newAssigment->ref_id = $masterAssigment->id;
         //\return $newAssigment;
         //$newAssigment->
         if($request->has('password')) $newAssigment->password = bcrypt($request->password);

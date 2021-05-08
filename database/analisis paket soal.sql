@@ -1,23 +1,16 @@
-select aql.id,aql.question_list_id,aql.assigment_id,u.name as user_name,g.description as grade,ql.name as question_list_name,ql.created_at,(
-	select group_concat(q.score) from questions q where exists(
-		select 1 from question_lists ql2 where ql2.id=q.question_list_id and ql2.ref_id=ql.id
-    )
-) as scores,
-(
-	select count(q.score) from questions q where exists(
-		select 1 from question_lists ql2 where ql2.id=q.question_list_id and ql2.ref_id=ql.id
-    )
-) as scores_count
- from assigment_question_lists aql 
-	inner join assigments a on a.id=aql.assigment_id 
-    inner join question_lists ql on ql.id=aql.question_list_id
-    inner join users u on u.id=a.user_id
-    inner join grades g on g.id=a.grade_id
+#paket soal adalah assigments dengan kondisi teacher_id IS NULL dan is_publish=1
+select a.id,a.user_id,g.description,a.code,a.name,(
+	select group_concat(ql.id) from assigment_question_lists aql inner join question_lists ql on aql.question_list_id=ql.id where aql.assigment_id=a.id
+)  as question_list_ids, (
+	select group_concat(ass.total_score) from assigment_sessions ass where ass.assigment_id=a.id
+) as scores,(
+	select count(ass.total_score) from assigment_sessions ass where ass.assigment_id=a.id
+) as scores_count,
+a.created_at
+	from assigments a 
+		inner join grades g on a.grade_id=g.id
 where 
-	exists(select 1 from assigment_types where id=assigment_type_id and (`description`='textarea' or `description`='textfield')) AND #hanya memilih soal yang uraian/teks
-	a.user_id=aql.creator_id
-    AND a.is_publish=0 #is_publish = 0 yaitu butir soal
-having scores is not null
-    
-    
-ORDER BY scores_count desc
+	a.is_publish=1 
+    and a.teacher_id is null
+#having scores is not null
+order by scores_count desc

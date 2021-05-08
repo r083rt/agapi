@@ -88,4 +88,12 @@ class RoomController extends Controller
         $res = $request->user()->rooms()->syncWithoutDetaching($room->id);
         return response()->json($room->load('users')->loadCount('users'));
     }
+
+    public function userlist($room_id){
+        $user = auth()->user();
+        $room = Room::with('non_admin_users')->whereHas('admin_users', function($query)use($user){
+            $query->where('user_id', $user->id);
+        })->findOrFail($room_id);
+        return $room;
+    }
 }

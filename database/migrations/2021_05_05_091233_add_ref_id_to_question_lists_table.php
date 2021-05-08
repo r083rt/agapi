@@ -28,7 +28,7 @@ class AddRefIdToQuestionListsTable extends Migration
     public function down()
     {
         Schema::table('question_lists', function (Blueprint $table) {
-            //
+            $table->dropColumn('ref_id');
         });
     }
 }

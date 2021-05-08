@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class QuestionAnalyticController extends Controller
+class QuestionPackageAnalyticController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,36 +16,24 @@ class QuestionAnalyticController extends Controller
     public function index(Request $request)
     {
         
-        $data = DB::table('assigment_question_lists as aql')
-        ->selectRaw("aql.id,aql.assigment_id,aql.question_list_id,u.name as user_name,g.description as grade,ql.name as question_list_name,ql.created_at, (
-            select group_concat(q.score) from questions q 
-                inner join question_lists ql2 on q.question_list_id=ql2.id 
-                inner join assigment_question_lists aql2 on aql2.question_list_id=q.question_list_id
-                inner join assigments a2 on a2.id=aql2.assigment_id
-            where ql2.ref_id=ql.id and a2.teacher_id is not null #teacher_id jika NULL, maka soalnya adalah soal master (latihan mandiri), tidak soal yg dibagikan (kerjakan soal)
-        ) as scores,
-        (
-            select count(q.score) from questions q 
-                inner join question_lists ql2 on q.question_list_id=ql2.id 
-                inner join assigment_question_lists aql2 on aql2.question_list_id=q.question_list_id
-                inner join assigments a2 on a2.id=aql2.assigment_id
-            where ql2.ref_id=ql.id and a2.teacher_id is not null #teacher_id jika NULL, maka soalnya adalah soal master (latihan mandiri), tidak soal yg dibagikan (kerjakan soal)
-        ) as scores_count
+        $data = DB::table('assigments as a')
+        ->selectRaw("a.id,a.user_id,u.name as user_name,g.description as grade,a.code,a.name,a.semester,(
+            select group_concat(ql.id) from assigment_question_lists aql inner join question_lists ql on aql.question_list_id=ql.id where aql.assigment_id=a.id
+        )  as question_list_ids, (
+            select group_concat(ass.total_score) from assigment_sessions ass where ass.assigment_id=a.id
+        ) as scores,(
+            select count(ass.total_score) from assigment_sessions ass where ass.assigment_id=a.id
+        ) as scores_count,
+        a.created_at
         ")
-        ->join('assigments as a','a.id','=','aql.assigment_id')
-        ->join('question_lists as ql','ql.id','=','aql.question_list_id')
-        ->join('users as u','u.id','=','a.user_id')
         ->join('grades as g', 'g.id','=','a.grade_id')
+        ->join('users as u', 'u.id','=','a.user_id')
 
-        // memastikan bahwa pembuat assigment sama dengan pembuat soal
-        ->whereColumn('a.user_id','aql.creator_id')->where('a.is_publish',false)
-        ->whereExists(function($query){
-            // hanya mengambil soal isian (tidak pilihan ganda)
-            $query->select(DB::raw(1))->from('assigment_types')->whereColumn('assigment_types.id','aql.assigment_type_id')->where(function($query2){
-                $query2->where('description','textarea')->orWhere('description','textfield');
-            });
-        })
-        ->havingRaw('scores is not null');
+        // paket soal adalah assigments dengan kondisi teacher_id IS NULL dan is_publish=1
+        ->where('a.is_publish',true)
+        ->whereNull('a.teacher_id');
+
+        // ->havingRaw('scores is not null');
       
         if($request->query('educational_level_id') || $request->query('grade_id')){
             $educational_level_id = $request->query('educational_level_id');
@@ -69,16 +57,16 @@ class QuestionAnalyticController extends Controller
         }
 
         $paginate = $data->orderBy('scores_count','desc')->paginate($itemsPerPage)->withQueryString();
-        foreach($paginate as $question_list){
-            $question_list->question_list_name = strip_tags($question_list->question_list_name);
-            $scores = explode(',', $question_list->scores);
-            $scores_value = [];
-            foreach($scores as $score) 
-            { 
-                array_push($scores_value,floatval($score));
-            } 
-            $question_list->std = round($this->calculate($scores_value),2);
-        }
+        // foreach($paginate as $question_list){
+        //     $question_list->question_list_name = strip_tags($question_list->question_list_name);
+        //     $scores = explode(',', $question_list->scores);
+        //     $scores_value = [];
+        //     foreach($scores as $score) 
+        //     { 
+        //         array_push($scores_value,floatval($score));
+        //     } 
+        //     $question_list->std = round($this->calculate($scores_value),2);
+        // }
         return $paginate;
 
     }

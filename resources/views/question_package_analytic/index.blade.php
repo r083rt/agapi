@@ -9,7 +9,7 @@
     @section('page_header')
     <div class="container-fluid">
         <h1 class="page-title">
-            <i class="voyager-receipt"></i> Analisis Butir Soal
+            <i class="voyager-receipt"></i> Analisis Paket Soal
         </h1>
     </div>
     @stop
@@ -51,11 +51,11 @@
                             headers: [{
                                     text: '#',
                                     sortable: true,
-                                    value: 'question_list_id',
+                                    value: 'id',
                                 },
                                 {
-                                    text: 'Soal',
-                                    value: 'question_list_name',
+                                    text: 'Nama',
+                                    value: 'name',
                                 },
                                 {
                                     text: 'Kelas',
@@ -70,10 +70,10 @@
                                     sortable: true,
                                     value: 'scores_count',
                                 },
-                                {
-                                    text: 'Skor soal',
-                                    value: 'std',
-                                },
+                                // {
+                                //     text: 'Skor soal',
+                                //     value: 'std',
+                                // },
                                 {
                                     text: 'Dibuat',
                                     value: 'created_at',
@@ -99,7 +99,7 @@
                                 page,
                                 itemsPerPage
                             } = this.options
-                            axios.get("/admin/api/question_analytic", {
+                            axios.get("/admin/api/question_package_analytic", {
                                 params: {
                                     page,
                                     itemsPerPage

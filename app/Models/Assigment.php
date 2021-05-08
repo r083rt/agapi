@@ -10,7 +10,7 @@ class Assigment extends Model
 {
     //
     use SoftDeletes;
-    protected $fillable = ['user_id', 'teacher_id', 'grade_code', 'grade_id','assigment_category_id','topic','subject','indicator','password','start_at','end_at','description','note','timer','code','is_publish','semester','education_year','name','is_public'];
+    protected $fillable = ['user_id', 'teacher_id', 'grade_code', 'grade_id','assigment_category_id','topic','subject','indicator','password','start_at','end_at','description','note','timer','code','is_publish','semester','education_year','name','is_public','ref_id'];
 
     public function grade(){
         return $this->belongsTo('App\Models\Grade');
