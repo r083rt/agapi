@@ -10,4 +10,4 @@ select group_concat(ql2.ref_id) as master_question_list_ids2 from assigment_ques
     )
 	and a2.teacher_id is not null #soal yg dishare
 	#and a2.user_id=1
-    and a2.id=7773
+    and a2.id=7777

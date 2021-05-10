@@ -1,5 +1,4 @@
-select 
- a.id,a.user_id,a.topic,a.teacher_id,(
+select a.id,a.user_id,a.topic,a.teacher_id,(
 	select group_concat(ql.ref_id) from assigment_question_lists aql 
 		inner join question_lists ql on ql.id=aql.question_list_id
 	where aql.assigment_id=a.id
@@ -18,5 +17,5 @@ select
 from assigments a 
 where 
 	a.teacher_id is null #master soal
-having master_question_list_ids is not null
+having master_question_list_ids is not null and shared_assigment_ids is not null
 order by a.id desc

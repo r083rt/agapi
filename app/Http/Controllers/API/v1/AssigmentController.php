@@ -288,6 +288,7 @@ class AssigmentController extends Controller
             return $this->store2($request);
         }
 
+
         $request->validate([
             'audio.*'=>'nullable|mimes:mp4,mp3'
         ]);
@@ -308,7 +309,8 @@ class AssigmentController extends Controller
             # code...
             $item_question_list = new QuestionList();
             $item_question_list->fill((array)$question_list);
-            // $item_question_list->ref_id = $question_list->pivot->question_list_id; // ref_id merujuk ke referensi master soal
+            // TIDAK usah dikasih ref_id
+            // $item_question_list->ref_id = $question_list->pivot->question_list_id; // ref_id merujuk ke referensi master soal 
             $item_question_list->save();
 
                          
