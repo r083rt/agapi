@@ -20,7 +20,7 @@ class RoomController extends Controller
         $type = $request->query('type');
         if(empty($type))$type = 'meeting';
         //
-        $res = Room::withCount('users')->with('users')->whereHas('users',function($query){
+        $res = Room::withCount('users')->with('admin_users','users')->whereHas('users',function($query){
             $query->where('user_id',Auth::user()->id);
         })->where('type',$type)->orderBy('id','desc')->get();
         return response()->json($res);

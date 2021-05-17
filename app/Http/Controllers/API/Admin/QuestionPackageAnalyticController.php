@@ -17,14 +17,29 @@ class QuestionPackageAnalyticController extends Controller
     {
         
         $data = DB::table('assigments as a')
-        ->selectRaw("a.id,a.user_id,u.name as user_name,g.description as grade,a.code,a.name,a.semester,(
-            select group_concat(ql.id) from assigment_question_lists aql inner join question_lists ql on aql.question_list_id=ql.id where aql.assigment_id=a.id
-        )  as question_list_ids, (
-            select group_concat(ass.total_score) from assigment_sessions ass where ass.assigment_id=a.id
-        ) as scores,(
-            select count(ass.total_score) from assigment_sessions ass where ass.assigment_id=a.id
+        ->selectRaw("a.id,u.name as user_name,g.description as grade,a.code,a.name,(
+            select group_concat(ql.ref_id) 
+            from assigment_question_lists aql inner join question_lists ql on aql.question_list_id=ql.id 
+            where aql.assigment_id=a.id
+        )  as master_question_list_ids, (
+            select group_concat(ass.total_score) from assigment_sessions ass 
+            inner join assigments a2 on a2.id=ass.assigment_id
+            where 
+                a2.is_publish=1 and a2.teacher_id is not null #teacher_id NOT NULL adalah slave soal dari master soal
+                and a2.ref_id=a.id
+        ) as scores, 
+        (
+            select count(ass.total_score) from assigment_sessions ass 
+            inner join assigments a2 on a2.id=ass.assigment_id
+            where 
+                a2.is_publish=1 and a2.teacher_id is not null #teacher_id NOT NULL adalah slave soal dari master soal
+                and a2.ref_id=a.id
         ) as scores_count,
-        a.created_at
+        (
+            select group_concat(a2.id) from assigments a2 
+            where a2.ref_id=a.id
+        ) as slave_assigment_ids,
+        a.created_at    
         ")
         ->join('grades as g', 'g.id','=','a.grade_id')
         ->join('users as u', 'u.id','=','a.user_id')
@@ -57,16 +72,16 @@ class QuestionPackageAnalyticController extends Controller
         }
 
         $paginate = $data->orderBy('scores_count','desc')->paginate($itemsPerPage)->withQueryString();
-        // foreach($paginate as $question_list){
-        //     $question_list->question_list_name = strip_tags($question_list->question_list_name);
-        //     $scores = explode(',', $question_list->scores);
-        //     $scores_value = [];
-        //     foreach($scores as $score) 
-        //     { 
-        //         array_push($scores_value,floatval($score));
-        //     } 
-        //     $question_list->std = round($this->calculate($scores_value),2);
-        // }
+        foreach($paginate as $question_list){
+            // $question_list->question_list_name = strip_tags($question_list->question_list_name);
+            $scores = explode(',', $question_list->scores);
+            $scores_value = [];
+            foreach($scores as $score) 
+            { 
+                array_push($scores_value,floatval($score));
+            } 
+            $question_list->std = round($this->calculate($scores_value),2);
+        }
         return $paginate;
 
     }

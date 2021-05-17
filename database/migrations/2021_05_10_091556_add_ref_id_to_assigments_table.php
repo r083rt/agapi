@@ -26,7 +26,7 @@ class AddRefIdToAssigmentsTable extends Migration
     public function down()
     {
         Schema::table('assigments', function (Blueprint $table) {
-            // $table->dropForeign('assigments_ref_id_foreign');
+            // $table->dropForeign('assigmengitts_ref_id_foreign');
             $table->dropColumn(['ref_id']);
         });
     }

@@ -68,6 +68,10 @@ Route::group(['prefix' => 'admin'], function () {
             return view('question_analytic.index');
         })->name('voyager.questionanalytic');
 
+        Route::get('question_package_analytic', function(){
+            return view('question_package_analytic.index');
+        })->name('voyager.questionpackageanalytic');
+
         Route::prefix('api')->group(function(){
             Route::get('question_analytic','API\\Admin\\QuestionAnalyticController@index');
             Route::get('question_package_analytic','API\\Admin\\QuestionPackageAnalyticController@index');

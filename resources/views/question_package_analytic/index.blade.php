@@ -54,26 +54,26 @@
                                     value: 'id',
                                 },
                                 {
-                                    text: 'Nama',
-                                    value: 'name',
+                                    text: 'Pembuat paket soal',
+                                    value: 'user_name',
                                 },
                                 {
                                     text: 'Kelas',
                                     value: 'grade',
                                 },
                                 {
-                                    text: 'Pembuat',
-                                    value: 'user_name',
+                                    text: 'Jenis',
+                                    value: 'name',
                                 },
                                 {
                                     text: 'Jumlah dikerjakan',
                                     sortable: true,
                                     value: 'scores_count',
                                 },
-                                // {
-                                //     text: 'Skor soal',
-                                //     value: 'std',
-                                // },
+                                {
+                                    text: 'Std deviasi',
+                                    value: 'std',
+                                },
                                 {
                                     text: 'Dibuat',
                                     value: 'created_at',
