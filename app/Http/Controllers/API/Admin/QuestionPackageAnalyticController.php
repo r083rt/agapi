@@ -17,28 +17,7 @@ class QuestionPackageAnalyticController extends Controller
     {
         
         $data = DB::table('assigments as a')
-        ->selectRaw("a.id,u.name as user_name,g.description as grade,a.code,a.name,(
-            select group_concat(ql.ref_id) 
-            from assigment_question_lists aql inner join question_lists ql on aql.question_list_id=ql.id 
-            where aql.assigment_id=a.id
-        )  as master_question_list_ids, (
-            select group_concat(ass.total_score) from assigment_sessions ass 
-            inner join assigments a2 on a2.id=ass.assigment_id
-            where 
-                a2.is_publish=1 and a2.teacher_id is not null #teacher_id NOT NULL adalah slave soal dari master soal
-                and a2.ref_id=a.id
-        ) as scores, 
-        (
-            select count(ass.total_score) from assigment_sessions ass 
-            inner join assigments a2 on a2.id=ass.assigment_id
-            where 
-                a2.is_publish=1 and a2.teacher_id is not null #teacher_id NOT NULL adalah slave soal dari master soal
-                and a2.ref_id=a.id
-        ) as scores_count,
-        (
-            select group_concat(a2.id) from assigments a2 
-            where a2.ref_id=a.id
-        ) as slave_assigment_ids,
+        ->selectRaw("a.id,u.name as user_name,g.description as grade,a.code,a.name,
         a.created_at    
         ")
         ->join('grades as g', 'g.id','=','a.grade_id')
@@ -59,10 +38,12 @@ class QuestionPackageAnalyticController extends Controller
             }
              // filter kelas
             if(!empty($grade_id)){
-                $query->where('g.grade_id', $grade_id);
+                $data->where('g.grade_id', $grade_id);
             }   
         }
        
+        // $data->where ('a.id',278);
+
         $itemsPerPage=100;
         if($request->query('itemsPerPage')){
             $itemsPerPage = $request->query('itemsPerPage');
@@ -70,19 +51,49 @@ class QuestionPackageAnalyticController extends Controller
                 $itemsPerPage=9999999999;
             }
         }
-
-        $paginate = $data->orderBy('scores_count','desc')->paginate($itemsPerPage)->withQueryString();
-        foreach($paginate as $question_list){
-            // $question_list->question_list_name = strip_tags($question_list->question_list_name);
-            $scores = explode(',', $question_list->scores);
+        
+        $paginate = $data->paginate($itemsPerPage)->withQueryString();
+        foreach($paginate as $assigment){
+          
+            $scores = DB::table('assigment_sessions as ass')->
+            whereNotNull('ass.total_score')->
+            whereExists(function($query)use($assigment){
+                $query->select(DB::raw(1))
+                ->from('assigments as a')
+                ->whereColumn('a.id','ass.assigment_id')
+                ->whereNotNull('a.teacher_id')
+                ->where('a.is_publish',1)
+                ->where('a.ref_id', $assigment->id);
+            });
+            
             $scores_value = [];
-            foreach($scores as $score) 
-            { 
-                array_push($scores_value,floatval($score));
-            } 
-            $question_list->std = round($this->calculate($scores_value),2);
+            $scores = $scores->get();
+            foreach($scores as $score){
+                array_push($scores_value,floatval($score->total_score));
+            }
+            $assigment->scores = $scores_value;
+            $assigment->scores_count = count($scores_value);
+            // $question_list->question_list_name = strip_tags($question_list->question_list_name);
+            
+            $assigment->std = null;
+            if($assigment->scores_count>0)$assigment->std = round($this->calculate($scores_value),2);
         }
-        return $paginate;
+        // return $paginate->items();
+        $items = $paginate->items();
+        usort($items, function($a, $b){
+            if($a->scores_count === $b->scores_count)return 0;
+            return ($a->scores_count < $b->scores_count) ? 1:-1;
+        });
+        // return $paginate;
+        return [
+            'current_page'=>$paginate->currentPage(),
+            'data'=>$items,
+            'next_page_url'=>$paginate->nextPageUrl(),
+            'prev_page_url'=>$paginate->previousPageUrl(),
+            'total'=>$paginate->total(),
+            'per_page'=>$paginate->perPage(),
+            'last_page'=>$paginate->lastPage()
+        ];
 
     }
     public function calculate($arr){

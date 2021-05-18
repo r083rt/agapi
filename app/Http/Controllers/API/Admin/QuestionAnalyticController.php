@@ -57,7 +57,7 @@ class QuestionAnalyticController extends Controller
             }
              // filter kelas
             if(!empty($grade_id)){
-                $query->where('g.grade_id', $grade_id);
+                $data->where('g.grade_id', $grade_id);
             }   
         }
        
