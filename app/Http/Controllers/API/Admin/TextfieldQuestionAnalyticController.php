@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class QuestionAnalyticController extends Controller
+class TextfieldQuestionAnalyticController extends Controller
 {
     /**
      * Display a listing of the resource.

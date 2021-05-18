@@ -64,16 +64,21 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('makeThumbnails/{id}','SecureController@makeThumbnails');
         Route::get('userreport','Admin\\UserReportAdminController@index')->name('voyager.userreport.index');
 
-        Route::get('question_analytic', function(){
-            return view('question_analytic.index');
-        })->name('voyager.questionanalytic');
+        Route::get('textfield_question_analytic', function(){
+            return view('textfield_question_analytic.index');
+        })->name('voyager.textfield.questionanalytic');
+
+        Route::get('selectoptions_question_analytic', function(){
+            return view('selectoptions_question_analytic.index');
+        })->name('voyager.selectoptions.questionanalytic');
 
         Route::get('question_package_analytic', function(){
             return view('question_package_analytic.index');
         })->name('voyager.questionpackageanalytic');
 
         Route::prefix('api')->group(function(){
-            Route::get('question_analytic','API\\Admin\\QuestionAnalyticController@index');
+            Route::get('textfield_question_analytic','API\\Admin\\TextfieldQuestionAnalyticController@index');
+            Route::get('selectoptions_question_analytic','API\\Admin\\SelectoptionsQuestionAnalyticController@index');
             Route::get('question_package_analytic','API\\Admin\\QuestionPackageAnalyticController@index');
         });
     });

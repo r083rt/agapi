@@ -9,7 +9,7 @@
     @section('page_header')
     <div class="container-fluid">
         <h1 class="page-title">
-            <i class="voyager-receipt"></i> Analisis Butir Soal
+            <i class="voyager-receipt"></i> Analisis Butir Soal Esai
         </h1>
     </div>
     @stop
@@ -99,7 +99,7 @@
                                 page,
                                 itemsPerPage
                             } = this.options
-                            axios.get("/admin/api/question_analytic", {
+                            axios.get("/admin/api/textfield_question_analytic", {
                                 params: {
                                     page,
                                     itemsPerPage
