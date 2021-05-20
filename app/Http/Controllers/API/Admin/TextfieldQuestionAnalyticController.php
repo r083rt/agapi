@@ -19,12 +19,12 @@ class TextfieldQuestionAnalyticController extends Controller
         $data = DB::table('assigment_question_lists as aql')
         ->selectRaw("aql.id,aql.assigment_id,aql.question_list_id,u.name as user_name,g.description as grade,ql.name as question_list_name,ql.created_at, 
         (
-            select group_concat(if(q.score is null,0,q.score)) from questions q 
+            select std(if(q.score is null,0,q.score)) from questions q 
                 inner join question_lists ql2 on q.question_list_id=ql2.id 
                 inner join assigment_question_lists aql2 on aql2.question_list_id=q.question_list_id
                 inner join assigments a2 on a2.id=aql2.assigment_id
             where ql2.ref_id=ql.id and a2.teacher_id is not null #teacher_id jika NULL, maka soalnya adalah soal master (latihan mandiri), tidak soal yg dibagikan (kerjakan soal)
-        ) as scores,
+        ) as score,
         (
             select count(1) from questions q 
                 inner join question_lists ql2 on q.question_list_id=ql2.id 
@@ -46,7 +46,7 @@ class TextfieldQuestionAnalyticController extends Controller
                 $query2->where('description','textarea')->orWhere('description','textfield');
             });
         })
-        ->havingRaw('scores is not null');
+        ->havingRaw('scores_count>0');
       
         if($request->query('educational_level_id') || $request->query('grade_id')){
             $educational_level_id = $request->query('educational_level_id');
@@ -70,16 +70,6 @@ class TextfieldQuestionAnalyticController extends Controller
         }
 
         $paginate = $data->orderBy('scores_count','desc')->paginate($itemsPerPage)->withQueryString();
-        foreach($paginate as $question_list){
-            $question_list->question_list_name = strip_tags($question_list->question_list_name);
-            $scores = explode(',', $question_list->scores);
-            $scores_value = [];
-            foreach($scores as $score) 
-            { 
-                array_push($scores_value,floatval($score));
-            } 
-            $question_list->std = round($this->calculate($scores_value),2);
-        }
         return $paginate;
 
     }
@@ -93,6 +83,9 @@ class TextfieldQuestionAnalyticController extends Controller
         } 
           
         return (float)sqrt($variance/$num_of_elements); 
+    }
+    public function calcaluteTopsis(){
+
     }
     /**
      * Store a newly created resource in storage.

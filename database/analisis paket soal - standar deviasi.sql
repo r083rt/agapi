@@ -6,12 +6,12 @@ select a.id,u.name as user_name,a.user_id,g.description,a.code,a.name,
     where aql.assigment_id=a.id
 )  as master_question_list_ids, 
 (
-	select group_concat(ass.total_score) from assigment_sessions ass 
+	select std(ass.total_score) from assigment_sessions ass 
     inner join assigments a2 on a2.id=ass.assigment_id
     where 
 		a2.is_publish=1 and a2.teacher_id is not null #teacher_id NOT NULL adalah slave soal dari master soal
         and a2.ref_id=a.id
-) as scores, (
+) as score, (
 	select count(ass.total_score) from assigment_sessions ass 
     inner join assigments a2 on a2.id=ass.assigment_id
     where 
@@ -29,5 +29,5 @@ a.created_at
 where 
 	a.is_publish=1 
     and a.teacher_id is null #teacher_id NULL adalah master soal
-#having scores is not null
-order by scores_count desc
+having score is not null
+#order by scores_count desc
