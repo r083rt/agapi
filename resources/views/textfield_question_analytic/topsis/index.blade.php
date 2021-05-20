@@ -9,7 +9,7 @@
     @section('page_header')
     <div class="container-fluid">
         <h1 class="page-title">
-            <i class="voyager-receipt"></i> Analisis Butir Soal Esai
+            <i class="voyager-receipt"></i> SPK Topsis Butir Soal Esai
         </h1>
     </div>
     @stop
@@ -18,11 +18,12 @@
         <div id="app">
             <v-app id="inspire">
                 <v-main>
-                    <v-data-table :server-items-length="totalItems" :options.sync="options" item-key="id"
+                    <v-data-table item-key="id"
                         :loading="loading" :headers="headers" :items="items" class="elevation-1" :search="search">
                         <template v-slot:top>
                             <v-text-field v-model="search" label="Cari" class="mx-4"></v-text-field>
                         </template>
+                      
 
                     </v-data-table>
                 </v-main>
@@ -51,19 +52,19 @@
                             headers: [{
                                     text: '#',
                                     sortable: true,
-                                    value: 'question_list_id',
+                                    value: 'id',
                                 },
                                 {
-                                    text: 'Soal',
-                                    value: 'question_list_name',
+                                    text: 'Pembuat paket soal',
+                                    value: 'user_name',
                                 },
                                 {
                                     text: 'Kelas',
                                     value: 'grade',
                                 },
                                 {
-                                    text: 'Pembuat',
-                                    value: 'user_name',
+                                    text: 'Jenis',
+                                    value: 'name',
                                 },
                                 {
                                     text: 'Jumlah dikerjakan',
@@ -71,8 +72,12 @@
                                     value: 'scores_count',
                                 },
                                 {
-                                    text: 'Skor soal',
+                                    text: 'Std',
                                     value: 'score',
+                                },
+                                {
+                                    text: 'Skor',
+                                    value: 'preference_score',
                                 },
                                 {
                                     text: 'Dibuat',
@@ -81,33 +86,23 @@
                             ]
                         }
                     },
-                    watch: {
-                        options: {
-                            handler(val) {
-                                console.log('options:', val);
-                                this.getDataFromApi()
-                            },
-                            deep: true,
-                        },
-                    },
+                    // watch: {
+                    //     options: {
+                    //         handler(val) {
+                    //             console.log('options:', val);
+                    //             this.getDataFromApi()
+                    //         },
+                    //         deep: true,
+                    //     },
+                    // },
                     methods: {
                         getDataFromApi() {
                             this.loading = true;
-                            const {
-                                sortBy,
-                                sortDesc,
-                                page,
-                                itemsPerPage
-                            } = this.options
-                            axios.get("/admin/api/textfield_question_analytic", {
-                                params: {
-                                    page,
-                                    itemsPerPage
-                                }
-                            }).then(res => {
-                                console.log(res.data);
-                                this.totalItems = res.data.total;
-                                this.items = res.data.data
+                         
+                            axios.get("/admin/api/topsis/textfield_question_analytic").then(res => {
+                                // console.log(res.data);
+                              
+                                this.items = res.data
                                 this.loading = false;
                             }).finally(() => {
 
@@ -115,6 +110,7 @@
                         }
                     },
                     mounted() {
+                        this.getDataFromApi();
                         // this.loading = true;
                         // axios.get("/testgan").then(res => {
                         //     console.log(res.data);

@@ -107,6 +107,45 @@ class QuestionPackageAnalyticController extends Controller
           
         return (float)sqrt($variance/$num_of_elements); 
     }
+    public function topsis(){
+        $data = DB::table('assigments as a')
+        ->selectRaw("a.id,u.name as user_name,g.description as grade,a.code,a.name,
+        a.created_at,
+        (
+            select std(ass.total_score) from assigment_sessions ass 
+            inner join assigments a2 on a2.id=ass.assigment_id
+            where 
+                a2.is_publish=1 and a2.teacher_id is not null #teacher_id NOT NULL adalah slave soal dari master soal
+                and a2.ref_id=a.id
+        ) as score, (
+            select count(ass.total_score) from assigment_sessions ass 
+            inner join assigments a2 on a2.id=ass.assigment_id
+            where 
+                a2.is_publish=1 and a2.teacher_id is not null #teacher_id NOT NULL adalah slave soal dari master soal
+                and a2.ref_id=a.id
+        ) as scores_count    
+        ")
+        ->join('grades as g', 'g.id','=','a.grade_id')
+        ->join('users as u', 'u.id','=','a.user_id')
+
+        // paket soal adalah assigments dengan kondisi teacher_id IS NULL dan is_publish=1
+        ->where('a.is_publish',true)
+        ->whereNull('a.teacher_id')
+        ->havingRaw('score is not null')->get();
+
+        $attributes = ['scores_count'=>['weight'=>5, 'type'=>'benefit'],
+        'score'=>['weight'=>4, 'type'=>'cost']
+        ];
+        $topsis = new \App\Helper\Topsis($attributes, $data);
+        $topsis->addPreferenceAttribute();
+        $new_data = $topsis->calculate();
+        foreach($new_data as $value){
+            $value->preference_score = round($value->preference_score, 3);
+            $value->score = round($value->score, 3);
+        }
+        return $new_data;
+
+    }
     /**
      * Store a newly created resource in storage.
      *

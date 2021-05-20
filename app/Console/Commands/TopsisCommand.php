@@ -69,7 +69,7 @@ class TopsisCommand extends Command
         'score'=>['weight'=>4, 'type'=>'cost']
         ];
         $topsis = new Topsis($attributes, $data);
-        // $topsis->addPreferenceAttribute();
+        $topsis->addPreferenceAttribute();
         $new_data = $topsis->calculate();
         print_r($new_data[0]);
         print_r($new_data[1]);

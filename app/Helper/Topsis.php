@@ -40,14 +40,12 @@ class Topsis{
             for($i=0; $i<$count; $i++){
                 $sum +=  pow($this->data[$i]->{$attribute}, 2);
             }
-            // $this->attributes[$attribute]['sqrt'] = sqrt($sum);
             $sqrt = sqrt($sum);
     
             for($i=0; $i<$count; $i++){
                 $y = $options['weight'] * ($this->data[$i]->{$attribute}/$sqrt);
                 $this->normalizedData[$i]->{$attribute} = $y;
             }
-
             // min max untuk solusi ideal
             $min = $max = $this->normalizedData[0]->{$attribute};
             for($i=0; $i<$count; $i++){

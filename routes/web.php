@@ -76,10 +76,26 @@ Route::group(['prefix' => 'admin'], function () {
             return view('question_package_analytic.index');
         })->name('voyager.questionpackageanalytic');
 
+        Route::prefix('topsis')->group(function(){
+            Route::get('question_package_analytic', function(){
+                return view('question_package_analytic.topsis.index');
+            })->name('voyager.topsis.questionpackageanalytic');
+
+            Route::get('textfield_question_analytic', function(){
+                return view('textfield_question_analytic.topsis.index');
+            })->name('voyager.topsis.textfield.questionanalytic');
+        });
+       
+
         Route::prefix('api')->group(function(){
             Route::get('textfield_question_analytic','API\\Admin\\TextfieldQuestionAnalyticController@index');
             Route::get('selectoptions_question_analytic','API\\Admin\\SelectoptionsQuestionAnalyticController@index');
             Route::get('question_package_analytic','API\\Admin\\QuestionPackageAnalyticController@index');
+
+            Route::prefix('topsis')->group(function(){
+                Route::get('textfield_question_analytic','API\\Admin\\TextfieldQuestionAnalyticController@topsis');
+                Route::get('question_package_analytic','API\\Admin\\QuestionPackageAnalyticController@topsis');
+            });
         });
     });
 });
