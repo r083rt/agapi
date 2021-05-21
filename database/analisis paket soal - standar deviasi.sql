@@ -30,4 +30,5 @@ where
 	a.is_publish=1 
     and a.teacher_id is null #teacher_id NULL adalah master soal
 having score is not null
+limit 100000000
 #order by scores_count desc

@@ -118,7 +118,7 @@ class QuestionPackageAnalyticController extends Controller
                 a2.is_publish=1 and a2.teacher_id is not null #teacher_id NOT NULL adalah slave soal dari master soal
                 and a2.ref_id=a.id
         ) as score, (
-            select count(ass.total_score) from assigment_sessions ass 
+            select count(1) from assigment_sessions ass 
             inner join assigments a2 on a2.id=ass.assigment_id
             where 
                 a2.is_publish=1 and a2.teacher_id is not null #teacher_id NOT NULL adalah slave soal dari master soal
