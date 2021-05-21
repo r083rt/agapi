@@ -23,8 +23,8 @@
                         <template v-slot:top>
                             <v-text-field v-model="search" label="Cari" class="mx-4"></v-text-field>
                         </template>
-                        <template v-slot:item.std="{item}">
-                            @{{item.std}}%
+                        <template v-slot:item.score="{item}">
+                            @{{(item.score*100).toFixed(2)}}%
                         </template>
 
                     </v-data-table>
@@ -75,7 +75,7 @@
                                 },
                                 {
                                     text: 'Rasio benar',
-                                    value: 'std',
+                                    value: 'score',
                                 },
                                 {
                                     text: 'Dibuat',

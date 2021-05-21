@@ -84,6 +84,10 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('textfield_question_analytic', function(){
                 return view('textfield_question_analytic.topsis.index');
             })->name('voyager.topsis.textfield.questionanalytic');
+
+            Route::get('selectoptions_question_analytic', function(){
+                return view('selectoptions_question_analytic.topsis.index');
+            })->name('voyager.topsis.selectoptions.questionanalytic');
         });
        
 
@@ -95,6 +99,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::prefix('topsis')->group(function(){
                 Route::get('textfield_question_analytic','API\\Admin\\TextfieldQuestionAnalyticController@topsis');
                 Route::get('question_package_analytic','API\\Admin\\QuestionPackageAnalyticController@topsis');
+                Route::get('selectoptions_question_analytic','API\\Admin\\SelectoptionsQuestionAnalyticController@topsis');
             });
         });
     });

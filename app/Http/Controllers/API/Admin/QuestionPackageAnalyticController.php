@@ -18,6 +18,20 @@ class QuestionPackageAnalyticController extends Controller
         
         $data = DB::table('assigments as a')
         ->selectRaw("a.id,u.name as user_name,g.description as grade,a.code,a.name,
+        (
+            select std(ass.total_score) from assigment_sessions ass 
+            inner join assigments a2 on a2.id=ass.assigment_id
+            where 
+                a2.is_publish=1 and a2.teacher_id is not null #teacher_id NOT NULL adalah slave soal dari master soal
+                and a2.ref_id=a.id
+        ) as score,
+        (
+            select count(1) from assigment_sessions ass 
+            inner join assigments a2 on a2.id=ass.assigment_id
+            where 
+                a2.is_publish=1 and a2.teacher_id is not null #teacher_id NOT NULL adalah slave soal dari master soal
+                and a2.ref_id=a.id
+        ) as scores_count,
         a.created_at    
         ")
         ->join('grades as g', 'g.id','=','a.grade_id')
@@ -25,9 +39,9 @@ class QuestionPackageAnalyticController extends Controller
 
         // paket soal adalah assigments dengan kondisi teacher_id IS NULL dan is_publish=1
         ->where('a.is_publish',true)
-        ->whereNull('a.teacher_id');
+        ->whereNull('a.teacher_id')
+        ->havingRaw('score is not null');
 
-        // ->havingRaw('scores is not null');
       
         if($request->query('educational_level_id') || $request->query('grade_id')){
             $educational_level_id = $request->query('educational_level_id');
@@ -52,48 +66,9 @@ class QuestionPackageAnalyticController extends Controller
             }
         }
         
-        $paginate = $data->paginate($itemsPerPage)->withQueryString();
-        foreach($paginate as $assigment){
-          
-            $scores = DB::table('assigment_sessions as ass')->
-            whereNotNull('ass.total_score')->
-            whereExists(function($query)use($assigment){
-                $query->select(DB::raw(1))
-                ->from('assigments as a')
-                ->whereColumn('a.id','ass.assigment_id')
-                ->whereNotNull('a.teacher_id')
-                ->where('a.is_publish',1)
-                ->where('a.ref_id', $assigment->id);
-            });
-            
-            $scores_value = [];
-            $scores = $scores->get();
-            foreach($scores as $score){
-                array_push($scores_value,floatval($score->total_score));
-            }
-            $assigment->scores = $scores_value;
-            $assigment->scores_count = count($scores_value);
-            // $question_list->question_list_name = strip_tags($question_list->question_list_name);
-            
-            $assigment->std = null;
-            if($assigment->scores_count>0)$assigment->std = round($this->calculate($scores_value),2);
-        }
-        // return $paginate->items();
-        $items = $paginate->items();
-        usort($items, function($a, $b){
-            if($a->scores_count === $b->scores_count)return 0;
-            return ($a->scores_count < $b->scores_count) ? 1:-1;
-        });
-        // return $paginate;
-        return [
-            'current_page'=>$paginate->currentPage(),
-            'data'=>$items,
-            'next_page_url'=>$paginate->nextPageUrl(),
-            'prev_page_url'=>$paginate->previousPageUrl(),
-            'total'=>$paginate->total(),
-            'per_page'=>$paginate->perPage(),
-            'last_page'=>$paginate->lastPage()
-        ];
+        $paginate = $data->orderBy('scores_count','desc')->paginate($itemsPerPage)->withQueryString();
+        return $paginate;
+      
 
     }
     public function calculate($arr){

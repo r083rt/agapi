@@ -9,7 +9,7 @@
     @section('page_header')
     <div class="container-fluid">
         <h1 class="page-title">
-            <i class="voyager-receipt"></i> Analisis Paket Soal
+            <i class="voyager-receipt"></i> SPK Topsis Butir Soal Pilihan Ganda
         </h1>
     </div>
     @stop
@@ -18,11 +18,15 @@
         <div id="app">
             <v-app id="inspire">
                 <v-main>
-                    <v-data-table :server-items-length="totalItems" :options.sync="options" item-key="id"
+                    <v-data-table item-key="id"
                         :loading="loading" :headers="headers" :items="items" class="elevation-1" :search="search">
                         <template v-slot:top>
                             <v-text-field v-model="search" label="Cari" class="mx-4"></v-text-field>
                         </template>
+                        <template v-slot:item.score="{item}">
+                            @{{(item.score*100).toFixed(2)}}%
+                        </template>
+                      
 
                     </v-data-table>
                 </v-main>
@@ -71,8 +75,12 @@
                                     value: 'scores_count',
                                 },
                                 {
-                                    text: 'Std deviasi',
+                                    text: 'Rasio benar',
                                     value: 'score',
+                                },
+                                {
+                                    text: 'Skor',
+                                    value: 'preference_score',
                                 },
                                 {
                                     text: 'Dibuat',
@@ -81,33 +89,23 @@
                             ]
                         }
                     },
-                    watch: {
-                        options: {
-                            handler(val) {
-                                console.log('options:', val);
-                                this.getDataFromApi()
-                            },
-                            deep: true,
-                        },
-                    },
+                    // watch: {
+                    //     options: {
+                    //         handler(val) {
+                    //             console.log('options:', val);
+                    //             this.getDataFromApi()
+                    //         },
+                    //         deep: true,
+                    //     },
+                    // },
                     methods: {
                         getDataFromApi() {
                             this.loading = true;
-                            const {
-                                sortBy,
-                                sortDesc,
-                                page,
-                                itemsPerPage
-                            } = this.options
-                            axios.get("/admin/api/question_package_analytic", {
-                                params: {
-                                    page,
-                                    itemsPerPage
-                                }
-                            }).then(res => {
-                                console.log(res.data);
-                                this.totalItems = res.data.total;
-                                this.items = res.data.data
+                         
+                            axios.get("/admin/api/topsis/selectoptions_question_analytic").then(res => {
+                                // console.log(res.data);
+                              
+                                this.items = res.data
                                 this.loading = false;
                             }).finally(() => {
 
@@ -115,6 +113,7 @@
                         }
                     },
                     mounted() {
+                        this.getDataFromApi();
                         // this.loading = true;
                         // axios.get("/testgan").then(res => {
                         //     console.log(res.data);

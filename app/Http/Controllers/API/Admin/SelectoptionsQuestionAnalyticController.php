@@ -32,7 +32,8 @@ class SelectoptionsQuestionAnalyticController extends Controller
                 inner join assigment_question_lists aql2 on aql2.question_list_id=q.question_list_id
                 inner join assigments a2 on a2.id=aql2.assigment_id
             where ql2.ref_id=ql.id and a2.teacher_id is not null #teacher_id jika NULL, maka soalnya adalah soal master (latihan mandiri), tidak soal yg dibagikan (kerjakan soal)
-        ) as scores_count
+        ) as scores_count,
+        (select correct_total/scores_count) as score
         ")
         ->join('assigments as a','a.id','=','aql.assigment_id')
         ->join('question_lists as ql','ql.id','=','aql.question_list_id')
@@ -69,10 +70,10 @@ class SelectoptionsQuestionAnalyticController extends Controller
         }
 
         $paginate = $data->orderBy('scores_count','desc')->paginate($itemsPerPage)->withQueryString();
-        foreach($paginate as $question_list){
+        // foreach($paginate as $question_list){
           
-            $question_list->std = round($question_list->correct_total/$question_list->scores_count*100,2);
-        }
+        //     $question_list->score = round($question_list->correct_total/$question_list->scores_count*100,2);
+        // }
         return $paginate;
 
     }
@@ -86,6 +87,52 @@ class SelectoptionsQuestionAnalyticController extends Controller
         } 
           
         return (float)sqrt($variance/$num_of_elements); 
+    }
+    public function topsis(){
+        $data = DB::table('assigment_question_lists as aql')
+        ->selectRaw("aql.id,aql.assigment_id,aql.question_list_id,u.name as user_name,g.description as grade,ql.name as question_list_name,ql.created_at, 
+        (
+            select count(1) from questions q 
+                inner join question_lists ql2 on q.question_list_id=ql2.id 
+                inner join assigment_question_lists aql2 on aql2.question_list_id=q.question_list_id
+                inner join assigments a2 on a2.id=aql2.assigment_id
+            where ql2.ref_id=ql.id and a2.teacher_id is not null #teacher_id jika NULL, maka soalnya adalah soal master (latihan mandiri), tidak soal yg dibagikan (kerjakan soal)
+            and q.score=100
+        ) as correct_total,
+        (
+            select count(1) from questions q 
+                inner join question_lists ql2 on q.question_list_id=ql2.id 
+                inner join assigment_question_lists aql2 on aql2.question_list_id=q.question_list_id
+                inner join assigments a2 on a2.id=aql2.assigment_id
+            where ql2.ref_id=ql.id and a2.teacher_id is not null #teacher_id jika NULL, maka soalnya adalah soal master (latihan mandiri), tidak soal yg dibagikan (kerjakan soal)
+        ) as scores_count,
+        (select correct_total/scores_count) as score
+        ")
+        ->join('assigments as a','a.id','=','aql.assigment_id')
+        ->join('question_lists as ql','ql.id','=','aql.question_list_id')
+        ->join('users as u','u.id','=','a.user_id')
+        ->join('grades as g', 'g.id','=','a.grade_id')
+
+        // memastikan bahwa pembuat assigment sama dengan pembuat soal
+        ->whereColumn('a.user_id','aql.creator_id')->where('a.is_publish',false)
+        ->whereExists(function($query){
+            // hanya mengambil soal isian (tidak pilihan ganda)
+            $query->select(DB::raw(1))->from('assigment_types')->whereColumn('assigment_types.id','aql.assigment_type_id')->where('description','selectoptions');
+        })
+        ->havingRaw('score is not null')->get();
+
+        $attributes = ['scores_count'=>['weight'=>5, 'type'=>'benefit'],
+        'score'=>['weight'=>4, 'type'=>'benefit']
+        ];
+        $topsis = new \App\Helper\Topsis($attributes, $data);
+        $topsis->addPreferenceAttribute();
+        $new_data = $topsis->calculate();
+        foreach($new_data as $value){
+            $value->preference_score = round($value->preference_score, 3);
+            $value->score = round($value->score, 3);
+        }
+        return $new_data;
+        
     }
     /**
      * Store a newly created resource in storage.
