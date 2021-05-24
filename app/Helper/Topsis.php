@@ -6,7 +6,6 @@ class Topsis{
     private $data;
     private $sorted_data;
     private $normalizedData;
-    private $weightedNormalizedData;
     private $positiveIdealSolution;
     private $negativeIdealSolution;
     private $preferences;

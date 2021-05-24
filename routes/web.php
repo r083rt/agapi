@@ -359,7 +359,10 @@ Route::get('/getcontactnumber',function(){
 });
 
 
-Route::get('/testgan','API\\Admin\\QuestionAnalyticController@index');
+Route::get('/testgan',function(){
+    $data = DB::table('question_lists')->where('is_paid',-1)->get();
+    return $data;
+});
 
 
 Route::get('/reverseproxy', function(Request $request){

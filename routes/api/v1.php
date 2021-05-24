@@ -333,7 +333,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         ////////////////////////////////////////////////////////////////////
 
         Route::get('/assigments/users/search/{key}', 'UserController@searchByKtaId');
-        Route::get('/assigments/questionlists/search/{subjectId}/{educationalLevelId}', 'AssigmentController@buildSearch');
+        Route::get('/assigments/questionlists/search/{assigmentCategoryId}/{educationalLevelId}', 'AssigmentController@buildSearch');
         Route::get('/assigments/start/{code}/{ktaId}', 'AssigmentController@start');
         Route::post('/assigments/check', 'AssigmentController@check');
         Route::post('/assigments/share', 'AssigmentController@share');
