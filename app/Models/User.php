@@ -232,5 +232,8 @@ class User extends \TCG\Voyager\Models\User
     public function rooms(){
         return $this->belongsToMany('App\Models\Room','user_rooms','user_id','room_id')->withPivot('is_admin');
     }
-
+    public function receivesBroadcastNotificationsOn()
+    {
+        return 'notification.'.$this->id;
+    }
 }

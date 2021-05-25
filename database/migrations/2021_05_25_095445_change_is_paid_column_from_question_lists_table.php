@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddForeignKeyToAssigmentsTable extends Migration
+class ChangeIsPaidColumnFromQuestionListsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class AddForeignKeyToAssigmentsTable extends Migration
      */
     public function up()
     {
-        Schema::table('assigments', function (Blueprint $table) {
-            $table->foreign('ref_id')->references('id')->on('assigments');
-
+        Schema::table('question_lists', function (Blueprint $table) {
+            $table->boolean('is_paid')->nullable()->change();
         });
     }
 
@@ -26,8 +25,8 @@ class AddForeignKeyToAssigmentsTable extends Migration
      */
     public function down()
     {
-        Schema::table('assigments', function (Blueprint $table) {
-            $table->dropForeign('assigments_ref_id_foreign');
+        Schema::table('question_lists', function (Blueprint $table) {
+            //
         });
     }
 }

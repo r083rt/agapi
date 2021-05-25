@@ -7,5 +7,5 @@ inner join top_question_lists tql2 on tql2.id=tql.max_id
 inner join assigment_question_lists	aql on aql.question_list_id=ql.id
 where
 	tql2.score is not null
-    #and aql.creator_id=1
+   and (ql.is_paid=-1 or ql.is_paid is null)
 order by tql2.score desc

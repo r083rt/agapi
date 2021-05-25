@@ -360,7 +360,7 @@ Route::get('/getcontactnumber',function(){
 
 
 Route::get('/testgan',function(){
-    $data = DB::table('question_lists')->where('is_paid',-1)->get();
+    $data = DB::table('notifications')->where('data->assigment->id',278)->get();
     return $data;
 });
 

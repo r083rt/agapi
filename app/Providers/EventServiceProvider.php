@@ -68,6 +68,9 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\AlsoCommentedPostEvent'=>[
             'App\Listeners\AlsoCommentedPostListener',
         ],
+        'App\Events\PayableAssigmentEvent'=>[
+            'App\Listeners\PayableAssigmentListener',
+        ],
         
     ];
 
