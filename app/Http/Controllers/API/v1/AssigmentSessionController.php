@@ -12,6 +12,7 @@ use App\Models\Answer;
 use App\Models\AnswerList;
 use App\Models\QuestionList;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 
 class AssigmentSessionController extends Controller
@@ -26,6 +27,80 @@ class AssigmentSessionController extends Controller
         //
     }
 
+    // sama dgn store, bedanya hanya mengambil soal pil. ganda dan langsung menyimpan dan menampilkan total nilai dri soal pil. ganda tsb
+    public function store2(Request $request){
+        // DB::transaction(function ()use($request) {
+            $request->validate([
+                'id'=>'required',
+                'question_lists'=>'required',
+                'question_lists.*.answer'=>'required',
+            ]);
+           
+            $assigment = Assigment::with(['question_lists'=>function($query){
+                $query->selectRaw('question_lists.*,ats.description as assigment_type')->join('assigment_question_lists as aql','aql.question_list_id','=','question_lists.id')
+                ->join('assigment_types as ats','ats.id','=','aql.assigment_type_id')
+                ->where('ats.description','selectoptions');
+            }, 'question_lists.answer_lists'])->findOrFail($request->id);
+
+            // return $assigment;
+
+            $session = new Session;
+            $session->user_id = $request->user()->id; //diisi dgn auth yg mengerjakan skrng
+            // $session->value = $request->value ?? null;
+            $session->save();
+            
+            $total_score=0; //hanya digunakan jika soal pilihan ganda semua
+        
+            //$assigment->sessions()->save($session,['user_id'=>$request->teacher_id]);
+            $assigment_session = new AssigmentSession;
+            $assigment_session->assigment_id = $assigment->id;
+            $assigment_session->session_id = $session->id;
+            $assigment_session->user_id = $assigment->teacher_id; //diisi dengan pembuat soal/guru
+            $assigment_session->save();
+            //Fungsi sync tidak digunakan agar Observer nya bisa ter-trigger oleh kode di atas
+            //$session->assigments()->sync([$assigment->id=>['user_id'=>$assigment->teacher_id]]);
+            
+
+
+            $user_questions = collect($request->question_lists);
+            foreach ($assigment->question_lists as $q => $question_list) {
+
+                //mengecek apakah paket soal yang dikirim mempunyai id soal yg sesuai dgn yg ada di db
+                if($user_questions->contains('id',$question_list->id)){ 
+                    
+                    $user_question = $user_questions->firstWhere('id',$question_list->id);
+                   
+                    // $answer_list = 
+                    $user_answer = $question_list->answer_lists()->findOrFail($user_question['answer']); //mendapatkan jawaban dari questions
+                    $question_list->answer = $user_question['answer'];
+                    
+                    if($user_answer->value==100) $total_score += 100;
+   
+                    // insert session to to question
+                    $db_question = new Question();
+                    $db_question->fill($question_list->toArray());
+                    $db_question->question_list_id =  $user_answer->question_list_id;
+                    $db_question->score = $user_answer->value;
+    
+                    $session->questions()->save($db_question);
+                    // insert answer to question
+                    $db_answer = new Answer;
+                    $db_answer->fill($user_answer->toArray());
+                    $db_answer->answer_list_id = $user_answer->id;
+                    $db_question->answer()->save($db_answer);
+                }
+
+                
+            }
+            // Log::debug('test assigment_session_controller store2');
+            //mengecek apakah request dari latihan soal dan mengecek apakah jumlah soal pilihan ganda yang kirim sama dengan jumlah soal pilihan ganda di db
+            $final_score = round($total_score/count($assigment->question_lists), 2);
+            $assigment->assigment_session->total_score = $final_score;
+            $assigment->assigment_session->save();
+            return response()->json(['score'=>['value'=>$final_score], 'assigment'=>$assigment]);
+        
+        // });
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -205,5 +280,11 @@ class AssigmentSessionController extends Controller
     public function destroy(AssigmentSession $assigmentSession)
     {
         //
+    }
+    public function history($assigment_id){
+        $assigment = Assigment::with(['sessions'=>function($query){
+            $query->where('sessions.user_id',auth()->user()->id)->orderBy('id','desc');
+        }])->findOrFail($assigment_id);
+        return $assigment;
     }
 }

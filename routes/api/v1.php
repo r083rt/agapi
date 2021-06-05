@@ -472,6 +472,19 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         //api untuk semua modul
         //Route::get('/template/owned','TemplateController@owned');
 
+        Route::middleware('isTeacher')->get('/question_item/payable','QuestionListController@payableItemList');
+        Route::middleware('isTeacher')->post('/question_item/setispaid/{question_list_id}','QuestionListController@setIsPaid');
+
+        Route::middleware('isTeacher')->get('/question_package/payable','AssigmentController@payableItemList');
+        // Route::get('/question_package/payable');
+        Route::middleware('isTeacher')->get('/test',function(Request $request){
+            return $request->user()->role;
+        });
+
+        Route::get('/assigments/{assigment_id}/show','AssigmentController@show2');
+        Route::post('/assigmentsessions/store2', 'AssigmentSessionController@store2');
+        Route::get('/assigments/{assigment_id}/history', 'AssigmentSessionController@history');
+
     });
 
     // END API WITH SECURITY ---------------------------------------------------------------------------------

@@ -20,7 +20,7 @@ class TopsisCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Hitung topsis unt';
+    protected $description = 'Hitung topsis untuk setiap paket soal dan butir soal kemudian simpan hasilnya';
 
     /**
      * Create a new command instance.
@@ -62,6 +62,8 @@ class TopsisCommand extends Command
             // hanya mengambil soal isian (tidak pilihan ganda)
             $query->select(DB::raw(1))->from('assigment_types')->whereColumn('assigment_types.id','aql.assigment_type_id')->where('description','selectoptions');
         })
+        ->whereNull('ql.is_paid') //akan mengambil question_list yang belum dicek saja, 
+        // assigment yg masih dalam konfirmasi (-1), terkonfirmasi tidak berbayar (0), dan terkonfirmasi berbayar (>=1) tidak perlu discan lgi
         ->havingRaw('score is not null')->get();
         return $data;
     }
@@ -96,6 +98,8 @@ class TopsisCommand extends Command
                 $query2->where('description','textarea')->orWhere('description','textfield');
             });
         })
+        ->whereNull('ql.is_paid') //akan mengambil question_list yang belum dicek saja, 
+        // assigment yg masih dalam konfirmasi (-1), terkonfirmasi tidak berbayar (0), dan terkonfirmasi berbayar (>=1) tidak perlu discan lgi
         ->havingRaw('score is not null')->get();
         return $data;
     }
@@ -123,6 +127,8 @@ class TopsisCommand extends Command
         // paket soal adalah assigments dengan kondisi teacher_id IS NULL dan is_publish=1
         ->where('a.is_publish',true)
         ->whereNull('a.teacher_id')
+        ->whereNull('a.is_paid') //akan mengambil assigment yang belum dicek saja, 
+        // assigment yg masih dalam konfirmasi (-1), terkonfirmasi tidak berbayar (0), dan terkonfirmasi berbayar (>=1) tidak perlu discan lgi
         ->havingRaw('score is not null')->get();
 
         return $data;
@@ -140,6 +146,7 @@ class TopsisCommand extends Command
         'score'=>['weight'=>4, 'type'=>'cost']
         ];
         $data = $this->getQuestionListsPackages();
+        echo count($data)." paket soal -> ";
         $topsis = new Topsis($attributes, $data);
         $topsis->addPreferenceAttribute();
         $new_data = $topsis->calculate();
@@ -152,9 +159,10 @@ class TopsisCommand extends Command
             ]);
           
         }
-        echo DB::table('top_assigments')->insert($insert);
+        echo DB::table('top_assigments')->insert($insert)."\n";
 
         $data = $this->getTextfieldQuestionLists();
+        echo count($data)." soal uraian -> ";
         $topsis = new Topsis($attributes, $data);
         $topsis->addPreferenceAttribute();
         $new_data = $topsis->calculate();
@@ -166,11 +174,12 @@ class TopsisCommand extends Command
             'updated_at'=> $datetime
             ]);
         }
-        echo DB::table('top_question_lists')->insert($insert);
+        echo DB::table('top_question_lists')->insert($insert)."\n";
         // $insert = [];
 
         $attributes['score']['type'] = 'benefit';
         $data = $this->getSelectoptionsQuestionLists();
+        echo count($data)." soal pilihan ganda -> ";
         $topsis = new Topsis($attributes, $data);
         $topsis->addPreferenceAttribute();
         $new_data = $topsis->calculate();
@@ -182,7 +191,7 @@ class TopsisCommand extends Command
             'updated_at'=> $datetime
             ]);
         }
-        echo DB::table('top_question_lists')->insert($insert);
+        echo DB::table('top_question_lists')->insert($insert)."\n";
     
         return 0;
     }

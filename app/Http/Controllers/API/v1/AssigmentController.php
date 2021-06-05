@@ -409,6 +409,21 @@ class AssigmentController extends Controller
         $assigment->save();
         return $assigment;
     }
+    public function show2($id){
+        //menampilkan assigment dengan question list tanpa jawaban
+        $assigment = Assigment::with(['question_lists'=>function($query){
+            $query->selectRaw('question_lists.*,ats.description as assigment_type')->join('assigment_question_lists as aql','aql.question_list_id','=','question_lists.id')
+            ->join('assigment_types as ats','ats.id','=','aql.assigment_type_id')
+            ->where('ats.description','selectoptions');
+        },'question_lists.answer_lists'=>function($query){
+            $query->selectRaw('answer_lists.id,answer_lists.question_list_id,answer_lists.name');
+        }])->findOrFail($id);
+        foreach($assigment->question_lists as $ql){
+            $ql->answer = null;
+        }
+        // $question_list = \App\Models\QuestionList::where
+        return $assigment;
+    }
     /**
      * Display the specified resource.
      *
@@ -859,7 +874,20 @@ class AssigmentController extends Controller
         $writer->save('php://output');
         exit();
 
+    }
 
-
+    public function payableItemList(){
+        
+        $data = \App\Models\Assigment::with('grade','question_lists.answer_lists')//->selectRaw('assigments.id,assigments.user_id,assigments.topic,assigments.name,assigments.created_at')
+      
+        // null = soal belum berkualifikasi
+        // -1 = belum dikonfirmasi
+        // 0 = berkualifikasi tapi terkonfirmasi tidak berbayar
+        // 1 = berkualifikasi tapi terkonfirmasi berbayar
+        ->where('assigments.user_id', auth()->user()->id)
+        ->whereIn('assigments.is_paid',[-1,0,1])
+        ->paginate();
+        return $data;
+        
     }
 }

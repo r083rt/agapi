@@ -40,5 +40,8 @@ class QuestionList extends Model
     public function questions(){
         return $this->hasMany('App\Models\Question','question_list_id');
     }
+    // public function a(){
+    //     return $this->has
+    // }
 
 }

@@ -70,5 +70,6 @@ class Kernel extends HttpKernel
         'checkSurveyor'=>\App\Http\Middleware\checkSurveyor::class,
         'checkSubAdmin'=>\App\Http\Middleware\checkSubAdmin::class,
         'checkWhiteListIp'=>\App\Http\Middleware\WhiteListIpMiddleware::class,
+        'isTeacher' => \App\Http\Middleware\IsTeacher::class
     ];
 }
