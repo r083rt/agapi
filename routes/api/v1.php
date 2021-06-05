@@ -474,8 +474,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::middleware('isTeacher')->get('/question_item/payable','QuestionListController@payableItemList');
         Route::middleware('isTeacher')->post('/question_item/setispaid/{question_list_id}','QuestionListController@setIsPaid');
+        Route::middleware('isTeacher')->get('/question_item/payable/{question_list_id}','QuestionListController@getPayableItem');
+
 
         Route::middleware('isTeacher')->get('/question_package/payable','AssigmentController@payableItemList');
+        
         // Route::get('/question_package/payable');
         Route::middleware('isTeacher')->get('/test',function(Request $request){
             return $request->user()->role;

@@ -109,13 +109,46 @@ class QuestionListController extends Controller
         // ->where('aql.creator_id',auth()->user()->id)->whereIn('question_lists.is_paid',[-1,0,1])
         ->groupBy('aql.question_list_id')
         ->paginate();
+        
         foreach($data as $ql){
             $ql->name = strip_tags($ql->name);
         }
         return $data;
         
     }
+    public function getPayableItem($question_list_id){
+        $workedQuestionList = DB::table('questions as q')->selectRaw('count(1) as total, ql2.ref_id as question_list_id')
+        ->join('question_lists as ql2', 'q.question_list_id','=','ql2.id')
+        ->join('assigment_question_lists as aql2', 'aql2.question_list_id','=','q.question_list_id')
+        ->join('assigments as a2', 'a2.id','=','aql2.assigment_id')
+        ->whereNotNull('ql2.ref_id')->whereNotNull('a2.teacher_id')
+        ->groupBy('ql2.ref_id');
+
+
+        $data = \App\Models\QuestionList::selectRaw('question_lists.id,question_lists.is_paid,question_lists.name,worked_question_list.total as scores_count,
+        question_lists.created_at,ats.description as assigment_type,ats.name as assigment_type_name,a.topic,a.subject,
+        g.description as grade,ac.description as assigment_category')->with('answer_lists')
+        ->join('assigment_question_lists as aql','aql.question_list_id','=','question_lists.id')
+        ->join('assigment_types as ats', 'ats.id','=','aql.assigment_type_id')
+        ->join('assigments as a','a.id','=','aql.assigment_id')
+        ->join('grades as g','g.id','=','a.grade_id')
+        ->join('assigment_categories as ac','ac.id','=','a.assigment_category_id')
+        ->joinSub($workedQuestionList, 'worked_question_list', function($join){
+            $join->on('aql.question_list_id', '=', 'worked_question_list.question_list_id');
+        })
+        // null = soal belum berkualifikasi
+        // -1 = belum dikonfirmasi
+        // 0 = berkualifikasi tapi terkonfirmasi tidak berbayar
+        // 1 = berkualifikasi tapi terkonfirmasi berbayar
+        ->where('aql.creator_id',auth()->user()->id)->whereIn('question_lists.is_paid',[-1])
+        // ->where('aql.creator_id',auth()->user()->id)->whereIn('question_lists.is_paid',[-1,0,1])
+        ->groupBy('aql.question_list_id')
+        ->findOrFail($question_list_id);
+        
+        return $data;
+    }
     public function setIsPaid($question_list_id, Request $request){
+        
         $request->validate([
             'value'=>['required', 
                 Rule::in(['1', '0']), 
@@ -135,6 +168,11 @@ class QuestionListController extends Controller
         ->find($question_list_id);
         $data->is_paid = $request->value;
         $data->save();
+        
+        $notificationToDelete = auth()->user()->notifications()->where('type','App\Notifications\PayableQuestionListNotification')->where('data->question_list->id',$question_list_id)->first();
+        $deleteNotification = auth()->user()->notifications()->where('type','App\Notifications\PayableQuestionListNotification')->where('id',$notificationToDelete->id)->delete();
+        // $deleteNotification = auth()->user()->notification()->where('type','App\Notifications\PayableQuestionListNotification')
+        $data->notificationToDelete = $notificationToDelete;
         return $data;
 
 
