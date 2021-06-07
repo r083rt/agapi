@@ -6,6 +6,8 @@ use Illuminate\Console\Command;
 use App\Notifications\PayableAssigmentNotification;
 use App\Notifications\PayableQuestionListNotification;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
+
 use DB;
 class Ranking extends Command
 {
@@ -14,9 +16,7 @@ class Ranking extends Command
      *
      * @var string
      */
-    private $assigmentPercentage = 0.01;
-    private $questionSelectoptionPercentage = 0.01;
-    private $questionTextPercentage = 0.01;
+   
     protected $signature = 'ranking';
 
     /**
@@ -44,20 +44,22 @@ class Ranking extends Command
     public function handle()
     {
 
-        echo "[+] Paket soal\n";
-        $this->assigmentsRanking(0.01);
-        echo "[+] Butir soal pilihan ganda\n";
-        $this->questionListsRanking(["selectoptions"], 0.01);
-        echo "[+] Butir soal uraian\n";
-        $this->questionListsRanking(["textfield","textarea"], 0.01);
+        Log::channel('topsis')->info("[+] Paket soal");
+        $this->assigmentsRanking(0.2, 0.3);
+
+        Log::channel('topsis')->info("[+] Butir soal pilihan ganda");
+        $this->questionListsRanking(["selectoptions"], 0.2, 0.3);
+
+        Log::channel('topsis')->info("[+] Butir soal uraian");
+        $this->questionListsRanking(["textfield","textarea"], 0.2, 0.3);
         // print_r($assigment_ids);
         
         return 0;
        
     }
-    private function assigmentsRanking($percentage=0.1){
+    private function assigmentsRanking($percentage=0.1, $min_score=0.3){
         //referensi file: top_assigments2.sql
-
+        Log::channel('topsis')->info("[+]Mengambil $percentage paket soal dari keseluruhan soal yang memiliki minimal skor $min_score");
         //subquery yg dipakai untuk join
         $topAssigments = DB::table('top_assigments')->selectRaw('created_at,assigment_id,max(id) as max_id')
         ->groupBy('assigment_id');
@@ -72,11 +74,12 @@ class Ranking extends Command
             // $query->where('is_paid',-1)->orWhereNull('is_paid');
             $query->whereNull('is_paid');
         })
+        ->where('ta2.score', '>=',$min_score)
         ->orderBy('ta2.score', 'desc');
         $count = $population->count();
-        echo "-> total: {$count}\n";
+        Log::channel('topsis')->info("[+] total data: {$count}");
         $limit = round($percentage*($count)); 
-        
+        Log::channel('topsis')->info("[+] data diambil: {$limit}");
         #nilai is_paid
         # -1 konfirmsasi berbayar atau tidak
         # NULL belum dicek
@@ -90,30 +93,32 @@ class Ranking extends Command
         foreach($sample as $data){
             array_push($assigment_ids, $data->id);
         }
-        print_r($assigment_ids);
+        // print_r($assigment_ids);
         $updated_count = DB::table('assigments')->whereIn('id',$assigment_ids)->update([
             'is_paid'=>-1]);
-        echo "{$updated_count} assigments updated\n";
+        Log::channel('topsis')->info("[+] {$updated_count} assigments updated to -1");
         
         // notifikasi dan hapus notifikasi lama
-        echo '-> removeNotification: ';
+        Log::channel('topsis')->info("[+] removeNotification:");
+        $log='';
         foreach($sample as $assigment){
             $user = User::find($assigment->user_id);
             $removeNotification =  $user->notifications()->where('data->assigment->id', $assigment->id)
-            ->where('type', 'App\Notifications\PayableAssigmentNotification')
+            ->where('type', 'Appotifications\PayableAssigmentNotification')
             ->delete();
-            echo $removeNotification." ";
+            $log.= "\n$removeNotification ";
             $user->notify(new PayableAssigmentNotification($assigment));
-            
+            $log.= " -> Skor assigment id {$assigment->id}: {$assigment->latest_score}";
             // return 0;
         }
-        echo "\n";
+        Log::channel('topsis')->info($log."\n");
       
 
      
     }
-    private function questionListsRanking($assigment_type=["selectoptions"], $percentage=0.01){
+    private function questionListsRanking($assigment_type=["selectoptions"], $percentage=0.01, $min_score=0.3){
       
+        Log::channel('topsis')->info("[+] Mengambil $percentage paket soal dari keseluruhan butir soal yang memiliki minimal skor $min_score");
         // print_r($assigment_type);
         //referensi file: top_assigments2.sql
 
@@ -135,12 +140,14 @@ class Ranking extends Command
         })
         ->whereIn('att.description',$assigment_type)
         // ->groupBy('aql.question_list_id')
+        ->where('tql2.score', '>=',$min_score)
         ->orderBy('tql2.score', 'desc');
       
         $count = $population->count();
         $limit = round($percentage*($count)); 
 
-        echo "-> total: {$count}\n";
+        Log::channel('topsis')->info("[+] total data: {$count}");
+        Log::channel('topsis')->info("[+] data diambil: {$limit}");
           #nilai is_paid
         # -1 konfirmsasi berbayar atau tidak
         # NULL belum dicek
@@ -154,24 +161,27 @@ class Ranking extends Command
         foreach($sample as $data){
             array_push($question_list_ids, $data->id);
         }
-        print_r($question_list_ids);
+        // print_r($question_list_ids);
         $updated_count = DB::table('question_lists')->whereIn('id',$question_list_ids)->update([
             'is_paid'=>-1]); //-1 = konfirmsasi berbayar atau tidak
-        echo "{$updated_count} question_lists updated\n";
+
+        Log::channel('topsis')->info("{$updated_count} question_lists updated to -1");
         // return 0;
          // notifikasi dan hapus notifikasi lama
-        echo '-> removeNotification: ';
+        Log::channel('topsis')->info("[+] removeNotification:");
+        $log = '';
         foreach($sample as $question_list){
             $user = User::find($question_list->creator_id);
             $removeNotification =  $user->notifications()->where('data->question_list->id', $question_list->id)
-            ->where('type', 'App\Notifications\PayableQuestionListNotification')
+            ->where('type', 'Appotifications\PayableQuestionListNotification')
             ->delete();
-            echo $removeNotification." ";
+            $log.="\n".$removeNotification;
             $question_list->name = strip_tags($question_list->name); //hapus tag html dri soal
             $user->notify(new PayableQuestionListNotification($question_list)); 
+            $log.=" -> Skor question_list id {$question_list->id}: {$question_list->latest_score}";
             // return 0;
         }
-        echo "\n";
+        Log::channel('topsis')->info($log."\n");
         
        
     }

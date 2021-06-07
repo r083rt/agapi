@@ -62,12 +62,16 @@ class TopsisCommand extends Command
             // hanya mengambil soal isian (tidak pilihan ganda)
             $query->select(DB::raw(1))->from('assigment_types')->whereColumn('assigment_types.id','aql.assigment_type_id')->where('description','selectoptions');
         })
-        ->whereNull('ql.is_paid') //akan mengambil question_list yang belum dicek saja, 
+        //akan mengambil question_list yang belum dicek saja, 
         // assigment yg masih dalam konfirmasi (-1), terkonfirmasi tidak berbayar (0), dan terkonfirmasi berbayar (>=1) tidak perlu discan lgi
+        ->whereNull('ql.is_paid') 
+         // di group by karena ada kasus data question list lebih dari 1, tpi datanya sama semua
+         ->groupBy('ql.id')
         ->havingRaw('score is not null')->get();
         return $data;
     }
     public function getTextfieldQuestionLists(){
+        // referensi sql: analisis butir soal.sql
         $data = DB::table('assigment_question_lists as aql')
         ->selectRaw("aql.id,aql.assigment_id,aql.question_list_id,u.name as user_name,g.description as grade,ql.name as question_list_name,ql.created_at, 
         (
@@ -98,8 +102,11 @@ class TopsisCommand extends Command
                 $query2->where('description','textarea')->orWhere('description','textfield');
             });
         })
-        ->whereNull('ql.is_paid') //akan mengambil question_list yang belum dicek saja, 
+         //akan mengambil question_list yang belum dicek saja, 
         // assigment yg masih dalam konfirmasi (-1), terkonfirmasi tidak berbayar (0), dan terkonfirmasi berbayar (>=1) tidak perlu discan lgi
+        ->whereNull('ql.is_paid')
+        // di group by karena ada kasus data question list lebih dari 1, tpi datanya sama semua
+        ->groupBy('ql.id')
         ->havingRaw('score is not null')->get();
         return $data;
     }

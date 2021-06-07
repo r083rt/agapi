@@ -876,18 +876,94 @@ class AssigmentController extends Controller
 
     }
 
+    private function payableQuery(){
+         // query untuk assigments yang telah dikerjakan
+         $workedAssigment = DB::table('assigment_sessions as ass')->selectRaw('a2.ref_id as assigment_id,count(1) as scores_count')
+         ->join('assigments as a2','a2.id','=','ass.assigment_id')
+         ->where('a2.is_publish',1)->whereNotNull('a2.teacher_id')->whereNotNull('a2.ref_id')
+         ->groupBy('a2.ref_id');
+         
+         // return $workedAssigment->get();
+ 
+         $query = \App\Models\Assigment::selectRaw('assigments.*,g.description,worked_assigment.scores_count')->with('grade','user','question_lists.answer_lists')//->selectRaw('assigments.id,assigments.user_id,assigments.topic,assigments.name,assigments.created_at')
+         ->join('grades as g','g.id','=','assigments.grade_id')
+         ->joinSub($workedAssigment,'worked_assigment', function($join){
+             $join->on('worked_assigment.assigment_id', '=','assigments.id');
+         })
+         // return $data->toSql();  
+         // null = soal belum berkualifikasi
+         // -1 = belum dikonfirmasi
+         // 0 = berkualifikasi tapi terkonfirmasi tidak berbayar
+         // 1 = berkualifikasi tapi terkonfirmasi berbayar
+         ->where('assigments.user_id', auth()->user()->id)
+         // ->whereIn('assigments.is_paid',[-1,0,1])
+         ->whereIn('assigments.is_paid',[-1]);
+
+         return $query;
+    }
+    private function getQualityDescription($score){
+        $arr = [
+            ['score'=>0.96,
+            'text'=>'Kualitas Luar Biasa'],
+            ['score'=>0.91,
+            'text'=>'Kualitas Sangat Baik'],
+            ['score'=>0.86,
+            'text'=>'Kualitas Sangat Bagus'],
+            ['score'=>0.81,
+            'text'=>'Kualitas Bagus'],
+            ['score'=>0.76,
+            'text'=>'Kualitas Berpotensi'],
+            ['score'=>0.71,
+            'text'=>'Kualitas Memadai'],
+            ['score'=>0.66,
+            'text'=>'Kualitas Lumayan'],
+            ['score'=>0.61,
+            'text'=>'Kualitas Berkembang'],
+            ['score'=>0.56,
+            'text'=>'Kualitas Cukup'],
+            ['score'=>0.51,
+            'text'=>'Kualitas Biasa'],
+        ];
+        foreach($arr as $k=>$v){
+            if($score>=$v['score'])return $v['text'];
+        }
+        return 'Kualitas Kurang';
+
+    }
     public function payableItemList(){
-        
-        $data = \App\Models\Assigment::with('grade','question_lists.answer_lists')//->selectRaw('assigments.id,assigments.user_id,assigments.topic,assigments.name,assigments.created_at')
-      
-        // null = soal belum berkualifikasi
-        // -1 = belum dikonfirmasi
-        // 0 = berkualifikasi tapi terkonfirmasi tidak berbayar
-        // 1 = berkualifikasi tapi terkonfirmasi berbayar
-        ->where('assigments.user_id', auth()->user()->id)
-        ->whereIn('assigments.is_paid',[-1,0,1])
-        ->paginate();
+        $data = $this->payableQuery()->paginate();
         return $data;
         
+    }
+    public function getPayableItem($assigment_id){
+        // return $assigment_id;
+        $data = $this->payableQuery()->findOrFail($assigment_id);
+        return $data;
+    }
+    public function setIsPaid($assigment_id, Request $request){
+        
+        $request->validate([
+            'value'=>['required', 
+                Rule::in(['1', '0']), 
+                function ($attribute, $value, $fail)use($request) {
+                    $data = \App\Models\Assigment::findOrFail($request->assigment_id);
+                    if($data->is_paid!=-1)$fail('Paket Soal ini sudah diset oleh pemilik soal menjadi '.($data->is_paid?'berbayar':'tidak berbayar'));
+
+                }
+            ],
+        ]);
+        // return $question_list_id;
+        $data = \App\Models\Assigment::where('user_id', auth()->user()->id  )
+        ->find($assigment_id);
+        $data->is_paid = $request->value;
+        $data->save();
+        
+        $notificationToDelete = auth()->user()->notifications()->where('type','App\Notifications\PayableAssigmentNotification')->where('data->assigment->id',$assigment_id)->first();
+        $deleteNotification = auth()->user()->notifications()->where('type','App\Notifications\PayableAssigmentNotification')->where('id',$notificationToDelete->id)->delete();
+        // $deleteNotification = auth()->user()->notification()->where('type','App\Notifications\PayableQuestionListNotification')
+        $data->notificationToDelete = $notificationToDelete;
+        return $data;
+
+
     }
 }
