@@ -385,7 +385,7 @@ class AssigmentController extends Controller
                     ->loadCount('comments', 'likes', 'liked')
             );
 
-            
+
         }catch (\PDOException $e) {
             // Woopsy
             dd($e);
@@ -486,6 +486,7 @@ class AssigmentController extends Controller
             'user',
             'grade',
             'assigment_category',
+            'question_lists.images',
             'question_lists.answer_lists'=>function($query){
                 if(auth('api')->user()->role->name=="student"){
                     $query->select('id','question_list_id','name');//pastikan student tidak bisa melihat kunci jawaban

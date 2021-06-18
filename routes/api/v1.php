@@ -144,10 +144,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             return $res;
         });
         Route::get('/auth/assigments/unpublished', function(Request $request){
-            return \App\Models\Assigment::with('likes','comments.user','user','grade','assigment_category','question_lists.assigment_types')->where('user_id','=',auth('api')->user()->id)->where('is_publish',false)->whereNull('teacher_id')->orderBy('id','desc')->paginate();
+            return \App\Models\Assigment::with('likes','comments.user','user','grade','assigment_category','question_lists.assigment_types','question_lists.images')->where('user_id','=',auth('api')->user()->id)->where('is_publish',false)->whereNull('teacher_id')->orderBy('id','desc')->paginate();
         });
         Route::get('/auth/assigments/published', function(Request $request){
-            return \App\Models\Assigment::with('likes','comments.user', 'user','grade','assigment_category','question_lists.assigment_types')->where('user_id','=',auth('api')->user()->id)->where('is_publish',true)->whereNull('teacher_id')->orderBy('id','desc')->paginate();
+            return \App\Models\Assigment::with('likes','comments.user', 'user','grade','assigment_category','question_lists.assigment_types','question_lists.images')->where('user_id','=',auth('api')->user()->id)->where('is_publish',true)->whereNull('teacher_id')->orderBy('id','desc')->paginate();
         });
 
         /////////////////////////////////////////////////////////////////////////////////////
