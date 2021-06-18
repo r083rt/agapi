@@ -218,6 +218,7 @@ class AssigmentController extends Controller
         return response()->json($assigments);
     }
 
+    
     /**
      * Store a newly created resource in storage.
      *
@@ -225,6 +226,7 @@ class AssigmentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store2($request){
+        
         $assigment = new Assigment();
         // return $request;
         $assigment->fill($request->all());
@@ -283,86 +285,121 @@ class AssigmentController extends Controller
     }
     public function store(Request $request)
     {
-        //jika pakai apk yg lama atau REQUEST dari rakit soal, maka memakai API store2()
+        //jika pakai apk yg lama atau REQUEST dari rakit kumpulan soal, maka memakai API store2()
         if(!$request->audio){
             return $this->store2($request);
         }
 
 
         $request->validate([
-            'audio.*'=>'nullable|mimes:mp4,mp3'
+            'audio.*'=>'nullable|mimes:mp4,mp3',
+            'images.*'=>'nullable|array',
+            'images.*.*'=>'image'
+            // 'images.*'=>'nullable|array',
         ]);
-        // return 'jancok';
-        # code...
-        // return $request->user()->id;
+        // return $request->images;
+      
         $data = (array)json_decode($request->data);
-        // return $data;
-        $assigment = new Assigment();
-        // $assigment->fill($request->all());
-        $assigment->fill($data);
-        if($request->has('password')) $assigment->password = bcrypt($data->password);
-        $assigment->code = base_convert($request->user()->id.time(), 10, 36);
-        $request->user()->assigments()->save($assigment);
-        foreach ($data['question_lists'] as $ql => $question_list) {
 
-              
-            # code...
-            $item_question_list = new QuestionList();
-            $item_question_list->fill((array)$question_list);
-            // TIDAK usah dikasih ref_id
-            // $item_question_list->ref_id = $question_list->pivot->question_list_id; // ref_id merujuk ke referensi master soal 
-            $item_question_list->save();
+        try{
+            DB::beginTransaction();
 
-                         
-            // upload audio //
-            if($request->hasFile("audio.{$ql}")){
-                $file = new \App\Models\File;
-                $file->type = 'audio/m4a';
-                $path = $request->file("audio.{$ql}")->store('files', 'wasabi');
-                // return $path;
-                if($path){
-                    $file->src = $path;
-                    $item_question_list->audio()->save($file);
-                }   
-            }           
-            ////////////////////
-
-            $assigment->question_lists()->attach([$item_question_list->id => [
-                'creator_id' => $question_list->pivot->creator_id,
-                'user_id' => $question_list->pivot->user_id,
-                'assigment_type_id' => $question_list->pivot->assigment_type_id,
-            ]]);
-          
-
-            foreach ($question_list->answer_lists as $al => $answer_list) {
+            $assigment = new Assigment();
+            // $assigment->fill($request->all());
+            $assigment->fill($data);
+            if($request->has('password')) $assigment->password = bcrypt($data->password);
+            $assigment->code = base_convert($request->user()->id.time(), 10, 36);
+            $request->user()->assigments()->save($assigment);
+            foreach ($data['question_lists'] as $ql => $question_list) {
+    
                 # code...
-                $item_answer_list = new AnswerList();
-                $item_answer_list->fill((array)$answer_list);
-                $item_question_list->answer_lists()->save($item_answer_list);
+                $item_question_list = new QuestionList();
+                $item_question_list->fill((array)$question_list);
+                // TIDAK usah dikasih ref_id
+                // $item_question_list->ref_id = $question_list->pivot->question_list_id; // ref_id merujuk ke referensi master soal 
+                $item_question_list->save();
+    
+                             
+                // UPLOAD AUDIO //
+                if($request->hasFile("audio.{$ql}")){
+                    $file = new \App\Models\File;
+                    $file->type = 'audio/m4a';
+                    $path = $request->file("audio.{$ql}")->store('files', 'wasabi');
+                    // return $path;
+                    if($path){
+                        $file->src = $path;
+                        $item_question_list->audio()->save($file);
+                    }   
+                }           
+                ////////////////////
+                
+                // UPLOAD IMAGES //
+                if(is_array($request->images[$ql])){
+                    
+                    foreach($request->images[$ql] as $image){
+                        $file = new \App\Models\File;
+                        $file->type='image/jpeg';
+                        $path = $image->store('files', 'wasabi');
+                        if($path){
+                            $file->src = $path;
+                            $item_question_list->images()->save($file);
+                        }   
+                    }
+                }
+                ///////////////////
+    
+                $assigment->question_lists()->attach([$item_question_list->id => [
+                    'creator_id' => $question_list->pivot->creator_id,
+                    'user_id' => $question_list->pivot->user_id,
+                    'assigment_type_id' => $question_list->pivot->assigment_type_id,
+                ]]);
+              
+    
+                foreach ($question_list->answer_lists as $al => $answer_list) {
+                    # code...
+                    $item_answer_list = new AnswerList();
+                    $item_answer_list->fill((array)$answer_list);
+                    $item_question_list->answer_lists()->save($item_answer_list);
+                }
             }
+            
+            DB::commit();
+
+            return response()->json(
+                $assigment
+                    ->load([
+                        'user',
+                        'grade',
+                        'assigment_category',
+                        'question_lists.answer_lists',
+                        'question_lists.audio',
+                        'likes',
+                        'comments.user',
+                        'comments' => function ($query) {
+                            $query
+                                ->with('likes', 'liked')
+                                ->withCount('likes', 'liked')
+                                ->orderBy('created_at', 'desc');
+                        },
+                    ])
+                    ->loadCount('comments', 'likes', 'liked')
+            );
+
+            
+        }catch (\PDOException $e) {
+            // Woopsy
+            dd($e);
+            DB::rollBack();
         }
-        return response()->json(
-            $assigment
-                ->load([
-                    'user',
-                    'grade',
-                    'assigment_category',
-                    'question_lists.answer_lists',
-                    'question_lists.audio',
-                    'likes',
-                    'comments.user',
-                    'comments' => function ($query) {
-                        $query
-                            ->with('likes', 'liked')
-                            ->withCount('likes', 'liked')
-                            ->orderBy('created_at', 'desc');
-                    },
-                ])
-                ->loadCount('comments', 'likes', 'liked')
-        );
+       
     }
     public function share(Request $request){
 
+        $request->validate([
+            'grade_code'=>'required'
+        ]);
+
+        // return $request;
         // return 'cok';
         $masterAssigment = Assigment::whereNull('teacher_id')->findOrFail($request->id);
         // $masterAssigment->load('question_lists');
@@ -370,12 +407,21 @@ class AssigmentController extends Controller
         // return $request->all();
         $newAssigment = new Assigment;
         $newAssigment->fill($masterAssigment->toArray());
-        // $newAssigment->fill($request->all());
-        $newAssigment->ref_id = $masterAssigment->id;
-        //\return $newAssigment;
-        //$newAssigment->
-        if($request->has('password')) $newAssigment->password = bcrypt($request->password);
         $newAssigment->code = base_convert($request->user()->id.time(), 10, 36);
+
+        // mereferensikan ke master assigment (soal asli)
+        $newAssigment->ref_id = $masterAssigment->id;
+      
+        //merubah value berdasarkan request
+        if($request->has('password') && !empty($request->password)) $newAssigment->password = bcrypt($request->password);
+        if($request->has('note') && !empty($request->note) ) $newAssigment->note = $request->note;
+        if($request->has('start_at') && $request->has('end_at') && !empty($request->start_at) && !empty($request->end_at)) {
+            $newAssigment->start_at = $request->start_at;
+            $newAssigment->end_at = $request->end_at;
+        }
+        if($request->has('timer') && !empty($request->timer) ) $newAssigment->timer = $request->timer;
+
+        $newAssigment->grade_code = $request->grade_code;
         $newAssigment->teacher_id = $request->user()->id;
 
         $masterUser->assigments()->save($newAssigment);
@@ -406,6 +452,7 @@ class AssigmentController extends Controller
         $assigment->is_public = $request->is_public;
         if($request->note)$assigment->note = $request->note;
         if($request->isTimer)$assigment->timer = $request->timer;
+        else $assigment->timer=null;
         $assigment->save();
         return $assigment;
     }
@@ -760,9 +807,54 @@ class AssigmentController extends Controller
             return response()->json($newAssigment);
         }
     }
+   
     public function buildSearch(Request $request, $assigmentCategoryId,$educationalLevelId){
         $res = Assigment::
         with([
+            'user',
+            'grade',
+            'assigment_category',
+            // 'question_lists'=>function($query){
+            //     // $query->selectRaw('question_lists.*,ats.description as question_list_type')
+            //     // ->join('')
+            // },
+            'question_lists.answer_lists',
+            'likes',
+            'comments.user',
+            'comments' => function ($query) {
+                $query
+                    ->with('likes', 'liked')
+                    ->withCount('likes', 'liked')
+                    ->orderBy('created_at', 'desc');
+            },
+        ])
+        ->orderBy('created_at','desc')
+        ->withCount('comments', 'likes', 'liked')
+        ->where('is_publish',false)
+        ->whereHas('grade',function($query)use($educationalLevelId){
+            $query->where('educational_level_id',$educationalLevelId);
+        })
+        ->whereIn('assigment_category_id',$assigmentCategoryId == 9 ? [1,7,8] : [$assigmentCategoryId]);
+        if(!empty($request->q)){
+            $res->where('topic','like','%'.$request->q.'%');
+        }
+        $res = $res->paginate();    
+        foreach ($res as $a => $assigment) {
+            # code...
+            foreach ($assigment->question_lists as $ql => $question_list) {
+                # code...
+                $question_list->pivot->assigment_type = AssigmentType::find($question_list->pivot->assigment_type_id);
+            }
+        }
+
+        return response()->json($res);
+    }
+    public function payableBuildSearch(Request $request, $assigmentCategoryId,$educationalLevelId){
+        $res = Assigment::
+        whereHas('question_lists', function($query){
+            $query->where('question_lists.is_paid',1);
+        })
+        ->with([
             'user',
             'grade',
             'assigment_category',

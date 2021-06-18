@@ -3,7 +3,7 @@ SELECT
   question_lists.is_paid, 
   question_lists.name, 
   latest_top_question_lists.latest_id,
-  tql.score,
+  tql.score as latest_score,
   worked_question_list.total AS scores_count, 
   question_lists.created_at, 
   ats.description AS assigment_type, 
