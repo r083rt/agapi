@@ -290,16 +290,20 @@ class AssigmentController extends Controller
             return $this->store2($request);
         }
 
-
         $request->validate([
             'audio.*'=>'nullable|mimes:mp4,mp3',
             'images.*'=>'nullable|array',
-            'images.*.*'=>'image'
+            'images.*.*'=>'image',
+            'question_lists.*.answer_lists.*.images'=>'array',
+            'question_lists.*.answer_lists.*.images.*'=>'image'
             // 'images.*'=>'nullable|array',
         ]);
-        // return $request->images;
+        // return 'babi';
       
         $data = (array)json_decode($request->data);
+
+     
+        return $data;
 
         try{
             DB::beginTransaction();
@@ -347,6 +351,10 @@ class AssigmentController extends Controller
                     }
                 }
                 ///////////////////
+
+                // UPLOAD ANSWER_LISTS IMAGE //
+
+                ////////////////////
     
                 $assigment->question_lists()->attach([$item_question_list->id => [
                     'creator_id' => $question_list->pivot->creator_id,
@@ -461,13 +469,33 @@ class AssigmentController extends Controller
         $assigment = Assigment::with(['question_lists'=>function($query){
             $query->selectRaw('question_lists.*,ats.description as assigment_type')->join('assigment_question_lists as aql','aql.question_list_id','=','question_lists.id')
             ->join('assigment_types as ats','ats.id','=','aql.assigment_type_id')
-            ->where('ats.description','selectoptions');
+            ->where('ats.description','selectoptions')
+            ->groupBy('aql.question_list_id');
         },'question_lists.answer_lists'=>function($query){
             $query->selectRaw('answer_lists.id,answer_lists.question_list_id,answer_lists.name');
         }])->findOrFail($id);
         foreach($assigment->question_lists as $ql){
             $ql->answer = null;
         }
+        // $question_list = \App\Models\QuestionList::where
+        return $assigment;
+    }
+    public function show2shuffle($id){
+        //menampilkan assigment dengan question list tanpa jawaban
+        $assigment = Assigment::with(['question_lists'=>function($query){
+            $query->selectRaw('question_lists.*,ats.description as assigment_type')->join('assigment_question_lists as aql','aql.question_list_id','=','question_lists.id')
+            ->join('assigment_types as ats','ats.id','=','aql.assigment_type_id')
+            ->where('ats.description','selectoptions')
+            ->groupBy('aql.question_list_id');
+        },'question_lists.answer_lists'=>function($query){
+            $query->selectRaw('answer_lists.id,answer_lists.question_list_id,answer_lists.name');
+        }])->findOrFail($id);
+        foreach($assigment->question_lists as $ql){
+            $ql->answer = null;
+        }
+        $shuffled_question_lists = $assigment->question_lists->shuffle();
+        unset($assigment->question_lists);
+        $assigment->question_lists = $shuffled_question_lists;
         // $question_list = \App\Models\QuestionList::where
         return $assigment;
     }

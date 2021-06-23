@@ -487,9 +487,14 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             return $request->user()->role;
         });
 
+        //===BEGIN [menampilkan question_lists.answer_lists tanpa kunci jawabannya]=========///
         Route::get('/assigments/{assigment_id}/show','AssigmentController@show2');
+        Route::get('/assigments/{assigment_id}/show_shuffle','AssigmentController@show2shuffle');
+        //==================================END============================================/
+
         Route::post('/assigmentsessions/store2', 'AssigmentSessionController@store2');
         Route::get('/assigments/{assigment_id}/history', 'AssigmentSessionController@history');
+        Route::post('/assigments/history', 'AssigmentSessionController@history2');
 
     });
 

@@ -16,7 +16,7 @@ class AddAnswerListTypeIdToAnswerListsTable extends Migration
         Schema::table('answer_lists', function (Blueprint $table) {
             $table->foreignId('answer_list_type_id')->nullable()->after('id');
 
-            // $table->foreign('answer_list_type_id')->references('id')->on('answer_list_types');
+            $table->foreign('answer_list_type_id')->references('id')->on('answer_list_types');
         });
     }
 

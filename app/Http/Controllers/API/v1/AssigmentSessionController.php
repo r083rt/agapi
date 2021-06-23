@@ -27,77 +27,157 @@ class AssigmentSessionController extends Controller
         //
     }
 
+    // mengurutkan apakah 2 array number sama. contoh: [3,2,1] dan [1,3,2] adalah sama
+    function checkIsSame($a, $b){
+        if(count($a)!==count($b))return false;
+        sort($a);
+        sort($b);
+        foreach($a as $k=>$v){
+            if($v!==$b[$k])return false;
+        }
+        return true;
+    }
     // sama dgn store, bedanya hanya mengambil soal pil. ganda dan langsung menyimpan dan menampilkan total nilai dri soal pil. ganda tsb
     public function store2(Request $request){
         // DB::transaction(function ()use($request) {
             $request->validate([
                 'id'=>'required',
                 'question_lists'=>'required',
-                'question_lists.*.answer'=>'required',
+                // 'question_lists.*.answer'=>'required',
             ]);
            
             $assigment = Assigment::with(['question_lists'=>function($query){
                 $query->selectRaw('question_lists.*,ats.description as assigment_type')->join('assigment_question_lists as aql','aql.question_list_id','=','question_lists.id')
                 ->join('assigment_types as ats','ats.id','=','aql.assigment_type_id')
-                ->where('ats.description','selectoptions');
+                ->where('ats.description','selectoptions')
+                ->groupBy('aql.question_list_id');
             }, 'question_lists.answer_lists'])->findOrFail($request->id);
 
-            // return $assigment;
 
-            $session = new Session;
-            $session->user_id = $request->user()->id; //diisi dgn auth yg mengerjakan skrng
-            // $session->value = $request->value ?? null;
-            $session->save();
+            try{
+                DB::beginTransaction();
+
+                $session = new Session;
+                $session->user_id = $request->user()->id; //diisi dgn auth yg mengerjakan skrng
+                // $session->value = $request->value ?? null;
+                $session->save();
+                
+             
             
-            $total_score=0; //hanya digunakan jika soal pilihan ganda semua
-        
-            //$assigment->sessions()->save($session,['user_id'=>$request->teacher_id]);
-            $assigment_session = new AssigmentSession;
-            $assigment_session->assigment_id = $assigment->id;
-            $assigment_session->session_id = $session->id;
-            $assigment_session->user_id = $assigment->teacher_id; //diisi dengan pembuat soal/guru
-            $assigment_session->save();
-            //Fungsi sync tidak digunakan agar Observer nya bisa ter-trigger oleh kode di atas
-            //$session->assigments()->sync([$assigment->id=>['user_id'=>$assigment->teacher_id]]);
-            
+                //$assigment->sessions()->save($session,['user_id'=>$request->teacher_id]);
+                $assigment_session = new AssigmentSession;
+                $assigment_session->assigment_id = $assigment->id;
+                $assigment_session->session_id = $session->id;
+                $assigment_session->user_id = $assigment->teacher_id; //diisi dengan pembuat soal/guru
+                $assigment_session->save();
+                //Fungsi sync tidak digunakan agar Observer nya bisa ter-trigger oleh kode di atas
+                //$session->assigments()->sync([$assigment->id=>['user_id'=>$assigment->teacher_id]]);
 
+                // taruh question_lists yg disubmit ke data array based key
+                $user_questions = collect($request->question_lists);
+                $submitted_question_lists = [];
+                $submitted_question_lists_ids = [];
+                foreach($request->question_lists as $question_list){
+                    $submitted_question_lists[$question_list['id']] = $question_list;
+                    $submitted_question_lists_ids[] = $question_list['id'];
+                }
 
-            $user_questions = collect($request->question_lists);
-            foreach ($assigment->question_lists as $q => $question_list) {
+                // taruh question_lists dari database ke data array based key
+                $db_question_lists = [];
+                $db_question_lists_ids = [];
+                
+                foreach($assigment->question_lists as $question_list){
+                    $db_question_lists[$question_list->id] = $question_list->toArray();
+                    $db_question_lists[$question_list->id]['arr_answer_lists'] = [];
+                    foreach($question_list->answer_lists as $answer_list){
+                        $db_question_lists[$question_list->id]['arr_answer_lists'][$answer_list->id] = $answer_list->toArray();
+                    }
+                    $db_question_lists_ids[] = $question_list->id;
+                }
 
-                //mengecek apakah paket soal yang dikirim mempunyai id soal yg sesuai dgn yg ada di db
-                if($user_questions->contains('id',$question_list->id)){ 
+              
+                // jika id's question_lists yg disubmit tidak sama dgn id's di db maka throw error
+                if(!$this->checkIsSame($db_question_lists_ids,$submitted_question_lists_ids)){
+                    throw new \Exception("ID's question_lists tidak sama dengan yg ada di database -_-");
+                }
+                
+                $total_score=0; //hanya digunakan jika soal pilihan ganda semua
+                foreach ($db_question_lists as $ql=>$question_list) {
+
+                    // cek apakah answer kosong pda question_list yg disubmit
+                    $submitted_answer = null;
+                    if(isset($submitted_question_lists[$ql]['answer']) && !empty($submitted_question_lists[$ql]['answer'])){
+                        $submitted_answer = $submitted_question_lists[$ql]['answer'];
+                    }
                     
-                    $user_question = $user_questions->firstWhere('id',$question_list->id);
-                   
-                    // $answer_list = 
-                    $user_answer = $question_list->answer_lists()->findOrFail($user_question['answer']); //mendapatkan jawaban dari questions
-                    $question_list->answer = $user_question['answer'];
-                    
-                    if($user_answer->value==100) $total_score += 100;
-   
+                    $score = 0;
+                    $selected_db_answer = null;
+                    // cek apakah db answer_lists ada menurut answer yg disubmit
+                    if(isset($question_list['arr_answer_lists'][$submitted_answer])){
+                        $selected_db_answer = $question_list['arr_answer_lists'][$submitted_answer];
+                        // jika jawaban benar nilai $score adalah 100
+                        $score = $selected_db_answer['value'];
+                    }
+                    $total_score += $score;
+
                     // insert session to to question
                     $db_question = new Question();
-                    $db_question->fill($question_list->toArray());
-                    $db_question->question_list_id =  $user_answer->question_list_id;
-                    $db_question->score = $user_answer->value;
+                    $db_question->fill($question_list);
+                    $db_question->question_list_id =  $ql;
+                    $db_question->score = $score;
     
                     $session->questions()->save($db_question);
                     // insert answer to question
                     $db_answer = new Answer;
-                    $db_answer->fill($user_answer->toArray());
-                    $db_answer->answer_list_id = $user_answer->id;
+                    if($selected_db_answer==null){
+                        $db_answer->name = null;
+                        $db_answer->answer_list_id = null;
+                        $db_answer->value = null;
+                    }else{
+                        $db_answer->fill($selected_db_answer);
+                        $db_answer->answer_list_id = $selected_db_answer['id'];
+                    }
+                  
+                   
                     $db_question->answer()->save($db_answer);
+        
                 }
+                // Log::debug('test assigment_session_controller store2');
+                //mengecek apakah request dari latihan soal dan mengecek apakah jumlah soal pilihan ganda yang kirim sama dengan jumlah soal pilihan ganda di db
+                $final_score = round($total_score/count($db_question_lists), 2);
+                $assigment->assigment_session->total_score = $final_score;
+                $assigment->assigment_session->save();
 
+                DB::commit();
+
+
+                unset($assigment->question_lists);
+                $assigment->question_lists = collect();
+                foreach($submitted_question_lists_ids as $submitted_question_lists_id){
+                    $question_list = $db_question_lists[$submitted_question_lists_id];
+                    $question_list['answer'] = $submitted_question_lists[$submitted_question_lists_id]['answer'];
+                    $assigment->question_lists->push($question_list);
+                }
                 
+
+                return response()->json(['score'=>['value'=>$final_score], 'assigment'=>$assigment]);
+
+            }catch(\PDOException $e){
+                DB::rollBack();
+                return response($e,500);
+               
+            }catch(\Exception $e){
+                DB::rollBack();
+                return response($e,500);
+              
             }
-            // Log::debug('test assigment_session_controller store2');
-            //mengecek apakah request dari latihan soal dan mengecek apakah jumlah soal pilihan ganda yang kirim sama dengan jumlah soal pilihan ganda di db
-            $final_score = round($total_score/count($assigment->question_lists), 2);
-            $assigment->assigment_session->total_score = $final_score;
-            $assigment->assigment_session->save();
-            return response()->json(['score'=>['value'=>$final_score], 'assigment'=>$assigment]);
+           
+           
+
+            
+
+
+            
         
         // });
     }
@@ -286,5 +366,18 @@ class AssigmentSessionController extends Controller
             $query->where('sessions.user_id',auth()->user()->id)->orderBy('id','desc');
         }])->findOrFail($assigment_id);
         return $assigment;
+    }
+    public function history2(Request $request){
+        $request->validate([
+            'assigment_ids'=>'required|array'
+        ]);
+        $sessions = Session::with('assigments')->whereHas('assigments', function($query)use($request){
+            $query->whereIn('assigments.id',$request->assigment_ids);
+        })->orderBy('id','desc');
+        return $sessions->get();
+        // $assigment = Assigment::with(['sessions'=>function($query){
+        //     $query->where('sessions.user_id',auth()->user()->id)->orderBy('id','desc');
+        // }])->findOrFail($assigment_id);
+        // return $assigment;
     }
 }
