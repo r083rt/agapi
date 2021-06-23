@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\AnswerListType;
+use \DB;
 class AnswerListTypeSeeder extends Seeder
 {
     /**
@@ -13,6 +14,7 @@ class AnswerListTypeSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('answer_list_types')->delete();
         AnswerListType::updateOrCreate([
             'name'=>'audio',
         ], ['description'=>'Jawaban berupa audio']);
@@ -20,14 +22,9 @@ class AnswerListTypeSeeder extends Seeder
             'name'=>'image',
         ], ['description'=>'Jawaban berupa gambar']);
         AnswerListType::updateOrCreate([
-            'name'=>'textfield',
+            'name'=>'text',
         ], ['description'=>'Jawaban berupa text singkat']);
-        AnswerListType::updateOrCreate([
-            'name'=>'textarea',
-        ], ['description'=>'Jawaban berupa text panjang/uraian']);
-        AnswerListType::updateOrCreate([
-            'name'=>'selectoptions',
-        ], ['description'=>'Jawaban berupa pilihan ganda']);
+       
         
     }
 }

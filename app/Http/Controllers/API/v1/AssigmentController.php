@@ -298,10 +298,15 @@ class AssigmentController extends Controller
             'question_lists.*.answer_lists.*.images.*'=>'image'
             // 'images.*'=>'nullable|array',
         ]);
-        // return 'babi';
       
         $data = (array)json_decode($request->data);
 
+        // menyimpan answer_list_types ke array based key dgn key'nya dalah name
+        $answer_list_types = DB::table('answer_list_types')->get();
+        $db_answer_list_types = [];
+        foreach($answer_list_types as $answer_list_type){
+            $db_answer_list_types[$answer_list_type->name] = $answer_list_type;
+        }
      
         return $data;
 
@@ -337,8 +342,8 @@ class AssigmentController extends Controller
                 }           
                 ////////////////////
                 
-                // UPLOAD IMAGES //
-                if(is_array($request->images[$ql])){
+                // UPLOAD IMAGES question_lists //
+                if(isset($request->images) && isset($request->images[$ql])){
                     
                     foreach($request->images[$ql] as $image){
                         $file = new \App\Models\File;
@@ -352,8 +357,10 @@ class AssigmentController extends Controller
                 }
                 ///////////////////
 
-                // UPLOAD ANSWER_LISTS IMAGE //
+                // UPLOAD IMAGES answer_lists //
+                if(isset($request->question_lists) && isset($request->question_lists[$ql])){
 
+                }
                 ////////////////////
     
                 $assigment->question_lists()->attach([$item_question_list->id => [
@@ -366,7 +373,9 @@ class AssigmentController extends Controller
                 foreach ($question_list->answer_lists as $al => $answer_list) {
                     # code...
                     $item_answer_list = new AnswerList();
-                    $item_answer_list->fill((array)$answer_list);
+                    $item_answer_list->name  = $answer_list->name;
+                    $item_answer_list->value = $answer_list->value;
+                    // $item_answer_list->fill((array)$answer_list);
                     $item_question_list->answer_lists()->save($item_answer_list);
                 }
             }
@@ -396,8 +405,9 @@ class AssigmentController extends Controller
 
         }catch (\PDOException $e) {
             // Woopsy
-            dd($e);
+            
             DB::rollBack();
+            dd($e);
         }
        
     }
