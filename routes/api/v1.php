@@ -502,6 +502,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
     // API WITHOUT SECURITY ----------------------------------------------------------------------------
 
+    Route::post('/getassigmentsinfo', 'AssigmentController@getAssigmentsInfo');
+
+    
     Route::apiResources([
         'settings' => 'SettingController',
     ]);

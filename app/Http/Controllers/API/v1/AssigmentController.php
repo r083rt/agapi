@@ -1087,4 +1087,12 @@ class AssigmentController extends Controller
 
 
     }
+    public function getAssigmentsInfo(Request $request){
+        $request->validate([
+            'assigment_ids'=>'required|array'
+        ]);
+        $assigments = Assigment::withCount('question_lists')->whereIn('id',$request->assigment_ids)->orderBy('id','desc')->get();
+        return $assigments;
+
+    }
 }
