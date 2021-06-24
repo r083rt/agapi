@@ -292,7 +292,7 @@ class AssigmentController extends Controller
 
         $request->validate([
             'audio.*'=>'nullable|mimes:mp4,mp3',
-            'images.*'=>'nullable|array',
+            'images.*'=>'array',
             'images.*.*'=>'image',
             'question_lists.*.answer_lists.*.images'=>'array',
             'question_lists.*.answer_lists.*.images.*'=>'image'
@@ -308,7 +308,7 @@ class AssigmentController extends Controller
             $db_answer_list_types[$answer_list_type->name] = $answer_list_type;
         }
      
-        return $data;
+        // return $data;
 
         try{
             DB::beginTransaction();
@@ -358,8 +358,22 @@ class AssigmentController extends Controller
                 ///////////////////
 
                 // UPLOAD IMAGES answer_lists //
+                // cek apakah requests formdata question_lists[ql] ada
                 if(isset($request->question_lists) && isset($request->question_lists[$ql])){
-
+                   
+                    foreach($request->question_lists[$ql]['answer_lists'] as $al=>$answer_list){
+                        $paths = [];
+                        // upload tiap gambar yg ada tiap butir answer_list
+                        foreach($answer_list['images'] as $image){
+                            $upload = $image->store('files', 'wasabi');
+                            if($upload){
+                                array_push($paths, $upload);
+                            }
+                        }
+                        $paths_json = json_encode($paths); // string json akan disimpan di column name answer_lists
+                        $question_list->answer_lists[$al]->name = $paths_json; // memberi value name dgn string json
+                        
+                    }
                 }
                 ////////////////////
     
@@ -375,6 +389,11 @@ class AssigmentController extends Controller
                     $item_answer_list = new AnswerList();
                     $item_answer_list->name  = $answer_list->name;
                     $item_answer_list->value = $answer_list->value;
+                    if(isset($answer_list->type)){
+                        $item_answer_list->answer_list_type_id = isset($db_answer_list_types[$answer_list->type])?$db_answer_list_types[$answer_list->type]->id:null;
+                    }
+                    
+                    
                     // $item_answer_list->fill((array)$answer_list);
                     $item_question_list->answer_lists()->save($item_answer_list);
                 }
@@ -530,6 +549,7 @@ class AssigmentController extends Controller
                     $query->select('id','question_list_id','name');//pastikan student tidak bisa melihat kunci jawaban
                     //masih bisa melihat jawaban untuk soal text
                 }
+                $query->selectRaw('answer_lists.*,alt.name as type')->join('answer_list_types as alt','alt.id','=','answer_lists.answer_list_type_id')->orderBy('answer_lists.id','asc');
             },
             'question_lists.audio',
             'likes',
@@ -542,9 +562,13 @@ class AssigmentController extends Controller
             },
         ])
             ->withCount('comments', 'likes', 'liked')
-            ->findOrFail($id);
+            ->selectRaw('assigments.*,if(timer is null,FALSE,TRUE) as isTimer,if(start_at is null or end_at is null,FALSE, TRUE) as isExpire, if(password is null,FALSE,TRUE) isPassword')->findOrFail($id);
         
         foreach ($assigment->question_lists as $ql => $question_list) {
+            foreach($question_list->answer_lists as $answer_list){
+                if($answer_list->type==='image')$answer_list->images = json_decode($answer_list->name);
+                else $answer_list->images = [];
+            }
             # code...
             $question_list->pivot->user = User::find($question_list->pivot->user_id);
             $question_list->pivot->creator = User::find($question_list->pivot->creator_id);
@@ -565,6 +589,7 @@ class AssigmentController extends Controller
         return response()->json($assigment);
     }
 
+   
     /**
      * Update the specified resource in storage.
      *
@@ -574,49 +599,175 @@ class AssigmentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-        $assigment = Assigment::where('user_id',$request->user()->id)->findOrFail($id);
-        $assigment->fill($request->all());
-        $assigment->password = bcrypt($request->password);
-        $assigment->code = base_convert($request->user()->id.time(), 10, 36);
-        $request->user()->assigments()->save($assigment);
-        foreach ($request->question_lists as $ql => $question_list) {
-            # code...
-            $item_question_list = QuestionList::findOrFail($question_list['id']);
-            $item_question_list->fill($question_list);
-            $item_question_list->save();
-            // $assigment->question_lists()->attach([$item_question_list->id => [
-            //     'creator_id' => $question_list['pivot']['creator_id'],
-            //     'user_id' => $question_list['pivot']['user_id'],
-            //     'assigment_type_id' => $question_list['pivot']['assigment_type_id'],
-            // ]]);
-
-            foreach ($question_list['answer_lists'] as $al => $answer_list) {
-                # code...
-                $item_answer_list = AnswerList::findOrFail($answer_list['id']);
-                $item_answer_list->name = $answer_list['name'];
-                $item_answer_list->save();
-                // $item_question_list->answer_lists()->save($item_answer_list);
-            }
+        $request->validate([
+            'question_lists.*'=>'array',
+            'question_lists.*.answer_lists.*'=>'array',
+            'isTimer'=>'required',
+            'isExpire'=>'required',
+            'password'=>[
+                Rule::requiredIf(function () use ($request,$id) {
+                    // required
+                    $assigment = Assigment::findOrFail($id);
+                    return $request->isPassword=="true" && empty($assigment->password);
+                })
+            ],
+            'timer'=>[
+                Rule::requiredIf(function () use ($request) {
+                    return $request->isTimer=="true";
+                })
+            ],
+            'start_at'=>[
+                Rule::requiredIf(function () use ($request) {
+                    return $request->isExpire=="true";
+                })
+            ],
+            'end_at'=>[
+                Rule::requiredIf(function () use ($request) {
+                    return $request->isExpire=="true";
+                })
+            ]
+        ]);
+      
+        // return $request->question_lists;
+         // menyimpan answer_list_types ke array based key dgn key'nya dalah name
+        $answer_list_types = DB::table('answer_list_types')->get();
+        $db_answer_list_types = [];
+        foreach($answer_list_types as $answer_list_type){
+            $db_answer_list_types[$answer_list_type->name] = $answer_list_type;
         }
-        return response()->json(
-            $assigment
-                ->load([
-                    'user',
-                    'grade',
-                    'assigment_category',
-                    'question_lists.answer_lists',
-                    'likes',
-                    'comments.user',
-                    'comments' => function ($query) {
-                        $query
-                            ->with('likes', 'liked')
-                            ->withCount('likes', 'liked')
-                            ->orderBy('created_at', 'desc');
-                    },
-                ])
-                ->loadCount('comments', 'likes', 'liked')
-        );
+
+        try{
+            DB::beginTransaction();
+
+            $assigment = Assigment::where('user_id',$request->user()->id)->findOrFail($id);
+
+            $input_assigment = $request->all();
+          
+            // JIKA request->isPassword=true, request->password TIDAK kosong, MAKA update db password 
+            if(!empty($input_assigment['password']))$input_assigment['password'] =  bcrypt($input_assigment['password']);
+            // JIKA request->isPassword=true, request->password kosong, MAKA JANGAN update db password 
+            if(empty($input_assigment['password']))unset($input_assigment['password']);
+            // maka dan password di assigment
+            return $input_assigment;
+
+            $assigment->fill($input_assigment);
+            // $assigment->password = bcrypt($request->password);
+            // $assigment->code = base_convert($request->user()->id.time(), 10, 36);
+            $request->user()->assigments()->save($assigment);
+
+            foreach ($request->question_lists as $ql => $question_list) {
+                # code...
+                $db_question_list = QuestionList::with('images')->findOrFail($question_list['id']);
+                $db_question_list->fill((array)$question_list);
+                $db_question_list->save();
+                $db_question_list_images = $db_question_list->images;
+                
+                
+                
+                // jika ada attribut images di question_lists lakukan pengecekan
+                if(isset($question_list['images'])){
+
+                    // pisakan images yg mempunyai file dan yg tidak
+                    // taruh image yg mempunyai file ke $images_upload dan image yg bertipe object ke $existed_images
+                    $images_upload = [];       
+                    $existed_images = collect();
+                    foreach($question_list['images'] as $key=>$image){
+                        if($request->hasFile("question_lists.{$ql}.images.{$key}")){
+                            array_push($images_upload, $image);
+                        }else{
+                            $existed_images->push($image);
+                        }
+                       
+                    }
+ 
+                    $deleted_image_ids = [];
+                    foreach($db_question_list_images as $db_question_list_image){
+                      $check = $existed_images->contains(function($value, $key)use($db_question_list_image){
+                          return $value['id']==$db_question_list_image->id;
+                      });
+                      // jika tidak ada di target images, letakkan di $deleted_image_ids
+                      if(!$check){
+                          array_push($deleted_image_ids, $db_question_list_image->id);
+                      }
+                    }
+                }
+               
+                //proses upload file
+                $db_files = [];
+                foreach($images_upload as $image_to_upload){
+                    $upload_path = $image_to_upload->store('files', 'wasabi');
+                    if($upload_path){
+                        $file = new \App\Models\File;
+                        $file->type='image/jpeg';
+                        $file->src = $upload_path;
+                        array_push($db_files, $file);
+                    }
+                   
+                }
+                // simpan files yg sudah diupload ke wasabi
+                $db_question_list->images()->saveMany($db_files);
+
+                //hapus gambar yg dipilih untuk dihapus
+                $db_question_list->images()->whereIn('id',$deleted_image_ids)->delete();
+
+
+        
+
+
+            }
+           
+
+            DB::commit();
+            return 'cok';
+        }catch (\PDOException $e) {
+            // Woopsy
+            
+            DB::rollBack();
+            dd($e);
+        }
+
+        // $assigment = Assigment::where('user_id',$request->user()->id)->findOrFail($id);
+        // $assigment->fill($request->all());
+        // $assigment->password = bcrypt($request->password);
+        // $assigment->code = base_convert($request->user()->id.time(), 10, 36);
+        // $request->user()->assigments()->save($assigment);
+        // foreach ($request->question_lists as $ql => $question_list) {
+        //     # code...
+        //     $item_question_list = QuestionList::findOrFail($question_list['id']);
+        //     $item_question_list->fill($question_list);
+        //     $item_question_list->save();
+        //     // $assigment->question_lists()->attach([$item_question_list->id => [
+        //     //     'creator_id' => $question_list['pivot']['creator_id'],
+        //     //     'user_id' => $question_list['pivot']['user_id'],
+        //     //     'assigment_type_id' => $question_list['pivot']['assigment_type_id'],
+        //     // ]]);
+
+        //     foreach ($question_list['answer_lists'] as $al => $answer_list) {
+        //         # code...
+        //         $item_answer_list = AnswerList::findOrFail($answer_list['id']);
+        //         $item_answer_list->name = $answer_list['name'];
+        //         $item_answer_list->save();
+        //         // $item_question_list->answer_lists()->save($item_answer_list);
+        //     }
+        // }
+        // return response()->json(
+        //     $assigment
+        //         ->load([
+        //             'user',
+        //             'grade',
+        //             'assigment_category',
+        //             'question_lists.answer_lists',
+        //             'likes',
+        //             'comments.user',
+        //             'comments' => function ($query) {
+        //                 $query
+        //                     ->with('likes', 'liked')
+        //                     ->withCount('likes', 'liked')
+        //                     ->orderBy('created_at', 'desc');
+        //             },
+        //         ])
+        //         ->loadCount('comments', 'likes', 'liked')
+        // );
     }
 
     /**
@@ -627,8 +778,8 @@ class AssigmentController extends Controller
      */
     public function destroy(Assigment $assigment)
     {
-        //
-        $assigment->delete();
+        $user = auth()->user();
+        $assigment->where('user_id',$user->id)->delete();
         return response($assigment);
     }
     public function softDelete($id){
@@ -1101,7 +1252,7 @@ class AssigmentController extends Controller
         $request->validate([
             'assigment_ids'=>'required|array'
         ]);
-        $assigments = Assigment::withCount('question_lists')->whereIn('id',$request->assigment_ids)->orderBy('id','desc')->get();
+        $assigments = Assigment::withCount('question_lists')->whereIn('id',$request->assigment_ids)->orderBy('id','asc')->get();
         return $assigments;
 
     }

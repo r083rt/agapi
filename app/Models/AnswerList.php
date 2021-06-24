@@ -15,4 +15,8 @@ class AnswerList extends Model
     public function answers(){
         return $this->hasMany('App\Models\Answer');
     }
+    public function answer_list_type(){
+        return $this->belongsTo(\App\Models\AnswerListType::class);
+    }
+ 
 }

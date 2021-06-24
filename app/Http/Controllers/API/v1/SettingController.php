@@ -17,7 +17,7 @@ class SettingController extends Controller
      */
     public function index()
     {
-        $settings = Voyager::model('Setting')->orderBy('id','desc')->get();
+        $settings = Voyager::model('Setting')->orderBy('id','asc')->get();
         return response()->json($settings);
     }
 
