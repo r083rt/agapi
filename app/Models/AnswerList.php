@@ -18,5 +18,8 @@ class AnswerList extends Model
     public function answer_list_type(){
         return $this->belongsTo(\App\Models\AnswerListType::class);
     }
+    public function images(){
+        return $this->morphMany(\App\Models\File::class,'file')->where('type', 'LIKE','image%');
+    }
  
 }

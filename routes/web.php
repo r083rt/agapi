@@ -360,13 +360,7 @@ Route::get('/getcontactnumber',function(){
 
 
 Route::get('/testgan',function(){
-    $workedQuestionList = DB::table('questions as q')->selectRaw('count(1) as total, ql2.ref_id as question_list_id')
-    ->join('question_lists as ql2', 'q.question_list_id','=','ql2.id')
-    ->join('assigment_question_lists as aql2', 'aql2.question_list_id','=','q.question_list_id')
-    ->join('assigments as a2', 'a2.id','=','aql2.assigment_id')
-    ->whereNotNull('ql2.ref_id')->whereNotNull('a2.teacher_id')
-    ->groupBy('ql2.ref_id')->get();
-    return $workedQuestionList;
+    return  Storage::disk('wasabi')->delete("files/X1feHOW1OtZnp6DghnUVaUFD17AQI0NhPFtxLUV8.png");
 });
 
 

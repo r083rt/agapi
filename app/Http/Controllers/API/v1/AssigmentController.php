@@ -19,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Style;
+use Illuminate\Support\Facades\Storage;
 
 class AssigmentController extends Controller
 {
@@ -362,16 +363,26 @@ class AssigmentController extends Controller
                 if(isset($request->question_lists) && isset($request->question_lists[$ql])){
                    
                     foreach($request->question_lists[$ql]['answer_lists'] as $al=>$answer_list){
-                        $paths = [];
+
+                        $question_list->answer_lists[$al]->image_models = [];
+
+                        // $paths = [];
                         // upload tiap gambar yg ada tiap butir answer_list
                         foreach($answer_list['images'] as $image){
                             $upload = $image->store('files', 'wasabi');
                             if($upload){
-                                array_push($paths, $upload);
+                                // array_push($paths, $upload);
+                                $file = new \App\Models\File;
+                                $file->type = 'image/jpeg';
+                                $file->src = $upload;
+                                $question_list->answer_lists[$al]->image_models[] = $file;
                             }
                         }
-                        $paths_json = json_encode($paths); // string json akan disimpan di column name answer_lists
-                        $question_list->answer_lists[$al]->name = $paths_json; // memberi value name dgn string json
+                        // return $question_list->answer_lists[$al]->file_models;
+                        // $paths_json = json_encode($paths); // string json akan disimpan di column name answer_lists
+                        // $question_list->answer_lists[$al]->name = $paths_json; // memberi value name dgn string json
+                        
+                        
                         
                     }
                 }
@@ -389,14 +400,19 @@ class AssigmentController extends Controller
                     $item_answer_list = new AnswerList();
                     $item_answer_list->name  = $answer_list->name;
                     $item_answer_list->value = $answer_list->value;
-                    if(isset($answer_list->type)){
-                        $item_answer_list->answer_list_type_id = isset($db_answer_list_types[$answer_list->type])?$db_answer_list_types[$answer_list->type]->id:null;
-                    }
-                    
-                    
-                    // $item_answer_list->fill((array)$answer_list);
+
+                    $type=empty($answer_list->type)?'text':$answer_list->type;
+                    $answer_list_type_id = !empty($db_answer_list_types[$type]) ? $db_answer_list_types[$type]->id :null;
+                    $item_answer_list->answer_list_type_id = $answer_list_type_id;
                     $item_question_list->answer_lists()->save($item_answer_list);
+
+                    // jika ada gambar, maka save ke relasi
+                    if(isset($answer_list->image_models)){
+                        $item_answer_list->images()->saveMany($answer_list->image_models);
+                    }
+
                 }
+              
             }
             
             DB::commit();
@@ -549,8 +565,9 @@ class AssigmentController extends Controller
                     $query->select('id','question_list_id','name');//pastikan student tidak bisa melihat kunci jawaban
                     //masih bisa melihat jawaban untuk soal text
                 }
-                $query->selectRaw('answer_lists.*,alt.name as type')->join('answer_list_types as alt','alt.id','=','answer_lists.answer_list_type_id')->orderBy('answer_lists.id','asc');
+                $query->selectRaw('answer_lists.*,alt.name as type')->leftJoin('answer_list_types as alt','alt.id','=','answer_lists.answer_list_type_id')->orderBy('answer_lists.id','asc');
             },
+            'question_lists.answer_lists.images',
             'question_lists.audio',
             'likes',
             'comments.user',
@@ -565,10 +582,7 @@ class AssigmentController extends Controller
             ->selectRaw('assigments.*,if(timer is null,FALSE,TRUE) as isTimer,if(start_at is null or end_at is null,FALSE, TRUE) as isExpire, if(password is null,FALSE,TRUE) isPassword')->findOrFail($id);
         
         foreach ($assigment->question_lists as $ql => $question_list) {
-            foreach($question_list->answer_lists as $answer_list){
-                if($answer_list->type==='image')$answer_list->images = json_decode($answer_list->name);
-                else $answer_list->images = [];
-            }
+           
             # code...
             $question_list->pivot->user = User::find($question_list->pivot->user_id);
             $question_list->pivot->creator = User::find($question_list->pivot->creator_id);
@@ -590,6 +604,112 @@ class AssigmentController extends Controller
     }
 
    
+    private function handleQuestionListImagesUpload(Request $request, $question_list_index, $question_list, $db_question_list){
+        $db_question_list_images = $db_question_list->images;
+         
+        // jika tidak ada attribut images di question_lists, maka images = [];
+        if(!isset($question_list['images']))$question_list['images'] = [];
+
+        // pisakan images yg mempunyai file dan yg tidak
+         // taruh image yg mempunyai file ke $images_upload dan image yg bertipe object ke $existed_images
+        $images_upload = [];       
+        $existed_images = collect();
+        foreach($question_list['images'] as $key=>$image){
+            if($request->hasFile("question_lists.{$question_list_index}.images.{$key}")){
+                array_push($images_upload, $image);
+             }else{
+                $existed_images->push($image);
+            }
+                       
+        }
+ 
+        $deleted_image_ids = [];
+        $deleted_image_paths = [];
+        foreach($db_question_list_images as $db_question_list_image){
+            $check = $existed_images->contains(function($value, $key)use($db_question_list_image){
+                return $value['id']==$db_question_list_image->id;
+            });
+             // jika tidak ada di target images, letakkan di $deleted_image_ids dan $deleted_image_urls 
+            if(!$check){
+                array_push($deleted_image_ids, $db_question_list_image->id);
+                array_push($deleted_image_paths, $db_question_list_image->src);
+            }
+        }
+
+        //proses upload file
+        $db_files = [];
+        foreach($images_upload as $image_to_upload){
+            $upload_path = $image_to_upload->store('files', 'wasabi');
+            if($upload_path){
+                $file = new \App\Models\File;
+                $file->type='image/jpeg';
+                $file->src = $upload_path;
+                array_push($db_files, $file);
+                }
+            }
+            // simpan files yg sudah diupload ke wasabi
+            $db_question_list->images()->saveMany($db_files);
+
+            // hapus gambar yg tidak masuk dalam array question_lists.*.images dri request users
+            Storage::disk('wasabi')->delete($deleted_image_paths);
+                    
+            // hapus gambar yg dipilih untuk dihapus
+            $db_question_list->images()->whereIn('id',$deleted_image_ids)->delete();
+
+    }
+    private function handleImagesUpload(Request $request, $request_key, $data, $db_data){
+        $db_data_images = $db_data->images;
+         
+        // jika tidak ada attribut images di question_lists, maka images = [];
+        if(!isset($data['images']))$data['images'] = [];
+
+        // pisakan images yg mempunyai file dan yg tidak
+         // taruh image yg mempunyai file ke $images_upload dan image yg bertipe object ke $existed_images
+        $images_upload = [];       
+        $existed_images = collect();
+        foreach($data['images'] as $key=>$image){
+            if($request->hasFile("{$request_key}.{$key}")){
+                array_push($images_upload, $image);
+             }else{
+                $existed_images->push($image);
+            }
+                       
+        }
+ 
+        $deleted_image_ids = [];
+        $deleted_image_paths = [];
+        foreach($db_data_images as $db_data_image){
+            $check = $existed_images->contains(function($value, $key)use($db_data_image){
+                return $value['id']==$db_data_image->id;
+            });
+             // jika tidak ada di target images, letakkan di $deleted_image_ids dan $deleted_image_urls 
+            if(!$check){
+                array_push($deleted_image_ids, $db_data_image->id);
+                array_push($deleted_image_paths, $db_data_image->src);
+            }
+        }
+
+        //proses upload file
+        $db_files = [];
+        foreach($images_upload as $image_to_upload){
+            $upload_path = $image_to_upload->store('files', 'wasabi');
+            if($upload_path){
+                $file = new \App\Models\File;
+                $file->type='image/jpeg';
+                $file->src = $upload_path;
+                array_push($db_files, $file);
+                }
+            }
+            // simpan files yg sudah diupload ke wasabi
+            $db_data->images()->saveMany($db_files);
+
+            // hapus gambar yg tidak masuk dalam array question_lists.*.images dri request users
+            Storage::disk('wasabi')->delete($deleted_image_paths);
+                    
+            // hapus gambar yg dipilih untuk dihapus
+            $db_data->images()->whereIn('id',$deleted_image_ids)->delete();
+
+    }
     /**
      * Update the specified resource in storage.
      *
@@ -602,6 +722,8 @@ class AssigmentController extends Controller
         $request->validate([
             'question_lists.*'=>'array',
             'question_lists.*.answer_lists.*'=>'array',
+            'question_lists.*.answer_lists.*.name'=>'nullable',
+            'question_lists.*.answer_lists.*.value'=>'nullable',
             'isTimer'=>'required',
             'isExpire'=>'required',
             'password'=>[
@@ -647,8 +769,6 @@ class AssigmentController extends Controller
             if(!empty($input_assigment['password']))$input_assigment['password'] =  bcrypt($input_assigment['password']);
             // JIKA request->isPassword=true, request->password kosong, MAKA JANGAN update db password 
             if(empty($input_assigment['password']))unset($input_assigment['password']);
-            // maka dan password di assigment
-            return $input_assigment;
 
             $assigment->fill($input_assigment);
             // $assigment->password = bcrypt($request->password);
@@ -657,68 +777,85 @@ class AssigmentController extends Controller
 
             foreach ($request->question_lists as $ql => $question_list) {
                 # code...
-                $db_question_list = QuestionList::with('images')->findOrFail($question_list['id']);
+                $db_question_list = QuestionList::with('answer_lists','images')->findOrFail($question_list['id']);
                 $db_question_list->fill((array)$question_list);
                 $db_question_list->save();
-                $db_question_list_images = $db_question_list->images;
-                
-                
-                
-                // jika ada attribut images di question_lists lakukan pengecekan
-                if(isset($question_list['images'])){
 
-                    // pisakan images yg mempunyai file dan yg tidak
-                    // taruh image yg mempunyai file ke $images_upload dan image yg bertipe object ke $existed_images
-                    $images_upload = [];       
-                    $existed_images = collect();
-                    foreach($question_list['images'] as $key=>$image){
-                        if($request->hasFile("question_lists.{$ql}.images.{$key}")){
-                            array_push($images_upload, $image);
-                        }else{
-                            $existed_images->push($image);
-                        }
-                       
-                    }
- 
-                    $deleted_image_ids = [];
-                    foreach($db_question_list_images as $db_question_list_image){
-                      $check = $existed_images->contains(function($value, $key)use($db_question_list_image){
-                          return $value['id']==$db_question_list_image->id;
-                      });
-                      // jika tidak ada di target images, letakkan di $deleted_image_ids
-                      if(!$check){
-                          array_push($deleted_image_ids, $db_question_list_image->id);
-                      }
-                    }
+                // memasukkan answer_lists ke array based key dgn key answer_lists.id
+                $db_answer_lists_key_based = [];
+                foreach($db_question_list->answer_lists as $answer_list){
+                    $db_answer_lists_key_based[$answer_list->id] = $answer_list;
                 }
+                
+                // handle upload gambar di question_lists
+                $this->handleQuestionListImagesUpload($request, $ql, $question_list, $db_question_list);
+
+                //////// BEGIN [ANSWER_LISTS]  ///////////
+                $existed_answer_list_ids = [];
+                $finished_answer_lists = [];
+                foreach($question_list['answer_lists'] as $al=>$answer_list){
+                    $type = empty($answer_list['type'])?'text':$answer_list['type'];
+
+                    $answer_list_type_id  = $db_answer_list_types[$type]->id;
+                    // jika ada di db_answer_lists, maka
+                    $db_answer_list = null;
+                    if(isset($answer_list['id']) && isset($db_answer_lists_key_based[$answer_list['id']])){
+
+                        $db_answer_list = AnswerList::findOrFail($answer_list['id']);
+                        $db_answer_list->name = $answer_list['name'];
+                        $db_answer_list->value = $answer_list['value'];
+                        $db_answer_list->answer_list_type_id = $answer_list_type_id;
+
+                        $db_answer_list->save(); 
+
+                        $existed_answer_list_ids[] = $answer_list['id'];
+
+                    }
+                    // jika tidak, berarti answer_list itu adalah data baru
+                    else{
+                        $db_answer_list = new AnswerList;
+                        $db_answer_list->name = $answer_list['name'];
+                        $db_answer_list->value = $answer_list['value'];
+                        $db_answer_list->answer_list_type_id = $answer_list_type_id;
+                        $db_question_list->answer_lists()->save($db_answer_list);
+                        // masukkan answer_lists yg baru
+                    }
+
+                    $finished_answer_lists[$al] = $db_answer_list;
+
+                 
+                }
+         
+                // hapus answer_lists yg tidak ada dalam request answer_lists.*.id
+                $deleted_answer_list_ids = [];
+                foreach($db_question_list->answer_lists as $db_answer_list){
+                    if(!in_array($db_answer_list->id, $existed_answer_list_ids))$deleted_answer_list_ids[] = $db_answer_list->id;
+                }
+                $db_question_list->answer_lists()->whereIn('id',$deleted_answer_list_ids)->delete();
+
+                // looping answer_lists lgi untuk handle upload images
+                foreach($question_list['answer_lists'] as $al=>$answer_list){
+                    $type = empty($answer_list['type'])?'text':$answer_list['type'];
+                    $db_answer_list  = $finished_answer_lists[$al];
+                    if($type=="image"){
+                        // fungsi handleImagesUpload akan menghanlde semua array images di $answer_list
+                        $this->handleImagesUpload($request,"question_lists.{$ql}.answer_lists.{$al}.images", $answer_list, $db_answer_list);
+    
+                    }
+
+                }
+
+
+                  
                
-                //proses upload file
-                $db_files = [];
-                foreach($images_upload as $image_to_upload){
-                    $upload_path = $image_to_upload->store('files', 'wasabi');
-                    if($upload_path){
-                        $file = new \App\Models\File;
-                        $file->type='image/jpeg';
-                        $file->src = $upload_path;
-                        array_push($db_files, $file);
-                    }
-                   
-                }
-                // simpan files yg sudah diupload ke wasabi
-                $db_question_list->images()->saveMany($db_files);
-
-                //hapus gambar yg dipilih untuk dihapus
-                $db_question_list->images()->whereIn('id',$deleted_image_ids)->delete();
-
-
-        
-
+                /////// END [ANSWER_LISTS] //////////////
+                
 
             }
            
 
             DB::commit();
-            return 'cok';
+            return $assigment;
         }catch (\PDOException $e) {
             // Woopsy
             

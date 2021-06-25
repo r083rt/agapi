@@ -371,7 +371,7 @@ class AssigmentSessionController extends Controller
         $request->validate([
             'assigment_ids'=>'required|array'
         ]);
-        $sessions = Session::with('assigments')->whereHas('assigments', function($query)use($request){
+        $sessions = Session::with('assigments')->where('user_id',auth()->user()->id)->whereHas('assigments', function($query)use($request){
             $query->whereIn('assigments.id',$request->assigment_ids);
         })->orderBy('id','desc');
         return $sessions->get();
