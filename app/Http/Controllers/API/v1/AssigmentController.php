@@ -705,6 +705,7 @@ class AssigmentController extends Controller
 
             // hapus gambar yg tidak masuk dalam array question_lists.*.images dri request users
             Storage::disk('wasabi')->delete($deleted_image_paths);
+           
                     
             // hapus gambar yg dipilih untuk dihapus
             $db_data->images()->whereIn('id',$deleted_image_ids)->delete();
@@ -826,11 +827,20 @@ class AssigmentController extends Controller
                  
                 }
          
+                
                 // hapus answer_lists yg tidak ada dalam request answer_lists.*.id
                 $deleted_answer_list_ids = [];
                 foreach($db_question_list->answer_lists as $db_answer_list){
                     if(!in_array($db_answer_list->id, $existed_answer_list_ids))$deleted_answer_list_ids[] = $db_answer_list->id;
                 }
+                // kumpulkan images dri $deleted_answer_list_ids kemudian hapus
+                $deleted_answer_list_images = \App\Models\File::whereHasMorph('fileable', [AnswerList::class], function($query)use($deleted_answer_list_ids){
+                    $query->whereIn('answer_lists.id',$deleted_answer_list_ids);
+                })->get();
+                foreach($deleted_answer_list_images as $deleted_answer_list_image){
+                    Storage::disk('wasabi')->delete($deleted_answer_list_image->src);
+                }
+
                 $db_question_list->answer_lists()->whereIn('id',$deleted_answer_list_ids)->delete();
 
                 // looping answer_lists lgi untuk handle upload images
@@ -845,15 +855,11 @@ class AssigmentController extends Controller
 
                 }
 
-
-                  
-               
                 /////// END [ANSWER_LISTS] //////////////
                 
 
             }
            
-
             DB::commit();
             return $assigment;
         }catch (\PDOException $e) {
