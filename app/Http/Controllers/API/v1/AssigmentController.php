@@ -565,7 +565,7 @@ class AssigmentController extends Controller
                     $query->select('id','question_list_id','name');//pastikan student tidak bisa melihat kunci jawaban
                     //masih bisa melihat jawaban untuk soal text
                 }
-                $query->selectRaw('answer_lists.*,alt.name as type')->leftJoin('answer_list_types as alt','alt.id','=','answer_lists.answer_list_type_id')->orderBy('answer_lists.id','asc');
+                $query->selectRaw("answer_lists.*,if(alt.name is null,'text',alt.name) as type")->leftJoin('answer_list_types as alt','alt.id','=','answer_lists.answer_list_type_id')->orderBy('answer_lists.id','asc');
             },
             'question_lists.answer_lists.images',
             'question_lists.audio',
