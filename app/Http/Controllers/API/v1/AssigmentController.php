@@ -919,10 +919,11 @@ class AssigmentController extends Controller
      * @param  \App\Models\Assigment  $assigment
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Assigment $assigment)
+    public function destroy($assigment_id)
     {
         $user = auth()->user();
-        $assigment->where('user_id',$user->id)->delete();
+        $assigment = Assigment::where('id',$assigment_id)->where('user_id',$user->id)->delete();
+       
         return response($assigment);
     }
     public function softDelete($id){
