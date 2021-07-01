@@ -159,6 +159,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             return $request->user();
         });
 
+        Route::get('/userreport2','UserController@userreport2');
+
         Route::get('/auth/assigment/student', function (Request $request) {
             return $request->user()->load([
                 'posts',

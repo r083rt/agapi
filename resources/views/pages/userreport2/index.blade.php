@@ -17,11 +17,13 @@
         <div class="col-md-12">
             <div class="panel panel-bordered">
                 <div class="panel-body">
+                    
                     <table id="myTable" class="table">
                         <thead>
                             <tr>
                                 <th>Nama</th>
                                 <th>Email</th>
+                                <th>Status</th>
                                 <th>No Hp</th>
                                 <th>Tanggal Bayar</th>
                                 <th>Terlambat Perpanjang</th>
@@ -33,6 +35,7 @@
                                 <tr>
                                     <td>{{$user->name}}</td>
                                     <td>{{$user->email}}</td>
+                                    <td>{{$user->pns_status ? $user->pns_status->is_pns ? 'PNS' : 'Non PNS' : 'Belum mengisi'}}</td>
                                     <td>{{$user->profile->contact ?? 'Kosong'}}</td>
                                     <td>{{$user->user_activated_at}}</td>
                                     <td>{{$user->late_paid}} Bulan</td>
@@ -44,8 +47,8 @@
                         </tbody>
                     </table>
                     <div class="row">
+                        <div class="col-sm-6">Total {{number_format($users->total())}}</div>
                         <div class="col-sm-6">{{$users->links()}}</div>
-                        <div class="col-sm-6 text-right">Total {{number_format($users->total())}}</div>
                     </div>
                 </div>
             </div>

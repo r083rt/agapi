@@ -120,7 +120,10 @@ class UserController extends Controller
     }  
 
     public function userreport2(){
-        $users = User::where('user_activated_at','<',(new \Carbon\Carbon)->submonths(6))->has('profile')->with('profile')->paginate();
+        $users = User::where('user_activated_at','<',(new \Carbon\Carbon)->submonths(6))
+        ->has('profile')
+        ->with('profile','pns_status')
+        ->paginate();
         foreach ($users as $u => $user) {
             # code...
             $user->profile->contact = $this->convertPhoneNumber($user->profile->contact);
