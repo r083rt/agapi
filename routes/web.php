@@ -63,6 +63,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('reset/password/{email}','SecureController@resetPassword');
         Route::get('makeThumbnails/{id}','SecureController@makeThumbnails');
         Route::get('userreport','Admin\\UserReportAdminController@index')->name('voyager.userreport.index');
+        Route::get('userreport2','UserController@userreport2');
 
         Route::get('textfield_question_analytic', function(){
             return view('textfield_question_analytic.index');
