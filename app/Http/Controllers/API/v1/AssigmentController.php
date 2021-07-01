@@ -228,43 +228,123 @@ class AssigmentController extends Controller
      */
     public function store2($request){
         
-        $assigment = new Assigment();
-        // return $request;
-        $assigment->fill($request->all());
-        if($request->has('password')) $assigment->password = bcrypt($request->password);
-        $assigment->code = base_convert($request->user()->id.time(), 10, 36);
-        $request->user()->assigments()->save($assigment);
+        $request->validate([
+            'is_paid'=>'boolean',
+            'question_lists'=>'required|array'
+        ]);
+        // $is_paid = empty($request->is_paid) ? false : $request->is_paid;
+        
+   
+        $request_question_list_ids = [];
         foreach ($request->question_lists as $ql => $question_list) {
-            # code...
-            
-            $item_question_list = new QuestionList();
-            $item_question_list->fill($question_list);
-            $item_question_list->ref_id = $question_list['pivot']['question_list_id']; // ref_id merujuk ke referensi master soal
-            $item_question_list->save();
-
-            //mendapatkan parent question_lists untuk mengecek audio'nya
-            $parent_item_question_list = QuestionList::findOrFail($question_list['id']);
-            if($parent_item_question_list->audio)
-            {
-                $file = new \App\Models\File;
-                $file->type = 'audio/m4a';
-                $file->src = $parent_item_question_list->audio->src;
-                $item_question_list->audio()->save($file);
-            }
-
-            $assigment->question_lists()->attach([$item_question_list->id => [
-                'creator_id' => $question_list['pivot']['creator_id'],
-                'user_id' => $question_list['pivot']['user_id'],
-                'assigment_type_id' => $question_list['pivot']['assigment_type_id'],
-            ]]);
-
-            foreach ($question_list['answer_lists'] as $al => $answer_list) {
-                # code...
-                $item_answer_list = new AnswerList();
-                $item_answer_list->fill($answer_list);
-                $item_question_list->answer_lists()->save($item_answer_list);
-            }
+                $request_question_list_ids[] = $question_list['id'];
         }
+
+        $db_question_lists = QuestionList::with('assigment_types','assigments','audio','answer_lists','images')->whereIn('id',$request_question_list_ids);
+        if($request->is_paid){
+            $db_question_lists->where(function($query){
+                $query->where('is_paid',1);
+            });
+        }else{
+            $db_question_lists->where(function($query){
+                $query->where('is_paid',-1) //assigment yg masih dalam konfirmasi (-1),
+                ->orWhereNull('is_paid') //gak masuk daftar topsis
+                ->orWhere('is_paid',0); //terkonfirmasi tidak berbayar (0)
+            });
+        }
+        // return $db_question_lists->get();
+
+        $db_question_lists = $db_question_lists->get();
+        $db_question_lists_key_based = [];
+        foreach($db_question_lists as $db_question_list){
+            $db_question_lists_key_based[$db_question_list->id] = $db_question_list;
+        }
+        // return $db_question_lists_key_based;
+
+        try{
+            DB::beginTransaction();
+
+            $assigment = new Assigment();
+            // return $request;
+            $assigment->fill($request->all());
+            // $assigment->is_paid = $is_paid;
+            if($request->has('password')) $assigment->password = bcrypt($request->password);
+            $assigment->code = base_convert($request->user()->id.time(), 10, 36);
+    
+            $request->user()->assigments()->save($assigment);
+
+            $user = $request->user();
+            // return $user;
+            foreach ($db_question_lists as $ql => $question_list) {
+                # code...
+                
+                $item_question_list = new QuestionList();
+                $item_question_list->fill($question_list->toArray());
+                $item_question_list->ref_id = $question_list->id; // ref_id merujuk ke referensi master soal
+                $item_question_list->save();
+    
+                // mendapatkan parent question_lists untuk mengecek audio'nya
+                // $parent_item_question_list = $db_question_lists_key_based[$question_list->id];
+                if($question_list->audio)
+                {
+                    $file = new \App\Models\File;
+                    $file->type = 'audio/m4a';
+                    $file->src = $question_list->audio->src;
+                    $item_question_list->audio()->save($file);
+                }
+                // jika ada gambar, maka masukkan ke model File
+                if(count($question_list->images)>0){
+                    $question_list_image_models = [];
+                    foreach($question_list->images as $image){
+                        $file = new \App\Models\File;
+                        $file->type = $image->type;
+                        $file->src = $image->src;
+                        $item_question_list->images()->save($file);
+                        $question_list_image_models[] = $file;
+                    }
+                    $item_question_list->images()->saveMany($question_list_image_models);
+                }
+               
+    
+                $assigment->question_lists()->attach([$item_question_list->id => [
+                    'creator_id' => $question_list->assigments[0]->user_id, //yg buat soal
+                    'user_id' => $user->id, //yg pakai soal
+                    'assigment_type_id' => $question_list->assigment_types[0]->id,
+                ]]);
+    
+                
+
+                $answer_list_image_models = [];
+                foreach ($question_list->answer_lists as $al => $answer_list) {
+                    # code...
+                    $item_answer_list = new AnswerList();
+                    $item_answer_list->name  = $answer_list->name;
+                    $item_answer_list->value = $answer_list->value;
+                    $item_question_list->answer_lists()->save($item_answer_list);
+
+                   if(count($answer_list->images)>0){
+                       $file = new \App\Models\File;
+                       $file->type = $answer_list->type;
+                       $file->src = $answer_list->src;
+                       $answer_list_image_models[] = $file;
+                   }
+                   $item_answer_list->images()->saveMany($answer_list_image_models);
+                    
+                }
+
+            }
+            DB::commit();
+            // return $question_list_models;
+            
+          
+        }catch (\PDOException $e) {
+            // Woopsy
+            
+            DB::rollBack();
+            dd($e);
+        }
+        // $question_list_models = [];
+        
         return response()->json(
             $assigment
                 ->load([
@@ -290,6 +370,8 @@ class AssigmentController extends Controller
         if(!$request->audio){
             return $this->store2($request);
         }
+
+        $request->validate(['data'=>'required']);
 
         $request->validate([
             'audio.*'=>'nullable|mimes:mp4,mp3',
@@ -325,6 +407,7 @@ class AssigmentController extends Controller
                 # code...
                 $item_question_list = new QuestionList();
                 $item_question_list->fill((array)$question_list);
+                $item_question_list->is_paid = null; //HARUS NULL agar dapat dilakukan pengecekan saat proses topsis
                 // TIDAK usah dikasih ref_id
                 // $item_question_list->ref_id = $question_list->pivot->question_list_id; // ref_id merujuk ke referensi master soal 
                 $item_question_list->save();
@@ -1142,17 +1225,21 @@ class AssigmentController extends Controller
         }
     }
    
-    public function buildSearch(Request $request, $assigmentCategoryId,$educationalLevelId){
-        $res = Assigment::
-        with([
+    public function buildSearchQuery($request, $assigmentCategoryId, $educationalLevelId, $func_arr=null){
+        $lazy_load = [
             'user',
             'grade',
             'assigment_category',
-            // 'question_lists'=>function($query){
-            //     // $query->selectRaw('question_lists.*,ats.description as question_list_type')
-            //     // ->join('')
-            // },
-            'question_lists.answer_lists',
+            'question_lists.images',
+            'question_lists.answer_lists'=>function($query){
+                if(auth('api')->user()->role->name=="student"){
+                    $query->select('id','question_list_id','name');//pastikan student tidak bisa melihat kunci jawaban
+                    //masih bisa melihat jawaban untuk soal text
+                }
+                $query->selectRaw("answer_lists.*,if(alt.name is null,'text',alt.name) as type")->leftJoin('answer_list_types as alt','alt.id','=','answer_lists.answer_list_type_id')->orderBy('answer_lists.id','asc');
+            },
+            'question_lists.answer_lists.images',
+            'question_lists.audio',
             'likes',
             'comments.user',
             'comments' => function ($query) {
@@ -1161,7 +1248,14 @@ class AssigmentController extends Controller
                     ->withCount('likes', 'liked')
                     ->orderBy('created_at', 'desc');
             },
-        ])
+        ];
+        if($func_arr){
+            foreach($func_arr as $key=>$func){
+                $lazy_load[$key] = $func;
+            }
+        }
+
+        $res = Assigment::with($lazy_load)
         ->orderBy('created_at','desc')
         ->withCount('comments', 'likes', 'liked')
         ->where('is_publish',false)
@@ -1172,52 +1266,61 @@ class AssigmentController extends Controller
         if(!empty($request->q)){
             $res->where('topic','like','%'.$request->q.'%');
         }
+        return $res;
+    }
+    
+    public function buildSearch(Request $request, $assigmentCategoryId,$educationalLevelId){
+       
+        $res = $this->buildSearchQuery($request, $assigmentCategoryId,$educationalLevelId);
+        $res = $res->whereHas('question_lists', function($query){
+            $query->where('question_lists.is_paid',-1) //assigment yg masih dalam konfirmasi (-1),
+            ->orWhereNull('question_lists.is_paid') //gak masuk daftar topsis
+            ->orWhere('question_lists.is_paid',0); //terkonfirmasi tidak berbayar (0)
+        });
+        
         $res = $res->paginate();    
+        // return $res;
         foreach ($res as $a => $assigment) {
             # code...
             foreach ($assigment->question_lists as $ql => $question_list) {
-                # code...
-                $question_list->pivot->assigment_type = AssigmentType::find($question_list->pivot->assigment_type_id);
+                if($question_list->is_paid){
+                    unset($assigment->question_lists[$ql]);
+                }
+                
+                if(!isset($assigment_types[$question_list->pivot->assigment_type_id])){
+                    $assigment_types[$question_list->pivot->assigment_type_id] = AssigmentType::find($question_list->pivot->assigment_type_id);     
+                }
+
+                $question_list->pivot->assigment_type = $assigment_types[$question_list->pivot->assigment_type_id];
             }
         }
 
         return response()->json($res);
     }
     public function payableBuildSearch(Request $request, $assigmentCategoryId,$educationalLevelId){
-        $res = Assigment::
-        whereHas('question_lists', function($query){
-            $query->where('question_lists.is_paid',1);
-        })
-        ->with([
-            'user',
-            'grade',
-            'assigment_category',
-            'question_lists.answer_lists',
-            'likes',
-            'comments.user',
-            'comments' => function ($query) {
-                $query
-                    ->with('likes', 'liked')
-                    ->withCount('likes', 'liked')
-                    ->orderBy('created_at', 'desc');
-            },
-        ])
-        ->orderBy('created_at','desc')
-        ->withCount('comments', 'likes', 'liked')
-        ->where('is_publish',false)
-        ->whereHas('grade',function($query)use($educationalLevelId){
-            $query->where('educational_level_id',$educationalLevelId);
-        })
-        ->whereIn('assigment_category_id',$assigmentCategoryId == 9 ? [1,7,8] : [$assigmentCategoryId]);
-        if(!empty($request->q)){
-            $res->where('topic','like','%'.$request->q.'%');
-        }
+        $res = $this->buildSearchQuery($request, $assigmentCategoryId,$educationalLevelId);
+        $res = $res->whereHas('question_lists', function($query){
+            $query->where('question_lists.is_paid',1); //terkonfirmasi berbayar (>=1) 
+        });
+        // return $res->toSql();
         $res = $res->paginate();    
+        // return $res;
+        $assigment_types = [];
         foreach ($res as $a => $assigment) {
             # code...
             foreach ($assigment->question_lists as $ql => $question_list) {
                 # code...
-                $question_list->pivot->assigment_type = AssigmentType::find($question_list->pivot->assigment_type_id);
+                if($question_list->is_paid==0){
+                    unset($assigment->question_lists[$ql]);
+                }
+                
+                if(!isset($assigment_types[$question_list->pivot->assigment_type_id])){
+                    $assigment_types[$question_list->pivot->assigment_type_id] = AssigmentType::find($question_list->pivot->assigment_type_id);     
+                }
+
+                $question_list->pivot->assigment_type = $assigment_types[$question_list->pivot->assigment_type_id];
+               
+                
             }
         }
 
