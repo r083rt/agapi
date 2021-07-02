@@ -316,7 +316,6 @@ class AssigmentController extends Controller
     
                 
 
-                $answer_list_image_models = [];
                 foreach ($question_list->answer_lists as $al => $answer_list) {
                     # code...
                     $item_answer_list = new AnswerList();
@@ -327,15 +326,16 @@ class AssigmentController extends Controller
                     $item_question_list->answer_lists()->save($item_answer_list);
 
                    if(count($answer_list->images)>0){
+                       $answer_list_image_models = [];
                        foreach($answer_list->images as $image){
                            $file = new \App\Models\File;
                            $file->type = $image->type;
                            $file->src = $image->src;
                            $answer_list_image_models[] = $file;
                        }
-                     
+                       $item_answer_list->images()->saveMany($answer_list_image_models);
                    }
-                   $item_answer_list->images()->saveMany($answer_list_image_models);
+                   
                     
                 }
 
