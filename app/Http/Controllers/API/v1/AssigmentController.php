@@ -267,7 +267,8 @@ class AssigmentController extends Controller
             $assigment = new Assigment();
             // return $request;
             $assigment->fill($request->all());
-            // $assigment->is_paid = $is_paid;
+            $assigment->is_paid = $request->is_paid==1?true:null;
+
             if($request->has('password')) $assigment->password = bcrypt($request->password);
             $assigment->code = base_convert($request->user()->id.time(), 10, 36);
     
@@ -280,6 +281,7 @@ class AssigmentController extends Controller
                 
                 $item_question_list = new QuestionList();
                 $item_question_list->fill($question_list->toArray());
+                $item_question_list->is_paid = $request->is_paid==1?true:null;
                 $item_question_list->ref_id = $question_list->id; // ref_id merujuk ke referensi master soal
                 $item_question_list->save();
     
@@ -299,7 +301,7 @@ class AssigmentController extends Controller
                         $file = new \App\Models\File;
                         $file->type = $image->type;
                         $file->src = $image->src;
-                        $item_question_list->images()->save($file);
+                        // $item_question_list->images()->save($file);
                         $question_list_image_models[] = $file;
                     }
                     $item_question_list->images()->saveMany($question_list_image_models);
@@ -320,13 +322,18 @@ class AssigmentController extends Controller
                     $item_answer_list = new AnswerList();
                     $item_answer_list->name  = $answer_list->name;
                     $item_answer_list->value = $answer_list->value;
+                    $item_answer_list->answer_list_type_id = $answer_list->answer_list_type_id;
+
                     $item_question_list->answer_lists()->save($item_answer_list);
 
                    if(count($answer_list->images)>0){
-                       $file = new \App\Models\File;
-                       $file->type = $answer_list->type;
-                       $file->src = $answer_list->src;
-                       $answer_list_image_models[] = $file;
+                       foreach($answer_list->images as $image){
+                           $file = new \App\Models\File;
+                           $file->type = $image->type;
+                           $file->src = $image->src;
+                           $answer_list_image_models[] = $file;
+                       }
+                     
                    }
                    $item_answer_list->images()->saveMany($answer_list_image_models);
                     
