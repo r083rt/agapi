@@ -8,6 +8,7 @@ use App\Models\Assigment;
 use App\Models\AssigmentSession;
 use App\Models\Session;
 use DB;
+use Carbon\Carbon;
 
 class AssigmentSessionController extends Controller
 {
@@ -29,7 +30,9 @@ class AssigmentSessionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // $request->validate([
+        //     're'
+        // ]);
     }
 
     /**
@@ -69,7 +72,41 @@ class AssigmentSessionController extends Controller
         $request->validate([
             'assigment_id'=>'required'
         ]);
+
         $user = $request->user();
+        $userProfile = $user->load('profile');
+        $educationalLevelId = $userProfile->profile->educational_level_id;
+
+        $assigment = Assigment::with('teacher','grade')
+        ->withCount('question_lists')
+        ->whereHas('grade',function($query)use($educationalLevelId){
+            $query->where('educational_level_id',$educationalLevelId);
+        })
+        ->whereNotNull('teacher_id')
+        ->findOrFail($request->assigment_id);
+        
+        $is_workable = true;
+        // jika end_at kosong dan jika tgl sekarang belum masuk dalam start_at, maka belum dimulai
+        if(!empty($assigment->start_at) && empty($assigment->end_at)){
+            $start_at = new Carbon($assigment->start_at);
+            $is_workable = Carbon::now()->greaterThanOrEqualTo($start_at);
+        
+        }
+        // jika start_at kosong dan jika tgl sekarang sudah melewati end_at, maka expired
+        elseif(empty($assigment->start_at) && !empty($assigment->end_at)){
+            $end_at = new Carbon($assigment->end_at);
+            $is_expired = Carbon::now()->greaterThanOrEqualTo($end_at);
+            $is_workable = !$is_expired;
+        }
+        // jika start_at dan end_at tidak kosong semua,
+        elseif(!empty($assigment->start_at) && !empty($assigment->end_at)){
+            $start_at = new Carbon($assigment->start_at);
+            $end_at = new Carbon($assigment->end_at);
+            $is_workable = Carbon::now()->isBetween($start_at, $end_at);
+            // return $is_workable;
+        }
+        if(!$is_workable)return response("Assigment tidak ada",404);
+
 
         $check = Session::with('assigments')->whereHas('assigments', function($query)use($request){
             $query->where('assigments.id',$request->assigment_id);
@@ -79,7 +116,7 @@ class AssigmentSessionController extends Controller
             return $check->first();
         }else{
             // return 'abb';
-            $assigment = Assigment::findOrFail($request->assigment_id);
+            
             try{
                 DB::beginTransaction();
                 $session = new Session;

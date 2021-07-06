@@ -181,6 +181,7 @@ class AssigmentSessionController extends Controller
         
         // });
     }
+   
     /**
      * Store a newly created resource in storage.
      *
@@ -190,118 +191,175 @@ class AssigmentSessionController extends Controller
     public function store(Request $request)
     {
 
+        $request->validate([
+            'question_lists'=>'required|array',
+            // 'question_lists.*.answer'=>''
+        ]);
+
+        $user = $request->user();
+        $userProfile = $user->load('profile');
+        $educationalLevelId = $userProfile->profile->educational_level_id;
+
         $isTraining = false; //jika True maka soalnya adalah latihan mandiri
 
-        //mengecek apakah soal latihan mandiri atau tidak dengan cara mengecek apakah request dari latihan soal dan mengecek apakah jumlah soal pilihan ganda yang kirim sama dengan jumlah soal pilihan ganda di db
-        $assigment = Assigment::with('question_lists.answer_lists')->findOrFail($request->id);
+        // mengecek apakah soal latihan mandiri atau tidak dengan cara mengecek apakah request 
+        // dari latihan soal dan mengecek apakah jumlah soal pilihan ganda yang kirim sama dengan 
+        // jumlah soal pilihan ganda di db
+        $assigment = Assigment::with('question_lists.answer_lists')
+        ->whereHas('grade',function($query)use($educationalLevelId){
+            $query->where('educational_level_id',$educationalLevelId);
+        })
+        ->findOrFail($request->id);
+
         if($request->has('_training') && $assigment->has('question_lists_select_options_only','=',count($request->question_lists))){
             $isTraining=true;
+            return response('Maaf Ada perbaikan sistem', 500);
         }
 
-        //jika soal tidak latihan mandiri,cek apakah user sudah mengerjakan soal ini
-        if(!$isTraining){
-            $check=Assigment::with('auth_sessions')->has('auth_sessions')->find($request->id);
-            if($check){
-                return response()->json(["error"=>"Siswa sudah mengerjakan soal ini",'session'=>$check]);
-            }
-        }
-       // return $request;
-        $assigment = Assigment::with('question_lists.answer_lists')->findOrFail($request->id);
+        //jika soal tidak latihan mandiri, cek apakah user sudah mengerjakan soal ini
+        // if(!$isTraining){
+        //     $check=Assigment::with('auth_sessions')->has('auth_sessions')->find($request->id);
+        //     if($check){
+        //         return response()->json(["error"=>"Siswa sudah mengerjakan soal ini",'session'=>$check]);
+        //     }
+        // }
+        // return $request;
 
         $selectoptions_ids = \App\Models\AssigmentType::where('description','=','selectoptions')->get()->map(function($value){
             return $value->id;
         });
-
-        $session = new Session;
-        $session->user_id = $request->user()->id;
-        $session->value = $request->value ?? null;
-        $session->save();
-        $selectoptions_count = 0;
-        $total_score=0; //hanya digunakan jika soal pilihan ganda semua
-       
-        //$assigment->sessions()->save($session,['user_id'=>$request->teacher_id]);
-        $assigment_session = new \App\Models\AssigmentSession;
-        $assigment_session->assigment_id = $assigment->id;
-        $assigment_session->session_id = $session->id;
-        $assigment_session->user_id = $assigment->teacher_id;
-        $assigment_session->save();
-        //Fungsi sync tidak digunakan agar Observer nya bisa ter-trigger oleh kode di atas
-        //$session->assigments()->sync([$assigment->id=>['user_id'=>$assigment->teacher_id]]);
         
+        
+        // cek apakah ada 1 sesi yg punya assigment tsb
+         $check_session = Session::where('user_id',$user->id)->whereHas('assigments', function($query)use($assigment){
+            $query->where('assigments.id',$assigment->id);
+        });
+        if($check_session->exists()){
+            $session = $check_session->first();
+        }else throw new \Exception('Session tidak ada :p');
 
 
-        if($request->has('question_lists')){
-            $user_questions = collect($request->question_lists);
-            foreach ($assigment->question_lists as $q => $question_list) {
-                # code...
-                $is_optionselects = false;
-                //$question_list = $assigment->question_lists()->findOrFail($question['id']); 
-                if($selectoptions_ids->contains($question_list->pivot->assigment_type_id)){ //cek apakah soal ini pilihan ganda
-                    $selectoptions_count++;
-                    $is_optionselects = true;
-                }
+        try{
+            DB::beginTransaction();
 
-                //mengecek apakah paket soal yang dikirim mempunyai id soal yg sesuai dgn yg ada di db
-                if($user_questions->contains('id',$question_list->id)){ 
-                    
-                    $user_question = $user_questions->firstWhere('id',$question_list->id);
-                    // if(!isset($user_question['answer']['id'])){
-                    //     return $question_list;
-                    // }
-                    $user_answer = $question_list->answer_lists()->findOrFail($user_question['answer']['id']); //mendapatkan jawaban dari questions
-                
-                    if(!$is_optionselects){
-                        $user_answer->value = null;
-                        $user_answer->name = $user_question['answer']['name'];
+          
+            $selectoptions_count = 0;
+            $total_score=0; //hanya digunakan jika soal pilihan ganda semua
+
+            //$assigment->sessions()->save($session,['user_id'=>$request->teacher_id]);
+            // $assigment_session = new \App\Models\AssigmentSession;
+            // $assigment_session->assigment_id = $assigment->id;
+            // $assigment_session->session_id = $session->id;
+            // $assigment_session->user_id = $assigment->teacher_id;
+            // $assigment_session->save();
+            //Fungsi sync tidak digunakan agar Observer nya bisa ter-trigger oleh kode di atas
+            //$session->assigments()->sync([$assigment->id=>['user_id'=>$assigment->teacher_id]]);
+
+            
+            if($request->has('question_lists')){
+                $user_questions = collect($request->question_lists);
+                foreach ($assigment->question_lists as $q => $question_list) {
+                    # code...
+                    $is_optionselects = false;
+                    //$question_list = $assigment->question_lists()->findOrFail($question['id']); 
+                    if($selectoptions_ids->contains($question_list->pivot->assigment_type_id)){ //cek apakah soal ini pilihan ganda
+                        $selectoptions_count++;
+                        $is_optionselects = true;
                     }
-                    if($user_answer->value==100) $total_score += 100;
+
+                    //mengecek apakah paket soal yang dikirim mempunyai id soal yg sesuai dgn yg ada di db
+                    if($user_questions->contains('id',$question_list->id)){ 
+                        
+                        $user_question = $user_questions->firstWhere('id',$question_list->id);
+                        // if(!isset($user_question['answer']['id'])){
+                        //     return $question_list;
+                        // }
+                        if(isset($user_question['answer']['id'])){
+                           
+                            $user_answer = $question_list->answer_lists()->findOrFail($user_question['answer']['id']); //mendapatkan jawaban dari questions
+                            $user_answer_question_list_id = $user_answer->question_list_id;
+                            $user_answer_value =  $user_answer->value;
+                            $user_answer_id =  $user_answer->id;
+                            $user_answer_name = $user_answer->name;
+                        }else{
+                            $user_answer_question_list_id = $question_list->id;
+                            $user_answer_value = 0;
+                            $user_answer_id = null;
+                            $user_answer_name = null;
+                        }
+                        
                     
-                    $db_question = new Question();
-                    $db_question->fill($question_list->toArray());
-                    $db_question->question_list_id =  $user_answer->question_list_id;
-                    $db_question->score = $user_answer->value;
-    
-                    $session->questions()->save($db_question);
-                    // insert answer to question
-                    $db_answer = new Answer;
-                    $db_answer->fill($user_answer->toArray());
-                    $db_answer->answer_list_id = $user_answer->id;
-                    $db_question->answer()->save($db_answer);
+                        if(!$is_optionselects){
+                            // $user_answer->value = 0;
+                            // $user_answer->name = $user_question['answer']['name'];
+                            $user_answer_value = 0;
+                            $user_answer_name =  $user_question['answer']['name'];
+                            
+                        }
+                        if($user_answer_value==100) $total_score += 100;
+                        
+                        $db_question = new Question();
+                        $db_question->fill($question_list->toArray());
+                        $db_question->question_list_id =  $user_answer_question_list_id;
+                        $db_question->score = $user_answer_value;
+        
+                        $session->questions()->save($db_question);
+                        // insert answer to question
+                        $db_answer = new Answer;
+                        // $db_answer->fill($user_answer->toArray());
+                        $db_answer->name = $user_answer_name;
+                        $db_answer->value = $user_answer_value;
+                        $db_answer->answer_list_id = $user_answer_id;
+                        $db_question->answer()->save($db_answer);
+                    }
+
+                    
                 }
-
-                
             }
-        }
-        Log::debug('test assigment_session_controller');
-        //mengecek apakah request dari latihan soal dan mengecek apakah jumlah soal pilihan ganda yang kirim sama dengan jumlah soal pilihan ganda di db
-        if($isTraining){
-           // return $assigment->withCount('question_lists_select_options_only')->get();
-            $assigment->assigment_session->total_score=round($total_score/$selectoptions_count, 2);
-            $assigment->assigment_session->save();
-            return response()->json(['score'=>['value'=>round($total_score/$selectoptions_count, 2)], 'data'=>$session->load([
-                //'questions.answer',
-                'questions',
-                'assigments'
-            ])]);
-        }
-        //jika soal merupakan ujian, tidak latihan soal, maka jalankan kode dbawah
-        else{
-            $isTemporary = true;
-            $value=0;
-            if($selectoptions_count==count($assigment->question_lists)){ //jika soalnya pilihan ganda semua, maka otomatis ternilai
-                $isTemporary = false;
-                $assigment->assigment_session->total_score = $value = round($total_score/count($assigment->question_lists), 2);
+            Log::debug('test assigment_session_controller');
+            //mengecek apakah request dari latihan soal dan mengecek apakah jumlah soal pilihan ganda yang kirim sama dengan jumlah soal pilihan ganda di db
+            if($isTraining){
+            // return $assigment->withCount('question_lists_select_options_only')->get();
+                $assigment->assigment_session->total_score=round($total_score/$selectoptions_count, 2);
                 $assigment->assigment_session->save();
-                //\App\Models\User::find(auth('api')->user()->id)->notify();
-            }
-            return response()->json(['score'=>['isTemporary'=>$isTemporary, 'value'=>$value, 'data'=>$session->load([
-                //'questions.answer',
-                'questions',
-                'assigments'
-            ])]]);
 
+                DB::commit();
+                return response()->json(['score'=>['value'=>round($total_score/$selectoptions_count, 2)], 'data'=>$session->load([
+                    //'questions.answer',
+                    'questions',
+                    'assigments'
+                ])]);
+            }
+            //jika soal merupakan ujian, tidak latihan soal, maka jalankan kode dbawah
+            else{
+                $isTemporary = true;
+                $value=0;
+                if($selectoptions_count==count($assigment->question_lists)){ //jika soalnya pilihan ganda semua, maka otomatis ternilai
+                    $isTemporary = false;
+                    $assigment->assigment_session->total_score = $value = round($total_score/count($assigment->question_lists), 2);
+                    $assigment->assigment_session->save();
+                    //\App\Models\User::find(auth('api')->user()->id)->notify();
+                }
+                
+                DB::commit();
+                return response()->json(['score'=>['isTemporary'=>$isTemporary, 'value'=>$value, 'data'=>$session->load([
+                    //'questions.answer',
+                    'questions',
+                    'assigments'
+                ])]]);
+
+            }
+
+          
+        }catch (\PDOException $e) {
+            DB::rollBack();
+           return response($e->getMessage(), 404);
+        }catch(\Exception $e){
+            DB::rollback();
+            return response($e->getMessage(), 404);
         }
         
+
       
     }
     // public function checkAndStore(Request $request){
