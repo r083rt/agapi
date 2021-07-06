@@ -24,5 +24,8 @@ class Question extends Model
     public function session(){
         return $this->belongsTo('App\Models\Session');
     }
+    public function question_list(){
+        return $this->belongsTo(\App\Models\QuestionList::class);
+    }
     
 }

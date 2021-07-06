@@ -63,14 +63,28 @@ class SessionController extends Controller
         //
     }
     public function getSessionById($id){
-        $session = Session::with('assigment_session','user','questions.answer_lists','questions.answer',
-            'questions.assigment_question_list.assigment_type:id,name,description')->whereHas('questions.assigment_question_list',
+        $session = Session::with(
+        'assigment_session',
+        'user',
+        'questions.question_list.images',
+        'questions.question_list.audio',
+        'questions.answer_lists.answer_list_type',
+        'questions.answer_lists.images',
+        'questions.answer',
+        'questions.assigment_question_list.assigment_type:id,name,description'
+        )->whereHas('questions.assigment_question_list',
             function($q){
                 $q->where('user_id','=',auth('api')->user()->id);
         })->findOrFail($id);
         
         foreach($session->questions as $question){
             if($question->score==null)$question->score=0;
+            foreach($question->answer_lists as $answer_list){
+                if($answer_list->answer_list_type==null){
+                    unset($answer_list->answer_list_type);
+                    $answer_list->answer_list_type = ['name'=>'text'];
+                }
+            }
         }
         return $session;
     }

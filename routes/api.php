@@ -154,6 +154,7 @@ Route::middleware([
     return $res;
 });
 
+
 Route::group(['namespace'=>'API\\v1'],function(){
     // API WITHOUT SECURITY ----------------------------------------------------------------------------
     Route::get('/auth/assigment',function(Request $request){ // GET USER AUTH FOR ASSIGMENT APPS

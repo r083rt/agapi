@@ -325,7 +325,7 @@ class AssigmentController extends Controller
 
                     $item_question_list->answer_lists()->save($item_answer_list);
 
-                   if(count($answer_list->images)>0){
+                    if(count($answer_list->images)>0){
                        $answer_list_image_models = [];
                        foreach($answer_list->images as $image){
                            $file = new \App\Models\File;
@@ -548,47 +548,96 @@ class AssigmentController extends Controller
         // $masterAssigment->load('question_lists');
         $masterUser = User::findOrFail($masterAssigment->user_id);
         // return $request->all();
-        $newAssigment = new Assigment;
-        $newAssigment->fill($masterAssigment->toArray());
-        $newAssigment->code = base_convert($request->user()->id.time(), 10, 36);
+        try{
+            DB::beginTransaction();
+            $newAssigment = new Assigment;
+            $newAssigment->fill($masterAssigment->toArray());
+            $newAssigment->code = base_convert($request->user()->id.time(), 10, 36);
 
-        // mereferensikan ke master assigment (soal asli)
-        $newAssigment->ref_id = $masterAssigment->id;
-      
-        //merubah value berdasarkan request
-        if($request->has('password') && !empty($request->password)) $newAssigment->password = bcrypt($request->password);
-        if($request->has('note') && !empty($request->note) ) $newAssigment->note = $request->note;
-        if($request->has('start_at') && $request->has('end_at') && !empty($request->start_at) && !empty($request->end_at)) {
-            $newAssigment->start_at = $request->start_at;
-            $newAssigment->end_at = $request->end_at;
-        }
-        if($request->has('timer') && !empty($request->timer) ) $newAssigment->timer = $request->timer;
-
-        $newAssigment->grade_code = $request->grade_code;
-        $newAssigment->teacher_id = $request->user()->id;
-
-        $masterUser->assigments()->save($newAssigment);
+            // mereferensikan ke master assigment (soal asli)
+            $newAssigment->ref_id = $masterAssigment->id;
         
-        foreach ($masterAssigment->question_lists as $ql => $question_list) {
-            # code...
-            $item_question_list = new QuestionList();
-            $item_question_list->fill($question_list->toArray());
-            $item_question_list->ref_id = $question_list->ref_id;
-            $item_question_list->save();
-            $newAssigment->question_lists()->attach([$item_question_list->id => [
-                'creator_id' => $question_list['pivot']['creator_id'],
-                'user_id' => $request->user()->id,
-                'assigment_type_id' => $question_list['pivot']['assigment_type_id'],
-            ]]);
-
-            foreach ($question_list->answer_lists as $al => $answer_list) {
-                # code...
-                $item_answer_list = new AnswerList();
-                $item_answer_list->fill($answer_list->toArray());
-                $item_question_list->answer_lists()->save($item_answer_list);
+            //merubah value berdasarkan request
+            if($request->has('password') && !empty($request->password)) $newAssigment->password = bcrypt($request->password);
+            if($request->has('note') && !empty($request->note) ) $newAssigment->note = $request->note;
+            if($request->has('start_at') && $request->has('end_at') && !empty($request->start_at) && !empty($request->end_at)) {
+                $newAssigment->start_at = $request->start_at;
+                $newAssigment->end_at = $request->end_at;
             }
+            if($request->has('timer') && !empty($request->timer) ) $newAssigment->timer = $request->timer;
+
+            $newAssigment->grade_code = $request->grade_code;
+            $newAssigment->teacher_id = $request->user()->id;
+
+            $masterUser->assigments()->save($newAssigment);
+            
+            foreach ($masterAssigment->question_lists as $ql => $question_list) {
+                # code...
+                $item_question_list = new QuestionList();
+                $item_question_list->fill($question_list->toArray());
+                $item_question_list->ref_id = $question_list->ref_id;
+                $item_question_list->save();
+                
+                
+                // mendapatkan parent question_lists untuk mengecek audio'nya
+                // $parent_item_question_list = $db_question_lists_key_based[$question_list->id];
+                if($question_list->audio)
+                {
+                    $file = new \App\Models\File;
+                    $file->type = 'audio/m4a';
+                    $file->src = $question_list->audio->src;
+                    $item_question_list->audio()->save($file);
+                }
+                // jika ada gambar, maka masukkan ke model File
+                if(count($question_list->images)>0){
+                    $question_list_image_models = [];
+                    foreach($question_list->images as $image){
+                        $file = new \App\Models\File;
+                        $file->type = $image->type;
+                        $file->src = $image->src;
+                        // $item_question_list->images()->save($file);
+                        $question_list_image_models[] = $file;
+                    }
+                    $item_question_list->images()->saveMany($question_list_image_models);
+                }
+
+                $newAssigment->question_lists()->attach([$item_question_list->id => [
+                    'creator_id' => $question_list['pivot']['creator_id'],
+                    'user_id' => $request->user()->id,
+                    'assigment_type_id' => $question_list['pivot']['assigment_type_id'],
+                ]]);
+
+                foreach ($question_list->answer_lists as $al => $answer_list) {
+                    # code...
+                    $item_answer_list = new AnswerList();
+                    $item_answer_list->name  = $answer_list->name;
+                    $item_answer_list->value = $answer_list->value;
+                    $item_answer_list->answer_list_type_id = $answer_list->answer_list_type_id;
+
+                    $item_question_list->answer_lists()->save($item_answer_list);
+
+                    if(count($answer_list->images)>0){
+                    $answer_list_image_models = [];
+                    foreach($answer_list->images as $image){
+                        $file = new \App\Models\File;
+                        $file->type = $image->type;
+                        $file->src = $image->src;
+                        $answer_list_image_models[] = $file;
+                    }
+                    $item_answer_list->images()->saveMany($answer_list_image_models);
+                }
+                }
+            }
+            DB::commit();
+            return $newAssigment;
+        }catch (\PDOException $e) {
+            // Woopsy
+            
+            DB::rollBack();
+            dd($e);
         }
-        return $newAssigment;
+        
+      
     }
     public function setAssigmentToPublic(Request $request){
         $assigment = Assigment::where('user_id','=',auth('api')->user()->id)->findOrFail($request->id);
@@ -652,10 +701,12 @@ class AssigmentController extends Controller
             'question_lists.images',
             'question_lists.answer_lists'=>function($query){
                 if(auth('api')->user()->role->name=="student"){
-                    $query->select('id','question_list_id','name');//pastikan student tidak bisa melihat kunci jawaban
+                    $query->select('answer_lists.id','answer_lists.question_list_id','answer_lists.name');//pastikan student tidak bisa melihat kunci jawaban
                     //masih bisa melihat jawaban untuk soal text
+                }else{
+                    $query->select('answer_lists.*');
                 }
-                $query->selectRaw("answer_lists.*,if(alt.name is null,'text',alt.name) as type")->leftJoin('answer_list_types as alt','alt.id','=','answer_lists.answer_list_type_id')->orderBy('answer_lists.id','asc');
+                $query->selectRaw("if(alt.name is null,'text',alt.name) as type")->leftJoin('answer_list_types as alt','alt.id','=','answer_lists.answer_list_type_id')->orderBy('answer_lists.id','asc');
             },
             'question_lists.answer_lists.images',
             'question_lists.audio',
@@ -1136,9 +1187,22 @@ class AssigmentController extends Controller
         return $res; 
     }
     public function selectOptionsOnly($assigment_id){
-        $res = Assigment::with(['grade','user','question_lists_select_options_only.assigment_types', 'question_lists_select_options_only.answer_lists'=>function($query){
-            $query->select('id','question_list_id','name');
-        }])->find($assigment_id); //cara 1 (2 query tapi hasil output lebih sedikit)
+        $res = Assigment::with(['grade',
+        'user',
+        'question_lists_select_options_only.images',
+        'question_lists_select_options_only.audio',
+        'question_lists_select_options_only.assigment_types', 
+        'question_lists_select_options_only.answer_lists'=>function($query){
+            if(auth('api')->user()->role->name=="student"){
+                $query->select('answer_lists.id','answer_lists.question_list_id','answer_lists.name');//pastikan student tidak bisa melihat kunci jawaban
+                //masih bisa melihat jawaban untuk soal text
+            }else{
+                $query->select('answer_lists.*');
+            }
+            $query->selectRaw("if(alt.name is null,'text',alt.name) as type")->leftJoin('answer_list_types as alt','alt.id','=','answer_lists.answer_list_type_id')->orderBy('answer_lists.id','asc');
+        },
+        'question_lists_select_options_only.answer_lists.images',
+        ])->find($assigment_id); //cara 1 (2 query tapi hasil output lebih sedikit)
         //return Assigment::with('question_lists.assigment_question_list.assigment_type_selectoptions_only')->find($assigment_id); cara 2 (1 query tapi hasil outputnya banyak)
         if($res){
             $res["question_lists"] = $res->question_lists_select_options_only;
