@@ -6,3 +6,5 @@ Route::post('createassigmentsession',
 Route::get('/assigments/search/{key}',
 [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'search']);
 // Route::get('/')
+Route::apiResource('/assigmentsession', Student\AssigmentSessionController::class);
+Route::get('unfinishedassigment', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'unfinishedAssigment']);

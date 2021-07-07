@@ -21,18 +21,52 @@ class AssigmentSessionController extends Controller
     {
         // return 111;
     }
-
+    function checkIsSame($a, $b){
+        if(count($a)!==count($b))return false;
+        sort($a);
+        sort($b);
+        foreach($a as $k=>$v){
+            if($v!==$b[$k])return false;
+        }
+        return true;
+    }
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
-     */
+     */ 
     public function store(Request $request)
     {
-        // $request->validate([
-        //     're'
-        // ]);
+        $request->validate([
+            'id'=>'required',
+            'question_lists'=>'required',
+            // 'question_lists.*.answer'=>'required',
+        ]);
+        // return 'cok';
+        $assigment = Assigment::with(['question_lists'=>function($query)use($request){
+            $query->selectRaw('question_lists.*,ats.description as assigment_type')
+            ->join('assigment_question_lists as aql','aql.question_list_id','=','question_lists.id')
+            ->join('assigment_types as ats','ats.id','=','aql.assigment_type_id')
+            ->where('aql.assigment_id', $request->id);
+
+            // ->groupBy('aql.question_list_id');
+        }, 'question_lists.answer_lists'])->findOrFail($request->id);
+
+        return $assigment;
+        // $session = Session::
+        try{
+
+
+        }catch(\PDOException $e){
+            DB::rollBack();
+            return response($e,500);
+           
+        }catch(\Exception $e){
+            DB::rollBack();
+            return response($e,500);
+          
+        }
     }
 
     /**

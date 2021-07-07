@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Assigment;
 use App\Models\Session;
 use Carbon\Carbon;
+use DB;
 class AssigmentController extends Controller
 {
     /**
@@ -62,6 +63,76 @@ class AssigmentController extends Controller
     public function destroy($id)
     {
         //
+    }
+    // session yang belum selesai:
+    // session yang jumlah questions tidak sama dengan jumlah assigments.question_lists
+    public function unfinishedAssigment($type='sharedassigment'){
+        $userProfile = auth('api')->user()->load('profile');
+        $educationalLevelId = $userProfile->profile->educational_level_id;
+        if($educationalLevelId==null)return response()->json(['error_jenjang'=>true]);
+
+        $totalQuestionLists = DB::table('assigment_question_lists as aql')
+        ->selectRaw('aql.assigment_id,count(1) question_lists_total')
+        ->groupBy('aql.assigment_id');
+
+        $totalQuestions = DB::table('questions as q')
+        ->selectRaw('q.session_id,count(1) as questions_total')
+        ->groupBy('q.session_id');
+
+        $query = DB::table('sessions')
+        ->selectRaw('sessions.id,
+        sessions.user_id,
+        sessions.created_at,
+        ass.assigment_id,
+        a.name,
+        a.code,
+        a.timer,
+        a.end_at,
+        a.start_at,
+        users.name as teacher,
+        grades.educational_level_id,
+        grades.description,
+        a.is_public,
+        a.teacher_id,
+        assigment_question_lists_pivot.question_lists_total,
+        questions_pivot.questions_total')
+        ->join('assigment_sessions as ass', 'ass.session_id','=','sessions.id')
+        ->join('assigments as a', 'a.id','=','ass.assigment_id')
+        ->join('grades', 'grades.id','=','a.grade_id')
+        ->join('users','users.id','=','a.teacher_id')
+        ->joinSub($totalQuestionLists, 'assigment_question_lists_pivot', function($join){
+            $join->on('assigment_question_lists_pivot.assigment_id','=','ass.assigment_id');
+        })
+        ->leftJoinSub($totalQuestions, 'questions_pivot', function($join){
+            $join->on('questions_pivot.session_id','=','sessions.id');
+        })
+        ->where('grades.educational_level_id',$educationalLevelId)
+        ->where(function($query2){
+            $query2->whereColumn('questions_pivot.questions_total','!=','assigment_question_lists_pivot.question_lists_total')
+            ->orWhereNull('questions_pivot.questions_total');
+        })
+        ->where('sessions.user_id',$userProfile->id)
+        ->orderBy('sessions.id','desc');
+
+        if($type=='sharedassigment'){ //menampilkan sharedassigment yang telah dikerjakan
+            $query->whereNotNull('teacher_id');
+        }elseif($type=='masterassigment'){ //menampilkan master soal (latihan soal) yang telah dikerjakan
+            $query->whereNull('teacher_id')->where('is_public','=',true);
+        }else{
+            return abort(404);   
+        }
+        // return $query->get();
+        $data = $query->paginate();
+        foreach($data as $session){
+            if($session->timer){
+                $carbon = new Carbon($session->created_at);
+                $diff = Carbon::now()->diffInSeconds($carbon);
+                $session->diff = $diff;
+            }
+        }
+        return $data;
+        //sharedassigment = paket soal hasil salinan dari master paket soal
+       
     }
     public function search($key){
       
