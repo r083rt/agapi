@@ -361,7 +361,9 @@ Route::get('/getcontactnumber',function(){
 
 
 Route::get('/testgan',function(){
-    return  Storage::disk('wasabi')->delete("files/X1feHOW1OtZnp6DghnUVaUFD17AQI0NhPFtxLUV8.png");
+    
+    $a = DB::table('notifications')->whereJsonContains('data->data->session_id', 25040)->where('notifiable_id',1);
+    return $a->get();
 });
 
 

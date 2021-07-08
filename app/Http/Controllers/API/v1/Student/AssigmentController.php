@@ -125,10 +125,28 @@ class AssigmentController extends Controller
         $data = $query->paginate();
         foreach($data as $session){
             if($session->timer){
+                // $session->end_time_unixtimestamp = Carbon::now()
+
+                $timer = intval($session->timer);
                 $carbon = new Carbon($session->created_at);
-                $diff = Carbon::now()->diffInSeconds($carbon);
-                $session->diff = $diff;
+                $seconds_diff = Carbon::now()->diffInSeconds($carbon);
+                $session->seconds_diff = $seconds_diff;
+                $minutes_diff = round($seconds_diff/60);
+                $is_timer_ended = $minutes_diff>=$timer?true:false;
+                $session->is_timer_ended = $is_timer_ended;
+
+                $session->actualEndTime = $carbon->add($timer, 'minutes')->getTimeStamp();
+                $session->actualStartTime = Carbon::parse($session->created_at)->getTimeStamp();
+
             }
+            
+            if(!empty($session->end_at)){
+                $end_at = new Carbon($session->end_at);
+                $is_expired = Carbon::now()->greaterThanOrEqualTo($end_at);
+                $session->is_expired = $is_expired;
+            }
+            
+            
         }
         return $data;
         //sharedassigment = paket soal hasil salinan dari master paket soal

@@ -246,6 +246,7 @@ class AssigmentSessionController extends Controller
             $selectoptions_count = 0;
             $total_score=0; //hanya digunakan jika soal pilihan ganda semua
 
+            
             //$assigment->sessions()->save($session,['user_id'=>$request->teacher_id]);
             // $assigment_session = new \App\Models\AssigmentSession;
             // $assigment_session->assigment_id = $assigment->id;
@@ -341,6 +342,9 @@ class AssigmentSessionController extends Controller
                     //\App\Models\User::find(auth('api')->user()->id)->notify();
                 }
                 
+
+                \App\Http\ObserverHandler\AssigmentSessionObserverHandler::handler($assigment->assigment_session);
+
                 DB::commit();
                 return response()->json(['score'=>['isTemporary'=>$isTemporary, 'value'=>$value, 'data'=>$session->load([
                     //'questions.answer',

@@ -50,10 +50,12 @@ class AssigmentSessionObserver
     {
         Log::debug('updated assigmentsesionobserver');
         \App\Models\Notification::whereHasMorph('notifiable', 'App\Models\User',function($query)use($assigmentSession){
-            $query->where('id','=',$assigmentSession->session->user_id);  
+            $query->where('id','=',$assigmentSession->session->user_id);  //session->user_id = murid
           })
           ->where('type','App\Notifications\AssigmentNotification')
-          ->where('data','REGEXP','{"data":{"id":\s*'.$assigmentSession->id)->delete();
+          ->whereJsonContains('data->data->id',$assigmentSession->id)->delete();
+
+        //   ->where('data','REGEXP','{"data":{"id":\s*'.$assigmentSession->id)->delete();
 
             if($assigmentSession->total_score!==null && $assigmentSession->assigment->teacher_id!==null){
                 $assigmentSession->load('session.user','teacher');

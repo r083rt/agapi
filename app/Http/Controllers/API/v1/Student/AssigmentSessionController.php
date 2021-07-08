@@ -155,7 +155,9 @@ class AssigmentSessionController extends Controller
                 DB::beginTransaction();
                 $session = new Session;
                 $session->user_id = $user->id;
-                $assigment->sessions()->save($session);
+                $session->save();
+                //user_id = teacher_id yang digunakan pada tahap selanjutnya
+                $assigment->sessions()->sync([$session->id => ['user_id'=>$assigment->teacher_id]]);
                 DB::commit();
                 return $session->load('assigments');
             

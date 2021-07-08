@@ -1,24 +1,10 @@
-# session yang belum selesai:
-# session yang jumlah questions tidak sama dengan jumlah assigments.question_lists
+# session yang belum selesai: session yang jumlah questions tidak sama dengan jumlah assigments.question_lists
 SELECT
-	sessions.id,
-	sessions.user_id,
-	sessions.created_at,
-	ass.assigment_id,
-    a.name,
-	a.code,
-    a.timer,
-    a.end_at,
-    a.start_at,
-    users.name as teacher,
-    grades.educational_level_id,
-    grades.description,
-    a.is_public,
-    a.teacher_id,
+	sessions.id,sessions.user_id,sessions.created_at,ass.assigment_id,a.name,a.code,a.timer,a.end_at,a.start_at,
+    users.name as teacher,grades.educational_level_id, grades.description, a.is_public,a.teacher_id,
     assigment_question_lists_pivot.question_lists_total,
 	questions_pivot.questions_total
 FROM sessions
-
 inner join 
 	assigment_sessions as ass on ass.session_id=sessions.id
 inner join 
