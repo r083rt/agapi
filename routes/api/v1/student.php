@@ -8,3 +8,6 @@ Route::get('/assigments/search/{key}',
 // Route::get('/')
 Route::apiResource('/assigmentsession', Student\AssigmentSessionController::class);
 Route::get('unfinishedassigment', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'unfinishedAssigment']);
+
+Route::post('createpayment',[App\Http\Controllers\API\v1\Student\PaymentController::class, 'createPayment']);
+Route::get('balance', [App\Http\Controllers\API\v1\Student\PaymentController::class, 'getBalance']);

@@ -213,7 +213,7 @@ class AssigmentSessionController extends Controller
 
         if($request->has('_training') && $assigment->has('question_lists_select_options_only','=',count($request->question_lists))){
             $isTraining=true;
-            return response('Maaf Ada perbaikan sistem', 500);
+            // return response('Maaf Ada perbaikan sistem', 500);
         }
 
         //jika soal tidak latihan mandiri, cek apakah user sudah mengerjakan soal ini
@@ -234,9 +234,16 @@ class AssigmentSessionController extends Controller
          $check_session = Session::where('user_id',$user->id)->whereHas('assigments', function($query)use($assigment){
             $query->where('assigments.id',$assigment->id);
         });
+
         if($check_session->exists()){
             $session = $check_session->first();
-        }else throw new \Exception('Session tidak ada :p');
+        }else {
+            if(!$request->has('_training')){
+                throw new \Exception('Session tidak ada :p');
+            }
+
+            
+        }
 
 
         try{
@@ -246,15 +253,24 @@ class AssigmentSessionController extends Controller
             $selectoptions_count = 0;
             $total_score=0; //hanya digunakan jika soal pilihan ganda semua
 
-            
-            //$assigment->sessions()->save($session,['user_id'=>$request->teacher_id]);
-            // $assigment_session = new \App\Models\AssigmentSession;
-            // $assigment_session->assigment_id = $assigment->id;
-            // $assigment_session->session_id = $session->id;
-            // $assigment_session->user_id = $assigment->teacher_id;
-            // $assigment_session->save();
-            //Fungsi sync tidak digunakan agar Observer nya bisa ter-trigger oleh kode di atas
-            //$session->assigments()->sync([$assigment->id=>['user_id'=>$assigment->teacher_id]]);
+            // JIKa soal latihan mandiri, maka buat session baru
+            if($request->has('_training') && $assigment->has('question_lists_select_options_only','=',count($request->question_lists))){
+
+                $session = new Session;
+                $session->user_id = $user->id; //diisi dgn auth yg mengerjakan skrng
+                // $session->value = $request->value ?? null;
+                $session->save();
+
+                //$assigment->sessions()->save($session,['user_id'=>$request->teacher_id]);
+                // $assigment_session = new \App\Models\AssigmentSession;
+                // $assigment_session->assigment_id = $assigment->id;
+                // $assigment_session->session_id = $session->id;
+                // $assigment_session->user_id = $assigment->teacher_id;
+                // $assigment_session->save();
+                //Fungsi sync tidak digunakan agar Observer nya bisa ter-trigger oleh kode di atas
+                $session->assigments()->sync([$assigment->id=>['user_id'=>$assigment->teacher_id]]);
+            }
+           
 
             
             if($request->has('question_lists')){

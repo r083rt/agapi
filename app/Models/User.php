@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class User extends \TCG\Voyager\Models\User
 {
@@ -235,5 +236,13 @@ class User extends \TCG\Voyager\Models\User
     public function receivesBroadcastNotificationsOn()
     {
         return 'notification.'.$this->id;
+    }
+    public function balance(){
+        $payments_in = $this->payments()->where('type','IN')
+        ->whereHas('necessary', function($query){
+            $query->where('necessaries.name','topup');
+        })->sum('value');
+        $payments_out = $this->payments()->where('type','OUT')->sum('value');
+        return $payments_in - $payments_out;
     }
 }
