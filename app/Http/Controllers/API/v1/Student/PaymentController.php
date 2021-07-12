@@ -68,6 +68,20 @@ class PaymentController extends Controller
         return $user->balance();
 
     }
+    public function checkPayment(Request $request, $payment_id){
+        $user = $request->user();
+        $payment = $user->payments()->findOrFail($payment_id);
+        // return $payment;
+        $client = new GuzzleHttp\Client();
+        $res = $client->get(env('MASTER_PAYMENT_URL')."/checkstatus/{$payment->master_payment_id}");
+        $master_payment = json_decode($res->getBody());
+        // jika status di master payment success, ubah jika payments.status
+        $payment->status = $master_payment->status??'pending';
+        $payment->save();
+        return $payment;
+        // dd($master_payment);
+
+    }
     public function createPayment(Request $request){
         $request->validate([
             'value'=>'required',

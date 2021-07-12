@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Assigment;
 use App\Models\Session;
 use Carbon\Carbon;
+use Illuminate\Validation\Rule;
+
 use DB;
 class AssigmentController extends Controller
 {
@@ -228,5 +230,42 @@ class AssigmentController extends Controller
 
         return $assigment;
 
+    }
+    public function buyAssigment(Request $request){
+        $request->validate([
+            'id'=>[
+                'required'
+            ]
+        ]);
+        $user = $request->user();
+        $user_balance = $user->balance();
+        $assigment = Assigment::where('is_paid','>=',1)->findOrFail($request->id);
+        // jika saldo kurang maka return 403 dgn json
+        if($user_balance<$assigment->is_paid){
+            return response(['message'=>'Saldo kurang'], 403);
+        }
+        try{
+            DB::beginTransaction();
+
+            $necessary = \App\Models\Necessary::where('name','transfer')->first();
+            if(!$necessary){
+                return response('Necessary not found',404);
+            }
+
+            $payment = new \App\Models\Payment;
+            $payment->type = 'OUT';
+            $payment->necessary_id = $necessary->id;
+            $payment->status = 'success';
+            $payment->value = $assigment->value;
+            $user->payments()->save($payment);
+
+            DB::commit();
+            return $payment;
+
+        }catch (\PDOException $e) {
+            DB::rollBack();
+            return response($e->getMessage(), 500);
+        }
+      
     }
 }

@@ -362,8 +362,36 @@ Route::get('/getcontactnumber',function(){
 
 Route::get('/testgan',function(){
     
-    $a = DB::table('notifications')->whereJsonContains('data->data->session_id', 25040)->where('notifiable_id',1);
-    return $a->get();
+    $assigmentPivot = DB::table('assigment_sessions as ass')
+        ->selectRaw('ass.id,a2.ref_id,ass.assigment_id,std(ass.total_score) as score,count(1) as scores_count')
+        ->join('assigments as a2','a2.id', '=', 'ass.assigment_id')
+        ->where('a2.is_publish',true) 
+        ->whereNotNull('a2.teacher_id') // teacher_id NOT NULL adalah slave soal dari master soal
+        ->groupBy('a2.ref_id');
+
+        $data = DB::table('assigments as a')
+        ->selectRaw("a.id, 
+        u.name as user_name, 
+        g.description as grade, 
+        a.code, 
+        a.name, 
+        a.created_at,
+        assigment_pivot.score,
+        assigment_pivot.scores_count")
+        ->join('grades as g', 'g.id','=','a.grade_id')
+        ->join('users as u', 'u.id','=','a.user_id')
+        ->leftJoinSub($assigmentPivot, 'assigment_pivot', function($join){
+            $join->on('assigment_pivot.ref_id', '=', 'a.id');
+        })
+
+        // paket soal adalah assigments dengan kondisi teacher_id IS NULL dan is_publish=1
+        ->where('a.is_publish',true)
+        ->whereNull('a.teacher_id')
+        ->whereNull('a.is_paid') //akan mengambil assigment yang belum dicek saja, 
+        // assigment yg masih dalam konfirmasi (-1), terkonfirmasi tidak berbayar (0), dan terkonfirmasi berbayar (>=1) tidak perlu discan lgi
+        ->havingRaw('score is not null')->get();
+    
+        return $data;
 });
 
 

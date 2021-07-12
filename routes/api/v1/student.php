@@ -11,3 +11,6 @@ Route::get('unfinishedassigment', [App\Http\Controllers\API\v1\Student\Assigment
 
 Route::post('createpayment',[App\Http\Controllers\API\v1\Student\PaymentController::class, 'createPayment']);
 Route::get('balance', [App\Http\Controllers\API\v1\Student\PaymentController::class, 'getBalance']);
+Route::get('checkpayment/{payment_id}', [App\Http\Controllers\API\v1\Student\PaymentController::class, 'checkPayment']);
+
+Route::post('buyassigment', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'buyAssigment']);

@@ -110,26 +110,29 @@ class TopsisCommand extends Command
         ->havingRaw('score is not null')->get();
         return $data;
     }
+    //raw sql: analisis paket soal - standar deviasi (use left join sub)
     public function getQuestionListsPackages(){
+        $assigmentPivot = DB::table('assigment_sessions as ass')
+        ->selectRaw('ass.id,a2.ref_id,ass.assigment_id,std(ass.total_score) as score,count(1) as scores_count')
+        ->join('assigments as a2','a2.id', '=', 'ass.assigment_id')
+        ->where('a2.is_publish',true) 
+        ->whereNotNull('a2.teacher_id') // teacher_id NOT NULL adalah slave soal dari master soal
+        ->groupBy('a2.ref_id');
+
         $data = DB::table('assigments as a')
-        ->selectRaw("a.id,u.name as user_name,g.description as grade,a.code,a.name,
+        ->selectRaw("a.id, 
+        u.name as user_name, 
+        g.description as grade, 
+        a.code, 
+        a.name, 
         a.created_at,
-        (
-            select std(ass.total_score) from assigment_sessions ass 
-            inner join assigments a2 on a2.id=ass.assigment_id
-            where 
-                a2.is_publish=1 and a2.teacher_id is not null #teacher_id NOT NULL adalah slave soal dari master soal
-                and a2.ref_id=a.id
-        ) as score, (
-            select count(1) from assigment_sessions ass 
-            inner join assigments a2 on a2.id=ass.assigment_id
-            where 
-                a2.is_publish=1 and a2.teacher_id is not null #teacher_id NOT NULL adalah slave soal dari master soal
-                and a2.ref_id=a.id
-        ) as scores_count    
-        ")
+        assigment_pivot.score,
+        assigment_pivot.scores_count")
         ->join('grades as g', 'g.id','=','a.grade_id')
         ->join('users as u', 'u.id','=','a.user_id')
+        ->leftJoinSub($assigmentPivot, 'assigment_pivot', function($join){
+            $join->on('assigment_pivot.ref_id', '=', 'a.id');
+        })
 
         // paket soal adalah assigments dengan kondisi teacher_id IS NULL dan is_publish=1
         ->where('a.is_publish',true)
@@ -137,7 +140,7 @@ class TopsisCommand extends Command
         ->whereNull('a.is_paid') //akan mengambil assigment yang belum dicek saja, 
         // assigment yg masih dalam konfirmasi (-1), terkonfirmasi tidak berbayar (0), dan terkonfirmasi berbayar (>=1) tidak perlu discan lgi
         ->havingRaw('score is not null')->get();
-
+    
         return $data;
     }
     /**
@@ -153,6 +156,7 @@ class TopsisCommand extends Command
         'score'=>['weight'=>4, 'type'=>'cost']
         ];
         $data = $this->getQuestionListsPackages();
+      
         echo count($data)." paket soal -> ";
         $topsis = new Topsis($attributes, $data);
         $topsis->addPreferenceAttribute();

@@ -1371,7 +1371,7 @@ class AssigmentController extends Controller
     public function payableBuildSearch(Request $request, $assigmentCategoryId,$educationalLevelId){
         $res = $this->buildSearchQuery($request, $assigmentCategoryId,$educationalLevelId);
         $res = $res->whereHas('question_lists', function($query){
-            $query->where('question_lists.is_paid',1); //terkonfirmasi berbayar (>=1) 
+            $query->where('question_lists.is_paid',1); //butir soal terkonfirmasi berbayar (>=1) 
         });
         // return $res->toSql();
         $res = $res->paginate();    
@@ -1544,7 +1544,7 @@ class AssigmentController extends Controller
         
         $request->validate([
             'value'=>['required', 
-                Rule::in(['1', '0']), 
+                'integer',
                 function ($attribute, $value, $fail)use($request) {
                     $data = \App\Models\Assigment::findOrFail($request->assigment_id);
                     if($data->is_paid!=-1)$fail('Paket Soal ini sudah diset oleh pemilik soal menjadi '.($data->is_paid?'berbayar':'tidak berbayar'));
@@ -1552,6 +1552,9 @@ class AssigmentController extends Controller
                 }
             ],
         ]);
+        if($request->value<=0){
+            return response('Harga paket soal harus lebih dari 0',422);
+        }
         // return $question_list_id;
         $data = \App\Models\Assigment::where('user_id', auth()->user()->id  )
         ->find($assigment_id);

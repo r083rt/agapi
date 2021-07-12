@@ -241,7 +241,7 @@ class User extends \TCG\Voyager\Models\User
         $payments_in = $this->payments()->where('type','IN')
         ->whereHas('necessary', function($query){
             $query->where('necessaries.name','topup');
-        })->sum('value');
+        })->where('status','success')->sum('value');
         $payments_out = $this->payments()->where('type','OUT')->sum('value');
         return $payments_in - $payments_out;
     }
