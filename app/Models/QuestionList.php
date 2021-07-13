@@ -42,6 +42,11 @@ class QuestionList extends Model
     public function questions(){
         return $this->hasMany('App\Models\Question','question_list_id');
     }
+   
+    
+    public function ref_question_list(){
+        return $this->belongsTo(QuestionList::class, 'ref_id');
+    }
     // public function a(){
     //     return $this->has
     // }

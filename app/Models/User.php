@@ -238,10 +238,12 @@ class User extends \TCG\Voyager\Models\User
         return 'notification.'.$this->id;
     }
     public function balance(){
+        // $payments_in = $this->payments()->where('type','IN')
+        // ->whereHas('necessary', function($query){
+        //     $query->where('necessaries.name','topup');
+        // })->where('status','success')->sum('value');
         $payments_in = $this->payments()->where('type','IN')
-        ->whereHas('necessary', function($query){
-            $query->where('necessaries.name','topup');
-        })->where('status','success')->sum('value');
+        ->whereNotNull('necessary_id')->where('status','success')->sum('value');
         $payments_out = $this->payments()->where('type','OUT')->sum('value');
         return $payments_in - $payments_out;
     }

@@ -16,7 +16,9 @@ class CreatePurchasedItemsTable extends Migration
         Schema::create('purchased_items', function (Blueprint $table) {
             $table->id();
             $table->nullableMorphs('purchased_item');
-            $table->foreignId('payment_id')->constrained();
+            $table->foreignId('payment_id')->constrained()
+            ->onUpdate('cascade')->onDelete('cascade');
+            
             $table->timestamps();
         });
     }

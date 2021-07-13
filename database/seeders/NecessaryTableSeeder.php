@@ -19,10 +19,14 @@ class NecessaryTableSeeder extends Seeder
 
         Necessary::updateOrCreate([
             'name'=>'beli_soal',
-        ], ['description'=>'Membeli paket soal']);
+        ], ['description'=>'Membeli paket soal oleh siswa']);
 
         Necessary::updateOrCreate([
             'name'=>'topup',
         ], ['description'=>'Pengisian saldo']);
+
+        Necessary::updateOrCreate([
+            'name'=>'bagi_keuntungan',
+        ], ['description'=>'Bagi keuntungan hasil dari pembelian paket soal oleh siswa']);
     }
 }

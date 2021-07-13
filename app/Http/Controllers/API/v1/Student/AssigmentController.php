@@ -278,9 +278,68 @@ class AssigmentController extends Controller
             $purchased_item->payment_id = $payment->id;
 
             $assigment->purchased_items()->save($purchased_item);
+
+            // sekarang bagi keuntungan ke pemilik paket soal berbayar dan pemilik butir soal berbayar
+            $assigment->load(['question_lists'=>function($query){
+                // hanya mengambil queston_lists yg berbayar (is_paid=1)
+                $query->where('question_lists.is_paid', true);
+            }]);
+
+           
             
+    
+            // jika butir soal berprofit ada di dalam paket soal tsb maka
+            if(count($assigment->question_lists)){
+                $profit = 0.5*$payment->value; // keuntungan 50% (dibagi 50% ke pembuat soal dan 50% ke pembuat butir soal berbayar sama-rata
+                $necessary = \App\Models\Necessary::where('name','bagi_keuntungan')->first();
+                if(!$necessary)return response('Necessary bagi_keuntungan not found',404);
+                
+                
+                $payment2 = new \App\Models\Payment;
+                $payment2->type = 'IN';
+                $payment2->value = $profit; 
+                $payment2->status = 'success'; 
+                $payment2->necessary_id = $necessary->id;
+                $assigment->user->payments()->save($payment2);
+
+
+                // profit untuk pembuat butir soal
+                $profit2 = $payment->value - $profit;
+                $profit2 = $profit2 / count($assigment->question_lists);
+                $payments2 = [];
+                foreach($assigment->question_lists as $question_list){
+
+                   array_push($payments2, [
+                    'necessary_id' => $necessary->id,
+                    'type' => 'IN',
+                    'status'=>'success',
+                    'value' => $profit2,
+                    'payment_id'=> $question_list->pivot->creator_id,
+                    'payment_type'=> \App\Models\User::class,
+                    'created_at'=> Carbon::now(),
+                    'updated_at'=> Carbon::now(),
+                   ]);
+
+                }
+                $totalInserted = DB::table('payments')->insert($payments2);
+               
+            }else{
+                // jika tidak ada soal yg berbayar maka 100% keuntungan dimiliki pembuat paket soal
+                $necessary = \App\Models\Necessary::where('name','bagi_keuntungan')->first();
+                if(!$necessary)return response('Necessary bagi_keuntungan not found',404);
+                
+                $payment2 = new \App\Models\Payment;
+                $payment2->type = 'IN';
+                $payment2->status = 'success';
+                $payment2->value = $payment->value; // keuntungan 100% (tidak dibagi karena butir2 soalnya tidak ada 1 pun yg is_paid TRUE)
+                $payment2->necessary_id = $necessary->id;
+                
+                $assigment->user->payments()->save($payment2);
+
+            }
+
             DB::commit();
-            return $payment;
+            return $assigment;
 
         }catch (\PDOException $e) {
             DB::rollBack();

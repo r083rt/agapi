@@ -490,6 +490,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::middleware('isTeacher')->post('/question_package/setispaid/{assigment_id}','AssigmentController@setIsPaid');
         Route::middleware('isTeacher')->get('/question_package/payable/{assigment_id}','AssigmentController@getPayableItem');
 
+        Route::get('balance', function(Request $request){
+            $user = $request->user();
+            return $user->balance();
+        });
+
         // Route::get('/question_package/payable');
         Route::middleware('isTeacher')->get('/test',function(Request $request){
             return $request->user()->role;
