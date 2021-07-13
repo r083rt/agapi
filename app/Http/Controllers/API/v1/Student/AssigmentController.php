@@ -8,6 +8,7 @@ use App\Models\Assigment;
 use App\Models\Session;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Database\Eloquent\Builder;
 
 use DB;
 class AssigmentController extends Controller
@@ -237,28 +238,47 @@ class AssigmentController extends Controller
                 'required'
             ]
         ]);
-        $user = $request->user();
-        $user_balance = $user->balance();
         $assigment = Assigment::where('is_paid','>=',1)->findOrFail($request->id);
+        $user = $request->user();
+        // cek apakah user sudah membeli assigment ini
+        $purchased = \App\Models\PurchasedItem::whereHas('payment', function(Builder $query)use($user){
+            $query->whereHasMorph('paymentable', \App\Models\User::class, function(Builder $query2)use($user){
+                $query2->where('users.id', $user->id);
+            });
+        })->whereHasMorph('purchased_item',
+         \App\Models\Assigment::class, function (Builder $query, $type)use($assigment){
+             $query->where('assigments.id', $assigment->id);
+         });
+        if($purchased->exists()){
+            return response(['message'=>'Kamu sudah membeli item ini.'], 403);
+        }
+        
         // jika saldo kurang maka return 403 dgn json
+        $user_balance = $user->balance();
         if($user_balance<$assigment->is_paid){
             return response(['message'=>'Saldo kurang'], 403);
         }
+
         try{
             DB::beginTransaction();
 
-            $necessary = \App\Models\Necessary::where('name','transfer')->first();
+            $necessary = \App\Models\Necessary::where('name','beli_soal')->first();
             if(!$necessary){
-                return response('Necessary not found',404);
+                return response('Necessary beli_soal not found',404);
             }
 
             $payment = new \App\Models\Payment;
             $payment->type = 'OUT';
             $payment->necessary_id = $necessary->id;
             $payment->status = 'success';
-            $payment->value = $assigment->value;
+            $payment->value = $assigment->is_paid;
             $user->payments()->save($payment);
 
+            $purchased_item = new \App\Models\PurchasedItem;
+            $purchased_item->payment_id = $payment->id;
+
+            $assigment->purchased_items()->save($purchased_item);
+            
             DB::commit();
             return $payment;
 

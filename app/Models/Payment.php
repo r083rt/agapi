@@ -73,4 +73,12 @@ class Payment extends Model
         return $this->belongsTo('App\Models\Necessary');
     }
 
+    public function purchased_item(){
+        return $this->hasOne(PurchasedItem::class);
+    }
+
+    public function paymentable(){
+        return $this->morphTo(__FUNCTION__, 'payment_type', 'payment_id');
+    }
+
 }
