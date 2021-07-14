@@ -362,9 +362,10 @@ Route::get('/getcontactnumber',function(){
 
 Route::get('/testgan',function(){
     
-        return \App\Models\Assigment::class;
+    $settings = DB::table('settings')->where('key', 'like',"admin.soal_p3k%manajerial")->get();
+    return $settings;
     
-        return $data;
+        // return $data;
 });
 
 

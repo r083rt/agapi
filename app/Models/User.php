@@ -247,4 +247,10 @@ class User extends \TCG\Voyager\Models\User
         $payments_out = $this->payments()->where('type','OUT')->sum('value');
         return $payments_in - $payments_out;
     }
+
+    public function isExpired(){
+        $user_activated_at = $this->user_activated_at;
+        $diffMonth = \Carbon\Carbon::now()->diffInMonths($user_activated_at);
+        return $diffMonth>6;
+    }
 }

@@ -665,6 +665,13 @@ class AssigmentController extends Controller
         return $assigment;
     }
     public function show2shuffle($id){
+        $user = auth()->user();
+        $check = DB::table('settings')->where('key', 'like',"admin.soal_p3k%manajerial")->where('value',$id);
+        if($check->exists()){
+            if($user->isExpired())return response('Akun Anda expired. Silahkan lakukan perpanjangan', 403);
+        }
+        
+        
         //menampilkan assigment dengan question list tanpa jawaban
         $assigment = Assigment::with(['question_lists'=>function($query){
             $query->selectRaw('question_lists.*,ats.description as assigment_type')->join('assigment_question_lists as aql','aql.question_list_id','=','question_lists.id')
