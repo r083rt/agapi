@@ -10,6 +10,7 @@ class Topsis{
     private $negativeIdealSolution;
     private $preferences;
     private $is_add_preference_column = false;
+    private $is_entropy = false;
     public function __construct($attributes, $data){
         /*
         usage:  $attributes = ['scores_count'=>['weight'=>5, 'type'=>'benefit'],
@@ -32,7 +33,47 @@ class Topsis{
         }
 
     }
+    public function calculateAttributeEntropy(){
+        //referensi: https://www.hindawi.com/journals/mpe/2020/3564835/
+
+        $count = count($this->data);
+        $E_arr = [];
+        foreach($this->attributes as $attribute=>$options){
+            $sum=0;
+            //hitung sum
+            for($i=0; $i<$count; $i++){
+                $sum +=  $this->data[$i]->{$attribute};
+            }
+            // hitung P[i][j] => ith atribut/indikator, jth sample
+            $P[$attribute] = [];
+            for($i=0; $i<$count; $i++){
+                $P[$attribute][$i] =  $this->data[$i]->{$attribute}/$sum;
+            }
+
+            $sum2 = 0;
+            for($i=0; $i<$count; $i++){
+                if($P[$attribute][$i]>0){
+                    $sum2 += $P[$attribute][$i] * log($P[$attribute][$i]);
+                }
+            }
+            $E_arr[$attribute] = (-1*$sum2)/log($count); 
+
+        }
+
+        $sum = array_sum($E_arr);
+        foreach($E_arr as $key=>$E){
+            $w = (1-$E)/$sum;
+            //masukkan $w ke weight tiap atribut
+            $this->attributes[$key]['weight'] = $w;
+        }
+      
+    }
     public function calculate(){
+
+        if($this->is_entropy){
+            $this->calculateAttributeEntropy();
+        }
+        
         $this->normalize();
         $this->calculatePreferences();
         $this->sortPreferences();
@@ -89,6 +130,9 @@ class Topsis{
     }
     public function addPreferenceAttribute(){
         $this->is_add_preference_column = true;
+    }
+    public function enableEntropyWeightMethod(){
+        $this->is_entropy = true;   
     }
     private function cmp($a, $b) {
         if ($a == $b) {

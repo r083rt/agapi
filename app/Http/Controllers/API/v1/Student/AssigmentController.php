@@ -431,6 +431,7 @@ class AssigmentController extends Controller
         'normalized_score'=>['weight'=>3, 'type'=>'benefit']
         ];
         $topsis = new \App\Helper\Topsis($attributes, $dataset);
+        $topsis->enableEntropyWeightMethod(); //aktifkan pembobotan tak
         // $topsis->addPreferenceAttribute();
         $ranking = $topsis->calculate();
         return $ranking;
