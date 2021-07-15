@@ -14,3 +14,5 @@ Route::post('createpayment',[App\Http\Controllers\API\v1\Student\PaymentControll
 Route::get('checkpayment/{payment_id}', [App\Http\Controllers\API\v1\Student\PaymentController::class, 'checkPayment']);
 
 Route::post('buyassigment', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'buyAssigment']);
+
+Route::get('/ranking', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'ranking'] );

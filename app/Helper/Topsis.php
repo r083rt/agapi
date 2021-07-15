@@ -11,6 +11,12 @@ class Topsis{
     private $preferences;
     private $is_add_preference_column = false;
     public function __construct($attributes, $data){
+        /*
+        usage:  $attributes = ['scores_count'=>['weight'=>5, 'type'=>'benefit'],
+        'score'=>['weight'=>4, 'type'=>'cost']
+        ];
+        new Topsis($attribute, $data);
+        */
         if(!is_array($attributes)){
             echo "Attributes harus array";
             die;
@@ -75,7 +81,10 @@ class Topsis{
             }
             $distance_p = sqrt($distance_p);
             $distance_n = sqrt($distance_n);
-            array_push($this->preferences, $distance_n/($distance_n+$distance_p));
+            // dd([$distance_n, $distance_p]);
+            $divider = $distance_n + $distance_p;
+            if($divider==0)$divider = $count;
+            array_push($this->preferences, $distance_n / $divider);
         }
     }
     public function addPreferenceAttribute(){

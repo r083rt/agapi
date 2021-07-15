@@ -347,4 +347,93 @@ class AssigmentController extends Controller
         }
       
     }
+    public function ranking(Request $request){
+        $request->validate([
+            'year'=>'nullable|integer',
+            'month'=>'nullable|integer',
+            'range_in'=>'nullable|integer',
+            'grade_id'=>'nullable|integer',
+            
+        ]);
+        // jika range_in tidak kosong, maka akan ignore year dan month
+        $grade_id  = $request->query('grade_id')??null;
+        $year  = $request->query('year')??null;
+        $month  = $request->query('month')??null;
+        $range_in = $request->query('range_in')??null;
+
+        $user_assigment_sessions = DB::table('sessions as s')->selectRaw('
+        s.user_id, 
+        u.name,
+        u.avatar,
+		count(1) as session_count,   
+        sum(ass.total_score) as scores_sum,
+		s.created_at
+        ')
+        ->join('assigment_sessions as ass', 'ass.session_id','=','s.id')
+        ->join('users as u', 'u.id','=','s.user_id')
+        ->join('profiles as p','p.user_id','=','u.id')
+        ->whereNotNull('ass.total_score')
+        ->groupBy('s.user_id')
+        ->limit(100);
+
+        if($grade_id){
+            $user_assigment_sessions->where('p.grade_id', $grade_id);
+        }
+
+        // jika range_in tidak null, maka filter year dan month akan diignore
+        if($range_in){
+            $start_at = Carbon::now()->subMonths($range_in)->toDateString();
+            $end_at = Carbon::now()->toDateString();
+            $user_assigment_sessions->whereBetween('s.created_at', [$start_at, $end_at]);
+        }else{
+            if($year){
+                $user_assigment_sessions->whereYear('s.created_at',$year);
+            }
+            if($month){
+                $user_assigment_sessions->whereMonth('s.created_at',$month);
+            }
+        }
+  
+        $query = DB::table($user_assigment_sessions,'t')->selectRaw('t.user_id,
+        t.name,
+        t.avatar,
+        t.session_count,
+        t.scores_sum/(t.session_count*100) as score')->orderBy('t.session_count','desc');
+        $dataset = $query->get();
+        if(!count($dataset))return [];
+        
+        $min_sessions_count = $max_sessions_count = $dataset[0]->session_count;
+        $min_score = $max_score = $dataset[0]->score;
+        foreach($dataset as $data){
+            if($data->session_count<$min_sessions_count)$min_sessions_count = $data->session_count;
+            elseif($data->session_count>$max_sessions_count)$max_sessions_count = $data->session_count;;
+
+            if($data->score < $min_score)$min_score = $data->score;
+            elseif($data->score > $max_score)$max_score = $data->score;
+        }
+        foreach($dataset as $data){
+            if($min_sessions_count===$max_sessions_count){
+                $data->normalized_session_count = $data->session_count/count($dataset);
+            }else{
+                $data->normalized_session_count = ($data->session_count - $min_sessions_count)/($max_sessions_count - $min_sessions_count);
+            }
+            
+            if($min_score===$max_score){
+                $data->normalized_score = $data->score/count($dataset);
+            }else{
+                $data->normalized_score = ($data->score - $min_score)/($max_score - $min_score);
+            }
+            
+        }
+        // return $dataset;
+
+        $attributes = ['normalized_session_count'=>['weight'=>5, 'type'=>'benefit'],
+        'normalized_score'=>['weight'=>3, 'type'=>'benefit']
+        ];
+        $topsis = new \App\Helper\Topsis($attributes, $dataset);
+        // $topsis->addPreferenceAttribute();
+        $ranking = $topsis->calculate();
+        return $ranking;
+    }
+    
 }
