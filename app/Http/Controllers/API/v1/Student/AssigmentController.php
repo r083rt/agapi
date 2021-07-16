@@ -402,33 +402,37 @@ class AssigmentController extends Controller
         $dataset = $query->get();
         if(!count($dataset))return [];
         
-        $min_sessions_count = $max_sessions_count = $dataset[0]->session_count;
-        $min_score = $max_score = $dataset[0]->score;
-        foreach($dataset as $data){
-            if($data->session_count<$min_sessions_count)$min_sessions_count = $data->session_count;
-            elseif($data->session_count>$max_sessions_count)$max_sessions_count = $data->session_count;;
+        // $min_sessions_count = $max_sessions_count = $dataset[0]->session_count;
+        // $min_score = $max_score = $dataset[0]->score;
+        // foreach($dataset as $data){
+        //     if($data->session_count<$min_sessions_count)$min_sessions_count = $data->session_count;
+        //     elseif($data->session_count>$max_sessions_count)$max_sessions_count = $data->session_count;;
 
-            if($data->score < $min_score)$min_score = $data->score;
-            elseif($data->score > $max_score)$max_score = $data->score;
-        }
-        foreach($dataset as $data){
-            if($min_sessions_count===$max_sessions_count){
-                $data->normalized_session_count = $data->session_count/count($dataset);
-            }else{
-                $data->normalized_session_count = ($data->session_count - $min_sessions_count)/($max_sessions_count - $min_sessions_count);
-            }
+        //     if($data->score < $min_score)$min_score = $data->score;
+        //     elseif($data->score > $max_score)$max_score = $data->score;
+        // }
+        // foreach($dataset as $data){
+        //     if($min_sessions_count===$max_sessions_count){
+        //         $data->normalized_session_count = $data->session_count/count($dataset);
+        //     }else{
+        //         $data->normalized_session_count = ($data->session_count - $min_sessions_count)/($max_sessions_count - $min_sessions_count);
+        //     }
             
-            if($min_score===$max_score){
-                $data->normalized_score = $data->score/count($dataset);
-            }else{
-                $data->normalized_score = ($data->score - $min_score)/($max_score - $min_score);
-            }
+        //     if($min_score===$max_score){
+        //         $data->normalized_score = $data->score/count($dataset);
+        //     }else{
+        //         $data->normalized_score = ($data->score - $min_score)/($max_score - $min_score);
+        //     }
             
-        }
-        // return $dataset;
+        // }
+        // // return $dataset;
 
-        $attributes = ['normalized_session_count'=>['weight'=>5, 'type'=>'benefit'],
-        'normalized_score'=>['weight'=>3, 'type'=>'benefit']
+        // $attributes = ['normalized_session_count'=>['weight'=>5, 'type'=>'benefit'],
+        // 'normalized_score'=>['weight'=>3, 'type'=>'benefit']
+        // ];
+        // tidak jadi pakai min max scaler karena hasil plot'nya sama saja, dan tidak mempengaruhi korelasi (https://stackoverflow.com/questions/47025485/does-scaling-time-series-using-min-max-scaling-affect-cross-correlation)
+        $attributes = ['session_count'=>['weight'=>5, 'type'=>'benefit'],
+        'score'=>['weight'=>3, 'type'=>'benefit']
         ];
         $topsis = new \App\Helper\Topsis($attributes, $dataset);
         $topsis->enableEntropyWeightMethod(); //aktifkan pembobotan tak
