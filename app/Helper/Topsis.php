@@ -37,6 +37,7 @@ class Topsis{
         //referensi: https://www.hindawi.com/journals/mpe/2020/3564835/
 
         $count = count($this->data);
+        if($count===1)return;
         $E_arr = [];
         foreach($this->attributes as $attribute=>$options){
             $sum=0;
