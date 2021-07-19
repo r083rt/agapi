@@ -99,6 +99,39 @@ class Assigment extends Model
     public function purchased_items(){
         return $this->morphMany(PurchasedItem::class, 'purchased_item');
     }
+
+    public function isWorkable(){
+        
+        $is_workable = true;
+        if(!empty($this->start_at) && empty($this->end_at)){
+            $start_at = new \Carbon\Carbon($this->start_at);
+            $is_workable = \Carbon\Carbon::now()->greaterThanOrEqualTo($start_at);
+        
+        }  // jika start_at kosong dan jika tgl sekarang sudah melewati end_at, maka expired
+        elseif(empty($this->start_at) && !empty($this->end_at)){
+            $end_at = new \Carbon\Carbon($this->end_at);
+            $is_expired = \Carbon\Carbon::now()->greaterThanOrEqualTo($end_at);
+            $is_workable = !$is_expired;
+        }
+        // jika start_at dan end_at tidak kosong semua,
+        elseif(!empty($this->start_at) && !empty($this->end_at)){
+            $start_at = new \Carbon\Carbon($this->start_at);
+            $end_at = new \Carbon\Carbon($this->end_at);
+            $is_workable = \Carbon\Carbon::now()->isBetween($start_at, $end_at);
+            // return $is_workable;
+        }
+        return $is_workable;
+    }
+
+    public function tags(){
+        return $this->morphToMany(Tag::class, 'taggable');
+    }
+    public function taggables(){
+        return $this->hasMany(Taggable::class, 'taggable_id')->where('taggables.taggable_type', Assigment::class);
+    }
+    public function taggables_(){
+        return $this->belongsToMany(Tag::class, 'taggables', 'taggable_id','tag_id')->where('taggables.taggable_type', Assigment::class);
+    }
   
     // public function 
 }

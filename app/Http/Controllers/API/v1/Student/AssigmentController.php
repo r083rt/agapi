@@ -155,6 +155,15 @@ class AssigmentController extends Controller
         //sharedassigment = paket soal hasil salinan dari master paket soal
        
     }
+    function checkIsSame($a, $b){
+        if(count($a)!==count($b))return false;
+        sort($a);
+        sort($b);
+        foreach($a as $k=>$v){
+            if($v!==$b[$k])return false;
+        }
+        return true;
+    }
     public function search($key){
       
         // return 'cok';
@@ -172,7 +181,8 @@ class AssigmentController extends Controller
         ->where('code',$key)->first();
         if(!$assigment)return response('Assigment tidak ada',404);
 
-        $session = Session::whereHas('assigments',function($query)use($assigment){
+
+        $session = Session::where('user_id',$userProfile->id)->whereHas('assigments',function($query)use($assigment){
             $query->where('assigments.id',$assigment->id);
         });
 

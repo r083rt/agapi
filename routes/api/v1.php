@@ -289,7 +289,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'conversation'=>'ConversationController',
             'paymentvendor'=>'PaymentVendorController',
             'room'=>'RoomController',
-            'student/room'=>'Student\RoomController'
+            'student/room'=>'Student\RoomController',
+            'tag'=>'TagController',
         ]);
 
         Route::delete('module/{moduleId}/dislike','ModuleLikeController@dislike');
@@ -508,6 +509,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::post('/assigmentsessions/store2', 'AssigmentSessionController@store2');
         Route::get('/assigments/{assigment_id}/history', 'AssigmentSessionController@history');
         Route::post('/assigments/history', 'AssigmentSessionController@history2');
+
+        Route::post('assigments_tag', 'TaggableController@assigmentsTag');
 
     });
 

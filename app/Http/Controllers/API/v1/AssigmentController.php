@@ -665,10 +665,20 @@ class AssigmentController extends Controller
         return $assigment;
     }
     public function show2shuffle($id){
-        $user = auth()->user();
-        $check = DB::table('settings')->where('key', 'like',"admin.soal_p3k%manajerial")->where('value',$id);
-        if($check->exists()){
-            if($user->isExpired())return response('Akun Anda expired. Silahkan lakukan perpanjangan', 403);
+        $user = auth()->user();    
+        $key = ['Manajerial','Sosiokultural'];
+    
+        $assigments  = Assigment::with('taggables_')->findOrFail($id);
+        $check_user_expired = false;
+        foreach($assigments->taggables_ as $taggable){
+            if(in_array($taggable->name, $key)){
+                $check_user_expired = true;
+                break;
+            }
+        }
+        // return $check;
+        if($check_user_expired && $user->isExpired()){
+            return response('Akun Anda expired. Silahkan lakukan perpanjangan', 403);
         }
         
         
