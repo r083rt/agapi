@@ -459,4 +459,11 @@ class AssigmentSessionController extends Controller
         // }])->findOrFail($assigment_id);
         // return $assigment;
     }
+    public function assigmentsTagHistory(){
+      
+        $sessions = Session::with('assigments')->where('user_id',auth()->user()->id)
+        ->has('assigments.taggables')->orderBy('id','desc');
+
+        return $sessions->get();
+    }
 }

@@ -510,7 +510,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/assigments/{assigment_id}/history', 'AssigmentSessionController@history');
         Route::post('/assigments/history', 'AssigmentSessionController@history2');
 
+        Route::get('/assigments_tag/history', 'AssigmentSessionController@assigmentsTagHistory');
         Route::post('assigments_tag', 'TaggableController@assigmentsTag');
+
+        
 
     });
 
