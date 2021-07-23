@@ -64,7 +64,8 @@ class AssigmentSessionController extends Controller
         ->withCount('question_lists')
         ->whereHas('grade',function($query)use($educationalLevelId){
             $query->where('educational_level_id',$educationalLevelId);
-        })->findOrFail($request->id);
+        })
+        ->findOrFail($request->id);
 
         if(!$assigment->isWorkable()){
             throw new \Exception('Soal tidak bisa dikerjakan');
@@ -137,14 +138,21 @@ class AssigmentSessionController extends Controller
                     $selectoptions_count++;
                     $is_selectoptions = true;
                 }
+
                 // submitted_answer adalah question_lists.*.answer yg disubmit user
                 $submitted_answer = null;
-                if(isset($submitted_question_lists[$ql]['answer']['id'])){
+
+                // jika type soal pilihan ganda (selectoptions), cek apakah answer.id ada
+                if($is_selectoptions && isset($submitted_question_lists[$ql]['answer']['id'])){
+                    $submitted_answer = $submitted_question_lists[$ql]['answer'];
+                }
+                // jika type soal esai (textfield/textarea), cek apakah answer.name ada
+                elseif(isset($submitted_question_lists[$ql]['answer']['name'])){
                     $submitted_answer = $submitted_question_lists[$ql]['answer'];
                 }
     
                 $score = 0; // jika type soal textfield/textarea, maka $score=0
-                $selected_db_answer = null;
+                $selected_db_answer = null; // jika soal esai, maka $selected_db_answer NULL
     
                 // jika type soal selectoptions dan $submitted_answer tidak NULL, maka koreksi soal
                 if($is_selectoptions && $submitted_answer){
@@ -169,7 +177,7 @@ class AssigmentSessionController extends Controller
                 // insert answer to question
                 $db_answer = new Answer;
                 if($selected_db_answer==null){
-                    $db_answer->name = !$is_selectoptions ? $submitted_answer['name']:null;
+                    $db_answer->name = !$is_selectoptions ? $submitted_answer['name']??null :null;
                     $db_answer->answer_list_id = null;
                     $db_answer->value = null;
                 }else{
@@ -179,11 +187,31 @@ class AssigmentSessionController extends Controller
               
                 
                 $db_question->answer()->save($db_answer);
-                return $db_answer;
+               
     
             }
 
+            $isTemporary = true;
+            $value=0;
+            
+            //jika soalnya pilihan ganda semua, maka otomatis ternilai
+            if($selectoptions_count==$assigment->question_lists_count){ 
+                $isTemporary = false;
+                $session->assigment_session->total_score = $value = round($total_score/$assigment->question_lists_count, 2);
+                $session->assigment_session->save();
+                //\App\Models\User::find(auth('api')->user()->id)->notify();
+            }
+
+            \App\Http\ObserverHandler\AssigmentSessionObserverHandler::handler($assigment->assigment_session);
+
             DB::commit();
+
+            return response()->json(['score'=>['isTemporary'=>$isTemporary, 'value'=>$value, 'data'=>$session->load([
+                //'questions.answer',
+                'questions',
+                'assigments'
+            ])]]);
+            
         }catch(\PDOException $e){
             DB::rollBack();
             return response($e,500);
@@ -283,7 +311,7 @@ class AssigmentSessionController extends Controller
                 $session->user_id = $user->id;
                 $session->save();
                 //user_id = teacher_id yang digunakan pada tahap selanjutnya
-                $assigment->sessions()->sync([$session->id => ['user_id'=>$assigment->teacher_id]]);
+                $assigment->sessions()->attach([$session->id => ['user_id'=>$assigment->teacher_id]]);
                 DB::commit();
                 return $session->load('assigments');
             

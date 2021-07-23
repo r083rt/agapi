@@ -349,6 +349,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::post('/assigments/share', 'AssigmentController@share');
         Route::post('/assigments/setpublic', 'AssigmentController@setAssigmentToPublic');
         Route::get('/assigments/getsharedpublish', 'AssigmentController@getSharedAssigment');
+        Route::get('/assigments/getsharedpublishorderby', 'AssigmentController@getSharedAssigmentOrderBy');
         Route::get('/assigments/getmasterpublish/{subject?}', 'AssigmentController@getMasterAssigment');
         Route::get('/assigments/getstudentassigments/{assigment_id}', 'AssigmentController@getStudentAssigmentsById');
         Route::get('/assigments/getassigmentinfo/{key}', 'AssigmentController@getAssigmentInfoById');

@@ -352,10 +352,11 @@ class AssigmentSessionController extends Controller
             else{
                 $isTemporary = true;
                 $value=0;
+                // return $session->assigment_session;
                 if($selectoptions_count==count($assigment->question_lists)){ //jika soalnya pilihan ganda semua, maka otomatis ternilai
                     $isTemporary = false;
-                    $assigment->assigment_session->total_score = $value = round($total_score/count($assigment->question_lists), 2);
-                    $assigment->assigment_session->save();
+                    $session->assigment_session->total_score = $value = round($total_score/count($assigment->question_lists), 2);
+                    $session->assigment_session->save();
                     //\App\Models\User::find(auth('api')->user()->id)->notify();
                 }
                 

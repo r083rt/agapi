@@ -1123,17 +1123,68 @@ class AssigmentController extends Controller
         return response()->json($res);
     }
     
-    public function getSharedAssigment(){
+    public function getSharedAssigmentOrderBy(Request $request){
+        $order_by = $request->query('orderby')??'assigment';
        // return auth('api')->user()->id;
+       $latestAssigmentSessions = DB::table('assigment_sessions')->selectRaw('
+       max(session_id) as latest_session_id,
+       assigment_id
+       ')->groupBy('assigment_id');
+
         $res = Assigment::withCount(['sessions'=>function($query){
             $query->has('questions');
         }])
         ->withCount(['sessions as daily_sessions_count'=>function($query){
             $query->whereDate('sessions.created_at',\Carbon\Carbon::now()->toDateString());
         }])
-        ->with('sessions','grade')->where('teacher_id',auth('api')->user()->id)->orderBy('id','desc')->paginate();
+        ->joinSub($latestAssigmentSessions, 'latest_assigment_sessions', function($join){
+            $join->on('latest_assigment_sessions.assigment_id', '=', 'assigments.id');
+        })
+        ->with('sessions','grade')->where('teacher_id',auth('api')->user()->id);
+        if($order_by==="assigment")$res->orderBy('id','desc');
+        else if($order_by==="session")$res->orderBy('latest_session_id','desc');
+        else $res->orderBy('id','desc');
 
-        return $res;
+        return $res->paginate();
+    }
+
+    public function getSharedAssigment(Request $request){
+       // return auth('api')->user()->id;
+       $order_by = $request->query('orderby')??'assigment';
+       $search = $request->query('search');
+
+       $latestAssigmentSessions = DB::table('assigment_sessions')->selectRaw('
+       max(session_id) as latest_session_id,
+       assigment_id
+       ')->groupBy('assigment_id');
+
+       $res = Assigment::withCount(['sessions'=>function($query){
+            $query->has('questions');
+        }])
+        ->withCount(['sessions as daily_sessions_count'=>function($query){
+            $query->whereDate('sessions.created_at',\Carbon\Carbon::now()->toDateString());
+        }])
+        ->with('sessions','grade')
+        ->joinSub($latestAssigmentSessions, 'latest_assigment_sessions', function($join){
+            $join->on('latest_assigment_sessions.assigment_id', '=', 'assigments.id');
+        })
+        ->where('teacher_id',auth('api')->user()->id);
+
+        if($order_by==="assigment")$res->orderBy('id','desc');
+        else if($order_by==="session")$res->orderBy('latest_session_id','desc');
+        else $res->orderBy('id','desc');
+
+        if($search){
+            $search = trim($search);
+            $res->where(function($query)use($search){
+                $query->where('code','like','%'.$search.'%')
+                ->orWhere('name','like','%'.$search.'%')
+                ->orWhere('topic','like','%'.$search.'%');   
+            });
+            
+        }
+
+        return $res->paginate()->withQueryString();
     }
     public function getDeletedItems(){
         $res = Assigment::onlyTrashed()->withCount(['sessions'=>function($query){
