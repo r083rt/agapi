@@ -18,3 +18,5 @@ Route::post('buyassigment', [App\Http\Controllers\API\v1\Student\AssigmentContro
 Route::get('/ranking', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'ranking'] );
 
 Route::get('purchasedassignment',[App\Http\Controllers\API\v1\Student\AssigmentController::class, 'purchasedAssignments']);
+
+// Route::post('/assigmentsessions/storePremium', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'storePremium']);

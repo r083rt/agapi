@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 
-class IsTeacher
+class isAdmin
 {
     /**
      * Handle an incoming request.
@@ -16,13 +16,9 @@ class IsTeacher
      */
     public function handle(Request $request, Closure $next)
     {
-        $role_name = $request->user()->role->name;
-        $teachers = ['user','admin','surveyor','headmaster'];
-        if(in_array($role_name, $teachers)){
+        if($request->user()->role->name==="admin"){
             return $next($request);
         }
-        return response('Harus mempunyai role name user',401);
-        // $request->user()->role()
-        // return $next($request);
+        return response('Harus mempunyai role name admin',401);
     }
 }
