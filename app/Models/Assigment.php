@@ -132,6 +132,9 @@ class Assigment extends Model
     public function taggables_(){
         return $this->belongsToMany(Tag::class, 'taggables', 'taggable_id','tag_id')->where('taggables.taggable_type', Assigment::class);
     }
-  
+
+    public function payments(){
+        return $this->belongsToMany(Payment::class,'purchased_items', 'purchased_item_id', 'payment_id')->where('purchased_items.purchased_item_type', Assigment::class);
+    }
     // public function 
 }

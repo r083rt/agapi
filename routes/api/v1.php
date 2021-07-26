@@ -492,6 +492,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::middleware('isTeacher')->post('/question_package/setispaid/{assigment_id}','AssigmentController@setIsPaid');
         Route::middleware('isTeacher')->get('/question_package/payable/{assigment_id}','AssigmentController@getPayableItem');
 
+        Route::middleware('isTeacher')->get('/assignment/payablecount','AssigmentController@getPayableCount');
+
         Route::get('balance', function(Request $request){
             $user = $request->user();
             return $user->balance();

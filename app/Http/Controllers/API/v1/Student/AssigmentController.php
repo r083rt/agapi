@@ -450,5 +450,27 @@ class AssigmentController extends Controller
         $ranking = $topsis->calculate();
         return $ranking;
     }
+
+    public function purchasedAssignments(){
+        $user = auth()->user();
+        $payment = \App\Models\Payment::class;
+        $query =  Assigment::whereHas('payments', function($query)use($user){
+            $query->whereHasMorph('paymentable', \App\Models\User::class,  function (Builder $query2)use($user) {
+                $query2->where('users.id', $user->id);
+            });
+        });
+        $res = Assigment::join('purchased_items','purchased_items.purchased_item_id','=','assigments.id')
+        ->where('purchased_items.purchased_item_type',Assigment::class)
+        ->whereExists(function($query)use($user){
+            $query->select(DB::raw(1))
+                     ->from('payments')
+                     ->whereColumn('payments.id','purchased_items.payment_id')
+                     ->where('payments.payment_id', $user->id)
+                     ->where('payments.payment_type',\App\Models\User::class);
+        })
+        ->orderBy('purchased_items.id','desc');
+        
+        return $res->paginate(1);
+    }
     
 }

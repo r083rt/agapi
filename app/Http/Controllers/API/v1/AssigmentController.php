@@ -536,16 +536,24 @@ class AssigmentController extends Controller
         }
        
     }
+    private function isShareable($assigment){
+        if(!$assigment->is_paid && $assigment->is_paid<0)return true;   //jika soal tidak premium maka shareable
+        elseif(auth()->user()->id==$assigment->user_id)return true; //jika premium tpi milik sendiri, maka shareable
+        else return false;
+    }
     public function share(Request $request){
 
         $request->validate([
+            'id'=>'required',
             'grade_code'=>'required'
         ]);
 
         // return $request;
         // return 'cok';
         $masterAssigment = Assigment::whereNull('teacher_id')->findOrFail($request->id);
+        if(!$this->isShareable($masterAssigment))throw new \Exception('Soal premium tidak dapat dibagikan kecuali pembuat soal itu sendiri');
         // $masterAssigment->load('question_lists');
+
         $masterUser = User::findOrFail($masterAssigment->user_id);
         // return $request->all();
         try{
@@ -1602,6 +1610,13 @@ class AssigmentController extends Controller
         $data = $this->payableQuery()->paginate();
         return $data;
         
+    }
+    public function getPayableCount(){
+        $question_item = new QuestionListController;
+     
+        return ['question_package_count'=>$this->payableQuery()->count(), 
+            'question_item_count'=> DB::table($question_item->payableQuery())->count()
+        ];
     }
     public function getPayableItem($assigment_id){
         // return $assigment_id;

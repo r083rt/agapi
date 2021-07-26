@@ -16,3 +16,5 @@ Route::get('checkpayment/{payment_id}', [App\Http\Controllers\API\v1\Student\Pay
 Route::post('buyassigment', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'buyAssigment']);
 
 Route::get('/ranking', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'ranking'] );
+
+Route::get('purchasedassignment',[App\Http\Controllers\API\v1\Student\AssigmentController::class, 'purchasedAssignments']);

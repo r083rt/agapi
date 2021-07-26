@@ -80,7 +80,10 @@ class QuestionListController extends Controller
 
         return response()->json($res);
     }
-    private function payableQuery(){
+
+    // raw sql: "sub join question_lists.sql"
+    public function payableQuery(){
+        // question_lists yang sudah dikerjakan/disubmit
         $workedQuestionList = DB::table('questions as q')->selectRaw('count(1) as total, ql2.ref_id as question_list_id')
         ->join('question_lists as ql2', 'q.question_list_id','=','ql2.id')
         ->join('assigment_question_lists as aql2', 'aql2.question_list_id','=','q.question_list_id')
