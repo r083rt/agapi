@@ -625,19 +625,27 @@ class AssigmentController extends Controller
                     $item_question_list->answer_lists()->save($item_answer_list);
 
                     if(count($answer_list->images)>0){
-                    $answer_list_image_models = [];
-                    foreach($answer_list->images as $image){
-                        $file = new \App\Models\File;
-                        $file->type = $image->type;
-                        $file->src = $image->src;
-                        $answer_list_image_models[] = $file;
+                        $answer_list_image_models = [];
+                        foreach($answer_list->images as $image){
+                            $file = new \App\Models\File;
+                            $file->type = $image->type;
+                            $file->src = $image->src;
+                            $answer_list_image_models[] = $file;
+                        }
+                        $item_answer_list->images()->saveMany($answer_list_image_models);
                     }
-                    $item_answer_list->images()->saveMany($answer_list_image_models);
-                }
                 }
             }
+            $newAssigment->loadCount(['sessions'=>function($query){
+                $query->has('questions');
+            }, 'sessions as daily_sessions_count'=>function($query){
+                $query->whereDate('sessions.created_at',\Carbon\Carbon::now()->toDateString());
+            }]);
+
             DB::commit();
+          
             return $newAssigment;
+
         }catch (\PDOException $e) {
             // Woopsy
             
@@ -1173,7 +1181,7 @@ class AssigmentController extends Controller
             $query->whereDate('sessions.created_at',\Carbon\Carbon::now()->toDateString());
         }])
         ->with('sessions','grade')
-        ->joinSub($latestAssigmentSessions, 'latest_assigment_sessions', function($join){
+        ->leftJoinSub($latestAssigmentSessions, 'latest_assigment_sessions', function($join){
             $join->on('latest_assigment_sessions.assigment_id', '=', 'assigments.id');
         })
         ->where('teacher_id',auth('api')->user()->id);
