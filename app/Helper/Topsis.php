@@ -31,6 +31,7 @@ class Topsis{
             $copy = clone $this->data[$i];
             array_push($this->normalizedData,  $copy);
         }
+        $this->eliminateZeroAttribute();
 
     }
     public function calculateAttributeEntropy(){
@@ -69,6 +70,21 @@ class Topsis{
         }
       
     }
+    /*
+     atribut yang memiliki nilai total 0, maka hilangkan untung menghindari kasus divide by zero
+     */
+    public function eliminateZeroAttribute(){
+        $count = count($this->data);
+        $new_attributes = [];
+        foreach($this->attributes as $attribute=>$options){
+            $sum=0;
+            for($i=0; $i<$count; $i++){
+                $sum +=  pow($this->data[$i]->{$attribute}, 2);
+            }
+            if($sum>0)$new_attributes[$attribute] = $options;
+        }
+        $this->attributes  = $new_attributes;
+    }
     public function calculate(){
 
         if($this->is_entropy){
@@ -80,7 +96,9 @@ class Topsis{
         $this->sortPreferences();
         return $this->sorted_data;
     }
+    
     public function normalize(){
+
         $count = count($this->data);
         foreach($this->attributes as $attribute=>$options){
             $sum=0;
@@ -88,7 +106,7 @@ class Topsis{
                 $sum +=  pow($this->data[$i]->{$attribute}, 2);
             }
             $sqrt = sqrt($sum);
-    
+            if($sqrt==0)dd($sum);
             for($i=0; $i<$count; $i++){
                 $y = $options['weight'] * ($this->data[$i]->{$attribute}/$sqrt);
                 $this->normalizedData[$i]->{$attribute} = $y;

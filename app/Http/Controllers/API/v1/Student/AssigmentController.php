@@ -411,7 +411,7 @@ class AssigmentController extends Controller
         t.scores_sum/(t.session_count*100) as score')->orderBy('t.session_count','desc');
         $dataset = $query->get();
         if(!count($dataset))return [];
-        
+        // return $dataset;
         // $min_sessions_count = $max_sessions_count = $dataset[0]->session_count;
         // $min_score = $max_score = $dataset[0]->score;
         // foreach($dataset as $data){
@@ -459,7 +459,7 @@ class AssigmentController extends Controller
                 $query2->where('users.id', $user->id);
             });
         });
-        $res = Assigment::join('purchased_items','purchased_items.purchased_item_id','=','assigments.id')
+        $res = Assigment::with('user')->join('purchased_items','purchased_items.purchased_item_id','=','assigments.id')
         ->where('purchased_items.purchased_item_type',Assigment::class)
         ->whereExists(function($query)use($user){
             $query->select(DB::raw(1))
@@ -470,7 +470,7 @@ class AssigmentController extends Controller
         })
         ->orderBy('purchased_items.id','desc');
         
-        return $res->paginate(1);
+        return $res->paginate();
     }
     
 }
