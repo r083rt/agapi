@@ -640,7 +640,7 @@ class AssigmentController extends Controller
                 $query->has('questions');
             }, 'sessions as daily_sessions_count'=>function($query){
                 $query->whereDate('sessions.created_at',\Carbon\Carbon::now()->toDateString());
-            }]);
+            }])->load('grade');
 
             DB::commit();
           
