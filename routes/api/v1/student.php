@@ -19,4 +19,12 @@ Route::get('/ranking', [App\Http\Controllers\API\v1\Student\AssigmentController:
 
 Route::get('purchasedassignment',[App\Http\Controllers\API\v1\Student\AssigmentController::class, 'purchasedAssignments']);
 
+Route::get('payableassignment', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'payableAssignments']);
 // Route::post('/assigmentsessions/storePremium', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'storePremium']);
+
+Route::get('paidassignmentdetails/{assigment_id}', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'paidAssignmentDetails']);
+
+Route::post('placeassignmentpayment/{assigment_id}', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'placeAssignmentPayment']);
+Route::get('getassignmentpaymentdetails/{assigment_id}', [App\Http\Controllers\API\v1\Student\AssigmentController::class, 'getPayment']);
+
+Route::put('confirmpayment/{payment_id}', [App\Http\Controllers\API\v1\Student\PaymentController::class, 'confirmPayment']);

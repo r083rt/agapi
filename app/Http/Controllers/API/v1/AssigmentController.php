@@ -86,7 +86,14 @@ class AssigmentController extends Controller
         if($educationalLevelId==null)return response()->json(['error_jenjang'=>true]);
 
         //sharedassigment = paket soal hasil salinan dari master paket soal
-        $sessions = \App\Models\Session::with('assigments.teacher','assigments.grade','assigments.user')->whereHas('assigments', function($query)use($type,$educationalLevelId){
+        $sessions = \App\Models\Session::with('assigments.teacher','assigments.grade','assigments.user')
+        ->whereHas('assigments', function($query)use($type,$educationalLevelId){
+            $query->where(function($query2){
+                $query2->where('assigment_sessions.type','common')->orWhereNull('assigment_sessions.type');
+            });
+            
+            
+
             if($type=='sharedassigment'){ //menampilkan sharedassigment yang telah dikerjakan
                 $query->whereNotNull('teacher_id');
             }elseif($type=='masterassigment'){ //menampilkan master soal (latihan soal) yang telah dikerjakan

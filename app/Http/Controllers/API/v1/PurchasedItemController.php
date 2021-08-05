@@ -3,21 +3,19 @@
 namespace App\Http\Controllers\API\v1;
 
 use App\Http\Controllers\Controller;
-use App\Models\PaymentVendor;
+use App\Models\PurchasedItem;
 use Illuminate\Http\Request;
 
-class PaymentVendorController extends Controller
+class PurchasedItemController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
-        $type = $request->query('type')??'bank';
-        $res = PaymentVendor::where('type','bank')->get();
-        return response()->json($res);
+        //
     }
 
     /**
@@ -34,10 +32,10 @@ class PaymentVendorController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\PaymentVendor  $paymentVendor
+     * @param  \App\Models\PurchasedItem  $purchasedItem
      * @return \Illuminate\Http\Response
      */
-    public function show(PaymentVendor $paymentVendor)
+    public function show(PurchasedItem $purchasedItem)
     {
         //
     }
@@ -46,10 +44,10 @@ class PaymentVendorController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\PaymentVendor  $paymentVendor
+     * @param  \App\Models\PurchasedItem  $purchasedItem
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, PaymentVendor $paymentVendor)
+    public function update(Request $request, PurchasedItem $purchasedItem)
     {
         //
     }
@@ -57,11 +55,12 @@ class PaymentVendorController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\PaymentVendor  $paymentVendor
+     * @param  \App\Models\PurchasedItem  $purchasedItem
      * @return \Illuminate\Http\Response
      */
-    public function destroy(PaymentVendor $paymentVendor)
+    public function destroy(PurchasedItem $purchasedItem)
     {
         //
     }
+    
 }

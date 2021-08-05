@@ -72,6 +72,13 @@ class Assigment extends Model
         }));
     
     }
+
+    public function question_lists_text_only(){
+        return $this->belongsToMany('App\Models\QuestionList','App\Models\AssigmentQuestionList','assigment_id','question_list_id')->withPivot('creator_id','user_id','assigment_type_id')->wherePivotIn('assigment_type_id',\App\Models\AssigmentType::where('description','=','textarea')->orWhere('description','=','textfield')->get()->map(function($data){
+            return $data->id;
+        }));
+    
+    }
     
 
     // public function sessions(){
@@ -79,7 +86,10 @@ class Assigment extends Model
     // }
 
     public function sessions(){
-        return $this->belongsToMany('App\Models\Session','App\Models\AssigmentSession')->withPivot('total_score','user_id');
+        return $this->belongsToMany('App\Models\Session','App\Models\AssigmentSession')->withPivot('total_score','user_id', 'type')->wherePivot('type','common')->orWherePivotNull('type'); 
+    }
+    public function paid_sessions(){
+        return $this->belongsToMany('App\Models\Session','App\Models\AssigmentSession')->withPivot('total_score','user_id', 'type')->wherePivot('type','paid');
     }
     public function assigment_sessions(){
         return $this->hasMany('App\Models\AssigmentSession')->orderBy('id','desc');
@@ -136,5 +146,40 @@ class Assigment extends Model
     public function payments(){
         return $this->belongsToMany(Payment::class,'purchased_items', 'purchased_item_id', 'payment_id')->where('purchased_items.purchased_item_type', Assigment::class);
     }
-    // public function 
+
+    /* 
+    menampilkan ranking master paket soal ini berdasarkan 
+    akumulasi skor topsis dari master paket soal lainnya
+    */
+    public function paidRank(){
+        if($this->teacher_id!=null)return new \Exception('Paket soal harus merupakan master, bukan slave dari master paket soal');
+        elseif(!$this->is_paid)return new \Exception('Paket soal harus premium');
+
+        //jika mempunyai sessions bertype paid, maka cek top_paid_assigments
+
+        $assigment_id = $this->id;
+        if($this->paid_sessions()->count()){
+           
+            //cek bulan ini apakah sudah dihitung topsis untuk master paket soal premium
+            $check = \App\Helper\AssigmentProcess::paidAssigmentScoring(function($query)use($assigment_id){
+                $query->where('a.id',$this->id)
+                ->whereYear('tpa.created_at',date('Y'))
+                ->whereMonth('tpa.created_at',date('m'));
+            });
+            
+            // jika tidak ada, maka lakukan perangkingan
+            if(!$check->exists()){
+                \App\Helper\AssigmentProcess::calculatePaidAssigmentTopsis();
+            }
+            
+        }
+        
+        $data = \App\Helper\AssigmentProcess::paidAssigmentScoring(function($query)use($assigment_id){
+            $query->where('a.id',$this->id);
+        });
+        return $data->first();
+        // return ;
+        
+    }
+    
 }

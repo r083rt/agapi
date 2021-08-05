@@ -362,8 +362,13 @@ Route::get('/getcontactnumber',function(){
 
 Route::get('/testgan',function(){
     
-    $settings = DB::table('settings')->where('key', 'like',"admin.soal_p3k%manajerial")->get();
-    return $settings;
+    $asu = App\Models\Assigment::findOrFail(108);
+    return response()->json($asu->paidRank());
+
+    return $asu;
+    // ->where('question_lists.name','like','%<img%')->exists();
+    // $settings = DB::table('settings')->where('key', 'like',"admin.soal_p3k%manajerial")->get();
+    return $asu;
     
         // return $data;
 });

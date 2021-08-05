@@ -18,7 +18,11 @@ class Session extends Model
     // }
 
     public function assigments(){
-        return $this->belongsToMany('App\Models\Assigment','assigment_sessions')->withPivot('total_score','user_id');
+        return $this->belongsToMany('App\Models\Assigment','assigment_sessions')->withPivot('total_score','user_id','type');//->wherePivot('type','common')->orWherePivotNull('type'); ;
+    }
+    // assigment yang premium
+    public function paid_assigments(){
+        return $this->belongsToMany('App\Models\Assigment','assigment_sessions')->withPivot('total_score','user_id','type')->wherePivot('type','paid') ;
     }
     // public function finished_assigments(){
     //     return $this->belongsToMany('App\Models\Assigment','assigment_sessions','session_id','assigment_id')->withPivot('total_score','user_id')->wherePivot('total_score',100);

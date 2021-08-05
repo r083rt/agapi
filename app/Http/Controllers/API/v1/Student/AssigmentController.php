@@ -9,7 +9,6 @@ use App\Models\Session;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\Builder;
-
 use DB;
 class AssigmentController extends Controller
 {
@@ -242,6 +241,9 @@ class AssigmentController extends Controller
         return $assigment;
 
     }
+    /*
+    hanya untuk pembelian menggunakan saldo, bukan tf
+    */
     public function buyAssigment(Request $request){
         $request->validate([
             'id'=>[
@@ -260,13 +262,13 @@ class AssigmentController extends Controller
              $query->where('assigments.id', $assigment->id);
          });
         if($purchased->exists()){
-            return response(['message'=>'Kamu sudah membeli item ini.'], 403);
+            throw new \Exception("Kamu sudah membeli item ini");
         }
         
         // jika saldo kurang maka return 403 dgn json
         $user_balance = $user->balance();
         if($user_balance<$assigment->is_paid){
-            return response(['message'=>'Saldo kurang'], 403);
+            throw new \Exception("Saldo kurang");
         }
 
         try{
@@ -274,7 +276,7 @@ class AssigmentController extends Controller
 
             $necessary = \App\Models\Necessary::where('name','beli_soal')->first();
             if(!$necessary){
-                return response('Necessary beli_soal not found',404);
+                throw new \Exception("Necessary beli_soal not found");
             }
 
             $payment = new \App\Models\Payment;
@@ -302,7 +304,9 @@ class AssigmentController extends Controller
             if(count($assigment->question_lists)){
                 $profit = 0.5*$payment->value; // keuntungan 50% (dibagi 50% ke pembuat soal dan 50% ke pembuat butir soal berbayar sama-rata
                 $necessary = \App\Models\Necessary::where('name','bagi_keuntungan')->first();
-                if(!$necessary)return response('Necessary bagi_keuntungan not found',404);
+                if(!$necessary){
+                    throw new \Exception("Necessary bagi_keuntungan not found");
+                }
                 
                 
                 $payment2 = new \App\Models\Payment;
@@ -336,7 +340,9 @@ class AssigmentController extends Controller
             }else{
                 // jika tidak ada soal yg berbayar maka 100% keuntungan dimiliki pembuat paket soal
                 $necessary = \App\Models\Necessary::where('name','bagi_keuntungan')->first();
-                if(!$necessary)return response('Necessary bagi_keuntungan not found',404);
+                if(!$necessary){
+                    throw new \Exception("Necessary bagi_keuntungan not found");
+                }
                 
                 $payment2 = new \App\Models\Payment;
                 $payment2->type = 'IN';
@@ -445,12 +451,20 @@ class AssigmentController extends Controller
         'score'=>['weight'=>3, 'type'=>'benefit']
         ];
         $topsis = new \App\Helper\Topsis($attributes, $dataset);
-        $topsis->enableEntropyWeightMethod(); //aktifkan pembobotan tak
+        $topsis->enableEntropyWeightMethod(); //aktifkan pembobotan otomatis
         // $topsis->addPreferenceAttribute();
         $ranking = $topsis->calculate();
         return $ranking;
     }
+    public function isExpired($created_at, $in_hours=24, &$remaining_time){
+        $created_at = new Carbon($created_at);
+        $expired_at = $created_at->addHours($in_hours);
+        $now = Carbon::now();
 
+        $is_expired = $now->greaterThanOrEqualTo($expired_at);
+        $remaining_time = $now->diffInMilliseconds($expired_at);
+        return $is_expired;
+    }
     public function purchasedAssignments(){
         $user = auth()->user();
         $payment = \App\Models\Payment::class;
@@ -466,11 +480,247 @@ class AssigmentController extends Controller
                      ->from('payments')
                      ->whereColumn('payments.id','purchased_items.payment_id')
                      ->where('payments.payment_id', $user->id)
-                     ->where('payments.payment_type',\App\Models\User::class);
+                     ->where('payments.payment_type',\App\Models\User::class)
+                     ->where('status','success');
         })
         ->orderBy('purchased_items.id','desc');
         
         return $res->paginate();
     }
+    /*
+    menampilkan paket soal yg dijual dalam jenjang kelas yg sama,
+    soal yang sudah dibeli juga ditampilkan.
+    raw sql: "payable assigments left join.sql"
+    */
+    public function payableAssignments(Request $request){
+        $user = auth()->user();
+        if(!$user->profile->grade_id)throw new \Exception("Harus isi jenjang terlebih dahulu");
+
+        $purchasedAssigments = DB::table('purchased_items')->selectRaw('purchased_items.purchased_item_id,
+		purchased_items.purchased_item_type,
+		purchased_items.payment_id,
+		payments.status,
+        payments.created_at')
+        ->join('payments', 'payments.id','=','purchased_items.payment_id')
+        ->where('purchased_item_type', Assigment::class)
+        ->whereIn('payments.status', ['success','pending']);
+
+        $res = Assigment::with('user')
+        ->selectRaw('assigments.*,
+        purchased_assigments.payment_id,
+        purchased_assigments.status,
+        purchased_assigments.created_at as payment_created_at')
+        ->leftJoinSub($purchasedAssigments, 'purchased_assigments', function($join){
+            $join->on('purchased_assigments.purchased_item_id', '=', 'assigments.id');
+        })
+        ->whereNull('teacher_id') //teacher_id NULL berarti master paket soal
+        ->where('is_paid','>',0) //hanya mengambi soal yg berbayar 
+        ->where('grade_id', $user->profile->grade_id); // mengambil berdasarkan jenjang siswa
+       
+        // ->where(function($query)use($user){
+        //     //belum dibeli
+        //     $query->whereDoesntHave('payments', function($query2)use($user){
+        //         $query2->where('payments.payment_id', $user->id)
+        //         ->where('payments.payment_type',\App\Models\User::class);
+        //     })
+        //     // pending (sudah terkonfirmas)
+        //     ->orWhereHas('payments', function($query2)use($user){
+        //         $query2->where('payments.payment_id', $user->id)
+        //         ->where('payments.payment_type',\App\Models\User::class)
+        //         ->whereNull('payments.status');
+        //     });
+        // });
+        
+
+        $res->orderBy('id','desc');
+
+        $data =  $res->paginate();
+        foreach($data as $payment_data){
+          
+            $is_payment_expired = false;
+
+            if($payment_data->status=="pending"){
+                $remaining_time=null;
+                $is_expired = $this->isExpired($payment_data->payment_created_at, 24, $remaining_time);
+                $payment_data->payment_pending = ['is_expired'=>$is_expired, 'remaining_time'=>$remaining_time];
+            }
+        }
+        return $data;
+    }
+    public function getPayment($assigment_id){
+        $assigment = Assigment::with('user.profile')->findOrFail($assigment_id);
+        if(!$assigment->is_paid)throw new \Exception('Paket soal harus premium');
+        
+        $user = auth()->user();
+        $payment = $assigment->payments()->whereHasMorph('paymentable', \App\Models\User::class, function(Builder $query)use($user){
+            $query->where('users.id', $user->id);
+        });
+        if($payment->exists()){
+            $payment = $payment->first();
+            $created_at = new Carbon($payment->created_at);
+            $expired_at = $created_at->addHours(24);
+            $now = Carbon::now();
+            $remaining_time = $now->diffInMilliseconds($expired_at);
+            $payment->remaining_time = $remaining_time;
+            return $payment;
+        }
+        else throw new \Exception('Anda belum membeli paket soal dengan ID '.$assigment->id);
+    }
+    public function paidAssignmentDetails($assigment_id){
+        
+        $assigment = Assigment::with('user.profile')->findOrFail($assigment_id);
+        if(!$assigment->is_paid)throw new \Exception('Paket soal harus premium');
+
+        $assigment->is_text = Assigment::where('id',$assigment->id)->has('question_lists_text_only')->exists();
+        $assigment->is_selectoption = Assigment::where('id',$assigment->id)->has('question_lists_select_options_only')->exists();
+        $notes = [];
+        if($assigment->is_text && !$assigment->is_selectoption){
+            $notes[] = 'Memiliki jenis soal uraian';
+            $assigment->is_image =  $assigment->question_lists_text_only()
+            ->where('question_lists.name','like','%<img%')->exists();
+            $assigment->is_audio = $assigment->question_lists_text_only()->has('audio')->exists();
+        }
+        elseif(!$assigment->is_text && $assigment->is_selectoption){
+            $notes[] = 'Memiliki jenis soal pilihan ganda';
+            $assigment->is_image = $assigment->question_lists_select_options_only()->has('images')->exists();
+            $assigment->is_audio = $assigment->question_lists_select_options_only()->has('audio')->exists();
+        }
+        elseif($assigment->is_text && $assigment->is_selectoption){
+            $notes[] = 'Memiliki jenis soal pilihan ganda dan uraian';
+            $is_image1 = $assigment->question_lists_text_only()
+            ->where('question_lists.name','like','%<img%')->exists();
+            $is_image2 = $assigment->question_lists_select_options_only()->has('images')->exists();
+            $assigment->is_image = $is_image1 || $is_image2;
+
+            $is_audio1 =  $assigment->question_lists_text_only()->has('audio')->exists();
+            $is_audio2 =  $assigment->question_lists_select_options_only()->has('audio')->exists();
+            $assigment->is_audio = $is_audio1 || $is_image2;
+        }
+        
+        if($assigment->is_image && !$assigment->is_audio)$notes[] = 'Terdapat gambar untuk memudahkan memahami soal';
+        elseif(!$assigment->is_image && $assigment->is_audio)$notes[] = 'Terdapat suara untuk memudahkan memahami soal';
+        elseif($assigment->is_image && $assigment->is_audio)$notes[] = 'Terdapat gambar dan suara untuk memudahkan memahami soal';
+
+        if($assigment->timer)$notes[] = 'Terdapat timer selama '.$assigment->timer.' Menit';
+
+     
+     
+        $assigment->rank = $assigment->paidRank();
+
+        if($assigment->rank){
+            $assigment->quality = \App\Helper\AssigmentProcess::getQualityDescription($assigment->rank->score);
+            $notes[] = 'Memiliki indeks kualitas soal sebesar '.round($assigment->rank->score,3).' ('.$assigment->quality.')';
+        }
+        // $is_audio =  $assigment->question_lists_text_only()
+        $notes_text = "";
+        foreach($notes as $key=>$note){
+            $notes_text.=($key+1).". $note\n";
+        }
+
+        $assigment->notes = $notes_text;
+
+        return $assigment;
+        // $user = auth()->user();
+    }
+
+    public function createPayment(){
+
+    }
+    /*
+    pembelian paket soal menggunakan transfer
+    */
+    public function placeAssignmentPayment($assigment_id, Request $request){
+        $request->validate([
+            'payment_vendor_id'=>'required'
+        ]);
+
+        $assigment = Assigment::where('is_paid','>=',1)->findOrFail($assigment_id);
+        $payment_vendor = \App\Models\PaymentVendor::findOrFail($request->payment_vendor_id);
+        $necessary = \App\Models\Necessary::where('name','beli_soal')->first();
+        if(!$necessary){
+            throw new \Exception("Necessary beli_soal not found");
+        }
+
+
+        $user = $request->user();
+        // cek apakah assignment tsb mempunyai payment dengan status `pending`
+        $purchased_pending = \App\Models\PurchasedItem::whereHas('payment', function(Builder $query)use($user){
+            $query->where('payments.status','pending')->whereHasMorph('paymentable', \App\Models\User::class, function(Builder $query2)use($user){
+                $query2->where('users.id', $user->id);
+            });
+        })->whereHasMorph('purchased_item',
+         \App\Models\Assigment::class, function (Builder $query, $type)use($assigment){
+             $query->where('assigments.id', $assigment->id);
+         });
+
+        try{
+            DB::beginTransaction();
+
+            //jika ada, cek apakah payment tsb sudah expired (24 jam)
+            if($purchased_pending->exists()){
+                $purchased_pending_item = $purchased_pending->first();
+
+                $payment = $purchased_pending_item->payment;
+                $created_at = new Carbon($payment->created_at);
+                $expired_at = $created_at->addHours(24);
+                $now = Carbon::now();
+
+                $is_expired = $now->greaterThanOrEqualTo($expired_at);
+
+                //jika expired Hapus payment tsb. dan buat payment baru
+                if($is_expired){
+                    $payment->delete();
+
+                }else{
+                    // jika belum expired, return payment tsb
+                    $remaining_time = $now->diffInMilliseconds($expired_at);
+                    $payment->remaining_time = $remaining_time;
+                    return $payment;
+                }
+                
+            }
+
+            //Buat payment baru dengan `status` NULL (belum dikonfirmasi)
+            $client = new \GuzzleHttp\Client();
+            $json_data = ['service_code'=>$payment_vendor->service_code,'value'=>$assigment->is_paid,'account_number'=>$payment_vendor->account_number];
     
+            $res = $client->post(env('MASTER_PAYMENT_URL').'/createpaymenttoaccountnumber',[
+                'json'=> $json_data
+            ]);
+            $master_payment = json_decode($res->getBody());
+
+            $res = $client->post(env('MASTER_PAYMENT_URL').'/todaytotalpaymentsbyaccountnumber',[
+                'json'=> ['account_number'=>$payment_vendor->account_number,'service_code'=>$payment_vendor->service_code]
+            ]);
+            $today_total_payments = json_decode($res->getBody());
+            
+            // Hapus semua payments dengan `status` NULL
+            $assigment->payments()->whereNull('payments.status')->delete();
+
+            $payment = new \App\Models\Payment;
+            $payment->master_payment_id = $master_payment->id;
+            $payment->payment_vendor_id = $payment_vendor->id;
+            $payment->necessary_id = $necessary->id;
+            $payment->type = 'OUT';
+            $payment->status = null; //jika NULL, maka hanya membuat $payment place order, dan $payment belum terkonfirmasi
+            $payment->value = $master_payment->value;
+            $payment->note = json_encode(['today_total_payments'=>$today_total_payments]);
+            $user->payments()->save($payment);
+
+            $purchased_item = new \App\Models\PurchasedItem;
+            $purchased_item->payment_id = $payment->id;
+            $assigment->purchased_items()->save($purchased_item);
+            
+            $payment->today_total_payments = $today_total_payments;
+            
+            DB::commit();   
+            return $payment;
+
+          
+
+        }catch (\PDOException $e) {
+            DB::rollBack();
+            return response($e->getMessage(), 500);
+        }
+    }
 }

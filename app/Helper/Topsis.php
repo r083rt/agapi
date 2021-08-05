@@ -106,7 +106,7 @@ class Topsis{
                 $sum +=  pow($this->data[$i]->{$attribute}, 2);
             }
             $sqrt = sqrt($sum);
-            if($sqrt==0)dd($sum);
+            // if($sqrt==0)dd($sum);
             for($i=0; $i<$count; $i++){
                 $y = $options['weight'] * ($this->data[$i]->{$attribute}/$sqrt);
                 $this->normalizedData[$i]->{$attribute} = $y;
@@ -170,6 +170,9 @@ class Topsis{
             }
             array_push($this->sorted_data, $obj);
         }
+    }
+    public function getAttributes(){
+        return $this->attributes;
     }
     
 

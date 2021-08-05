@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API\v1\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
+
 use GuzzleHttp;
 use DB;
 class PaymentController extends Controller
@@ -81,6 +83,26 @@ class PaymentController extends Controller
         return $payment;
         // dd($master_payment);
 
+    }
+    public function confirmPayment($payment_id, Request $request){
+        try{
+            $user = auth()->user();
+            DB::beginTransaction();
+            $payment = Payment::whereHasMorph('paymentable', \App\Models\User::class, function(Builder $query)use($user){
+                $query->where('users.id', $user->id);
+            })->findOrFail($payment_id);
+            
+            $payment->status = 'pending';
+            $payment->save();
+            
+            DB::commit();
+            // \App\Events\PaymentNew::dispatch($payment);
+            return $payment;
+            
+        }catch (\PDOException $e) {
+            DB::rollBack();
+            return response($e->getMessage(), 500);
+        }
     }
     public function createPayment(Request $request){
         $request->validate([
