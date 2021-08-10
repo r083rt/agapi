@@ -227,7 +227,7 @@ class AssigmentSessionController extends Controller
        
         $request->validate([
             'id'=>'required',
-            // 'question_lists'=>'required|array',
+            'question_lists'=>'required|array',
             // 'question_lists.*.answer'=>'required',
             // 'question_lists.*.answer.id'=>'required|integer',
             // 'question_lists.*.answer.name'=>'nullable',
@@ -246,19 +246,42 @@ class AssigmentSessionController extends Controller
             // ->groupBy('aql.question_list_id');
         }, 'question_lists.answer_lists'])
         ->withCount('question_lists')
-        // ->whereHas('grade',function($query)use($educationalLevelId){
-        //     $query->where('educational_level_id',$educationalLevelId);
-        // })
-        ->whereHas('payments', function($query)use($user){
-            $query->where('status','success') 
-            ->whereHasMorph('paymentable', \App\Models\User::class, function($query2)use($user){
-                $query2->where('users.id',$user->id);
-            });
+        ->whereHas('grade',function($query)use($educationalLevelId){
+            $query->where('educational_level_id',$educationalLevelId);
         })
         ->findOrFail($request->id);
 
+        if(!$assigment->isWorkable()){
+            throw new \Exception('Soal tidak bisa dikerjakan');
+        }
+        // cek apakah ada 1 sesi yg punya assigment tsb
+        $check_session = Session::where('user_id',$user->id)->whereHas('assigments', function($query)use($assigment){
+            $query->where('assigments.id',$assigment->id);
+        });
+
+        if($check_session->exists()){
+            $session = $check_session->first();
+
+             // jika jumlah questions sama dengan jumlah question_lists, maka berarti pengerjaannya sudah disubmit
+            if($session->questions_count===$assigment->question_lists_count){
+                throw new \Exception('Soal sudah disubmit');
+            }
+            // jika selisih menit waktu sekarang dan waktu di session.created_at melebihi assigment.timer+1, maka timer habis
+            if(!empty($assigment->timer)){
+                $timer = intval($assigment->timer);
+                $diff_minutes = Carbon::now()->diffInMinutes($session->created_at);
+                // toleransi 1 menit (+1)
+                if($diff_minutes>$timer+1){
+                    throw new \Exception('Waktu Habis');
+                }
+            }
+
+        }else {
+            throw new \Exception('Session belum dibuat');
+        }
+
         
-        // taruh question_lists yg disubmit ke data array-key based
+        // taruh question_lists yg disubmit ke data array based key
         // $user_questions = collect($request->question_lists);
         $submitted_question_lists = [];
         $submitted_question_lists_ids = [];
@@ -267,7 +290,7 @@ class AssigmentSessionController extends Controller
             $submitted_question_lists_ids[] = $question_list['id'];
         }
 
-        // taruh question_lists dari database ke data array-key based
+        // taruh question_lists dari database ke data array based key
         $db_question_lists = [];
         $db_question_lists_ids = [];
          
@@ -291,18 +314,6 @@ class AssigmentSessionController extends Controller
         // return $assigment;
         try{
             DB::beginTransaction();
-
-            $session = new Session;
-            $session->user_id = $user->id;
-            $session->save();
-
-            
-            $session->assigments()->attach([$assigment->id=>['type'=>'paid']  
-            ]);
-
-            
-            // $session->assigment_session;
-
             foreach ($db_question_lists as $ql=>$question_list) {
 
                 $is_selectoptions = false;
@@ -375,29 +386,24 @@ class AssigmentSessionController extends Controller
                 //\App\Models\User::find(auth('api')->user()->id)->notify();
             }
 
-            \App\Http\ObserverHandler\AssigmentSessionObserverHandler::premiumHandler($assigment->assigment_session);
-            // return response()->json(['score'=>['isTemporary'=>$isTemporary, 'value'=>$value, 'data'=>$session->load([
-            //     //'questions.answer',
-            //     'questions',
-            //     'assigments'
-            // ])]]);
-            
+            \App\Http\ObserverHandler\AssigmentSessionObserverHandler::handler($assigment->assigment_session);
+
             DB::commit();
 
-            $session->load([
+            return response()->json(['score'=>['isTemporary'=>$isTemporary, 'value'=>$value, 'data'=>$session->load([
                 //'questions.answer',
                 'questions',
                 'assigments'
-            ]);
-            return response()->json(['score'=>['isTemporary'=>$isTemporary, 'value'=>$value, 'data'=>$session]]);
-
-            // DB::commit();
-
+            ])]]);
             
         }catch(\PDOException $e){
             DB::rollBack();
             return response($e,500);
            
+        }catch(\Exception $e){
+            DB::rollBack();
+            return response($e,500);
+          
         }
     }
     /**

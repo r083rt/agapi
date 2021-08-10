@@ -465,23 +465,120 @@ class AssigmentController extends Controller
         $remaining_time = $now->diffInMilliseconds($expired_at);
         return $is_expired;
     }
+
+    // mendapatkan lists assigments yang pending
+    public function pendingAssigmentPayments(){
+        $user = auth()->user();
+        if(!$user->profile->grade_id)throw new \Exception("Harus isi jenjang terlebih dahulu");
+
+        $now = \Carbon\Carbon::now();
+        $purchasedAssigments = DB::table('purchased_items')->selectRaw('purchased_items.purchased_item_id,
+		purchased_items.purchased_item_type,
+		purchased_items.payment_id,
+		payments.status,
+        payments.created_at,
+        date_add(payments.created_at,interval 24 hour) as expired_at')
+        ->join('payments', 'payments.id','=','purchased_items.payment_id')
+        ->where('purchased_item_type', Assigment::class)
+        ->where('payments.status', 'pending');
+
+        $res = Assigment::with('user')
+        ->withCount('question_lists')
+        ->selectRaw('assigments.*,
+        purchased_assigments.payment_id,
+        purchased_assigments.status,
+        purchased_assigments.created_at as payment_created_at,
+        purchased_assigments.expired_at')
+        ->joinSub($purchasedAssigments, 'purchased_assigments', function($join){
+            $join->on('purchased_assigments.purchased_item_id', '=', 'assigments.id');
+        })
+        ->whereNull('teacher_id') //teacher_id NULL berarti master paket soal
+        ->where('is_paid','>',0) //hanya mengambi soal yg berbayar 
+        ->where('expired_at','>', $now); //hanya mengambil data yang belum expired
+
+        $res->orderBy('id','desc');
+        // $query = Assignment::
+        $data = $res->paginate();
+        foreach($data as $payment_data){
+          
+            $is_payment_expired = false;
+
+            if($payment_data->status=="pending"){
+                $remaining_time=null;
+                $is_expired = $this->isExpired($payment_data->payment_created_at, 24, $remaining_time);
+                $payment_data->payment_pending = ['is_expired'=>$is_expired, 'remaining_time'=>$remaining_time];
+            }
+        }
+        return $data;
+    }
+        // menampilkan question_lists
+        public function showPurchasedAssignment($assignment_id){
+            $user = auth()->user();
+            // cek apakah user berhak mengakses payable assigment tsb
+            $assignment = Assigment::with(
+            ['question_lists.answer_lists'=>function($query){
+                $query->select('answer_lists.id','answer_lists.question_list_id','answer_lists.name','answer_lists.answer_list_type_id');//pastikan student tidak bisa melihat kunci jawaban
+                $query->selectRaw("if(answer_list_types.name is null,'text',answer_list_types.name) as type")
+                ->leftJoin('answer_list_types','answer_list_types.id','=','answer_lists.answer_list_type_id')->orderBy('answer_lists.id','asc');
+            },
+            'question_lists.assigment_types',
+            'question_lists.answer_lists.images',
+            'question_lists.audio',
+            'grade'
+            ])
+            ->whereHas('payments', function(Builder $query)use($user){
+                $query->whereHasMorph('paymentable', \App\Models\User::class, function($query2)use($user){
+                    $query2->where('users.id',$user->id);
+                });
+            })
+            ->selectRaw('assigments.*,if(timer is null,FALSE,TRUE) as isTimer,if(start_at is null or end_at is null,FALSE, TRUE) as isExpire, if(password is null,FALSE,TRUE) isPassword')
+            ->findOrFail($assignment_id);
+
+            $assigment_types_db = \App\Models\AssigmentType::all();
+            $assigment_types_db_key_based = [];
+            foreach($assigment_types_db as $assigment_type){
+                $assigment_types_db_key_based[$assigment_type->id] = $assigment_type;
+            }
+
+            foreach ($assignment->question_lists as $ql => $question_list) {
+           
+                # code...
+                // $question_list->pivot->user = \App\Models\User::find($question_list->pivot->user_id);
+                // $question_list->pivot->creator = User::find($question_list->pivot->creator_id);
+                $question_list->pivot->assigment_type = $assigment_types_db_key_based[$question_list->pivot->assigment_type_id];
+    
+                //jika murid, maka hilangkan/kosongkan field `name` dari answer_list karena itu adalah kunci jawaban dari soal tsb
+                if($user->role->name=="student"){
+                    if($question_list->pivot->assigment_type->description=="textarea" || $question_list->pivot->assigment_type->description=="textfield"){
+                        $question_list->answer_lists->transform(function($item, $key){
+                            $item->name="";
+                            return $item;
+                        });
+                    }
+                }
+    
+            }
+
+            return $assignment;
+
+        }
     public function purchasedAssignments(){
         $user = auth()->user();
-        $payment = \App\Models\Payment::class;
-        $query =  Assigment::whereHas('payments', function($query)use($user){
-            $query->whereHasMorph('paymentable', \App\Models\User::class,  function (Builder $query2)use($user) {
-                $query2->where('users.id', $user->id);
-            });
-        });
-        $res = Assigment::with('user')->join('purchased_items','purchased_items.purchased_item_id','=','assigments.id')
+        // $payment = \App\Models\Payment::class;
+        // $query =  Assigment::whereHas('payments', function($query)use($user){
+        //     $query->whereHasMorph('paymentable', \App\Models\User::class,  function (Builder $query2)use($user) {
+        //         $query2->where('users.id', $user->id);
+        //     });
+        // });
+        $res = Assigment::with('grade','user','grade.educational_level')->withCount('question_lists')
+        ->selectRaw('assigments.*,payments.created_at as payment_created_at')
+        ->join('purchased_items','purchased_items.purchased_item_id','=','assigments.id')
+        ->join('payments', 'payments.id','=','purchased_items.payment_id')
         ->where('purchased_items.purchased_item_type',Assigment::class)
-        ->whereExists(function($query)use($user){
-            $query->select(DB::raw(1))
-                     ->from('payments')
-                     ->whereColumn('payments.id','purchased_items.payment_id')
-                     ->where('payments.payment_id', $user->id)
-                     ->where('payments.payment_type',\App\Models\User::class)
-                     ->where('status','success');
+        ->where(function($query)use($user){
+            $query->where('payments.payment_id', $user->id) //user sat ini
+            ->where('payments.payment_type',\App\Models\User::class)
+            ->where('status','success'); //hanya mengambil payment yang success
         })
         ->orderBy('purchased_items.id','desc');
         
@@ -506,6 +603,7 @@ class AssigmentController extends Controller
         ->whereIn('payments.status', ['success','pending']);
 
         $res = Assigment::with('user')
+        ->withCount('question_lists')
         ->selectRaw('assigments.*,
         purchased_assigments.payment_id,
         purchased_assigments.status,
@@ -722,5 +820,36 @@ class AssigmentController extends Controller
             DB::rollBack();
             return response($e->getMessage(), 500);
         }
+    }
+    public function checkAssignmentPayment($assignment_id){
+        $user = auth()->user();
+        $assignment = Assigment::with('payments')->whereHas('payments', function(Builder $query)use($user){
+            $query->whereHasMorph('paymentable', \App\Models\User::class, function(Builder $query2)use($user){
+                $query2->where('users.id', $user->id);
+            });
+        })->findOrFail($assignment_id);
+        $payment = $assignment->payments[0];
+
+        $client = new \GuzzleHttp\Client();
+        $res = $client->get(env('MASTER_PAYMENT_URL')."/checkstatus/{$payment->master_payment_id}");
+        $master_payment = json_decode($res->getBody());
+
+        try{
+            
+            DB::beginTransaction();
+
+           if($master_payment->status==="success"){
+               \App\Models\Payment::where('id',$payment->id)->update(['status'=>'success']);
+           }
+
+            DB::commit();
+            $assignment->load('payments.paymentable','payments.payment_vendor');
+            return $assignment;
+        }catch (\PDOException $e) {
+            DB::rollBack();
+            return response($e->getMessage(), 500);
+        }
+      
+
     }
 }

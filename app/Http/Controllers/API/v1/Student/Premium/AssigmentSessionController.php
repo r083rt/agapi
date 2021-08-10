@@ -414,7 +414,7 @@ class AssigmentSessionController extends Controller
      */
     public function show($id)
     {
-        $res = AssigmentSession::with('assigment.grade','assigment.user','teacher')->findOrFail($id);
+        $res = AssigmentSession::with('assigment.grade','teacher')->findOrFail($id);
         return $res;
     }
 

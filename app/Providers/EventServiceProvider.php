@@ -33,8 +33,14 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\AssigmentTeacherEvent'=>[
             'App\Listeners\AssigmentTeacherListener',
         ],
+        'App\Events\PaidAssigmentUserEvent'=>[
+            'App\Listeners\PaidAssigmentUserListener',
+        ],
         'App\Events\AssigmentStudentEvent'=>[
             'App\Listeners\AssigmentStudentListener',
+        ],
+        'App\Events\PaidAssigmentStudentEvent'=>[
+            'App\Listeners\PaidAssigmentStudentListener',
         ],
         'App\Events\AssigmentSharedEvent'=>[
             'App\Listeners\AssigmentSharedListener',
@@ -71,6 +77,7 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\PayableAssigmentEvent'=>[
             'App\Listeners\PayableAssigmentListener',
         ],
+        
         
     ];
 
