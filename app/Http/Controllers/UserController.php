@@ -124,6 +124,7 @@ class UserController extends Controller
         $users = User::where('user_activated_at','<',(new \Carbon\Carbon)->submonths(6))
         ->has('profile')
         ->with('profile','pns_status')
+        ->orderBy('created_at','desc')
         ->paginate($total ?? 50);
         foreach ($users as $u => $user) {
             # code...
@@ -162,6 +163,7 @@ class UserController extends Controller
         ->whereHas('pns_status',function($query){
             $query->where('is_pns',1);
         })
+        ->orderBy('created_at','desc')
         ->paginate($total ?? 50);
         foreach ($users as $u => $user) {
             # code...
@@ -199,6 +201,7 @@ class UserController extends Controller
         ->whereHas('pns_status',function($query){
             $query->where('is_pns',0);
         })
+        ->orderBy('created_at','desc')
         ->paginate($total ?? 50);
         foreach ($users as $u => $user) {
             # code...
