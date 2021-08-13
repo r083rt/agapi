@@ -92,7 +92,6 @@ class AssigmentController extends Controller
                 $query2->where('assigment_sessions.type','common')->orWhereNull('assigment_sessions.type');
             });
             
-            
 
             if($type=='sharedassigment'){ //menampilkan sharedassigment yang telah dikerjakan
                 $query->whereNotNull('teacher_id');
@@ -237,10 +236,10 @@ class AssigmentController extends Controller
         
         $request->validate([
             'is_paid'=>'boolean',
+            'price'=>'required_if:is_paid,1',
             'question_lists'=>'required|array'
         ]);
         // $is_paid = empty($request->is_paid) ? false : $request->is_paid;
-        
    
         $request_question_list_ids = [];
         foreach ($request->question_lists as $ql => $question_list) {
@@ -266,7 +265,17 @@ class AssigmentController extends Controller
         foreach($db_question_lists as $db_question_list){
             $db_question_lists_key_based[$db_question_list->id] = $db_question_list;
         }
-        // return $db_question_lists_key_based;
+
+        $user = $request->user();
+
+        // cek apakah user berhak membuat soal berbayar
+        if($request->is_paid==1){
+            if($user->canCreatePremiumAssigment()){
+                $request->price = preg_replace("/\D/",'', $request->price);
+            }else{
+                throw new \Exception('Anda saat ini belum berhak membuat soal premium');
+            }
+        }
 
         try{
             DB::beginTransaction();
@@ -274,14 +283,14 @@ class AssigmentController extends Controller
             $assigment = new Assigment();
             // return $request;
             $assigment->fill($request->all());
-            $assigment->is_paid = $request->is_paid==1?true:null;
+            $assigment->is_paid = $request->is_paid==1?$request->price:null;
 
             if($request->has('password')) $assigment->password = bcrypt($request->password);
             $assigment->code = base_convert($request->user()->id.time(), 10, 36);
     
-            $request->user()->assigments()->save($assigment);
 
-            $user = $request->user();
+            $user->assigments()->save($assigment);
+
             // return $user;
             foreach ($db_question_lists as $ql => $question_list) {
                 # code...
@@ -1171,6 +1180,53 @@ class AssigmentController extends Controller
         return $res->paginate();
     }
 
+    // sama dengan getSharedAssigment, cman master paket soal ikut disertakan
+    public function getAssigmentWorks(Request $request){
+        $order_by = $request->query('orderby')??'assigment';
+        $search = $request->query('search');
+        $user = auth('api')->user();
+    
+        $latestAssigmentSessions = DB::table('assigment_sessions')->selectRaw('
+        max(session_id) as latest_session_id,
+        assigment_id
+        ')->groupBy('assigment_id');
+
+        $res = Assigment::withCount(['sessions'=>function($query){
+                $query->has('questions')
+                ->whereRaw("assigment_sessions.type=IF(assigments.is_paid is not null,'paid',null or 'common')");
+            }])
+            ->withCount(['sessions as daily_sessions_count'=>function($query){
+                $query->whereDate('sessions.created_at',\Carbon\Carbon::now()->toDateString())
+                ->whereRaw("assigment_sessions.type=IF(assigments.is_paid is not null,'paid',null or 'common')");
+            }])
+            // ->with('sessions','grade')
+            ->with('grade')
+            ->leftJoinSub($latestAssigmentSessions, 'latest_assigment_sessions', function($join){
+                $join->on('latest_assigment_sessions.assigment_id', '=', 'assigments.id');
+            })
+            ->where(function($query)use($user){
+                $query->where('teacher_id', $user->id) //paket soal yang dishare
+                ->orWhere(function($query2)use($user){ //master paket soal yang yang berbayar
+                    $query2->where('user_id', $user->id)->whereNotNull('is_paid');
+                });
+            });
+
+            if($order_by==="assigment")$res->orderBy('id','desc');
+            else if($order_by==="session")$res->orderBy('latest_session_id','desc');
+            else $res->orderBy('id','desc');
+
+            if($search){
+                $search = trim($search);
+                $res->where(function($query)use($search){
+                    $query->where('code','like','%'.$search.'%')
+                    ->orWhere('name','like','%'.$search.'%')
+                    ->orWhere('topic','like','%'.$search.'%');   
+                });
+                
+            }
+            // return $res->toSql();
+            return $res->paginate()->withQueryString();
+    }
     public function getSharedAssigment(Request $request){
        // return auth('api')->user()->id;
        $order_by = $request->query('orderby')??'assigment';
@@ -1267,15 +1323,23 @@ class AssigmentController extends Controller
         return $res;
     }
     public function getStudentAssigmentsById($assigment_id){
-        $a=\App\Models\Session::with('user','questions.answer','assigments')->whereHas('assigments',function($query)use($assigment_id){
-            $query->where('assigments.id','=',$assigment_id)->where('teacher_id',auth('api')->user()->id); 
-        })->has('questions')->paginate();
-        return $a;
+        $res =\App\Models\Session::with('user','questions.answer','assigments')->whereHas('assigments',function($query)use($assigment_id){
+            $user = auth('api')->user();
+            $query->where('assigments.id','=',$assigment_id)
+            ->where(function($query)use($user){
+                $query->where('assigments.teacher_id', $user->id) //paket soal yang dishare
+                ->orWhere(function($query2)use($user){ //master paket soal yang yang berbayar
+                    $query2->where('assigments.user_id', $user->id)->whereNotNull('assigments.is_paid');
+                });
+            })
+            ->whereRaw("assigment_sessions.type=IF(assigments.is_paid is not null,'paid',null or 'common')");
+            
+        })->has('questions');
         //$res = Assigment::withCount('sessions')->with('grade','sessions.user','sessions.questions.answer')->find($key);
         // $res->max_score=$res->sessions->max('pivot.total_score');
         // $res->avg_score=$res->sessions->avg('pivot.total_score');
    
-        return $res; 
+        return $res->paginate(); 
     }
     public function selectOptionsOnly($assigment_id){
         $res = Assigment::with(['grade',
@@ -1569,7 +1633,8 @@ class AssigmentController extends Controller
 
     private function payableQuery(){
          // query untuk assigments yang telah dikerjakan
-         $workedAssigment = DB::table('assigment_sessions as ass')->selectRaw('a2.ref_id as assigment_id,count(1) as scores_count')
+         $workedAssigment = DB::table('assigment_sessions as ass')
+         ->selectRaw('a2.ref_id as assigment_id,count(1) as scores_count')
          ->join('assigments as a2','a2.id','=','ass.assigment_id')
          ->where('a2.is_publish',1)->whereNotNull('a2.teacher_id')->whereNotNull('a2.ref_id')
          ->groupBy('a2.ref_id');

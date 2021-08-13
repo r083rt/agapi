@@ -362,8 +362,8 @@ Route::get('/getcontactnumber',function(){
 
 Route::get('/testgan',function(){
     
-    $asu = App\Models\Assigment::findOrFail(108);
-    return response()->json($asu->paidRank());
+    $asu = App\Models\User::findOrFail(155355);
+    return $asu->canCreatePremiumAssigment();
 
     return $asu;
     // ->where('question_lists.name','like','%<img%')->exists();

@@ -82,7 +82,7 @@ class Ranking extends Command
         Log::channel('topsis')->info("[+] data diambil: {$limit}");
         #nilai is_paid
         # -1 konfirmsasi berbayar atau tidak
-        # NULL belum dicek
+        # NULL belum dicek (tidak masuk kualifikasi)
         # 0 terkonfirmasi TIDAK terbayar. TIDAK usah dilakukan pengecekan lgi
         # >0 terkonfirmasi terbayar. TIDAK usah dilakukan pengecekan lagi
 

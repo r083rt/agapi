@@ -86,7 +86,9 @@ class Assigment extends Model
     // }
 
     public function sessions(){
-        return $this->belongsToMany('App\Models\Session','App\Models\AssigmentSession')->withPivot('total_score','user_id', 'type')->wherePivot('type','common')->orWherePivotNull('type'); 
+        // return $this->belongsToMany('App\Models\Session','App\Models\AssigmentSession')->withPivot('total_score','user_id', 'type')->wherePivot('type','common')->orWherePivotNull('type'); 
+        return $this->belongsToMany('App\Models\Session','App\Models\AssigmentSession')->withPivot('total_score','user_id', 'type'); 
+        
     }
     public function paid_sessions(){
         return $this->belongsToMany('App\Models\Session','App\Models\AssigmentSession')->withPivot('total_score','user_id', 'type')->wherePivot('type','paid');

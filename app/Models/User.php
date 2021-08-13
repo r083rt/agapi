@@ -255,4 +255,29 @@ class User extends \TCG\Voyager\Models\User
         $diffMonth = \Carbon\Carbon::now()->diffInMonths($user_activated_at);
         return $diffMonth>6;
     }
+
+    /*
+    user dapat merakit soal premium jika:
+    1. memiliki minimal 1 butir soal yang masuk kualifikasi
+
+    #nilai is_paid
+        # NULL belum dicek (tidak masuk kualifikasi)
+        # -1 tahap konfirmasi mau dijadikan berbayar atau tidak
+        # 0 terkonfirmasi TIDAK terbayar. TIDAK usah dilakukan pengecekan lgi
+        # >0 terkonfirmasi terbayar. TIDAK usah dilakukan pengecekan lagi
+    */
+    public function canCreatePremiumAssigment(){
+        $query = $this->question_lists()->whereNull('ref_id')->where(function($query2){
+            $query2->where('is_paid', [-1,0,1]);
+        });
+        if($query->exists())return true;
+        else{
+            $query = $this->assigments()->whereNull('ref_id')->where(function($query){
+                $query->where('is_paid', '>=',0)->orWhere('is_paid', -1);
+            });
+            if($query->exists())return true;
+            else return false;
+        }
+
+    }
 }

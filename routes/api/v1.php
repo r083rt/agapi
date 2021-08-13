@@ -135,25 +135,28 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         });
         ///API di bawah merupakan perkembangan dari potongan endpoint di atas//////////////////
         Route::get('/auth/assigment_lite', function (Request $request) {
-            $user_id = $request->user()->id;
-            $res = $request->user()
+            $user = $request->user();
+            $user_id = $user->id;
+            $res = $user
                 ->load(['profile','role'])->loadCount(['rooms'=>function($query){
                     $query->where('type','class');
                 }]);
             $res->count_question_lists=\App\Models\QuestionList::whereHas('assigments',function($query)use($user_id){
-                $query->where('assigments.user_id','=',$user_id);
+                $query->where('assigments.user_id','=',$user_id)->where('is_publish', false);
             })->count();
             $res->count_sessions = \App\Models\Session::whereHas('assigments',function($query)use($user_id){
                 $query->where('assigments.user_id','=',$user_id)->orWhere('assigments.teacher_id','=',$user_id);
             })->count();
             $res->count_publish_assigments = \App\Models\Assigment::where('user_id','=',$user_id)->where('is_publish',true)->whereNull('teacher_id')->count();
+            $res->canCreatePremiumAssigment = $user->canCreatePremiumAssigment();
             return $res;
         });
         Route::get('/auth/assigments/unpublished', function(Request $request){
             return \App\Models\Assigment::with('likes','comments.user','user','grade','assigment_category','question_lists.assigment_types','question_lists.images')->where('user_id','=',auth('api')->user()->id)->where('is_publish',false)->whereNull('teacher_id')->orderBy('id','desc')->paginate();
         });
         Route::get('/auth/assigments/published', function(Request $request){
-            return \App\Models\Assigment::with('likes','comments.user', 'user','grade','assigment_category','question_lists.assigment_types','question_lists.images')->where('user_id','=',auth('api')->user()->id)->where('is_publish',true)->whereNull('teacher_id')->orderBy('id','desc')->paginate();
+            return \App\Models\Assigment::with('likes','comments.user', 'user','grade','assigment_category','question_lists.assigment_types','question_lists.images')
+            ->where('user_id','=',auth('api')->user()->id)->where('is_publish',true)->whereNull('teacher_id')->orderBy('id','desc')->paginate();
         });
 
         /////////////////////////////////////////////////////////////////////////////////////
@@ -349,6 +352,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::post('/assigments/share', 'AssigmentController@share');
         Route::post('/assigments/setpublic', 'AssigmentController@setAssigmentToPublic');
         Route::get('/assigments/getsharedpublish', 'AssigmentController@getSharedAssigment');
+        Route::get('/assigments/getassigmentworks', 'AssigmentController@getAssigmentWorks');
         Route::get('/assigments/getsharedpublishorderby', 'AssigmentController@getSharedAssigmentOrderBy');
         Route::get('/assigments/getmasterpublish/{subject?}', 'AssigmentController@getMasterAssigment');
         Route::get('/assigments/getstudentassigments/{assigment_id}', 'AssigmentController@getStudentAssigmentsById');
