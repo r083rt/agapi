@@ -28,6 +28,10 @@ Route::get('/', function () {
     return Redirect::to('https://web.agpaiidigital.org');
 });
 
+Route::get('/watzap/perpanjang/{total}','UserController@perpanjang');
+Route::get('/watzap/guruPns/{total}','UserController@guruPns');
+Route::get('/watzap/guruNonPns/{total}','UserController@guruNonPns');
+
 Auth::routes();
 //logout khusus questionnary page
 Route::post('/logout2',function(){
