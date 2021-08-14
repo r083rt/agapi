@@ -1193,11 +1193,11 @@ class AssigmentController extends Controller
 
         $res = Assigment::withCount(['sessions'=>function($query){
                 $query->has('questions')
-                ->whereRaw("assigment_sessions.type=IF(assigments.is_paid is not null,'paid',null or 'common')");
+                ->whereRaw("assigment_sessions.type=IF(assigments.is_paid > 0,'paid','common')");
             }])
             ->withCount(['sessions as daily_sessions_count'=>function($query){
                 $query->whereDate('sessions.created_at',\Carbon\Carbon::now()->toDateString())
-                ->whereRaw("assigment_sessions.type=IF(assigments.is_paid is not null,'paid',null or 'common')");
+                ->whereRaw("assigment_sessions.type=IF(assigments.is_paid > 0,'paid','common')");
             }])
             // ->with('sessions','grade')
             ->with('grade')
@@ -1332,7 +1332,7 @@ class AssigmentController extends Controller
                     $query2->where('assigments.user_id', $user->id)->whereNotNull('assigments.is_paid');
                 });
             })
-            ->whereRaw("assigment_sessions.type=IF(assigments.is_paid is not null,'paid',null or 'common')");
+            ->whereRaw("assigment_sessions.type=IF(assigments.is_paid > 0,'paid', 'common')");
             
         })->has('questions');
         //$res = Assigment::withCount('sessions')->with('grade','sessions.user','sessions.questions.answer')->find($key);
