@@ -113,11 +113,124 @@ class UserController extends Controller
             }
             // cek apakah no hp karakter 1 adalah 0
             elseif(substr(trim($nohp), 0, 1)=='0'){
-                $hp = '+62'.substr(trim($nohp), 1);
+                $hp = '62'.substr(trim($nohp), 1);
             }
         }
         return $hp;
     }  
+
+    public function perpanjang($total){
+        $content = "";
+        $users = User::where('user_activated_at','<',(new \Carbon\Carbon)->submonths(6))
+        ->has('profile')
+        ->with('profile','pns_status')
+        ->orderBy('created_at','desc')
+        ->paginate($total ?? 50);
+        foreach ($users as $u => $user) {
+            # code...
+            $user->profile->contact = $this->convertPhoneNumber($user->profile->contact);
+            $user->late_paid = Carbon::parse(Carbon::now())->diffInMonths(Carbon::parse($user->user_activated_at));
+            $name = $user->name;
+            $contact = $user->profile->contact;
+
+            if($contact){
+                $name = str_replace(","," ",$name);
+                $name = str_replace("."," ",$name);
+                $content .= "$name,$contact";
+                $content .= "\n";
+            }
+            
+        }
+
+        // file name that will be used in the download
+        $fileName = "watzap_perpanjang.txt";
+
+        // use headers in order to generate the download
+        $headers = [
+        'Content-type' => 'text/plain', 
+        'Content-Disposition' => sprintf('attachment; filename="%s"', $fileName),
+        ];
+        // make a response, with the content, a 200 response code and the headers
+        return response()->make($content, 200, $headers);
+
+    }
+
+    public function guruPns($total){
+        $content = "";
+        $users = User::
+        has('profile')
+        ->with('profile','pns_status')
+        ->whereHas('pns_status',function($query){
+            $query->where('is_pns',1);
+        })
+        ->orderBy('created_at','desc')
+        ->paginate($total ?? 50);
+        foreach ($users as $u => $user) {
+            # code...
+            $user->profile->contact = $this->convertPhoneNumber($user->profile->contact);
+            $user->late_paid = Carbon::parse(Carbon::now())->diffInMonths(Carbon::parse($user->user_activated_at));
+            $name = $user->name;
+            $contact = $user->profile->contact;
+
+            if($contact){
+                $name = str_replace(","," ",$name);
+                $name = str_replace("."," ",$name);
+                $content .= "$name,$contact";
+                $content .= "\n";
+            }
+            
+        }
+
+        // file name that will be used in the download
+        $fileName = "watzap_guruPns.txt";
+
+        // use headers in order to generate the download
+        $headers = [
+        'Content-type' => 'text/plain', 
+        'Content-Disposition' => sprintf('attachment; filename="%s"', $fileName),
+        ];
+        // make a response, with the content, a 200 response code and the headers
+        return response()->make($content, 200, $headers);
+
+    }
+
+    public function guruNonPns($total){
+        $content = "";
+        $users = User::has('profile')
+        ->with('profile','pns_status')
+        ->whereHas('pns_status',function($query){
+            $query->where('is_pns',0);
+        })
+        ->orderBy('created_at','desc')
+        ->paginate($total ?? 50);
+        foreach ($users as $u => $user) {
+            # code...
+            $user->profile->contact = $this->convertPhoneNumber($user->profile->contact);
+            $user->late_paid = Carbon::parse(Carbon::now())->diffInMonths(Carbon::parse($user->user_activated_at));
+            $name = $user->name;
+            $contact = $user->profile->contact;
+
+            if($contact){
+                $name = str_replace(","," ",$name);
+                $name = str_replace("."," ",$name);
+                $content .= "$name,$contact";
+                $content .= "\n";
+            }
+            
+        }
+
+        // file name that will be used in the download
+        $fileName = "watzap_guruNonPns.txt";
+
+        // use headers in order to generate the download
+        $headers = [
+        'Content-type' => 'text/plain', 
+        'Content-Disposition' => sprintf('attachment; filename="%s"', $fileName),
+        ];
+        // make a response, with the content, a 200 response code and the headers
+        return response()->make($content, 200, $headers);
+
+    }
 
     public function userreport2(){
         $users = User::where('user_activated_at','<',(new \Carbon\Carbon)->submonths(6))
