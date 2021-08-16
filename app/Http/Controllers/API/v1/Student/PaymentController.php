@@ -70,9 +70,22 @@ class PaymentController extends Controller
         return $user->balance();
 
     }
+    public function getPayment($payment_id){
+        $user = auth()->user();
+        $payment = $user->payments()->findOrFail($payment_id);
+        $created_at = new \Carbon\Carbon($payment->created_at);
+        $expired_at = $created_at->addHours(24);
+        $now = \Carbon\Carbon::now();
+        if($now->lessThan($expired_at)){
+            $payment->remaining_time = $now->diffInMilliseconds($expired_at);
+        }
+        return $payment;
+        
+    }
     public function checkPayment(Request $request, $payment_id){
         $user = $request->user();
         $payment = $user->payments()->findOrFail($payment_id);
+        $payment->load('paymentable','payment_vendor');
         // return $payment;
         $client = new GuzzleHttp\Client();
         $res = $client->get(env('MASTER_PAYMENT_URL')."/checkstatus/{$payment->master_payment_id}");
@@ -107,20 +120,26 @@ class PaymentController extends Controller
     public function createPayment(Request $request){
         $request->validate([
             'value'=>'required',
-            'payment_vendor_id'=>'required|exists:payment_vendors,id'
+            'payment_vendor_id'=>'required'
         ]);
         $user = $request->user();
+        $payment_vendor = \App\Models\PaymentVendor::findOrFail($request->payment_vendor_id);
         $stop = false;
         
         $client = new GuzzleHttp\Client();
-        $json_data = ['value'=>$request->value,'payment_vendor'=>$request->payment_vendor_id];
-        $res = $client->post(env('MASTER_PAYMENT_URL').'/createpayment',[
+        $json_data = ['value'=>$request->value,'service_code'=>$payment_vendor->service_code, 'account_number'=>$payment_vendor->account_number];
+        $res = $client->post(env('MASTER_PAYMENT_URL').'/createpaymenttoaccountnumber',[
             'json'=> $json_data
         ]);
         $master_payment = json_decode($res->getBody());
         if(json_last_error() != JSON_ERROR_NONE){
             return response('Format JSON salah',422);
         }
+
+        $res = $client->post(env('MASTER_PAYMENT_URL').'/todaytotalpaymentsbyaccountnumber',[
+            'json'=> ['account_number'=>$payment_vendor->account_number,'service_code'=>$payment_vendor->service_code]
+        ]);
+        $today_total_payments = json_decode($res->getBody());
 
         $necessary = \App\Models\Necessary::where('name','topup')->first();
         // return $res;
@@ -132,11 +151,13 @@ class PaymentController extends Controller
             $payment->value = $master_payment->value;
             $payment->status = $master_payment->status; //pending
             $payment->type = 'IN';
+            $payment->note = 'Topup Balance';
             $payment->payment_vendor_id = $request->payment_vendor_id;
             $user->payments()->save($payment);
             
             DB::commit();
             // \App\Events\PaymentNew::dispatch($payment);
+            $payment->note = json_encode(['today_total_payments'=>$today_total_payments]);
             return $payment;
             
         }catch (\PDOException $e) {
