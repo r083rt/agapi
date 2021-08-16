@@ -1191,14 +1191,15 @@ class AssigmentController extends Controller
         assigment_id
         ')->groupBy('assigment_id');
 
-        $res = Assigment::withCount(['sessions'=>function($query){
+        $assigment_sessions_query = "assigment_sessions.type=IF(assigments.is_paid > 0, 'paid' , IF(assigment_sessions.type is not null,'common', NULL))";
+        $res = Assigment::withCount(['sessions'=>function($query)use($assigment_sessions_query){
                 $query->has('questions')
-                ->whereRaw("assigment_sessions.type=IF(assigments.is_paid > 0,'paid','common')");
+                ->whereRaw($assigment_sessions_query);
             }])
-            ->withCount(['sessions as daily_sessions_count'=>function($query){
-                $query->whereDate('sessions.created_at',\Carbon\Carbon::now()->toDateString())
-                ->whereRaw("assigment_sessions.type=IF(assigments.is_paid > 0,'paid','common')");
-            }])
+            // ->withCount(['sessions as daily_sessions_count'=>function($query){
+            //     $query->whereDate('sessions.created_at',\Carbon\Carbon::now()->toDateString())
+            //     ->whereRaw("assigment_sessions.type=IF(assigments.is_paid > 0,'paid','common')");
+            // }])
             // ->with('sessions','grade')
             ->with('grade')
             ->leftJoinSub($latestAssigmentSessions, 'latest_assigment_sessions', function($join){
@@ -1315,15 +1316,24 @@ class AssigmentController extends Controller
          return $res->paginate();
      }
     public function getAssigmentInfoById($key){
-        $res = Assigment::withCount('sessions')->with('grade')->find($key);
-        $res->max_score=$res->sessions->max('pivot.total_score');
-        $res->avg_score=round($res->sessions->avg('pivot.total_score'), 2);
+        $assigment_sessions_query = "assigment_sessions.type=IF(assigments.is_paid > 0, 'paid' , IF(assigment_sessions.type is not null,'common', NULL))";
+        $res = Assigment::withCount(['sessions'=>function($query)use($assigment_sessions_query){
+            $query->has('questions')
+                ->whereRaw($assigment_sessions_query);
+
+        }])->with('grade')->find($key);
+        // dd($res->sessions()->whereRaw($assigment_sessions_query)->toSql());
+        $sessions = $res->sessions()->join('assigments','assigments.id','=','assigment_sessions.assigment_id')->whereRaw($assigment_sessions_query)->get();
+        // return $sessions;
+        $res->max_score=$sessions->max('pivot.total_score');
+        $res->avg_score=round($sessions->avg('pivot.total_score'), 2);
         //unset($res->sessions);
        // $res->sessions_count = $res->sessions->count();
         return $res;
     }
     public function getStudentAssigmentsById($assigment_id){
-        $res =\App\Models\Session::with('user','questions.answer','assigments')->whereHas('assigments',function($query)use($assigment_id){
+        $res =\App\Models\Session::with('user','questions.answer','assigments')
+        ->whereHas('assigments',function($query)use($assigment_id){
             $user = auth('api')->user();
             $query->where('assigments.id','=',$assigment_id)
             ->where(function($query)use($user){
@@ -1332,7 +1342,7 @@ class AssigmentController extends Controller
                     $query2->where('assigments.user_id', $user->id)->whereNotNull('assigments.is_paid');
                 });
             })
-            ->whereRaw("assigment_sessions.type=IF(assigments.is_paid > 0,'paid', 'common')");
+            ->whereRaw("assigment_sessions.type=IF(assigments.is_paid > 0, 'paid' , IF(assigment_sessions.type is not null,'common', NULL))");
             
         })->has('questions');
         //$res = Assigment::withCount('sessions')->with('grade','sessions.user','sessions.questions.answer')->find($key);
