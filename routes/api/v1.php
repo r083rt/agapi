@@ -350,6 +350,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/assigments/start/{code}/{ktaId}', 'AssigmentController@start');
         Route::post('/assigments/check', 'AssigmentController@check');
         Route::post('/assigments/share', 'AssigmentController@share');
+        Route::post('/assigments/{id}/update','AssigmentController@update');
         Route::post('/assigments/setpublic', 'AssigmentController@setAssigmentToPublic');
         Route::get('/assigments/getsharedpublish', 'AssigmentController@getSharedAssigment');
         Route::get('/assigments/getassigmentworks', 'AssigmentController@getAssigmentWorks');
