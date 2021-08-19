@@ -21,7 +21,7 @@ class CreateAdsTable extends Migration
             $table->text('description')->nullable();
             $table->datetime('start_at')->nullable();
             $table->integer('price');
-            $table->smallInteger('ratio');
+            $table->float('ratio');
             $table->string('target_type')->nullable();
             $table->string('target_value')->nullable();
             $table->timestamps();

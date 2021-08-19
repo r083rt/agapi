@@ -514,6 +514,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         //==================================END============================================/
 
         Route::post('/assigmentsessions/store2', 'AssigmentSessionController@store2');
+        // menampilkan list jawaban yg disubmit dan jawaban yang benar berdasarkan question_lists yg diacak sebelumnya
+        Route::get('/assigmentsessions/{session_id}/review', 'AssigmentSessionController@review');
+
         Route::get('/assigments/{assigment_id}/history', 'AssigmentSessionController@history');
         Route::post('/assigments/history', 'AssigmentSessionController@history2');
 

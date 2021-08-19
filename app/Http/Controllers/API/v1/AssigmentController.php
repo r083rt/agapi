@@ -698,7 +698,7 @@ class AssigmentController extends Controller
     }
     public function show2shuffle($id){
         $user = auth()->user();    
-        $key = ['Manajerial','Sosiokultural'];
+        $key = ['Manajerial','Sosiokultural','Wawancara'];
     
         $assigments  = Assigment::with('taggables_')->findOrFail($id);
         $check_user_expired = false;
@@ -715,11 +715,12 @@ class AssigmentController extends Controller
         
         
         //menampilkan assigment dengan question list tanpa jawaban
-        $assigment = Assigment::with(['question_lists'=>function($query){
-            $query->selectRaw('question_lists.*,ats.description as assigment_type')->join('assigment_question_lists as aql','aql.question_list_id','=','question_lists.id')
+        $assigment = Assigment::with(['question_lists'=>function($query)use($id){
+            $query->selectRaw('question_lists.*,ats.description as assigment_type')
+            ->join('assigment_question_lists as aql','aql.question_list_id','=','question_lists.id')
             ->join('assigment_types as ats','ats.id','=','aql.assigment_type_id')
-            ->where('ats.description','selectoptions')
-            ->groupBy('aql.question_list_id');
+            ->where('aql.assigment_id', $id);
+            // ->groupBy('aql.question_list_id');
         },'question_lists.answer_lists'=>function($query){
             $query->selectRaw('answer_lists.id,answer_lists.question_list_id,answer_lists.name');
         }])->findOrFail($id);

@@ -37,7 +37,8 @@ class AssigmentSessionController extends Controller
         }
         return true;
     }
-    // sama dgn store, bedanya hanya mengambil soal pil. ganda dan langsung menyimpan dan menampilkan total nilai dri soal pil. ganda tsb
+    // sama dgn store, 
+    // bedanya hanya mengambil soal pil. ganda dan langsung menyimpan dan menampilkan total nilai dri soal pil. ganda tsb
     public function store2(Request $request){
         // DB::transaction(function ()use($request) {
             $request->validate([
@@ -46,12 +47,14 @@ class AssigmentSessionController extends Controller
                 // 'question_lists.*.answer'=>'required',
             ]);
            
-            $assigment = Assigment::with(['question_lists'=>function($query){
-                $query->selectRaw('question_lists.*,ats.description as assigment_type')->join('assigment_question_lists as aql','aql.question_list_id','=','question_lists.id')
+            $assigment = Assigment::with(['question_lists'=>function($query)use($request){
+                $query->selectRaw('question_lists.*,ats.description as assigment_type')
+                ->join('assigment_question_lists as aql','aql.question_list_id','=','question_lists.id')
                 ->join('assigment_types as ats','ats.id','=','aql.assigment_type_id')
-                ->where('ats.description','selectoptions')
-                ->groupBy('aql.question_list_id');
-            }, 'question_lists.answer_lists'])->findOrFail($request->id);
+                ->where('aql.assigment_id', $request->id);
+            }, 'question_lists.answer_lists'])
+            ->withCount('question_lists')
+            ->findOrFail($request->id);
 
 
             try{
@@ -102,23 +105,40 @@ class AssigmentSessionController extends Controller
                 }
                 
                 $total_score=0; //hanya digunakan jika soal pilihan ganda semua
-                foreach ($db_question_lists as $ql=>$question_list) {
+                $selectoptions_count = 0;
+                
+                foreach ($submitted_question_lists as $ql=>$submitted_question_list) {
 
-                    // cek apakah answer kosong pda question_list yg disubmit
+                    $question_list = $db_question_lists[$ql];
+
+                    $is_selectoptions = false;
+               
+                    if($question_list['assigment_type']==="selectoptions"){
+                        $selectoptions_count++;
+                        $is_selectoptions = true;
+                    }
+
+                    // submitted_answer adalah question_lists.*.answer yg disubmit user
                     $submitted_answer = null;
-                    if(isset($submitted_question_lists[$ql]['answer']) && !empty($submitted_question_lists[$ql]['answer'])){
+
+                    if(isset($submitted_question_lists[$ql]['answer'])){
                         $submitted_answer = $submitted_question_lists[$ql]['answer'];
                     }
-                    
-                    $score = 0;
-                    $selected_db_answer = null;
-                    // cek apakah db answer_lists ada menurut answer yg disubmit
-                    if(isset($question_list['arr_answer_lists'][$submitted_answer])){
-                        $selected_db_answer = $question_list['arr_answer_lists'][$submitted_answer];
-                        // jika jawaban benar nilai $score adalah 100
-                        $score = $selected_db_answer['value'];
+                   
+        
+                    $score = 0; // jika type soal textfield/textarea, maka $score=0
+                    $selected_db_answer = null; // jika soal esai, maka $selected_db_answer NULL
+        
+                    // jika type soal selectoptions dan $submitted_answer tidak NULL, maka koreksi soal
+                    if($is_selectoptions && $submitted_answer){
+                        // cek apakah db answer_lists ada menurut answer yg disubmit
+                        if(isset($question_list['arr_answer_lists'][$submitted_answer])){
+                            $selected_db_answer = $question_list['arr_answer_lists'][$submitted_answer];
+                            // jika jawaban benar nilai $score adalah 100
+                            $score = $selected_db_answer['value'];
+                        }
+                        $total_score += $score;
                     }
-                    $total_score += $score;
 
                     // insert session to to question
                     $db_question = new Question();
@@ -142,11 +162,21 @@ class AssigmentSessionController extends Controller
                     $db_question->answer()->save($db_answer);
         
                 }
+
+                $isTemporary = true;
+                $value=0;
+                //jika soalnya pilihan ganda semua, maka otomatis ternilai
+                if($selectoptions_count==$assigment->question_lists_count){ 
+                    $isTemporary = false;
+                    $session->assigment_session->total_score = $value = round($total_score/$assigment->question_lists_count, 2);
+                    $session->assigment_session->save();
+                    //\App\Models\User::find(auth('api')->user()->id)->notify();
+                }
                 // Log::debug('test assigment_session_controller store2');
                 //mengecek apakah request dari latihan soal dan mengecek apakah jumlah soal pilihan ganda yang kirim sama dengan jumlah soal pilihan ganda di db
-                $final_score = round($total_score/count($db_question_lists), 2);
-                $assigment->assigment_session->total_score = $final_score;
-                $assigment->assigment_session->save();
+                // $final_score = round($total_score/count($db_question_lists), 2);
+                // $assigment->assigment_session->total_score = $final_score;
+                // $assigment->assigment_session->save();
 
                 DB::commit();
 
@@ -160,7 +190,7 @@ class AssigmentSessionController extends Controller
                 }
                 
 
-                return response()->json(['score'=>['value'=>$final_score], 'assigment'=>$assigment]);
+                return response()->json(['score'=>['isTemporary'=>$isTemporary, 'value'=>$value], 'assigment'=>$assigment]);
 
             }catch(\PDOException $e){
                 DB::rollBack();
@@ -417,7 +447,22 @@ class AssigmentSessionController extends Controller
         $res = AssigmentSession::with('assigment.grade','assigment.user','teacher')->findOrFail($id);
         return $res;
     }
+    public function review($session_id){
+        $user = auth()->user();
+        $session = $user->sessions()->where('id',$session_id)->first();
+        $session->load('assigment_session');
 
+        if(!$session)throw new \Exception('Session tidak ada');
+
+        $session->load(['questions'=>function($query)use($session){
+            $query->selectRaw('questions.*,ats.description as assigment_type')
+            ->join('assigment_question_lists as aql','aql.question_list_id','=','questions.question_list_id')
+            ->join('assigment_types as ats','ats.id','=','aql.assigment_type_id')
+            ->where('aql.assigment_id', $session->assigment_session->assigment_id);
+        },'questions.answer_lists','questions.answer','assigment_session']);
+        
+        return $session;
+    }
     /**
      * Update the specified resource in storage.
      *

@@ -19,6 +19,7 @@ class User extends \TCG\Voyager\Models\User
      *
      * @var array
      */
+
     protected $fillable = [
         'name', 'email', 'password', 'kta_id', 'user_activated_at', 'avatar', 'role_id',
         'point'
@@ -255,7 +256,11 @@ class User extends \TCG\Voyager\Models\User
         $diffMonth = \Carbon\Carbon::now()->diffInMonths($user_activated_at);
         return $diffMonth>6;
     }
-
+    public function age(){
+        $birthdate = new \Carbon\Carbon($this->profile->birthdate);
+        $now = \Carbon\Carbon::now();
+        return $now->diffInYears($birthdate);
+    }
     /*
     user dapat merakit soal premium jika:
     1. memiliki minimal 1 butir soal yang masuk kualifikasi

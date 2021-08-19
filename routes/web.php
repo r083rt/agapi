@@ -366,8 +366,8 @@ Route::get('/getcontactnumber',function(){
 
 Route::get('/testgan',function(){
     
-    $asu = App\Models\User::findOrFail(155355);
-    return $asu->canCreatePremiumAssigment();
+    $asu = App\Models\User::findOrFail(1);
+    return $asu->age();
 
     return $asu;
     // ->where('question_lists.name','like','%<img%')->exists();

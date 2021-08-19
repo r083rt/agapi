@@ -26,7 +26,6 @@ class PostController extends Controller
     {
         //
         // dd(Auth::check());
-        // $role_ids = [1,2,7,11];
         $posts = Post::with([
             'files',
             'bookmarks',
@@ -42,17 +41,13 @@ class PostController extends Controller
             'comments.user',
             'likes.user',
         ])->withCount('comments', 'likes', 'liked')
-        // ->join('users','users.id','=','posts.author_id')
-        // ->whereIn('users.role_id', $role_ids)
-        ->whereHas('authorId', function ($query) {
+            ->whereHas('authorId', function ($query) {
                 $role_ids = [1,2,7,11];
                 $query
-                    ->where('role_id', $role_ids);
-            })
-        ->orderBy('posts.id', 'desc');
-            // return $posts->toSql();
-            // ->paginate($request->show ?? 10);
-        return $posts->paginate();
+                    ->whereIn('role_id', $role_ids);
+            })->orderBy('id', 'desc')
+            ->paginate($request->show ?? 10);
+        return $posts;
     }
 
     /**
