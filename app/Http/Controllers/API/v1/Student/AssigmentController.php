@@ -765,8 +765,13 @@ class AssigmentController extends Controller
     public function checkAssignmentPayment($assignment_id){
         $user = auth()->user();
         $assignment = Assigment::with(['payments','question_lists'=>function($query){
-            // hanya mengambil queston_lists yg berbayar (is_paid=1)
-            $query->where('question_lists.is_paid', true);
+            // hanya mengambil queston_lists yang master'nya (ref_id) berbayar (is_paid=1)
+            $query->whereExists(function($query2){
+                $query2->select(DB::raw(1))
+                ->from('question_lists as master_question_list')
+                ->whereColumn('master_question_list.id','=','question_lists.ref_id')
+                ->where('master_question_list.is_paid',1);
+            });
         }])->whereHas('payments', function(Builder $query)use($user){
             $query->whereHasMorph('paymentable', \App\Models\User::class, function(Builder $query2)use($user){
                 $query2->where('users.id', $user->id);

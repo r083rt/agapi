@@ -536,4 +536,8 @@ class UserController extends Controller
         return ['totalUser'=>$res->count(), 'data'=>$res->paginate($itemsPerPage)];
     }
 
+    public function profit(){
+        return 1;
+    }
+
 }

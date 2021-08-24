@@ -196,4 +196,10 @@ class QuestionListController extends Controller
 
 
     }
+
+    // menampilkan list butir soal premium yang dibeli oleh siswa,
+    // dan jga menampilkan siapa guru yg memakai soal tsb
+    public function getPayableLists(Request $request){
+        return 'cok';
+    }
 }
