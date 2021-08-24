@@ -529,6 +529,7 @@ class AssigmentController extends Controller
                         'user',
                         'grade',
                         'assigment_category',
+                        'question_lists.assigment_types',
                         'question_lists.answer_lists',
                         'question_lists.audio',
                         'likes',

@@ -250,22 +250,21 @@ class AssigmentController extends Controller
                 'required'
             ]
         ]);
-        $assigment = Assigment::where('is_paid','>=',1)->findOrFail($request->id);
+        
+        $premium_assigment_repo = new \App\Repositories\PremiumAssigmentRepository;
+        $assigment = $premium_assigment_repo->findOrFail($request->id);
+        
+
         $user = $request->user();
         // cek apakah user sudah membeli assigment ini
-        $purchased = \App\Models\PurchasedItem::whereHas('payment', function(Builder $query)use($user){
-            $query->whereHasMorph('paymentable', \App\Models\User::class, function(Builder $query2)use($user){
-                $query2->where('users.id', $user->id);
-            });
-        })->whereHasMorph('purchased_item',
-         \App\Models\Assigment::class, function (Builder $query, $type)use($assigment){
-             $query->where('assigments.id', $assigment->id);
-         });
-        if($purchased->exists()){
+        $purchased_assigment = new \App\Helper\PurchasedAssigmentItemHelper;
+        $purchased_assigment->user_id = $user->id;
+        $purchased_assigment->assigment_id = $assigment->id;
+        if($purchased_assigment->isExists()){
             throw new \Exception("Kamu sudah membeli item ini");
         }
         
-        // jika saldo kurang maka return 403 dgn json
+        // jika saldo kurang maka return Error
         $user_balance = $user->balance();
         if($user_balance<$assigment->is_paid){
             throw new \Exception("Saldo kurang");
@@ -279,80 +278,19 @@ class AssigmentController extends Controller
                 throw new \Exception("Necessary beli_soal not found");
             }
 
-            $payment = new \App\Models\Payment;
-            $payment->type = 'OUT';
-            $payment->necessary_id = $necessary->id;
-            $payment->status = 'success';
-            $payment->value = $assigment->is_paid;
-            $user->payments()->save($payment);
-
-            $purchased_item = new \App\Models\PurchasedItem;
-            $purchased_item->payment_id = $payment->id;
-
-            $assigment->purchased_items()->save($purchased_item);
-
-            // sekarang bagi keuntungan ke pemilik paket soal berbayar dan pemilik butir soal berbayar
-            $assigment->load(['question_lists'=>function($query){
-                // hanya mengambil queston_lists yg berbayar (is_paid=1)
-                $query->where('question_lists.is_paid', true);
-            }]);
+            $payment_out = new \App\Models\Payment;
+            $payment_out->type = 'OUT';
+            $payment_out->necessary_id = $necessary->id;
+            $payment_out->status = 'success';
+            $payment_out->value = $assigment->is_paid;
+            $user->payments()->save($payment_out);
 
            
+
+            //bagi keuntungan
+            $assigment_question_list_payment_sharing = new \App\Helper\AssigmentQuestionListPaymentSharingHelper($assigment);
+            $assigment_question_list_payment_sharing->sharingFrom($payment_out);
             
-    
-            // jika butir soal berprofit ada di dalam paket soal tsb maka
-            if(count($assigment->question_lists)){
-                $profit = 0.5*$payment->value; // keuntungan 50% (dibagi 50% ke pembuat soal dan 50% ke pembuat butir soal berbayar sama-rata
-                $necessary = \App\Models\Necessary::where('name','bagi_keuntungan')->first();
-                if(!$necessary){
-                    throw new \Exception("Necessary bagi_keuntungan not found");
-                }
-                
-                
-                $payment2 = new \App\Models\Payment;
-                $payment2->type = 'IN';
-                $payment2->value = $profit; 
-                $payment2->status = 'success'; 
-                $payment2->necessary_id = $necessary->id;
-                $assigment->user->payments()->save($payment2);
-
-
-                // profit untuk pembuat butir soal
-                $profit2 = $payment->value - $profit;
-                $profit2 = $profit2 / count($assigment->question_lists);
-                $payments2 = [];
-                foreach($assigment->question_lists as $question_list){
-
-                   array_push($payments2, [
-                    'necessary_id' => $necessary->id,
-                    'type' => 'IN',
-                    'status'=>'success',
-                    'value' => $profit2,
-                    'payment_id'=> $question_list->pivot->creator_id,
-                    'payment_type'=> \App\Models\User::class,
-                    'created_at'=> Carbon::now(),
-                    'updated_at'=> Carbon::now(),
-                   ]);
-
-                }
-                $totalInserted = DB::table('payments')->insert($payments2);
-               
-            }else{
-                // jika tidak ada soal yg berbayar maka 100% keuntungan dimiliki pembuat paket soal
-                $necessary = \App\Models\Necessary::where('name','bagi_keuntungan')->first();
-                if(!$necessary){
-                    throw new \Exception("Necessary bagi_keuntungan not found");
-                }
-                
-                $payment2 = new \App\Models\Payment;
-                $payment2->type = 'IN';
-                $payment2->status = 'success';
-                $payment2->value = $payment->value; // keuntungan 100% (tidak dibagi karena butir2 soalnya tidak ada 1 pun yg is_paid TRUE)
-                $payment2->necessary_id = $necessary->id;
-                
-                $assigment->user->payments()->save($payment2);
-
-            }
 
             DB::commit();
             return $assigment;
@@ -821,9 +759,15 @@ class AssigmentController extends Controller
             return response($e->getMessage(), 500);
         }
     }
+    /*
+    konfirmasi pembayaran assigment
+    */
     public function checkAssignmentPayment($assignment_id){
         $user = auth()->user();
-        $assignment = Assigment::with('payments')->whereHas('payments', function(Builder $query)use($user){
+        $assignment = Assigment::with(['payments','question_lists'=>function($query){
+            // hanya mengambil queston_lists yg berbayar (is_paid=1)
+            $query->where('question_lists.is_paid', true);
+        }])->whereHas('payments', function(Builder $query)use($user){
             $query->whereHasMorph('paymentable', \App\Models\User::class, function(Builder $query2)use($user){
                 $query2->where('users.id', $user->id);
             });
@@ -840,6 +784,11 @@ class AssigmentController extends Controller
 
            if($master_payment->status==="success"){
                \App\Models\Payment::where('id',$payment->id)->update(['status'=>'success']);
+
+                 //bagi keuntungan
+                $assigment_question_list_payment_sharing = new \App\Helper\AssigmentQuestionListPaymentSharingHelper($assignment);
+                $assigment_question_list_payment_sharing->sharingFrom($payment);
+
            }
 
             DB::commit();

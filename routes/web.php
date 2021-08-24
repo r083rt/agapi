@@ -366,13 +366,8 @@ Route::get('/getcontactnumber',function(){
 
 Route::get('/testgan',function(){
     
-    $asu = App\Models\User::findOrFail(1);
-    return $asu->age();
-
-    return $asu;
-    // ->where('question_lists.name','like','%<img%')->exists();
-    // $settings = DB::table('settings')->where('key', 'like',"admin.soal_p3k%manajerial")->get();
-    return $asu;
+    $a = new \App\Repositories\AssigmentPurchasedItemRepository;
+    return $a->isExists();
     
         // return $data;
 });
