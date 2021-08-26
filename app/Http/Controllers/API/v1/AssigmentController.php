@@ -1752,4 +1752,50 @@ class AssigmentController extends Controller
         return $assigments;
 
     }
+
+    public function getPayableListsQuery($user, $year, $month){
+
+        $payment_query = function($query)use($year, $month){
+            $query->whereHas('payment', function($query2)use($year, $month){
+                $query2->whereYear('payments.created_at', $year)
+                ->whereMonth('payments.created_at', $month);
+            });
+        };
+
+        $purchased_items = \App\Models\PurchasedItem::with('payment.user','purchased_item')->whereHasMorph('purchased_item', Assigment::class, function(Builder $query)use($user){
+            $query->where('assigments.user_id', $user->id);
+        })->whereHas('payment', function($query)use($year, $month){
+            $query->where('payments.status','success')
+            ->whereYear('payments.created_at', $year)
+            ->whereMonth('payments.created_at', $month);
+        })
+        ->orderBy('id','desc')
+        ;
+        // return $purchased_items->get();
+        // $assigments = $user->assigments()->with(['purchased_items'=>$payment_query, 'purchased_items.payment.user'])
+        // ->whereHas('purchased_items', $payment_query)
+        // ->where('is_paid','>', 0)
+        // ->whereNull('ref_id')
+        // ->orderBy('id','desc');
+
+        return $purchased_items;
+    }
+    // menampilkan list paket soal premium yang dibeli oleh siswa,
+    public function getPayableLists(Request $request){
+      
+        $user = auth()->user();
+        $year = $request->query('year')??date('Y');
+        $month = $request->query('month')??date('m');
+
+
+        $previous_month = \Carbon\Carbon::create($year, $month)->subMonths(1);
+        $query = $this->getPayableListsQuery($user, $year, $month);
+    
+        $query_previous_month = $this->getPayableListsQuery($user, $previous_month->format('Y'), $previous_month->format('m'));
+   
+
+        return ['data'=>$query->get(), 'previous_month_count'=>$query_previous_month->count()];
+    }
+    
+    
 }

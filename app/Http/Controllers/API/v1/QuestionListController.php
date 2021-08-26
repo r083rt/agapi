@@ -199,7 +199,66 @@ class QuestionListController extends Controller
 
     // menampilkan list butir soal premium yang dibeli oleh siswa,
     // dan jga menampilkan siapa guru yg memakai soal tsb
+    // raw sql: menampilkan pembayaran dari user_id mana + siapa yg pakai butir soal.sql
+    public function getPayableListsQuery(){
+        $purchased_question_lists = DB::table('purchased_items')->where('purchased_item_type', QuestionList::class);
+
+        $payment_sharings_pivot = DB::table('payments')->selectRaw('payments.id,
+        payments.type,
+        payments.value,
+        payments.payment_type,
+        payments.payment_id as user_id,
+        payments.created_at,
+		payment_sharings.payment_from,
+		payment_from_table.payment_id as payment_from_user_id')
+        ->join('payment_sharings', 'payment_sharings.payment_to', 'payments.id')
+        ->join('payments as payment_from_table', 'payment_from_table.id', '=', 'payment_sharings.payment_from')
+        ->where('payments.payment_type', \App\Models\User::class);
+
+        $query = DB::table('question_lists as ql')->selectRaw('ql.id,
+        aql.assigment_id,
+        aql.creator_id,
+        aql.user_id,
+        master_question_lists.is_paid as master_is_paid,
+        purchased_question_lists.payment_id,
+        payment_sharings_pivot.payment_from_user_id,
+        payment_sharings_pivot.created_at as payment_created_at,
+        senders.avatar as payment_sender_avatar,
+        senders.name as payment_sender_name,
+        receivers.avatar as payment_receiver_avatar,
+        receivers.name as payment_receiver_name
+        ')
+        ->join('assigment_question_lists as aql', 'aql.question_list_id','=', 'ql.id')
+        ->join('question_lists as master_question_lists', 'master_question_lists.id','=','ql.ref_id')
+        ->joinSub($purchased_question_lists, 'purchased_question_lists', function($join){
+            $join->on('purchased_question_lists.purchased_item_id','=', 'aql.question_list_id');
+        })
+        ->joinSub($payment_sharings_pivot, 'payment_sharings_pivot', function($join){
+            $join->on('payment_sharings_pivot.id', '=', 'purchased_question_lists.payment_id');
+        })
+        ->join('users as senders', 'senders.id', '=', 'payment_sharings_pivot.payment_from_user_id')  #murid yang membeli soal
+        ->join('users as receivers', 'receivers.id', '=', 'aql.user_id')  #guru yang memakai soal
+        ->where('master_question_lists.is_paid', 1);
+        return $query;
+    }
     public function getPayableLists(Request $request){
-        return 'cok';
+        $year = $request->query('year')??date('Y');
+        $month = $request->query('month')??date('m');
+        
+        $query = $this->getPayableListsQuery()
+        ->whereYear('payment_sharings_pivot.created_at', $year)
+        ->whereMonth('payment_sharings_pivot.created_at', $month)
+        ->where('aql.creator_id', auth()->user()->id)
+        ->orderBy('ql.id', 'DESC');
+
+        $previous_month = \Carbon\Carbon::create($year, $month)->subMonths(1);
+        $query_previous_month = $this->getPayableListsQuery()
+        ->whereYear('payment_sharings_pivot.created_at', $previous_month->format('Y'))
+        ->whereMonth('payment_sharings_pivot.created_at', $previous_month->format('m'))
+        ->where('aql.creator_id', auth()->user()->id);
+
+        return ['data'=>$query->get(), 'previous_month_count'=>$query_previous_month->count()];
+
+
     }
 }

@@ -537,7 +537,19 @@ class UserController extends Controller
     }
 
     public function profit(){
-        return 1;
+        $user = auth()->user();
+        $necessaries = DB::table('necessaries')->get();
+        $necessaries_key_based = [];
+        foreach($necessaries as $necessary){
+            $necessaries_key_based[$necessary->name] = $necessary;
+        }
+        $necessary_ids = [
+            $necessaries_key_based['bagi_guru_butir_soal']->id, 
+            $necessaries_key_based['bagi_guru_paket_soal']->id,
+            $necessaries_key_based['beli_soal']->id
+        ];
+        $payments_in = $user->payments()->where('status','success')->where('type','IN')->whereIn('necessary_id',$necessary_ids);
+        return $payments_in->sum('value');
     }
 
 }

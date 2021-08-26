@@ -366,8 +366,8 @@ Route::get('/getcontactnumber',function(){
 
 Route::get('/testgan',function(){
     
-    $a = new \App\Repositories\AssigmentPurchasedItemRepository;
-    return $a->isExists();
+    $a = Carbon\Carbon::create(2021, 8)->subMonths(1);
+    return $a->toDateTimeString();
     
         // return $data;
 });

@@ -3,12 +3,14 @@ namespace App\Helper;
 use App\Models\PurchasedItem;
 use App\Models\PaymentSharing;
 use App\Models\Assigment;
+use App\Models\User;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Builder;
 use DB;
 
 class AssigmentQuestionListPaymentSharingHelper{
 
+    public $buyer_user_id=null;
     public $assigment;
     public function __construct(Assigment $assigment){
         $this->assigment = $assigment;
@@ -72,10 +74,29 @@ class AssigmentQuestionListPaymentSharingHelper{
         $payment_sharings = $sharing_payment_repo->save();
         
 
-        // masukkan premium assigment ke purchased_item
+        // masukkan premium assigment yang dibeli ke purchased_item
+        // jika sudah ada, tidak usah dimasukkan
         $purchased_item = new \App\Models\PurchasedItem;
         $purchased_item->payment_id = $payment_out->id;
-        $this->assigment->purchased_items()->save($purchased_item);
+
+        // jika buyer_user_id tidak kosong, lakukan pengecekan
+        if($this->buyer_user_id){
+            $exists = $this->assigment->whereHas('purchased_items', function($query){
+                $query->whereHas('payment', function($query2){
+                    $query2->where('payments.payment_type',\App\Models\User::class)
+                    ->where('payments.payment_id', $this->buyer_user_id);
+                });
+            })->exists();
+
+            if(!$exists){
+                $this->assigment->purchased_items()->save($purchased_item);
+            }
+        }else{
+            $this->assigment->purchased_items()->save($purchased_item);
+        }
+      
+
+        
 
         // masukkan premium butir soal/question_list ke purchased_item
         $payment_sharing_question_list_ids = [];

@@ -17,11 +17,13 @@ left join (
     where 
 		purchased_item_type='App\\Models\\Assigment'
         and payments.status  in ('success','pending')
+        and payments.payment_type='App\\Models\\User'
+        and payments.payment_id=22811
 ) purchased_assigments on purchased_assigments.purchased_item_id=assigments.id 
 where 
 	assigments.is_paid>0
-
-	and assigments.grade_id=1
+	
+	and assigments.grade_id=2
 	
     
 	

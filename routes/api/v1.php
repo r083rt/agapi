@@ -491,7 +491,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::middleware('isTeacher')->get('/question_item/payable','QuestionListController@payableItemList');
         Route::middleware('isTeacher')->post('/question_item/setispaid/{question_list_id}','QuestionListController@setIsPaid');
         Route::middleware('isTeacher')->get('/question_item/payable/{question_list_id}','QuestionListController@getPayableItem');
-        Route::middleware('isTeacher')->get('/get_payable_question_items','QuestionListController@getPayableLists');
+        
         
 
 
@@ -502,6 +502,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::middleware('isTeacher')->get('/assignment/payablecount','AssigmentController@getPayableCount');
 
         Route::middleware('isTeacher')->get('/assignment/payable/profit', 'UserController@profit');
+        Route::middleware('isTeacher')->get('/assignment/payable/profit/question_items','QuestionListController@getPayableLists');
+        Route::middleware('isTeacher')->get('/assignment/payable/profit/question_packages','AssigmentController@getPayableLists');
 
         Route::get('balance', function(Request $request){
             $user = $request->user();

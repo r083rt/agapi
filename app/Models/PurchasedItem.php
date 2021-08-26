@@ -13,6 +13,6 @@ class PurchasedItem extends Model
     }
 
     public function purchased_item(){
-        return $this->morphTo();
+        return $this->morphTo(__FUNCTION__, 'purchased_item_type', 'purchased_item_id');
     }
 }

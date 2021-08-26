@@ -538,7 +538,9 @@ class AssigmentController extends Controller
         payments.created_at')
         ->join('payments', 'payments.id','=','purchased_items.payment_id')
         ->where('purchased_item_type', Assigment::class)
-        ->whereIn('payments.status', ['success','pending']);
+        ->whereIn('payments.status', ['success','pending'])
+        ->where('payments.payment_type', \App\Models\User::class)
+        ->where('payments.payment_id', $user->id);
 
         $res = Assigment::with('user')
         ->withCount('question_lists')
@@ -764,7 +766,13 @@ class AssigmentController extends Controller
     */
     public function checkAssignmentPayment($assignment_id){
         $user = auth()->user();
-        $assignment = Assigment::with(['payments','question_lists'=>function($query){
+       
+        $user_morph_query = function($query)use($user){
+            $query->whereHasMorph('paymentable', \App\Models\User::class, function(Builder $query2)use($user){
+                $query2->where('users.id', $user->id);
+            });
+        };
+        $assignment = Assigment::with(['payments'=>$user_morph_query,'question_lists'=>function($query){
             // hanya mengambil queston_lists yang master'nya (ref_id) berbayar (is_paid=1)
             $query->whereExists(function($query2){
                 $query2->select(DB::raw(1))
@@ -772,13 +780,9 @@ class AssigmentController extends Controller
                 ->whereColumn('master_question_list.id','=','question_lists.ref_id')
                 ->where('master_question_list.is_paid',1);
             });
-        }])->whereHas('payments', function(Builder $query)use($user){
-            $query->whereHasMorph('paymentable', \App\Models\User::class, function(Builder $query2)use($user){
-                $query2->where('users.id', $user->id);
-            });
-        })->findOrFail($assignment_id);
+        }])->whereHas('payments', $user_morph_query)->findOrFail($assignment_id);
         $payment = $assignment->payments[0];
-
+        // return $payment;
         $client = new \GuzzleHttp\Client();
         $res = $client->get(env('MASTER_PAYMENT_URL')."/checkstatus/{$payment->master_payment_id}");
         $master_payment = json_decode($res->getBody());
@@ -792,12 +796,13 @@ class AssigmentController extends Controller
 
                  //bagi keuntungan
                 $assigment_question_list_payment_sharing = new \App\Helper\AssigmentQuestionListPaymentSharingHelper($assignment);
+                $assigment_question_list_payment_sharing->buyer_user_id = $user->id; //jika buyer_user_id tidak NULL, maka dilakukan pengecekan di table purchased_items agar tidak perlu dimasukkan data lgi
                 $assigment_question_list_payment_sharing->sharingFrom($payment);
 
            }
 
             DB::commit();
-            $assignment->load('payments.paymentable','payments.payment_vendor');
+            $assignment->load(['payments'=>$user_morph_query,  'payments.paymentable','payments.payment_vendor']);
             return $assignment;
         }catch (\PDOException $e) {
             DB::rollBack();
