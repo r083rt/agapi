@@ -96,6 +96,12 @@
                                         'error'
                                     )
                                 }
+                            }).catch(err => {
+                                Swal.fire(
+                                    'Ops!',
+                                    'Data pengguna tidak ditemukan',
+                                    'error'
+                                )
                             })
                         }
                     })
@@ -117,7 +123,7 @@
                     axios
                         .get(`/api/v1/quickgetstatus/${this.user.id}`)
                         .then(res => {
-                            this.user = res.data
+                            // this.user = {...res.data}
                             if (
                                 moment(new Date()).diff(
                                     new Date(res.data.user_activated_at),
@@ -126,6 +132,8 @@
                                 ) > 6
                             ) {
                                 this.$q.notify("Silahkan Tunggu 1x24 jam");
+                            } else {
+                                this.$q.notify("Pembayaran diterima");
                             }
                         })
                         .catch(err => {

@@ -480,7 +480,7 @@ class UserController extends Controller
                 ['user_activated_at', '!=', null],
                 ['email', '=', $key],
             ])
-            ->first();
+            ->firstOrFail();
         $user->late_paid = Carbon::parse(Carbon::now())->diffInMonths(Carbon::parse($user->user_activated_at));
         return response()->json($user);
     }
