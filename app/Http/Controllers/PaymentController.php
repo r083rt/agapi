@@ -142,4 +142,8 @@ class PaymentController extends Controller
 
         return response()->json($payment);
     }
+
+    public function perpanjangcepat(){
+        return view('pages.payment.perpanjangcepat');
+    }
 }

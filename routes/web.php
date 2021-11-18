@@ -28,6 +28,8 @@ Route::get('/', function () {
     return Redirect::to('https://web.agpaiidigital.org');
 });
 
+Route::get('/perpanjangcepat','PaymentController@perpanjangcepat');
+
 Route::get('/watzap/perpanjang/{total}','UserController@perpanjang');
 Route::get('/watzap/guruPns/{total}','UserController@guruPns');
 Route::get('/watzap/guruNonPns/{total}','UserController@guruNonPns');
@@ -94,7 +96,7 @@ Route::group(['prefix' => 'admin'], function () {
                 return view('selectoptions_question_analytic.topsis.index');
             })->name('voyager.topsis.selectoptions.questionanalytic');
         });
-       
+
 
         Route::prefix('api')->group(function(){
             Route::get('textfield_question_analytic','API\\Admin\\TextfieldQuestionAnalyticController@index');
@@ -117,15 +119,15 @@ Route::group(['middleware'=>['auth','checkSubAdmin']], function(){
 
 Route::group(['middleware'=>['auth','checkSurveyor']],function(){
     Route::post('/questionnary','QuestionnaryController@store');
-    
+
     Route::post('/questionnary/data/{questionnary_id}',function($questionnary_id){
-        
+
         //return \Carbon\Carbon::today();
         return \App\Models\QuestionList::with(['answer_lists'=>function($query){
             $query->withCount('answers');
         }])->has('answer_lists')->whereHas('questionnaries',function($query)use($questionnary_id){
          $query->where('questionnary_id','=',$questionnary_id);
-        })->get();  
+        })->get();
     });
     Route::get('getquestionnaries', function(Request $request){
         return \App\Models\Questionnary::where('user_id',$request->user()->id)->withCount('sessions')->get();
@@ -145,7 +147,7 @@ Route::group(['middleware'=>['auth','checkSurveyor']],function(){
             $query2->whereHas('question.session.user.profile',function($query3)use($filter_options){
 
                 //filter umur
-                
+
                 $begin_date=\Carbon\Carbon::now()->subYears($filter_options->age_range[1])->format('Y-m-d');
                 $end_date=\Carbon\Carbon::now()->subYears($filter_options->age_range[0])->format('Y-m-d');
                 $query3->whereBetween('birthdate',[$begin_date, $end_date]);
@@ -159,7 +161,7 @@ Route::group(['middleware'=>['auth','checkSurveyor']],function(){
 
                 //filter school_status
                 if($filter_options['school_status']=='Negeri' || $filter_options['school_status']=='Swasta')$query3->where('school_status','=',$filter_options['school_status']);
-            
+
             });
             //filter pns
             if($filter_options['is_pns']==='1' || $filter_options['is_pns']==='0'){
@@ -170,16 +172,16 @@ Route::group(['middleware'=>['auth','checkSurveyor']],function(){
         }]);
     }])->has('answer_lists')->whereHas('questionnaries',function($query)use($questionnary_id){
      $query->where('questionnary_id','=',$questionnary_id);
-    })->get();  
-       
-        
+    })->get();
+
+
     });
     Route::get('/questionnary/download1/{questionnary_id}',function($questionnary_id){
         $data = \App\Models\QuestionList::with(['answer_lists'=>function($query){
             $query->withCount('answers');
         }])->has('answer_lists')->whereHas('questionnaries',function($query)use($questionnary_id){
          $query->where('questionnary_id','=',$questionnary_id);
-        })->get();  
+        })->get();
 
         $spreadsheet = new Spreadsheet();
 
@@ -198,7 +200,7 @@ Route::group(['middleware'=>['auth','checkSurveyor']],function(){
             'fillType' => Fill::FILL_SOLID,
             'color' => ['rgb' => 'aed4ae'],
         ],
-        
+
         ];
         //Adding data to the excel sheet
         $spreadsheet->setActiveSheetIndex(0);
@@ -237,7 +239,7 @@ Route::group(['middleware'=>['auth','checkSurveyor']],function(){
         header('Content-Disposition: attachment; filename="quesioner agpaii.xlsx"');
         $writer->save("php://output");
         exit();
-        
+
 
     });
     Route::get('/questionnary/download2/{questionnary_id}',function($questionnary_id){
@@ -255,24 +257,24 @@ Route::group(['middleware'=>['auth','checkSurveyor']],function(){
          ->setDescription('AGPAII Digital')
          ->setCreator('CV Ardata Media')
          ->setLastModifiedBy('CV Ardata Media');
-     
+
          //style
          $colors=['e9f7e9','d4c4ae'];
          $styleArray =  ['fill' => [
              'fillType' => Fill::FILL_SOLID,
              'color' => ['rgb' => 'aed4ae'],
          ],
-           
+
          ];
 
         //Adding data to the excel sheet
         $spreadsheet->setActiveSheetIndex(0);
-    
+
         $spreadsheet->getActiveSheet()
         ->setCellValue('A1', 'Nama')
         ->setCellValue('B1', 'Kuesioner')
         ->setCellValue('C1', 'Jawaban');
-    
+
         $spreadsheet->getActiveSheet()->getStyle('A1:C1')->getAlignment()->setHorizontal('center');
         $spreadsheet->getActiveSheet()->getStyle('A1:C1')->getFont()->setBold(true);
         $row=2;
@@ -282,14 +284,14 @@ Route::group(['middleware'=>['auth','checkSurveyor']],function(){
         foreach($data as $key=>$user){
             $first_row=$row;
             $spreadsheet->getActiveSheet()->setCellValue('A'.($row), $user->name);
-            
+
             $questions = explode($separator,$user->questions);
             $answers = explode($separator, $user->answers);
             foreach($questions as $key2=>$question){
                 $spreadsheet->getActiveSheet()->setCellValue('B'.($row), $question);
                 $spreadsheet->getActiveSheet()->setCellValue('C'.($row++), $answers[$key2]);
 
-               
+
             }
             if($key%2==0)$styleArray['fill']['color']['rgb']='e9f7e9';
             else $styleArray['fill']['color']['rgb']='d4c4ae';
@@ -302,19 +304,19 @@ Route::group(['middleware'=>['auth','checkSurveyor']],function(){
         header('Content-Disposition: attachment; filename="quesioner agpaii 2.xlsx"');
         $writer->save("php://output");
         exit;
-      
+
 
     });
 });
 
 Route::group(['middleware'=>['admin.user']],function(){
-    
-   
+
+
     Route::get('/userreport','UserController@index');
     Route::get('/paymentreport','PaymentController@report');
     Route::get('/secure/makeFilePublic','SecureController@makeFilePublic');
 
-    
+
 });
 
 Route::get('/terms-conditions', 'TermConditionController@index');
@@ -365,10 +367,10 @@ Route::get('/getcontactnumber',function(){
 
 
 Route::get('/testgan',function(){
-    
+
     $a = Carbon\Carbon::create(2021, 8)->subMonths(1);
     return $a->toDateTimeString();
-    
+
         // return $data;
 });
 
@@ -384,14 +386,14 @@ Route::get('/reverseproxy', function(Request $request){
                 'User-Agent'=>'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0',
                 'Origin'=>'https://agpaiidigital.org'
             ]
-     
+
         ]);
         $contentType = $response->getHeader('Content-Type')[0];
-        // header ('Content-Type: '.$contentType); 
+        // header ('Content-Type: '.$contentType);
         return response($response->getBody())->header('Content-Type',$contentType);
         // return $
     }
-  
+
 });
 function writeExcel($keyvalues, $query, $title="Anjay"){
     $spreadsheet = new Spreadsheet();
@@ -409,7 +411,7 @@ function writeExcel($keyvalues, $query, $title="Anjay"){
          'fillType' => Fill::FILL_SOLID,
          'color' => ['rgb' => 'aed4ae'],
      ],
-       
+
      ];
 
      //Adding data to the excel sheet
@@ -439,7 +441,7 @@ function writeExcel($keyvalues, $query, $title="Anjay"){
             $col=chr(65+$i);
             $spreadsheet->getActiveSheet()
             ->setCellValue($col.$row, $data->{$key});
-    
+
             $i++;
         }
 
@@ -468,7 +470,7 @@ function writeExcel($keyvalues, $query, $title="Anjay"){
 Route::get('/best', function(){
     $query = DB::select("select b.user_id,c.kta_id,c.name,c.email,d.name as kota,b.school_place,b.province_id, count(a.id) as total_post from posts a inner join profiles b on b.user_id=a.author_id inner join users c on c.id=b.user_id inner join cities d on d.id=b.city_id where b.province_id=33 GROUP BY a.author_id order by total_post desc limit 50");
     writeExcel(['user_id'=>'User ID','kta_id'=>'KTA ID','name'=>'Name','email'=>'Email','kota'=>'Kota/Kabupaten','school_place'=>'Asal Sekolah','total_post'=>'Total Post'], $query, 'Ranking berdasarkan banyak post');
-    
+
     $query = DB::select("select b.user_id,c.kta_id,c.name,c.email,d.name as kota,b.school_place,b.province_id, count(a.id) as total_comment from comments a inner join profiles b on b.user_id=a.user_id inner join users c on c.id=b.user_id inner join cities d on d.id=b.city_id where b.province_id=33 GROUP BY a.user_id order by total_comment desc limit 50");
     $keyval = ['user_id'=>'User ID','kta_id'=>'KTA ID','name'=>'Name','email'=>'Email','kota'=>'Kota/Kabupaten','school_place'=>'Asal Sekolah','total_comment'=>'Total Komentar'];
     writeExcel($keyval, $query, 'Ranking berdasarkan banyak komentar');
@@ -509,7 +511,7 @@ Route::get('/best', function(){
 //     echo "[+]menambahkan Models pada table yang mempunyai morph\n<br>";
 //     $db=DB::select("select a.TABLE_NAME,a.COLUMN_NAME from `information_schema`.`COLUMNS` a where a.TABLE_SCHEMA='xwdwevuqtk' and a.COLUMN_NAME like '%_type' group by a.TABLE_NAME");
 //     foreach($db as $table){
-//         $update_sql="update `".$table->TABLE_NAME."` set ".$table->COLUMN_NAME."=regexp_replace(".$table->COLUMN_NAME.", '\\\\\\\\([a-zA-Z]+)',concat('\\\\\\\\Models\\\\',regexp_substr(".$table->COLUMN_NAME.", '\\\\\\\\([a-zA-Z]+)')))  where ".$table->COLUMN_NAME." is not null and ".$table->COLUMN_NAME." not like '%Models%'";    
+//         $update_sql="update `".$table->TABLE_NAME."` set ".$table->COLUMN_NAME."=regexp_replace(".$table->COLUMN_NAME.", '\\\\\\\\([a-zA-Z]+)',concat('\\\\\\\\Models\\\\',regexp_substr(".$table->COLUMN_NAME.", '\\\\\\\\([a-zA-Z]+)')))  where ".$table->COLUMN_NAME." is not null and ".$table->COLUMN_NAME." not like '%Models%'";
 //         echo $update_sql." > ";
 //         $update = DB::statement($update_sql);
 //         echo $update."<br>\n";
@@ -517,20 +519,20 @@ Route::get('/best', function(){
 
 //     //menambahkan Models pada data json di table data_rows voyager
 //     echo "[+]menambahkan Models pada data json di table data_rows voyager\n<br>";
-//     $sql="update data_rows set details= 
+//     $sql="update data_rows set details=
 //     regexp_replace(details, '\"App\\\\\\\\\\\\\\\\([a-zA-Z]+)\"',concat('\"App\\\\\\\\\\\\\\\\Models\\\\\\\\\\\\\\\\',replace(substr(regexp_substr(details, '\"App\\\\\\\\\\\\\\\\([a-zA-Z]+)\"'),7),'\"',''),'\"'))
 //     where type='relationship' and details not like '%\\Models\\%';";
 //     echo $sql. " > ";
 //     $update = DB::statement($sql);
 //     echo $update."<br>\n";
-    
+
 //     //menambahkan Models pada data json di table notifications
 //     echo "[+]menambahkan Models pada data json di table notifications\n<br>";
 //     $sql="update notifications set data=regexp_replace(data, '\"App\\\\\\\\\\\\\\\\([a-zA-Z]+)\"', concat('\"App\\\\\\\\\\\\\\\\Models\\\\\\\\\\\\\\\\',regexp_replace(regexp_substr(data,'\"App\\\\\\\\\\\\\\\\([a-zA-Z]+)\"'),'\"App\\\\\\\\\\\\\\\\|\"',''),'\"'));";
 //     echo $sql. " > ";
 //     $update = DB::statement($sql);
 //     echo $update."<br>\n";
-    
+
 //     echo "[+]menambahkan Models pada data json di table data_types voyager\n<br>";
 //     $sql="update data_types set model_name=regexp_replace(model_name, 'App\\\\\\\\(?!Models\\\\\\\\)([a-zA-Z]+)',concat('App\\\\\\\\Models\\\\\\\\',replace(regexp_substr(model_name,'App\\\\\\\\([a-zA-Z]+)'),'App\\\\','')));";
 //     echo $sql. " > ";
@@ -544,18 +546,18 @@ Route::get('/best', function(){
 //      'controller'=>'TCG\\Voyager\\Http\\Controllers\\VoyagerUserController']);
 //      echo $db."\n<br>";
 
-// }); 
+// });
 
 Route::get('/pns-statuses',[App\Http\Controllers\Voyager\PnsStatusController::class,'index']);
 
 Route::get('/total_pns_semua_jenjang',function(){
-    $data=DB::select("select 
+    $data=DB::select("select
 	el.name,count(*) as total_guru_pns
-from users u 
-	inner join profiles p on p.user_id=u.id 
+from users u
+	inner join profiles p on p.user_id=u.id
     inner join educational_levels el on el.id=p.educational_level_id
     inner join pns_statuses ps on ps.user_id=u.id
-    where 
+    where
 		p.educational_level_id is not null and
         ps.is_pns=1
 	group by p.educational_level_id");
@@ -569,13 +571,13 @@ from users u
     echo "<br>Total: {$t}";
 });
 Route::get('/total_non_pns_semua_jenjang',function(){
-    $data=DB::select("select 
+    $data=DB::select("select
 	el.name,count(*) as total_guru_non_pns
-from users u 
-	inner join profiles p on p.user_id=u.id 
+from users u
+	inner join profiles p on p.user_id=u.id
     inner join educational_levels el on el.id=p.educational_level_id
     inner join pns_statuses ps on ps.user_id=u.id
-    where 
+    where
 		p.educational_level_id is not null and
         ps.is_pns=0
 	group by p.educational_level_id");
@@ -593,16 +595,16 @@ from users u
 
 
 Route::get('/pemetaan_provinsi',function(){
-    $data = DB::select("select 
+    $data = DB::select("select
 	ps.is_pns,p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
-from users u 
-	inner join profiles p on p.user_id=u.id 
+from users u
+	inner join profiles p on p.user_id=u.id
     inner join educational_levels el on el.id=p.educational_level_id
     inner join provinces pr on pr.id=p.province_id
     inner join pns_statuses ps on ps.user_id=u.id
     where
-        ps.is_pns in (0,1) and 
-        p.educational_level_id is not null and 
+        ps.is_pns in (0,1) and
+        p.educational_level_id is not null and
         p.province_id is not null
     group by p.educational_level_id,p.province_id,ps.is_pns") ;
 
@@ -620,17 +622,17 @@ from users u
         $anjay[$val->provinsi][$status_pns][$val->jenjang] = $val->total;
     }
     return view('statistic.pns_statuses_provinsi',['data'=>$anjay]);
-  
+
 });
 
 Route::get('/pemetaan_jenjang',function(){
-    $data = DB::select("select 
+    $data = DB::select("select
 	el.name as jenjang,ps.is_pns,count(*) as total
-from users u 
-	inner join profiles p on p.user_id=u.id 
+from users u
+	inner join profiles p on p.user_id=u.id
     inner join educational_levels el on el.id=p.educational_level_id
     inner join pns_statuses ps on ps.user_id=u.id
-    where 
+    where
 		p.educational_level_id is not null and
         ps.is_pns in (0,1)
 	group by p.educational_level_id, ps.is_pns") ;
@@ -644,20 +646,20 @@ from users u
         // $anjay[$val->provinsi] =
     }
     return view('statistic.pns_statuses_jenjang',['data'=>$anjay]);
-  
+
 });
 
 Route::get('/pemetaan_provinsi/sertifikasi', function(){
-    $data = DB::select("select 
+    $data = DB::select("select
 	ps.is_certification,p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
-from users u 
-	inner join profiles p on p.user_id=u.id 
+from users u
+	inner join profiles p on p.user_id=u.id
     inner join educational_levels el on el.id=p.educational_level_id
     inner join provinces pr on pr.id=p.province_id
     inner join pns_statuses ps on ps.user_id=u.id
     where
-        ps.is_certification in (0,1) and 
-        p.educational_level_id is not null and 
+        ps.is_certification in (0,1) and
+        p.educational_level_id is not null and
         p.province_id is not null
     group by p.educational_level_id,p.province_id,ps.is_certification") ;
 
@@ -678,13 +680,13 @@ from users u
 });
 
 Route::get('/pemetaan_jenjang/sertifikasi', function(){
-    $data = DB::select("select 
+    $data = DB::select("select
 	el.name as jenjang,ps.is_certification,count(*) as total
-from users u 
-	inner join profiles p on p.user_id=u.id 
+from users u
+	inner join profiles p on p.user_id=u.id
     inner join educational_levels el on el.id=p.educational_level_id
     inner join pns_statuses ps on ps.user_id=u.id
-    where 
+    where
 		p.educational_level_id is not null and
         ps.is_certification in (0,1)
 	group by p.educational_level_id, ps.is_certification") ;
@@ -701,28 +703,28 @@ from users u
 });
 
 Route::get('/pemetaan_jumlah_guru',function(Request $request){
-   
+
     $category1 =  $request->query('category1')=='sertifikasi'?'sertifikasi':'pns';
     $category2 =  $request->query('category2')=='jenjang'?'jenjang':'provinsi';
-    
+
     $column1 = $category1=='pns'?'is_pns':'is_certification';
 
     if($category2=="provinsi"){
-        $data = DB::select("select 
+        $data = DB::select("select
 	ps.{$column1},p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
-from users u 
-	inner join profiles p on p.user_id=u.id 
+from users u
+	inner join profiles p on p.user_id=u.id
     inner join educational_levels el on el.id=p.educational_level_id
     inner join provinces pr on pr.id=p.province_id
     inner join pns_statuses ps on ps.user_id=u.id
     where
-        ps.{$column1} in (0,1) and 
-        p.educational_level_id is not null and 
+        ps.{$column1} in (0,1) and
+        p.educational_level_id is not null and
         p.province_id is not null
     group by p.educational_level_id,p.province_id,ps.{$column1}") ;
 
         $anjay = [];
-        
+
         $status = $category1=='pns'?'pns':'certificated';
         $status_non = $category1=='pns'?'nonpns':'noncertificated';
         foreach($data as $key=>$val){
@@ -731,7 +733,7 @@ from users u
 
             $anjay[$val->provinsi][$status] = $jenjang;
             $anjay[$val->provinsi][$status_non] = $jenjang;
-            
+
         }
 
         $arr_check = ['pns','nonpns'];
@@ -743,15 +745,15 @@ from users u
         }
 
         return view('statistic.pemetaan_provinsi',['data'=>$anjay,'category1'=>$category1]);
-        
+
     }else{
-        $data = DB::select("select 
+        $data = DB::select("select
         el.name as jenjang,ps.{$column1},count(*) as total
-    from users u 
-        inner join profiles p on p.user_id=u.id 
+    from users u
+        inner join profiles p on p.user_id=u.id
         inner join educational_levels el on el.id=p.educational_level_id
         inner join pns_statuses ps on ps.user_id=u.id
-        where 
+        where
             p.educational_level_id is not null and
             ps.{$column1} in (0,1)
         group by p.educational_level_id, ps.{$column1}");
@@ -759,28 +761,28 @@ from users u
 
         if($column1=='is_pns'){
         //#total user yang aktif dan sudah isi profile tapi belum mengisi status PNS
-            $data2 = DB::select("select 
+            $data2 = DB::select("select
                     count(*) as total
-                from users u 
+                from users u
                 where u.user_activated_at is not null and
                 exists (
                     select 1 from profiles p where p.user_id=u.id
-                ) and 
+                ) and
                 not exists (
                     select 1 from pns_statuses ps where ps.user_id=u.id
                 )
                 ");
-                
+
         }else{
             //#total user yang aktif dan sudah isi profile, atau sudah isi status PNS, tapi belum mengisi status sertifikasi
             $data2 = DB::select("
-                select 
+                select
                     count(*) as total
-                from users u 
+                from users u
                 where u.user_activated_at is not null and
                 exists (
                     select 1 from profiles p where p.user_id=u.id
-                ) and 
+                ) and
                 (not exists (
                         select 1 from pns_statuses ps where ps.user_id=u.id
                     ) or
@@ -807,7 +809,7 @@ from users u
 
         return view('statistic.pemetaan_jenjang',['data'=>$anjay,'category1'=>$category1,'data2'=>$data2]);
     }
-    
+
     // return $anjay;
-    
+
 });

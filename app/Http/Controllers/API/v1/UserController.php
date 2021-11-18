@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\API\v1;
 
+use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\District;
-use App\Http\Controllers\Controller;
 use App\Models\Like;
 use App\Models\Profile;
 use App\Models\Rating;
@@ -14,8 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -29,7 +28,7 @@ class UserController extends Controller
         if (Auth::user()->hasRole('admin')) {
             $users = User::with('profile.district', 'role')
                 ->where('user_activated_at', '!=', null)
-                ->whereIn('role_id',[2,7,9,10,11])
+                ->whereIn('role_id', [2, 7, 9, 10, 11])
                 ->paginate($request->show ?? 10);
         } elseif (Auth::user()->hasRole('DPP')) {
             $users = User::with('profile.district', 'role')->get();
@@ -68,22 +67,22 @@ class UserController extends Controller
 
         return response()->json($user->load('profile', 'role'));
     }
-    public function changePassword(Request $request){
+    public function changePassword(Request $request)
+    {
 
         $user = User::findOrFail(auth('api')->user()->id);
-        if(Hash::check($request->old_password, $user->password)){
-            if(strcmp($request->new_password,$request->confirm_password)==0){
-                $user->password=bcrypt($request->new_password);
+        if (Hash::check($request->old_password, $user->password)) {
+            if (strcmp($request->new_password, $request->confirm_password) == 0) {
+                $user->password = bcrypt($request->new_password);
                 $user->save();
-                return response()->json(['sukses'=>'Berhasil merubah password']);
-            }else{
-                return response()->json(['error'=>'Konfirmasi password baru salah']);
+                return response()->json(['sukses' => 'Berhasil merubah password']);
+            } else {
+                return response()->json(['error' => 'Konfirmasi password baru salah']);
             }
-        }else{
-            return response()->json(['error'=>'Password lama salah']);
+        } else {
+            return response()->json(['error' => 'Password lama salah']);
         }
-        
-        
+
     }
     public function register(Request $request)
     {
@@ -93,7 +92,7 @@ class UserController extends Controller
             'password' => 'required|min:6',
             'password_confirmation' => 'required|same:password',
         ]);
-        
+
         $user = new User;
         $user->fill($request->all());
         $user->password = bcrypt($request->password);
@@ -162,7 +161,7 @@ class UserController extends Controller
             'lesson_plans.cover',
             'lesson_plans.template',
             //'lesson_plan_guided_users',
-            'follows.lesson_plans'=>function($query){
+            'follows.lesson_plans' => function ($query) {
                 $query
                     ->with([
                         'user.profile',
@@ -198,7 +197,7 @@ class UserController extends Controller
             'follower',
             'lesson_plans' => function ($query) {
                 $query
-                    ->orderBy('created_at','desc')
+                    ->orderBy('created_at', 'desc')
                     ->with([
                         'user.profile',
                         'contents',
@@ -230,10 +229,10 @@ class UserController extends Controller
                             $query->select(DB::raw('SUM(value)'));
                         }]);
             },
-            'books' => function($query){
-                $query->with(['user','book_category']);
+            'books' => function ($query) {
+                $query->with(['user', 'book_category']);
             },
-            'appreciations'
+            'appreciations',
         ])
             ->loadCount([
                 'lesson_plans',
@@ -242,13 +241,13 @@ class UserController extends Controller
                 //'lesson_plan_guided_users',
                 // 'lesson_plans_comments',
                 'books',
-                'question_lists'
+                'question_lists',
             ]);
-        $res->lesson_plans_likes_count=$res->lesson_plans_likes_without_auth_count;
-        $lesson_plans_my_likes_count = Like::where('like_type','=','App\Models\LessonPlan')->where('user_id', $user->id)->count();
-        $lesson_plans_my_ratings_count = Rating::where('rating_type','=','App\Models\LessonPlan')->where('user_id', $user->id)->count();
-        $lesson_plans_comments_count = Comment::where('comment_type','=','App\Models\LessonPlan')->where('user_id',$user->id)->count();
-        $lesson_plans_comments = Comment::where('comment_type','=','App\Models\LessonPlan')->where('user_id',$user->id)->get();
+        $res->lesson_plans_likes_count = $res->lesson_plans_likes_without_auth_count;
+        $lesson_plans_my_likes_count = Like::where('like_type', '=', 'App\Models\LessonPlan')->where('user_id', $user->id)->count();
+        $lesson_plans_my_ratings_count = Rating::where('rating_type', '=', 'App\Models\LessonPlan')->where('user_id', $user->id)->count();
+        $lesson_plans_comments_count = Comment::where('comment_type', '=', 'App\Models\LessonPlan')->where('user_id', $user->id)->count();
+        $lesson_plans_comments = Comment::where('comment_type', '=', 'App\Models\LessonPlan')->where('user_id', $user->id)->get();
         $res->lesson_plans_my_likes_count = $lesson_plans_my_likes_count;
         $res->lesson_plans_my_ratings_count = $lesson_plans_my_ratings_count;
         $res->lesson_plans_comments_count = $lesson_plans_comments_count;
@@ -265,7 +264,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {   
+    {
         //return $request->profile;
         //return $request;
         // Validator::make($request->all(), [
@@ -297,27 +296,27 @@ class UserController extends Controller
         }
         $user->update();
 
-        if($request->has('pns')){
+        if ($request->has('pns')) {
             //return $request->pns;
-            $pns_status = \App\Models\PnsStatus::firstOrNew(['user_id'=>$request->user()->id]);
+            $pns_status = \App\Models\PnsStatus::firstOrNew(['user_id' => $request->user()->id]);
             //return $pns_status;
             $pns_status->is_pns = $request->pns['status']['value'];
-            if($pns_status->is_pns==1){
+            if ($pns_status->is_pns == 1) {
                 $pns_status->is_certification = $request->pns['certification']['value'];
                 $pns_status->is_non_pns_inpassing = null;
-            }else{
-                $pns_status->is_non_pns_inpassing = $request->pns['non_pns_inpassing']['value'];               
-                $pns_status->is_certification = $request->pns['certification']['value'];              
+            } else {
+                $pns_status->is_non_pns_inpassing = $request->pns['non_pns_inpassing']['value'];
+                $pns_status->is_certification = $request->pns['certification']['value'];
 
             }
             $request->user()->pns_status()->save($pns_status);
 
-            if($request->user()->pns_status->is_pns===0 && $request->has('bank_account') && $request->bank_account!=null){
-                $bankAccount = \App\Models\BankAccount::firstOrNew(['user_id'=>$request->user()->id]);
-                $bankAccount->name=$request->bank_account['name'];
-                $bankAccount->account_number=$request->bank_account['account_number'];
-                $bankAccount->bank_name=$request->bank_account['bank_name'];
-                
+            if ($request->user()->pns_status->is_pns === 0 && $request->has('bank_account') && $request->bank_account != null) {
+                $bankAccount = \App\Models\BankAccount::firstOrNew(['user_id' => $request->user()->id]);
+                $bankAccount->name = $request->bank_account['name'];
+                $bankAccount->account_number = $request->bank_account['account_number'];
+                $bankAccount->bank_name = $request->bank_account['bank_name'];
+
                 $request->user()->bank_account()->save($bankAccount);
             }
         }
@@ -385,7 +384,7 @@ class UserController extends Controller
     {
         $count_user = User::
             where('user_activated_at', '!=', null)
-            ->whereIn('role_id',[2,7,9,10,11])
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
             ->count();
         return response()->json($count_user);
     }
@@ -420,9 +419,9 @@ class UserController extends Controller
 
     public function getByProvince(Request $request, $provinceId)
     {
-        $users = User::with('role','profile')
+        $users = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
-            ->whereIn('role_id',[2,7,9,10,11])
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
             ->whereHas('profile', function ($query) use ($provinceId) {
                 $query->where('province_id', $provinceId);
             })->paginate($request->show ?? 10);
@@ -431,9 +430,9 @@ class UserController extends Controller
 
     public function getByCity(Request $request, $cityId)
     {
-        $users = User::with('role','profile')
+        $users = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
-            ->whereIn('role_id',[2,7,9,10,11])
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
             ->whereHas('profile', function ($query) use ($cityId) {
                 $query->where('city_id', $cityId);
             })->paginate($request->show ?? 10);
@@ -442,9 +441,9 @@ class UserController extends Controller
 
     public function getByDistrict($districtId)
     {
-        $users = User::with('role','profile')
+        $users = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
-            ->whereIn('role_id',[2,7,9,10,11])
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
             ->whereHas('profile', function ($query) use ($districtId) {
                 $query->where('district_id', $districtId);
             })->get();
@@ -454,7 +453,7 @@ class UserController extends Controller
     public function searchbyname($key)
     {
         $users = User::with('profile')
-            ->whereIn('role_id',[2,7,9,10,11])
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
             ->where([
                 ['user_activated_at', '!=', null],
                 ['name', 'like', '%' . $key . '%'],
@@ -463,13 +462,26 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-    public function searchByKtaId($key){
+    public function searchByKtaId($key)
+    {
         $user = User::with('profile')
             ->where([
                 ['user_activated_at', '!=', null],
-                ['kta_id','=',$key]
+                ['kta_id', '=', $key],
             ])
             ->first();
+        return response()->json($user);
+    }
+
+    public function searchByEmail($key)
+    {
+        $user = User::with('profile')
+            ->where([
+                ['user_activated_at', '!=', null],
+                ['email', '=', $key],
+            ])
+            ->first();
+        $user->late_paid = Carbon::parse(Carbon::now())->diffInMonths(Carbon::parse($user->user_activated_at));
         return response()->json($user);
     }
 
@@ -479,76 +491,86 @@ class UserController extends Controller
         return view('pages.user.membercard', compact('user'));
     }
 
-    public function userslist(Request $request){
-        $itemsPerPage = $request->query('itemsPerPage')?$request->query('itemsPerPage'):10;
+    public function userslist(Request $request)
+    {
+        $itemsPerPage = $request->query('itemsPerPage') ? $request->query('itemsPerPage') : 10;
         //return $itemsPerPage;
-       // return $request;
+        // return $request;
         //$res=DB::table('users')->join('pns_statuses',);
 
         //filter gender
-        $filter_options=$request;
-      
-        $res=\App\Models\User::with('role','profile','pns_status')->whereHas('profile',function($query)use($filter_options){
+        $filter_options = $request;
+
+        $res = \App\Models\User::with('role', 'profile', 'pns_status')->whereHas('profile', function ($query) use ($filter_options) {
 
             //filter umur
-            $begin_date=\Carbon\Carbon::now()->subYears($filter_options->age_range[1])->format('Y-m-d');
-            $end_date=\Carbon\Carbon::now()->subYears($filter_options->age_range[0])->format('Y-m-d');
+            $begin_date = \Carbon\Carbon::now()->subYears($filter_options->age_range[1])->format('Y-m-d');
+            $end_date = \Carbon\Carbon::now()->subYears($filter_options->age_range[0])->format('Y-m-d');
 
-            $query->whereBetween('birthdate',[$begin_date, $end_date]);
+            $query->whereBetween('birthdate', [$begin_date, $end_date]);
 
             //filter gender
-            if($filter_options['gender']=='L' || $filter_options['gender']=='P'){$query->where('gender','=',$filter_options['gender']);
+            if ($filter_options['gender'] == 'L' || $filter_options['gender'] == 'P') {$query->where('gender', '=', $filter_options['gender']);
             }
 
-             //filter educational_level
-             if($filter_options['educational_level']!='-')$query->where('educational_level_id','=',$filter_options['educational_level']);
+            //filter educational_level
+            if ($filter_options['educational_level'] != '-') {
+                $query->where('educational_level_id', '=', $filter_options['educational_level']);
+            }
 
-             //filter school_status
-             if($filter_options['school_status']=='Negeri' || $filter_options['school_status']=='Swasta')$query->where('school_status','=',$filter_options['school_status']);
+            //filter school_status
+            if ($filter_options['school_status'] == 'Negeri' || $filter_options['school_status'] == 'Swasta') {
+                $query->where('school_status', '=', $filter_options['school_status']);
+            }
 
-             //filter province
-             if(!in_array(-1,$filter_options['province'])){
-                $query->whereIn('province_id',$filter_options['province']);
-             }
-         
+            //filter province
+            if (!in_array(-1, $filter_options['province'])) {
+                $query->whereIn('province_id', $filter_options['province']);
+            }
+
         });
         //filter PNS atau sertifikasi
-        if($filter_options['is_pns']!='-' || $filter_options['certified']!='-'){
-            $res->whereHas('pns_status', function($query)use($filter_options){
-                
+        if ($filter_options['is_pns'] != '-' || $filter_options['certified'] != '-') {
+            $res->whereHas('pns_status', function ($query) use ($filter_options) {
+
                 //filter pns
-                if($filter_options['is_pns']=='1' || $filter_options['is_pns']=='0')$query->where('is_pns','=',intval($filter_options['is_pns']));
+                if ($filter_options['is_pns'] == '1' || $filter_options['is_pns'] == '0') {
+                    $query->where('is_pns', '=', intval($filter_options['is_pns']));
+                }
 
                 //filter sertifikasi
-                if($filter_options['certified']=='1' || $filter_options['certified']=='0')$query->where('is_certification','=',intval($filter_options['certified']));
+                if ($filter_options['certified'] == '1' || $filter_options['certified'] == '0') {
+                    $query->where('is_certification', '=', intval($filter_options['certified']));
+                }
+
             });
         }
         //filter role
-        if($filter_options['role']!='-'){
-            $res->where('role_id','=',intval($filter_options['role']));
+        if ($filter_options['role'] != '-') {
+            $res->where('role_id', '=', intval($filter_options['role']));
         }
-      
 
         //return $res->paginate(10);
         //filter umur
-       
+
         // $res=\App\Models\User::with('')
-        return ['totalUser'=>$res->count(), 'data'=>$res->paginate($itemsPerPage)];
+        return ['totalUser' => $res->count(), 'data' => $res->paginate($itemsPerPage)];
     }
 
-    public function profit(){
+    public function profit()
+    {
         $user = auth()->user();
         $necessaries = DB::table('necessaries')->get();
         $necessaries_key_based = [];
-        foreach($necessaries as $necessary){
+        foreach ($necessaries as $necessary) {
             $necessaries_key_based[$necessary->name] = $necessary;
         }
         $necessary_ids = [
-            $necessaries_key_based['bagi_guru_butir_soal']->id, 
+            $necessaries_key_based['bagi_guru_butir_soal']->id,
             $necessaries_key_based['bagi_guru_paket_soal']->id,
-            $necessaries_key_based['beli_soal']->id
+            $necessaries_key_based['beli_soal']->id,
         ];
-        $payments_in = $user->payments()->where('status','success')->where('type','IN')->whereIn('necessary_id',$necessary_ids);
+        $payments_in = $user->payments()->where('status', 'success')->where('type', 'IN')->whereIn('necessary_id', $necessary_ids);
         return $payments_in->sum('value');
     }
 

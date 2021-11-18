@@ -28,7 +28,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             include "v1/student.php";
         });
 
-        
+
         Route::get('/auth/assigment', function (Request $request) { // GET USER AUTH FOR ASSIGMENT APPS
             $res = $request->user()
                 ->load([
@@ -491,8 +491,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::middleware('isTeacher')->get('/question_item/payable','QuestionListController@payableItemList');
         Route::middleware('isTeacher')->post('/question_item/setispaid/{question_list_id}','QuestionListController@setIsPaid');
         Route::middleware('isTeacher')->get('/question_item/payable/{question_list_id}','QuestionListController@getPayableItem');
-        
-        
+
+
 
 
         Route::middleware('isTeacher')->get('/question_package/payable','AssigmentController@payableItemList');
@@ -530,7 +530,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/assigments_tag/history', 'AssigmentSessionController@assigmentsTagHistory');
         Route::post('assigments_tag', 'TaggableController@assigmentsTag');
 
-        
+
 
     });
 
@@ -540,7 +540,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
     Route::post('/getassigmentsinfo', 'AssigmentController@getAssigmentsInfo');
 
-    
+    Route::get('/users/searchbyemail/{key}', 'UserController@searchbyemail'); // SEARCH USER BY Email
+    Route::post('/quickpaymentUrl', 'PaymentController@quickPaymentUrl'); //route untuk pembayaran seperti store payment tapi return url untuk webview reactnative
+    Route::get('/quickgetstatus/{userId}','PaymentController@getStatus');
+
     Route::apiResources([
         'settings' => 'SettingController',
     ]);

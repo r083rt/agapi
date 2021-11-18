@@ -47,7 +47,7 @@ class PaymentController extends Controller
     {
         //
     }
-    
+
     /*
     Mengecek status dari midtrans
     */
@@ -687,6 +687,72 @@ class PaymentController extends Controller
         return response()->json($this->response);
     }
 
+    public function quickPaymentUrl(Request $request)
+    {
+        $user = User::findOrFail($request->user_id);
+        if ($user->user_activated_at == null) {
+            $payment_value = setting('admin.member_price');
+            $payment_text = "Pembayaran Member KTA";
+        } else {
+            $payment_value = setting('admin.extend_member_period');
+            $payment_text = "Pembayaran Iuran Anggota Selama 6 Bulan";
+        }
+
+        $data = new Payment(['value' => $payment_value]);
+        $uniqueId = 1;
+        try {
+            $payment = $user->payment()->save($data);
+        } catch (\Illuminate\Database\QueryException $e) {
+            $errorCode = $e->errorInfo[1];
+            if ($errorCode == '1062') {
+                while (Payment::where('id', $uniqueId)->exists()) {
+                    $uniqueId++;
+                }
+                $newdata = new Payment(['id' => $uniqueId, 'value' => $payment_value]);
+                $payment = $request->user()->payment()->save($newdata);
+            }
+        }
+        $data->id = $payment->id;
+        $data->update();
+
+        $payload = [
+            'transaction_details' => [
+                'order_id' => $data->id,
+                'gross_amount' => $payment->value,
+            ],
+            'customer_details' => [
+                'first_name' => $user->name,
+                'email' => $user->email,
+            ],
+        ];
+        //return $payload;
+        //dd(Veritrans_Snap::createTransaction($payload)->redirect_url);
+        do {
+            try {
+                $tryAgain = false;
+                $paymentUrl = Veritrans_Snap::createTransaction($payload)->redirect_url;
+            } catch (\Exception $e) {
+                $tryAgain = true;
+                //  dd($e->getCode();
+                if ($e->getCode() == '400') {
+                    $uniqueId++;
+                    $data->id = $uniqueId;
+                    $data->update();
+                    $payload['transaction_details']['order_id'] = $data->id;
+                    $paymentUrl = Veritrans_Snap::createTransaction($payload)->redirect_url;
+                } else {
+                    break;
+                }
+            }
+        } while ($tryAgain);
+
+        $payment->update();
+
+        $this->response['payment_url'] = $paymentUrl;
+
+        return response()->json($this->response);
+    }
+
     /**
      * Display the specified resource.
      *
@@ -1027,7 +1093,7 @@ class PaymentController extends Controller
         $city = \App\Models\City::findOrFail($city_id);
         $db = DB::select("select if(sum(a.value),sum(a.value),0) as total_payment_out from payments a inner join transactions b on a.payment_id=b.id inner join bank_accounts c on c.id=b.bank_account_to_id WHERE a.type='OUT' and a.payment_type='App\\\Models\\\Transaction' and c.bank_account_type='App\\\Models\\\City' and c.bank_account_id=?", [$city->id]);
         return response()->json($db[0]);
-    }   
+    }
 
     public function makeUniquePayment(Request $request)
     {
@@ -1124,12 +1190,12 @@ class PaymentController extends Controller
             $user = User::findOrFail($user->id);
             $user->payment_success = $payment;
             return $user;
-           
+
         }else{
             return abort(404, 'Belum ada yang dibayarkan');
         }
-      
-      
+
+
     }
     public function paymentHandler(Request $request){
         $request->validate([
@@ -1137,7 +1203,7 @@ class PaymentController extends Controller
             'data.'
         ]);
         // $master_payment_id = $request->master_payment_id;
-        
+
 
     }
 
