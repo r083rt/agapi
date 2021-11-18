@@ -40,13 +40,13 @@
                             <div class="text-caption">nomer kta: @{{ user . kta_id }}</div>
                             <div class="text-h6 text-warning">Lama Pemakaian: @{{ user . late_paid }} bulan</div>
                             <div class="text-caption text-grey">Masa aktif pemakaian 6 bulan</div>
-                            <div class="text-h6 text-green" v-if="user.late_paid <= 6">Akun masih dalam masa aktif</div>
+                            <div class="text-h6 text-green" v-if="user.late_paid < 6">Akun masih dalam masa aktif</div>
                             <div class="row">
                                 <q-btn class="q-ma-sm" :loading="loading" :disable="loading"
-                                    @click="createTransaction()" color="green" v-if="user.late_paid > 6">Perpanjang
+                                    @click="createTransaction()" color="green" v-if="user.late_paid >= 6">Perpanjang
                                     sekarang</q-btn>
                                 <q-btn class="q-ma-sm" :loading="loading" :disable="loading" @click="check()"
-                                    color="green" v-if="user.late_paid > 6">Konfirmasi</q-btn>
+                                    color="green" v-if="user.late_paid >= 6">Konfirmasi</q-btn>
                             </div>
 
                         </div>
