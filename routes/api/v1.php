@@ -319,6 +319,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         ]);
 
         Route::post('/rooms/join','RoomController@join');
+        Route::post('/rooms/changename', 'RoomController@changeRoomName');
+        Route::get('/rooms/{roomid}/viewmember', 'RoomController@viewMembers');
         Route::get('/rooms/{room_id}/userlist','RoomController@userlist');
 
         Route::get('/student/getjoinedrooms', 'Student\RoomController@getJoinedRooms');

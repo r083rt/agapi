@@ -96,4 +96,14 @@ class RoomController extends Controller
         })->findOrFail($room_id);
         return $room;
     }
+
+    public function changeRoomName(Request $request){
+
+        // return response()->json($request->all());
+        return Room::findOrFail($request->id)->update(['name' => $request->name]);
+    }
+
+    public function viewMembers($id){
+        return Room::with('users')->findOrFail($id);
+    }
 }

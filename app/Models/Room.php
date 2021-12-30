@@ -14,6 +14,8 @@ class Room extends Model
     *
     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
     */
+
+    protected $guarded = ['id'];
     public function users()
     {
         return $this->belongsToMany('App\Models\User', 'user_rooms', 'room_id', 'user_id')->withPivot('is_admin');
