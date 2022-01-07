@@ -116,6 +116,7 @@ class UserController extends Controller
         $res = $user->load([
             'bookmark_posts' => function ($query) {
                 $query->with([
+                    
                     'files',
                     'authorId.profile',
                     'comments',
@@ -131,6 +132,8 @@ class UserController extends Controller
                 ])->withCount('likes', 'liked')
                     ->orderBy('created_at', 'desc');
             },
+            'posts.meeting_rooms',
+            'posts.events',
             'posts.files',
             'posts.authorId.profile',
             'posts.comments',

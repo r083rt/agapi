@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
@@ -77,5 +78,18 @@ class EventController extends Controller
         $event = Event::findOrfail($id);
         $event->delete();
         return response()->json($event);
+    }
+
+    public function get_event_years()
+    {
+        // return 'asd';
+        $res = DB::table('events')
+            ->select(
+                DB::raw('YEAR(events.start_at) year'),
+            )
+            ->orderBy('year', 'desc')
+            ->groupBy('year')
+            ->get();
+        return $res;
     }
 }

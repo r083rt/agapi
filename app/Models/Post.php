@@ -115,4 +115,12 @@ class Post extends Model
     public function documents(){
         return $this->morphMany('App\Models\File','file');
     }
+
+    public function meeting_rooms(){
+        return $this->belongsToMany('App\Models\Room', 'room_posts')->where('rooms.type', 'meeting');
+    }
+
+    public function events(){
+        return $this->belongsToMany('App\Models\Event', 'event_posts');
+    }
 }

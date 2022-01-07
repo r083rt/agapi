@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\v1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Room;
+use App\Models\UserRoom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -106,4 +107,10 @@ class RoomController extends Controller
     public function viewMembers($id){
         return Room::with('users')->findOrFail($id);
     }
+
+    public function get_user_rooms(){
+        return Room::with('admin_users', 'users')->where('type', 'meeting')->get();
+    }
+
+    
 }

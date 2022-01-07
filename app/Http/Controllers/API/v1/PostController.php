@@ -27,6 +27,8 @@ class PostController extends Controller
         //
         // dd(Auth::check());
         $posts = Post::with([
+            'events',
+            'meeting_rooms.users',
             'files',
             'bookmarks',
             'bookmarked',
@@ -60,6 +62,7 @@ class PostController extends Controller
     {
         // dd($request->allFiles()['files'][0]->getClientMimeType());
         //return $request;
+        // return response()->json($request->all());
         $post = new Post($request->all());
         $post->slug = Str::random(8);
         $request->user()->posts()->save($post);
@@ -111,7 +114,17 @@ class PostController extends Controller
                 }
             }
         }
+
+        if(isset($request->rooms)){
+            $post->rooms()->attach($request->rooms);
+        }
+        
+        if(isset($request->event)){
+            $post->events()->attach($request->event);
+        }
         return response()->json($post->load([
+            'events',
+            'meeting_rooms',
             'files',
             'bookmarks',
             'bookmarked',
