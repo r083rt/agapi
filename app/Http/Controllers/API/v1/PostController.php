@@ -116,7 +116,7 @@ class PostController extends Controller
         }
 
         if(isset($request->rooms)){
-            $post->rooms()->attach($request->rooms);
+            $post->meeting_rooms()->attach($request->rooms);
         }
         
         if(isset($request->event)){

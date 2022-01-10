@@ -92,4 +92,15 @@ class EventController extends Controller
             ->get();
         return $res;
     }
+
+    public function filter_event(Request $request)
+    {
+        // return response()->json($request->all());
+        $month = strval($request->month);
+        $year = strval($request->year['year']);
+        $res = Event::whereMonth('start_at', $month)
+            ->whereYear('start_at', $year)->paginate(5);
+
+        return $res;
+    }
 }

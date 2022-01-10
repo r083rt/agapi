@@ -109,7 +109,7 @@ class RoomController extends Controller
     }
 
     public function get_user_rooms(){
-        return Room::with('admin_users', 'users')->where('type', 'meeting')->get();
+        return Room::with('admin_users', 'users')->where('type', 'meeting')->paginate(10);
     }
 
     
