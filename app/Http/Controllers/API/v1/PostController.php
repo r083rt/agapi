@@ -44,7 +44,7 @@ class PostController extends Controller
             'likes.user',
         ])->withCount('comments', 'likes', 'liked')
             ->whereHas('authorId', function ($query) {
-                $role_ids = [1,2,7,11];
+                $role_ids = [1, 2, 7, 11];
                 $query
                     ->whereIn('role_id', $role_ids);
             })->orderBy('id', 'desc')
@@ -67,15 +67,15 @@ class PostController extends Controller
         $post->slug = Str::random(8);
         $request->user()->posts()->save($post);
         if ($request->hasFile('files')) {
-            if($request->has('is_file') && $request->is_file==true){
-                    //dd($request->file('files')->getClientOriginalName());
-                    $file = new File();
-                    $path = $request->file('files')->store('files', 'wasabi');
-                    $file->src = $path;
-                    $file->name = $request->file('files')->getClientOriginalName();
-                    $file->value='document';
-                    $file->type = $request->allFiles()['files']->getClientMimeType();
-                    $post->files()->save($file);
+            if ($request->has('is_file') && $request->is_file == true) {
+                //dd($request->file('files')->getClientOriginalName());
+                $file = new File();
+                $path = $request->file('files')->store('files', 'wasabi');
+                $file->src = $path;
+                $file->name = $request->file('files')->getClientOriginalName();
+                $file->value = 'document';
+                $file->type = $request->allFiles()['files']->getClientMimeType();
+                $post->files()->save($file);
             }
             foreach ($request->allFiles()['files'] as $f => $file) {
                 if (strpos($request->allFiles()['files'][$f]->getClientMimeType(), 'image') !== false) {
@@ -115,11 +115,11 @@ class PostController extends Controller
             }
         }
 
-        if(isset($request->rooms)){
+        if (isset($request->rooms)) {
             $post->meeting_rooms()->attach($request->rooms);
         }
-        
-        if(isset($request->event)){
+
+        if (isset($request->event)) {
             $post->events()->attach($request->event);
         }
         return response()->json($post->load([
@@ -149,6 +149,8 @@ class PostController extends Controller
     {
         //
         $post = Post::with([
+            'events',
+            'meeting_rooms',
             'files',
             'bookmarks',
             'bookmarked',
@@ -191,17 +193,18 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        $post = Post::where('author_id','=', auth('api')->user()->id)->findOrFail($id);
+        $post = Post::where('author_id', '=', auth('api')->user()->id)->findOrFail($id);
         $post->delete();
         return response()->json($post);
     }
-    public function report(Request $request){
+    public function report(Request $request)
+    {
         $post = Post::findOrFail($request->id);
         $sync = $post->user_reports()->syncWithoutDetaching(auth('api')->user()->id);
-        $sync['is_removed']=false;
-        if($post->loadCount('user_reports')->user_reports_count>=10){
+        $sync['is_removed'] = false;
+        if ($post->loadCount('user_reports')->user_reports_count >= 10) {
             $post->delete();
-            $sync['is_removed']=true;
+            $sync['is_removed'] = true;
         }
         return $sync;
         // $post = Post::with('reports')->whereHas('reports',function($query){
@@ -221,16 +224,17 @@ class PostController extends Controller
         // }else{
         //     return response()->json(['error'=>'Anda sudah melaporkan postingan ini','description'=>$post->reports[0]->description]);
         // }
-    
-        
+
+
     }
-    public function readPost(Request $request){
+    public function readPost(Request $request)
+    {
         $post = Post::findOrFail($request->id);
         return $post->readers()->syncWithoutDetaching(auth('api')->user()->id);
     }
     public function studentpost(Request $request)
     {
-   
+
         $posts = Post::with([
             'files',
             'bookmarks',
@@ -244,19 +248,20 @@ class PostController extends Controller
             },
             'comments.user',
             'likes.user',
-        ])->withCount(['comments', 'likes', 'liked','auth_read'])
+        ])->withCount(['comments', 'likes', 'liked', 'auth_read'])
             ->whereHas('authorId.role', function ($query) {
                 //->whereHas('authorId', function ($query) {
                 //$query->where('role_id',\App\Models\Role::where('name','=','student')->first()->id);
-                $query->where('name','=','student');
-            })->whereHas('authorId.profile', function($query){
-                $query->where('educational_level_id','=',auth('api')->user()->profile->educational_level_id);
+                $query->where('name', '=', 'student');
+            })->whereHas('authorId.profile', function ($query) {
+                $query->where('educational_level_id', '=', auth('api')->user()->profile->educational_level_id);
             })
             ->orderBy('created_at', 'desc')
             ->paginate($request->show ?? 10); //$request->show ?? 10
         return response()->json($posts);
     }
-    public function ownstudentpost(){
+    public function ownstudentpost()
+    {
         //return auth('api')->user()-id;
         $posts = Post::with([
             'files',
@@ -271,11 +276,11 @@ class PostController extends Controller
             },
             'comments.user',
             'likes.user',
-        ])->withCount('comments', 'likes', 'liked','auth_read')
+        ])->withCount('comments', 'likes', 'liked', 'auth_read')
             ->whereHas('authorId.role', function ($query) {
                 //->whereHas('authorId', function ($query) {
                 //$query->where('role_id',\App\Models\Role::where('name','=','student')->first()->id);
-                $query->where('name','=','student');
+                $query->where('name', '=', 'student');
             })->where('author_id', '=', auth('api')->user()->id)
             ->orderBy('created_at', 'desc')
             ->paginate($request->show ?? 10); //$request->show ?? 10
@@ -285,15 +290,15 @@ class PostController extends Controller
     {
         $userProfile = auth()->user()->load('profile');
         Validator::make($userProfile->toArray(), [
-            'profile.educational_level_id' => function ($attribute, $value, $fail)use($userProfile){
-                if($userProfile['profile']['educational_level_id']==null){
+            'profile.educational_level_id' => function ($attribute, $value, $fail) use ($userProfile) {
+                if ($userProfile['profile']['educational_level_id'] == null) {
                     $fail('Harus memilih jenjang terlebih dahulu');
                 }
             },
         ])->validate();
         $educationalLevelId  = $userProfile->profile->educational_level_id;
-        
-        if($educationalLevelId==null)return abort(404);
+
+        if ($educationalLevelId == null) return abort(404);
         $posts = Post::with([
             'files',
             'bookmarks',
@@ -307,25 +312,26 @@ class PostController extends Controller
             },
             'comments.user',
             'likes.user',
-        ])->where('is_public',true)->withCount('comments', 'likes', 'liked')
+        ])->where('is_public', true)->withCount('comments', 'likes', 'liked')
             ->whereHas('user.role', function ($query) {
-                $query->where('roles.name','!=','student');
+                $query->where('roles.name', '!=', 'student');
             })->orderBy('created_at', 'desc');
 
-            //cari post yang dengan jenjang yg sama
-            $posts->whereHas('authorId.profile', function($query)use($educationalLevelId){
-                $query->where('educational_level_id',$educationalLevelId);
-            })->get();
+        //cari post yang dengan jenjang yg sama
+        $posts->whereHas('authorId.profile', function ($query) use ($educationalLevelId) {
+            $query->where('educational_level_id', $educationalLevelId);
+        })->get();
 
 
-            $posts = $posts->paginate($request->show ?? 10);
-            return response()->json($posts);
+        $posts = $posts->paginate($request->show ?? 10);
+        return response()->json($posts);
     }
-    public function setPublicPost(Request $request, $post_id){
-        $res = Post::whereHas('user',function($query){
-            $query->where('id',auth('api')->user()->id);
+    public function setPublicPost(Request $request, $post_id)
+    {
+        $res = Post::whereHas('user', function ($query) {
+            $query->where('id', auth('api')->user()->id);
         })->find($post_id);
-        $res->is_public=$request->is_public;
+        $res->is_public = $request->is_public;
         $res->save();
         return $res;
     }
