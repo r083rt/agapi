@@ -236,6 +236,8 @@ class PostController extends Controller
     {
 
         $posts = Post::with([
+            'events',
+            'meeting_rooms',
             'files',
             'bookmarks',
             'bookmarked',
@@ -264,6 +266,8 @@ class PostController extends Controller
     {
         //return auth('api')->user()-id;
         $posts = Post::with([
+            'events',
+            'meeting_rooms',
             'files',
             'bookmarks',
             'bookmarked',
@@ -300,6 +304,8 @@ class PostController extends Controller
 
         if ($educationalLevelId == null) return abort(404);
         $posts = Post::with([
+            'events',
+            'meeting_rooms',
             'files',
             'bookmarks',
             'bookmarked',

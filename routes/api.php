@@ -45,6 +45,8 @@ Route::middleware([
             ])->withCount('likes', 'liked')
             ->orderBy('created_at', 'desc');
         },
+        'posts.meeting_rooms',
+        'posts.events',
         'posts.files',
         'posts.authorId.role',
         'posts.authorId.profile',
