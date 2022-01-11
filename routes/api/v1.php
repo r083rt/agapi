@@ -326,6 +326,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/eventyears', 'EventController@get_event_years');
         Route::post('/filterevent', 'EventController@filter_event');
 
+        Route::post('/murottals/listening', 'MurottalController@listening');
+        Route::get('/murottals/getdatalistening', 'MurottalController@listening_show');
+
         Route::get('/student/getjoinedrooms', 'Student\RoomController@getJoinedRooms');
         Route::post('/student/rooms/join', 'Student\RoomController@join');
 
