@@ -33,18 +33,18 @@ class TopsisCommand extends Command
     }
     public function getSelectoptionsQuestionLists(){
         $data = DB::table('assigment_question_lists as aql')
-        ->selectRaw("aql.id,aql.assigment_id,aql.question_list_id,u.name as user_name,g.description as grade,ql.name as question_list_name,ql.created_at, 
+        ->selectRaw("aql.id,aql.assigment_id,aql.question_list_id,u.name as user_name,g.description as grade,ql.name as question_list_name,ql.created_at,
         (
-            select count(1) from questions q 
-                inner join question_lists ql2 on q.question_list_id=ql2.id 
+            select count(1) from questions q
+                inner join question_lists ql2 on q.question_list_id=ql2.id
                 inner join assigment_question_lists aql2 on aql2.question_list_id=q.question_list_id
                 inner join assigments a2 on a2.id=aql2.assigment_id
             where ql2.ref_id=ql.id and a2.teacher_id is not null #teacher_id jika NULL, maka soalnya adalah soal master (latihan mandiri), tidak soal yg dibagikan (kerjakan soal)
             and q.score=100
         ) as correct_total,
         (
-            select count(1) from questions q 
-                inner join question_lists ql2 on q.question_list_id=ql2.id 
+            select count(1) from questions q
+                inner join question_lists ql2 on q.question_list_id=ql2.id
                 inner join assigment_question_lists aql2 on aql2.question_list_id=q.question_list_id
                 inner join assigments a2 on a2.id=aql2.assigment_id
             where ql2.ref_id=ql.id and a2.teacher_id is not null #teacher_id jika NULL, maka soalnya adalah soal master (latihan mandiri), tidak soal yg dibagikan (kerjakan soal)
@@ -62,9 +62,9 @@ class TopsisCommand extends Command
             // hanya mengambil soal isian (tidak pilihan ganda)
             $query->select(DB::raw(1))->from('assigment_types')->whereColumn('assigment_types.id','aql.assigment_type_id')->where('description','selectoptions');
         })
-        //akan mengambil question_list yang belum dicek saja, 
+        //akan mengambil question_list yang belum dicek saja,
         // assigment yg masih dalam konfirmasi (-1), terkonfirmasi tidak berbayar (0), dan terkonfirmasi berbayar (>=1) tidak perlu discan lgi
-        ->whereNull('ql.is_paid') 
+        ->whereNull('ql.is_paid')
          // di group by karena ada kasus data question list lebih dari 1, tpi datanya sama semua
          ->groupBy('ql.id')
         ->havingRaw('score is not null')->get();
@@ -73,17 +73,17 @@ class TopsisCommand extends Command
     public function getTextfieldQuestionLists(){
         // referensi sql: analisis butir soal.sql
         $data = DB::table('assigment_question_lists as aql')
-        ->selectRaw("aql.id,aql.assigment_id,aql.question_list_id,u.name as user_name,g.description as grade,ql.name as question_list_name,ql.created_at, 
+        ->selectRaw("aql.id,aql.assigment_id,aql.question_list_id,u.name as user_name,g.description as grade,ql.name as question_list_name,ql.created_at,
         (
-            select std(if(q.score is null,0,q.score)) from questions q 
-                inner join question_lists ql2 on q.question_list_id=ql2.id 
+            select std(if(q.score is null,0,q.score)) from questions q
+                inner join question_lists ql2 on q.question_list_id=ql2.id
                 inner join assigment_question_lists aql2 on aql2.question_list_id=q.question_list_id
                 inner join assigments a2 on a2.id=aql2.assigment_id
             where ql2.ref_id=ql.id and a2.teacher_id is not null #teacher_id jika NULL, maka soalnya adalah soal master (latihan mandiri), tidak soal yg dibagikan (kerjakan soal)
         ) as score,
         (
-            select count(1) from questions q 
-                inner join question_lists ql2 on q.question_list_id=ql2.id 
+            select count(1) from questions q
+                inner join question_lists ql2 on q.question_list_id=ql2.id
                 inner join assigment_question_lists aql2 on aql2.question_list_id=q.question_list_id
                 inner join assigments a2 on a2.id=aql2.assigment_id
             where ql2.ref_id=ql.id and a2.teacher_id is not null #teacher_id jika NULL, maka soalnya adalah soal master (latihan mandiri), tidak soal yg dibagikan (kerjakan soal)
@@ -102,7 +102,7 @@ class TopsisCommand extends Command
                 $query2->where('description','textarea')->orWhere('description','textfield');
             });
         })
-         //akan mengambil question_list yang belum dicek saja, 
+         //akan mengambil question_list yang belum dicek saja,
         // assigment yg masih dalam konfirmasi (-1), terkonfirmasi tidak berbayar (0), dan terkonfirmasi berbayar (>=1) tidak perlu discan lgi
         ->whereNull('ql.is_paid')
         // di group by karena ada kasus data question list lebih dari 1, tpi datanya sama semua
@@ -115,16 +115,16 @@ class TopsisCommand extends Command
         $assigmentPivot = DB::table('assigment_sessions as ass')
         ->selectRaw('ass.id,a2.ref_id,ass.assigment_id,std(ass.total_score) as score,count(1) as scores_count')
         ->join('assigments as a2','a2.id', '=', 'ass.assigment_id')
-        ->where('a2.is_publish',true) 
+        ->where('a2.is_publish',true)
         ->whereNotNull('a2.teacher_id') // teacher_id NOT NULL adalah slave soal dari master soal
         ->groupBy('a2.ref_id');
 
         $data = DB::table('assigments as a')
-        ->selectRaw("a.id, 
-        u.name as user_name, 
-        g.description as grade, 
-        a.code, 
-        a.name, 
+        ->selectRaw("a.id,
+        u.name as user_name,
+        g.description as grade,
+        a.code,
+        a.name,
         a.created_at,
         assigment_pivot.score,
         assigment_pivot.scores_count")
@@ -137,10 +137,10 @@ class TopsisCommand extends Command
         // paket soal adalah assigments dengan kondisi teacher_id IS NULL dan is_publish=1
         ->where('a.is_publish',true)
         ->whereNull('a.teacher_id')
-        ->whereNull('a.is_paid') //akan mengambil assigment yang belum dicek saja, 
+        ->whereNull('a.is_paid') //akan mengambil assigment yang belum dicek saja,
         // assigment yg masih dalam konfirmasi (-1), terkonfirmasi tidak berbayar (0), dan terkonfirmasi berbayar (>=1) tidak perlu discan lgi
         ->havingRaw('score is not null')->get();
-    
+
         return $data;
     }
     /**
@@ -156,20 +156,23 @@ class TopsisCommand extends Command
         'score'=>['weight'=>4, 'type'=>'cost']
         ];
         $data = $this->getQuestionListsPackages();
-      
+
         echo count($data)." paket soal -> ";
         $topsis = new Topsis($attributes, $data);
         $topsis->addPreferenceAttribute();
         $new_data = $topsis->calculate();
         $insert = [];
+        $this->info(response()->json($new_data[0]));
+        return 0;
         foreach($new_data as $assigment){
             array_push($insert, ['assigment_id'=>$assigment->id,
             'score'=>$assigment->preference_score,
             'created_at'=> $datetime,
             'updated_at'=> $datetime
             ]);
-          
+
         }
+
         echo DB::table('top_assigments')->insert($insert)."\n";
 
         $data = $this->getTextfieldQuestionLists();
@@ -203,7 +206,7 @@ class TopsisCommand extends Command
             ]);
         }
         echo DB::table('top_question_lists')->insert($insert)."\n";
-    
+
         return 0;
     }
 }
