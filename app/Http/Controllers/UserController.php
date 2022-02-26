@@ -123,6 +123,7 @@ class UserController extends Controller
     public function perpanjang($total)
     {
         $content = "";
+        $content .= "\n";
         $users = User::where('user_activated_at', '<', (new \Carbon\Carbon)->submonths(6))
             ->has('profile')
             ->with('profile', 'pns_status')
@@ -136,7 +137,6 @@ class UserController extends Controller
             $contact = $user->profile->contact;
 
             if ($contact) {
-                $content .= "\n";
                 $name = str_replace(",", " ", $name);
                 $name = str_replace(".", " ", $name);
                 $content .= "$name,$contact,$user->email";
@@ -161,6 +161,7 @@ class UserController extends Controller
     public function guruPns($total)
     {
         $content = "";
+        $content .= "\n";
         $users = User::
             has('profile')
             ->with('profile', 'pns_status')
@@ -177,7 +178,6 @@ class UserController extends Controller
             $contact = $user->profile->contact;
 
             if ($contact) {
-                $content .= "\n";
                 $name = str_replace(",", " ", $name);
                 $name = str_replace(".", " ", $name);
                 $content .= "$name,$contact,$user->email";
@@ -202,6 +202,8 @@ class UserController extends Controller
     public function guruNonPns($total)
     {
         $content = "";
+        $content .= "\n";
+
         $users = User::has('profile')
             ->with('profile', 'pns_status')
             ->whereHas('pns_status', function ($query) {
@@ -217,7 +219,6 @@ class UserController extends Controller
             $contact = $user->profile->contact;
 
             if ($contact) {
-                $content .= "\n";
                 $name = str_replace(",", " ", $name);
                 $name = str_replace(".", " ", $name);
                 $content .= "$name,$contact,$user->email";
