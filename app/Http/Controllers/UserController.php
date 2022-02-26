@@ -136,6 +136,7 @@ class UserController extends Controller
             $contact = $user->profile->contact;
 
             if ($contact) {
+                $content .= "\n";
                 $name = str_replace(",", " ", $name);
                 $name = str_replace(".", " ", $name);
                 $content .= "$name,$contact,$user->email";
@@ -176,6 +177,7 @@ class UserController extends Controller
             $contact = $user->profile->contact;
 
             if ($contact) {
+                $content .= "\n";
                 $name = str_replace(",", " ", $name);
                 $name = str_replace(".", " ", $name);
                 $content .= "$name,$contact,$user->email";
@@ -215,6 +217,7 @@ class UserController extends Controller
             $contact = $user->profile->contact;
 
             if ($contact) {
+                $content .= "\n";
                 $name = str_replace(",", " ", $name);
                 $name = str_replace(".", " ", $name);
                 $content .= "$name,$contact,$user->email";
