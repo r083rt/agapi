@@ -122,7 +122,7 @@ class UserController extends Controller
 
     public function perpanjang($total)
     {
-        $content = "";
+        $content = "nama,no_hp,email";
         $content .= "\n";
         $users = User::where('user_activated_at', '<', (new \Carbon\Carbon)->submonths(6))
             ->has('profile')
@@ -160,7 +160,7 @@ class UserController extends Controller
 
     public function guruPns($total)
     {
-        $content = "";
+        $content = "nama,no_hp,email";
         $content .= "\n";
         $users = User::
             has('profile')
@@ -201,7 +201,7 @@ class UserController extends Controller
 
     public function guruNonPns($total)
     {
-        $content = "";
+        $content = "nama,no_hp,email";
         $content .= "\n";
 
         $users = User::has('profile')
