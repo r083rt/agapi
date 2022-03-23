@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
@@ -125,10 +126,15 @@ class UserController extends Controller
         $content = "nama,no_hp,email";
         $content .= "\n";
         $users = User::where('user_activated_at', '<', (new \Carbon\Carbon)->submonths(6))
+            ->select(
+                DB::raw('users.*'),
+                DB::raw('DATEDIFF(users.user_activated_at,NOW()) as date_diff'),
+            )
             ->has('profile')
             ->with('profile', 'pns_status')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('date_diff', 'asc')
             ->paginate($total ?? 50);
+        // return response()->json($users);
         foreach ($users as $u => $user) {
             # code...
             $user->profile->contact = $this->convertPhoneNumber($user->profile->contact);
