@@ -610,4 +610,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
     });
     // END API WITHOUT SECURITY ------------------------------------------------------------------------
 
+
+    // New ------------------------------------------
+    // Mengambil data acara dan peserta nya
+    Route::get('/get-event-by-id/{id}', 'EventController@getEventById');
 });
