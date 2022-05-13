@@ -16,8 +16,14 @@ class Post extends Model
     // protected $guarded = ["id"];
     protected $fillable = ['author_id','category_id','title','seo_title','excerpt','body','image','slug','meta_description','meta_keywords','status','featured', 'is_public'];
 
+    protected $appends = ['is_liked','is_bookmarked','likes_count','comments_count'];
+
     public function authorId()
     {
+        return $this->belongsTo('App\Models\User', 'author_id', 'id');
+    }
+
+    public function author(){
         return $this->belongsTo('App\Models\User', 'author_id', 'id');
     }
 
@@ -30,32 +36,32 @@ class Post extends Model
 
         parent::save();
     }
+
     public function user(){
         return $this->belongsTo('App\Models\User','author_id');
     }
-    public function scopePublished(Builder $query)
-    {
+
+    public function scopePublished(Builder $query){
         return $query->where('status', '=', 'PUBLISHED');
     }
 
-    // public function comments()
-    // {
-    //     return $this->belongsToMany('App\Models\Comment', 'App\Models\PostComment')->withPivot('created_at')->withTimestamps();
-    // }
     public function comments_from_other(){
         return $this->morphMany('App\Models\Comment','comment')->where('user_id','!=',auth('api')->user()?auth('api')->user()->id:-1);
     }
+
     public function comments(){
         return $this->morphMany('App\Models\Comment','comment');
     }
-    public function reports()
-    {
+
+    public function reports(){
         return $this->morphMany('App\Models\Report','report');
     }
+
     public function user_reports()
     {
         return $this->morphToMany('App\Models\User','report');
     }
+
     public function auth_user_reports()
     {
         return $this->morphToMany('App\Models\User','report')->wherePivot('user_id','=',auth('api')->user()->id);;
@@ -65,33 +71,21 @@ class Post extends Model
     public function readers(){
         return $this->morphToMany('App\Models\User','read');
     }
+
     public function auth_read(){
         return $this->morphToMany('App\Models\User','read')->wherePivot('user_id','=',auth('api')->user()->id);
     }
-
-    // public function likes()
-    // {
-    //     return $this->belongsToMany('App\Models\Like', 'App\Models\PostLike')->withPivot('created_at')->withTimestamps();
-    // }
 
     public function likes(){
         return $this->morphMany('App\Models\Like','like');
     }
 
-    // public function liked()
-    // {
-    //     return $this->belongsToMany('App\Models\Like', 'App\Models\PostLike')->withPivot('created_at')->withTimestamps()->where('user_id', Auth::user()->id);
-    // }
-
     public function liked(){
-        //return $this->morphOne('App\Models\Like','like')->where('user_id', Auth::check() ? Auth::user()->id : 0);
         $user=auth('api')->user();
         return $this->morphOne('App\Models\Like','like')->where('user_id', $user?$user->id:0);
-
     }
 
     public function bookmarked(){
-        //return $this->morphOne('App\Models\Bookmark','bookmark')->where('user_id',Auth::check() ? Auth::user()->id : 0);
         $user=auth('api')->user();
         return $this->morphOne('App\Models\Bookmark','bookmark')->where('user_id', $user?$user->id:0);
     }
@@ -100,8 +94,7 @@ class Post extends Model
         return $this->morphMany('App\Models\Bookmark','bookmark');
     }
 
-    public function category()
-    {
+    public function category(){
         return $this->belongsTo('App\Models\Category');
     }
 
@@ -123,4 +116,45 @@ class Post extends Model
     public function events(){
         return $this->belongsToMany('App\Models\Event', 'event_posts');
     }
+
+    public function images(){
+        return $this->morphMany('App\Models\File','file')->whereIn('type',['image/jpeg','image/png','image/gif','image/jpg']);
+    }
+
+    public function videos(){
+        return $this->morphMany('App\Models\File','file')->whereIn('type',['video/mp4','video/ogg','video/webm']);
+    }
+
+    public function audios(){
+        return $this->morphMany('App\Models\File','file')->whereIn('type',['audio/mpeg','audio/ogg','audio/wav']);
+    }
+
+    public function docs(){
+        return $this->morphMany('App\Models\File','file')->whereIn('type',['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document']);
+    }
+
+    // accessor -----------------------------------------------------------------------------------------
+    public function getIsLikedAttribute()
+    {
+        $user=auth('api')->user();
+        return $this->liked()->where('user_id', $user?$user->id:0)->exists();
+    }
+
+    public function getIsBookmarkedAttribute()
+    {
+        $user=auth('api')->user();
+        return $this->bookmarked()->where('user_id', $user?$user->id:0)->exists();
+    }
+
+    public function getLikesCountAttribute()
+    {
+        return $this->likes()->count();
+    }
+
+    public function getCommentsCountAttribute()
+    {
+        return $this->comments()->count();
+    }
+
 }
+

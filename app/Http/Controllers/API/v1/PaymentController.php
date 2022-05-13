@@ -77,6 +77,10 @@ class PaymentController extends Controller
                     $user->update(['user_activated_at' => $date]);
                     $user->payment_success = $payment;
                     break;
+                } elseif($payment->status == 'success'){
+                    $user->payment_success = $payment;
+                    $user->update(['user_activated_at' => $date]);
+                    break;
                 }
             } catch (\Exception $e) {
 

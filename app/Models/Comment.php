@@ -9,6 +9,7 @@ class Comment extends Model
 {
     //
     protected $fillable = ["user_id", "value"];
+    protected $appends = ["is_liked", "likes_count"];
 
     // public function likes()
     // {
@@ -33,10 +34,27 @@ class Comment extends Model
         return $this->belongsTo('App\Models\User');
     }
 
+    public function author()
+    {
+        return $this->belongsTo('App\Models\User','user_id','id');
+    }
+
     public function lesson_plans(){
         return $this->belongsToMany('App\Models\LessonPlan','lesson_plan_comments');
     }
+
     public function commentable(){
         return $this->morphTo(__FUNCTION__,'comment_type','comment_id');
+    }
+
+    // accessors
+    public function getIsLikedAttribute()
+    {
+        return $this->liked()->exists();
+    }
+
+    public function getLikesCountAttribute()
+    {
+        return $this->likes()->count();
     }
 }
