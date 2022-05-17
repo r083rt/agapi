@@ -90,9 +90,15 @@ class PostController extends Controller
 
                     $file = new File();
                     $path = $request->allFiles()['files'][$f]->store('files', 'wasabi');
+
                     // file type is video
                     // set storage path to store the file (image generated for a given video)
                     $thumbnail_path = public_path() . '/storage/thumbnails';
+                    //check if folder is exists
+                    if(!Storage::disk('public')->exists('thumbnails')) {
+                        Storage::disk('public')->makeDirectory('thumbnails', 0777, true); //creates directory
+                    }
+                    //------
                     // set thumbnail image name
                     $timestamp = str_replace([' ', ':'], '-', Carbon::now()->toDateTimeString());
                     $thumbnail_image = $request->user()->id . "." . $timestamp . ".jpg";
