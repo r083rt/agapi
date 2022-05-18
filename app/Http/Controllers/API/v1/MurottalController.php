@@ -72,11 +72,11 @@ class MurottalController extends Controller
         // $click = Click::whereDate('created_at', \Carbon\Carbon::now())
         //                 ->exists();
         // if(!$click){
-           $murottal = Murottal::findOrFail($request->id); 
+           $murottal = Murottal::findOrFail($request->id);
            $listening = new Click();
            $listening->user_id = auth('api')->user()->id;
            $murottal->listening()->save($listening);
-                    
+
            return response()->json($murottal->load("listening"));
         // }
 
@@ -88,7 +88,7 @@ class MurottalController extends Controller
         //                 ->where('clickable_type', 'App\Models\Murottal')
         //                 ->whereDate('created_at', \Carbon\Carbon::today())
         //                 ->get();
-        $today = \Carbon\Carbon::today();
+        $today = \Carbon\Carbon::now()->subHours(3)->toDateTimeString();
         $res = DB::table('clicks')
         ->join("murottals as m", "m.id", "=", "clicks.clickable_id")
         ->join("users as u", "u.id", "=", "clicks.user_id")
@@ -101,7 +101,7 @@ class MurottalController extends Controller
         )
         ->groupBy('clicks.id')
         ->where("clicks.clickable_type", "=", "App\Models\Murottal")
-        ->where("clicks.created_at", ">=", $today)
+        ->where("clicks.created_at", ">", $today)
         ->get();
         return $res;
         }
