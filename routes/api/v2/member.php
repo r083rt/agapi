@@ -8,4 +8,5 @@ Route::post('/register','AuthController@register');
 Route::resources([
     'posts' => 'PostController',
     'posts.comments' => 'PostCommentController', // comment post
+    'users.posts' => 'UserPostController'
 ]);

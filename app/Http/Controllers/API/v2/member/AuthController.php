@@ -66,7 +66,9 @@ class AuthController extends Controller
 
     public function getUserAccount(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user()->load(['profile'=>function($query){
+            $query->with(['province','city','district']);
+        }]);
         return response()->json($user);
     }
 
