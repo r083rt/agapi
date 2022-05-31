@@ -16,10 +16,10 @@ class PostController extends Controller
     public function index()
     {
         //
-        $posts = Post::with('images','videos','audios','docs','meeting_rooms','author.profile')
-        ->has('author')
-        ->has('images')
-        ->paginate();
+        $posts = Post::with('images', 'videos', 'audios', 'docs', 'meeting_rooms', 'author.profile')
+            ->has('author')
+            ->has('images')
+            ->paginate();
         return response()->json($posts);
     }
 
@@ -32,6 +32,7 @@ class PostController extends Controller
     public function store(Request $request)
     {
         //
+        return response()->json([$request->hasFile('images'), $request->file('images'), $request->all()]);
     }
 
     /**

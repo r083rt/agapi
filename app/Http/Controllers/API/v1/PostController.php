@@ -60,6 +60,12 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'title' => "required",
+            'body' => "required",
+            'status' => "required",
+            'featured' => "required",
+        ]);
         // dd($request->allFiles()['files'][0]->getClientMimeType());
         //return $request;
         // return response()->json($request->all());
@@ -95,7 +101,7 @@ class PostController extends Controller
                     // set storage path to store the file (image generated for a given video)
                     $thumbnail_path = public_path() . '/storage/thumbnails';
                     //check if folder is exists
-                    if(!Storage::disk('public')->exists('thumbnails')) {
+                    if (!Storage::disk('public')->exists('thumbnails')) {
                         Storage::disk('public')->makeDirectory('thumbnails', 0777, true); //creates directory
                     }
                     //------

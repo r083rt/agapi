@@ -1,1 +1,1 @@
-<?php exec('php artisan backup:run');
+<?php echo shell_exec('php artisan backup:run --only-db'); ?>
