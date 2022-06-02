@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
+use App\Models\File;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -18,7 +20,8 @@ class PostController extends Controller
         //
         $posts = Post::with('images', 'videos', 'audios', 'docs', 'meeting_rooms', 'author.profile')
             ->has('author')
-            ->has('images')
+        // ->has('images')
+            ->orderBy('created_at', 'desc')
             ->paginate();
         return response()->json($posts);
     }
@@ -32,7 +35,36 @@ class PostController extends Controller
     public function store(Request $request)
     {
         //
-        return response()->json([$request->hasFile('images'), $request->file('images'), $request->all()]);
+        $request->validate([
+            'body' => "required",
+        ]);
+        $post = new Post($request->all());
+
+        \DB::transaction(function () use ($request, $post) {
+
+            $post->slug = Str::random(8);
+            $request->user()->posts()->save($post);
+
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $index => $image) {
+                    $image = new File();
+                    $path = $request->file('images')[$index]->store('images', env('FILESYSTEM_DRIVER'));
+                    $image->src = $path;
+                    $image->type = $request->file('images')[$index]->getClientMimeType();
+                    $post->images()->save($image);
+                }
+            }
+
+            if (isset($request->rooms)) {
+                $post->meeting_rooms()->attach($request->rooms);
+            }
+
+            if (isset($request->event)) {
+                $post->events()->attach($request->event);
+            }
+        });
+        return response()->json($post->load(['images', 'author.profile']));
+
     }
 
     /**

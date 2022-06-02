@@ -4,9 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use TCG\Voyager\Facades\Voyager;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Post extends Model
 {
@@ -14,16 +13,17 @@ class Post extends Model
     //
     const PUBLISHED = 'PUBLISHED';
     // protected $guarded = ["id"];
-    protected $fillable = ['author_id','category_id','title','seo_title','excerpt','body','image','slug','meta_description','meta_keywords','status','featured', 'is_public'];
+    protected $fillable = ['author_id', 'category_id', 'title', 'seo_title', 'excerpt', 'body', 'image', 'slug', 'meta_description', 'meta_keywords', 'status', 'featured', 'is_public'];
 
-    protected $appends = ['is_liked','is_bookmarked','likes_count','comments_count'];
+    protected $appends = ['is_liked', 'is_bookmarked', 'likes_count', 'comments_count'];
 
     public function authorId()
     {
         return $this->belongsTo('App\Models\User', 'author_id', 'id');
     }
 
-    public function author(){
+    public function author()
+    {
         return $this->belongsTo('App\Models\User', 'author_id', 'id');
     }
 
@@ -37,113 +37,134 @@ class Post extends Model
         parent::save();
     }
 
-    public function user(){
-        return $this->belongsTo('App\Models\User','author_id');
+    public function user()
+    {
+        return $this->belongsTo('App\Models\User', 'author_id');
     }
 
-    public function scopePublished(Builder $query){
+    public function scopePublished(Builder $query)
+    {
         return $query->where('status', '=', 'PUBLISHED');
     }
 
-    public function comments_from_other(){
-        return $this->morphMany('App\Models\Comment','comment')->where('user_id','!=',auth('api')->user()?auth('api')->user()->id:-1);
+    public function comments_from_other()
+    {
+        return $this->morphMany('App\Models\Comment', 'comment')->where('user_id', '!=', auth('api')->user() ? auth('api')->user()->id : -1);
     }
 
-    public function comments(){
-        return $this->morphMany('App\Models\Comment','comment');
+    public function comments()
+    {
+        return $this->morphMany('App\Models\Comment', 'comment');
     }
 
-    public function reports(){
-        return $this->morphMany('App\Models\Report','report');
+    public function reports()
+    {
+        return $this->morphMany('App\Models\Report', 'report');
     }
 
     public function user_reports()
     {
-        return $this->morphToMany('App\Models\User','report');
+        return $this->morphToMany('App\Models\User', 'report');
     }
 
     public function auth_user_reports()
     {
-        return $this->morphToMany('App\Models\User','report')->wherePivot('user_id','=',auth('api')->user()->id);;
+        return $this->morphToMany('App\Models\User', 'report')->wherePivot('user_id', '=', auth('api')->user()->id);
     }
 
     //siapa aja users yang membaca post
-    public function readers(){
-        return $this->morphToMany('App\Models\User','read');
+    public function readers()
+    {
+        return $this->morphToMany('App\Models\User', 'read');
     }
 
-    public function auth_read(){
-        return $this->morphToMany('App\Models\User','read')->wherePivot('user_id','=',auth('api')->user()->id);
+    public function auth_read()
+    {
+        return $this->morphToMany('App\Models\User', 'read')->wherePivot('user_id', '=', auth('api')->user()->id);
     }
 
-    public function likes(){
-        return $this->morphMany('App\Models\Like','like');
+    public function likes()
+    {
+        return $this->morphMany('App\Models\Like', 'like');
     }
 
-    public function liked(){
-        $user=auth('api')->user();
-        return $this->morphOne('App\Models\Like','like')->where('user_id', $user?$user->id:0);
+    public function liked()
+    {
+        $user = auth('api')->user();
+        return $this->morphOne('App\Models\Like', 'like')->where('user_id', $user ? $user->id : 0);
     }
 
-    public function bookmarked(){
-        $user=auth('api')->user();
-        return $this->morphOne('App\Models\Bookmark','bookmark')->where('user_id', $user?$user->id:0);
+    public function bookmarked()
+    {
+        $user = auth('api')->user();
+        return $this->morphOne('App\Models\Bookmark', 'bookmark')->where('user_id', $user ? $user->id : 0);
     }
 
-    public function bookmarks(){
-        return $this->morphMany('App\Models\Bookmark','bookmark');
+    public function bookmarks()
+    {
+        return $this->morphMany('App\Models\Bookmark', 'bookmark');
     }
 
-    public function category(){
+    public function category()
+    {
         return $this->belongsTo('App\Models\Category');
     }
 
-    public function files(){
-        return $this->morphMany('App\Models\File','file');
+    public function files()
+    {
+        return $this->morphMany('App\Models\File', 'file');
     }
 
-    public function ads(){
-        return $this->morphMany('App\Models\Ad','ad');
+    public function ads()
+    {
+        return $this->morphMany('App\Models\Ad', 'ad');
     }
-    public function documents(){
-        return $this->morphMany('App\Models\File','file');
+    public function documents()
+    {
+        return $this->morphMany('App\Models\File', 'file');
     }
 
-    public function meeting_rooms(){
+    public function meeting_rooms()
+    {
         return $this->belongsToMany('App\Models\Room', 'room_posts')->where('rooms.type', 'meeting');
     }
 
-    public function events(){
+    public function events()
+    {
         return $this->belongsToMany('App\Models\Event', 'event_posts');
     }
 
-    public function images(){
-        return $this->morphMany('App\Models\File','file')->whereIn('type',['image/jpeg','image/png','image/gif','image/jpg']);
+    public function images()
+    {
+        return $this->morphMany('App\Models\File', 'file')->whereIn('type', ['image/jpeg', 'image/png', 'image/gif', 'image/jpg']);
     }
 
-    public function videos(){
-        return $this->morphMany('App\Models\File','file')->whereIn('type',['video/mp4','video/ogg','video/webm']);
+    public function videos()
+    {
+        return $this->morphMany('App\Models\File', 'file')->whereIn('type', ['video/mp4', 'video/ogg', 'video/webm']);
     }
 
-    public function audios(){
-        return $this->morphMany('App\Models\File','file')->whereIn('type',['audio/mpeg','audio/ogg','audio/wav']);
+    public function audios()
+    {
+        return $this->morphMany('App\Models\File', 'file')->whereIn('type', ['audio/mpeg', 'audio/ogg', 'audio/wav']);
     }
 
-    public function docs(){
-        return $this->morphMany('App\Models\File','file')->whereIn('type',['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document']);
+    public function docs()
+    {
+        return $this->morphMany('App\Models\File', 'file')->whereIn('type', ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']);
     }
 
     // accessor -----------------------------------------------------------------------------------------
     public function getIsLikedAttribute()
     {
-        $user=auth('api')->user();
-        return $this->liked()->where('user_id', $user?$user->id:0)->exists();
+        $user = auth('api')->user();
+        return $this->liked()->where('user_id', $user ? $user->id : 0)->exists();
     }
 
     public function getIsBookmarkedAttribute()
     {
-        $user=auth('api')->user();
-        return $this->bookmarked()->where('user_id', $user?$user->id:0)->exists();
+        $user = auth('api')->user();
+        return $this->bookmarked()->where('user_id', $user ? $user->id : 0)->exists();
     }
 
     public function getLikesCountAttribute()
@@ -157,4 +178,3 @@ class Post extends Model
     }
 
 }
-
