@@ -14,6 +14,11 @@ class Event extends Model
         return $this->belongsTo('App\Models\User');
     }
 
+    public function author()
+    {
+        return $this->belongsTo('App\Models\User', 'user_id');
+    }
+
     public function event_guests()
     {
         return $this->hasMany('App\Models\EventGuest');
@@ -21,6 +26,6 @@ class Event extends Model
 
     public function users()
     {
-        return $this->belongsToMany('App\Models\User', 'event_guests')->withPivot('created_at')->withTimestamps()->orderBy('created_at','desc');
+        return $this->belongsToMany('App\Models\User', 'event_guests')->withPivot('created_at')->withTimestamps()->orderBy('created_at', 'desc');
     }
 }
