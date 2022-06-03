@@ -37,19 +37,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // $this->configureRateLimiting();
-
-        // $this->routes(function () {
-        //     Route::prefix('api')
-        //         ->middleware('api')
-        //         ->namespace($this->namespace)
-        //         ->group(base_path('routes/api.php'));
-
-        //     Route::middleware('web')
-        //         ->namespace($this->namespace)
-        //         ->group(base_path('routes/web.php'));
-        // });
-         parent::boot();
+        parent::boot();
     }
 
     /**
@@ -88,8 +76,8 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapWebRoutes()
     {
         Route::middleware('web')
-             ->namespace($this->namespace)
-             ->group(base_path('routes/web.php'));
+            ->namespace($this->namespace)
+            ->group(base_path('routes/web.php'));
     }
 
     /**
@@ -103,26 +91,27 @@ class RouteServiceProvider extends ServiceProvider
     {
 
         // ORIGINAL ROUTE SETTING -------
-        // Route::prefix('api')
-        //      ->middleware('api')
-        //      ->namespace($this->namespace)
-        //      ->group(base_path('routes/api.php'));
+        Route::prefix('api')
+            ->middleware('api')
+            ->namespace($this->namespace)
+            ->name('api.')
+            ->group(base_path('routes/api.php'));
         // END ORIGINAL ------------------
 
-        Route::group([
-            'middleware' => 'api',
-            'namespace' => $this->namespace,
-            'prefix' => 'api',
-        ], function ($router) {
-            require base_path('routes/api.php'); // STANDARD API
-            require base_path('routes/api/v1.php'); // V1 API
-        });
+        // API v1 ROUTE SETTING -------
+        Route::prefix('api')
+            ->middleware('api')
+            ->namespace($this->namespace)
+            ->name('api.v1.')
+            ->group(base_path('routes/api/v1.php'));
+        // END ORIGINAL ------------------
 
         Route::group([
             'middleware' => 'auth:api',
             'namespace' => \App\Http\Controllers\API\v2\teacher::class,
             'prefix' => 'api/v2/teacher',
-        ],function($router){
+            'name' => 'api.v2.teacher.',
+        ], function ($router) {
             // V2 untuk penilaian kegiatan akademik API
             require base_path('routes/api/v2/teacher.php');
         });
@@ -131,7 +120,8 @@ class RouteServiceProvider extends ServiceProvider
             'middleware' => 'auth:api',
             'namespace' => \App\Http\Controllers\API\v2\member::class,
             'prefix' => 'api/v2/member',
-        ],function($router){
+            'name' => 'api.v2.member.',
+        ], function ($router) {
             // V2 untuk member agpaii API
             require base_path('routes/api/v2/member.php');
         });
@@ -140,7 +130,8 @@ class RouteServiceProvider extends ServiceProvider
             'middleware' => 'auth:api',
             'namespace' => \App\Http\Controllers\API\v2\student::class,
             'prefix' => 'api/v2/student',
-        ],function($router){
+            'name' => 'api.v2.student.',
+        ], function ($router) {
             // V2 untuk murid API
             require base_path('routes/api/v2/student.php');
         });
