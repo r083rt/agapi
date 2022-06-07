@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\API\v1;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Notifications\CommentedPostNotification;
 use App\Models\Comment;
 use App\Models\Post;
+use Illuminate\Http\Request;
+
 class PostCommentController extends Controller
 {
     /**
@@ -30,23 +30,23 @@ class PostCommentController extends Controller
         $comment = new Comment($request->all());
         $post = Post::findOrFail($request->post_id);
         $comment = $post->comments()->save($comment);
-    
-        $comment->load('commentable','user');
-        
+
+        $comment->load('commentable', 'user');
+
         //Orang2 yang telah mengomentari post ini akan menerima notifikasi komentar orang lain juga
-        $users_comment = \App\Models\User::whereHas('comment',function($query)use($post){
-            $query->where('comment_type','App\Models\Post')->where('comment_id',$post->id);
-        })->where('id','!=',$post->author_id)->where('id','!=',$comment->user_id)->get();
-        foreach($users_comment as $user){
+        $users_comment = \App\Models\User::whereHas('comment', function ($query) use ($post) {
+            $query->where('comment_type', 'App\Models\Post')->where('comment_id', $post->id);
+        })->where('id', '!=', $post->author_id)->where('id', '!=', $comment->user_id)->get();
+        foreach ($users_comment as $user) {
             \App\Events\AlsoCommentedPostEvent::dispatch($user, $comment);
         }
-        
+
         // \App\Models\User::find($post->author_id)->notify(new CommentedPostNotification($comment));
-        //Orang yang membuat post akan menerima notifikasi komentar 
-        if($comment->commentable->author_id!==$comment->user_id) {
+        //Orang yang membuat post akan menerima notifikasi komentar
+        if ($comment->commentable->author_id !== $comment->user_id) {
             // $comment->loadMissing('commentable','user');
             \App\Events\CommentedPostEvent::dispatch($comment);
-     
+
         }
 
         return response()->json($comment->load('likes', 'user')->loadCount('likes', 'liked'));
@@ -84,5 +84,11 @@ class PostCommentController extends Controller
     public function destroy($id)
     {
         //
+        // return response()->json($id);
+        $comment = Comment::whereHas('post.author', function ($query) {
+            $query->where('id', auth()->id());
+        })->findOrFail($id);
+        $res = $comment->delete();
+        return response()->json($res);
     }
 }

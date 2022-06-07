@@ -16,8 +16,14 @@ class Comment extends Model
     //     return $this->belongsToMany('App\Models\Like', 'App\Models\CommentLike')->withPivot('created_at')->withTimestamps();
     // }
 
-    public function likes(){
-        return $this->morphMany('App\Models\Like','like');
+    public function post()
+    {
+        return $this->belongsTo('App\Models\Post', 'comment_id')->where('comment_type', 'App\Models\Post');
+    }
+
+    public function likes()
+    {
+        return $this->morphMany('App\Models\Like', 'like');
     }
 
     // public function liked()
@@ -25,8 +31,9 @@ class Comment extends Model
     //     return $this->belongsToMany('App\Models\Like', 'App\Models\CommentLike')->withPivot('created_at')->withTimestamps()->where('user_id', Auth::user()->id);
     // }
 
-    public function liked(){
-        return $this->morphOne('App\Models\Like','like')->where('user_id', Auth::check() ? Auth::user()->id : 0);
+    public function liked()
+    {
+        return $this->morphOne('App\Models\Like', 'like')->where('user_id', Auth::check() ? Auth::user()->id : 0);
     }
 
     public function user()
@@ -36,15 +43,17 @@ class Comment extends Model
 
     public function author()
     {
-        return $this->belongsTo('App\Models\User','user_id','id');
+        return $this->belongsTo('App\Models\User', 'user_id', 'id');
     }
 
-    public function lesson_plans(){
-        return $this->belongsToMany('App\Models\LessonPlan','lesson_plan_comments');
+    public function lesson_plans()
+    {
+        return $this->belongsToMany('App\Models\LessonPlan', 'lesson_plan_comments');
     }
 
-    public function commentable(){
-        return $this->morphTo(__FUNCTION__,'comment_type','comment_id');
+    public function commentable()
+    {
+        return $this->morphTo(__FUNCTION__, 'comment_type', 'comment_id');
     }
 
     // accessors
