@@ -9,12 +9,12 @@ use App\Models\Like;
 use App\Models\Profile;
 use App\Models\Rating;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -116,7 +116,7 @@ class UserController extends Controller
         $res = $user->load([
             'bookmark_posts' => function ($query) {
                 $query->with([
-                    
+
                     'files',
                     'authorId.profile',
                     'comments',
@@ -575,6 +575,95 @@ class UserController extends Controller
         ];
         $payments_in = $user->payments()->where('status', 'success')->where('type', 'IN')->whereIn('necessary_id', $necessary_ids);
         return $payments_in->sum('value');
+    }
+
+    public function getPnsCount()
+    {
+        $res = User::
+            whereHas('pns_status', function ($query) {
+            $query->where('is_pns', 1);
+        })
+            ->count();
+        return response()->json($res);
+    }
+
+    public function getPnsUsers()
+    {
+        $res = User::
+            whereHas('pns_status', function ($query) {
+            $query->where('is_pns', 1);
+        })
+            ->paginate();
+        return response()->json($res);
+    }
+
+    public function getNonPnsCount()
+    {
+        $res = User::
+            whereHas('pns_status', function ($query) {
+            $query->where('is_pns', 0);
+        })
+            ->count();
+        return response()->json($res);
+    }
+
+    public function getNonPnsUsers()
+    {
+        $res = User::
+            whereHas('pns_status', function ($query) {
+            $query->where('is_pns', 0);
+        })
+            ->paginate();
+        return response()->json($res);
+    }
+
+    public function searchPnsUsers($key)
+    {
+        $search = User::
+            whereHas('pns_status', function ($query) {
+            $query->where('is_pns', 1);
+        })
+            ->where('name', 'like', '%' . $key . '%')
+            ->paginate();
+
+        return response()->json($search);
+    }
+
+    public function searchNonPnsUsers($key)
+    {
+        $search = User::
+            whereHas('pns_status', function ($query) {
+            $query->where('is_pns', 0);
+        })
+            ->where('name', 'like', '%' . $key . '%')
+            ->paginate();
+
+        return response()->json($search);
+    }
+
+    public function getExpiredMembersCount()
+    {
+        $res = User::where('user_activated_at', '!=', null)
+            ->where('user_activated_at', '<', (new \Carbon\Carbon)->submonths(6))
+            ->count();
+        return response()->json($res);
+    }
+
+    public function getExpiredMembers()
+    {
+        $res = User::where('user_activated_at', '!=', null)
+            ->where('user_activated_at', '<', (new \Carbon\Carbon)->submonths(6))
+            ->paginate();
+        return response()->json($res);
+    }
+
+    public function searchExpiredMembers($key)
+    {
+        $search = User::where('user_activated_at', '!=', null)
+            ->where('user_activated_at', '<', (new \Carbon\Carbon)->submonth(6))
+            ->where('name', 'like', '%' . $key . '%')
+            ->paginate();
+        return response()->json($search);
     }
 
 }

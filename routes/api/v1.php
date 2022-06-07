@@ -23,11 +23,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         // 'verified'
     ]], function () {
 
-        Route::prefix('student')->group(function(){
+        Route::prefix('student')->group(function () {
             // Route::post('student/createassigmentsession',[App\Http\Controllers\API\v1\Student\AssigmentSessionController::class, 'createAssigmentSession']);
             include "v1/student.php";
         });
-
 
         Route::get('/auth/assigment', function (Request $request) { // GET USER AUTH FOR ASSIGMENT APPS
             $res = $request->user()
@@ -138,25 +137,25 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             $user = $request->user();
             $user_id = $user->id;
             $res = $user
-                ->load(['profile','role'])->loadCount(['rooms'=>function($query){
-                    $query->where('type','class');
-                }]);
-            $res->count_question_lists=\App\Models\QuestionList::whereHas('assigments',function($query)use($user_id){
-                $query->where('assigments.user_id','=',$user_id)->where('is_publish', false);
+                ->load(['profile', 'role'])->loadCount(['rooms' => function ($query) {
+                $query->where('type', 'class');
+            }]);
+            $res->count_question_lists = \App\Models\QuestionList::whereHas('assigments', function ($query) use ($user_id) {
+                $query->where('assigments.user_id', '=', $user_id)->where('is_publish', false);
             })->count();
-            $res->count_sessions = \App\Models\Session::whereHas('assigments',function($query)use($user_id){
-                $query->where('assigments.user_id','=',$user_id)->orWhere('assigments.teacher_id','=',$user_id);
+            $res->count_sessions = \App\Models\Session::whereHas('assigments', function ($query) use ($user_id) {
+                $query->where('assigments.user_id', '=', $user_id)->orWhere('assigments.teacher_id', '=', $user_id);
             })->count();
-            $res->count_publish_assigments = \App\Models\Assigment::where('user_id','=',$user_id)->where('is_publish',true)->whereNull('teacher_id')->count();
+            $res->count_publish_assigments = \App\Models\Assigment::where('user_id', '=', $user_id)->where('is_publish', true)->whereNull('teacher_id')->count();
             $res->canCreatePremiumAssigment = $user->canCreatePremiumAssigment();
             return $res;
         });
-        Route::get('/auth/assigments/unpublished', function(Request $request){
-            return \App\Models\Assigment::with('likes','comments.user','user','grade','assigment_category','question_lists.assigment_types','question_lists.images')->where('user_id','=',auth('api')->user()->id)->where('is_publish',false)->whereNull('teacher_id')->orderBy('id','desc')->paginate();
+        Route::get('/auth/assigments/unpublished', function (Request $request) {
+            return \App\Models\Assigment::with('likes', 'comments.user', 'user', 'grade', 'assigment_category', 'question_lists.assigment_types', 'question_lists.images')->where('user_id', '=', auth('api')->user()->id)->where('is_publish', false)->whereNull('teacher_id')->orderBy('id', 'desc')->paginate();
         });
-        Route::get('/auth/assigments/published', function(Request $request){
-            return \App\Models\Assigment::with('likes','comments.user', 'user','grade','assigment_category','question_lists.assigment_types','question_lists.images')
-            ->where('user_id','=',auth('api')->user()->id)->where('is_publish',true)->whereNull('teacher_id')->orderBy('id','desc')->paginate();
+        Route::get('/auth/assigments/published', function (Request $request) {
+            return \App\Models\Assigment::with('likes', 'comments.user', 'user', 'grade', 'assigment_category', 'question_lists.assigment_types', 'question_lists.images')
+                ->where('user_id', '=', auth('api')->user()->id)->where('is_publish', true)->whereNull('teacher_id')->orderBy('id', 'desc')->paginate();
         });
 
         /////////////////////////////////////////////////////////////////////////////////////
@@ -168,7 +167,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             return $request->user();
         });
 
-        Route::get('/userreport2','UserController@userreport2');
+        Route::get('/userreport2', 'UserController@userreport2');
 
         Route::get('/auth/assigment/student', function (Request $request) {
             return $request->user()->load([
@@ -210,36 +209,38 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         //      //->get();
         // });
 
-        Route::get('/auth/assigment/student/finishedtoday', function(Request $request){
+        Route::get('/auth/assigment/student/finishedtoday', function (Request $request) {
             $userProfile = auth('api')->user()->load('profile');
             $educationalLevelId = $userProfile->profile->educational_level_id;
-            if($educationalLevelId==null)return response()->json(['error_jenjang'=>'Harus pilih jenjang dulu']);
+            if ($educationalLevelId == null) {
+                return response()->json(['error_jenjang' => 'Harus pilih jenjang dulu']);
+            }
 
             //paket soal utama
-            $res = \App\Models\Session::withCount('questions')->with('assigments.grade')->where('user_id',auth('api')->user()->id)
-            ->whereDate('created_at',\Carbon\Carbon::today())
-            ->whereHas('assigments',function($query)use($educationalLevelId){
-                $query->whereNotNull('teacher_id')->whereHas('grade', function($query2)use($educationalLevelId){
-                   $query2->where('educational_level_id', $educationalLevelId);
+            $res = \App\Models\Session::withCount('questions')->with('assigments.grade')->where('user_id', auth('api')->user()->id)
+                ->whereDate('created_at', \Carbon\Carbon::today())
+                ->whereHas('assigments', function ($query) use ($educationalLevelId) {
+                    $query->whereNotNull('teacher_id')->whereHas('grade', function ($query2) use ($educationalLevelId) {
+                        $query2->where('educational_level_id', $educationalLevelId);
+                    });
                 });
-            });
             // ->whereHas('assigment_session',function($query){
             //    $query->whereNotNull('total_score');  //hanya mengambil paket soal yang telah dinilai oleh guru atau telah melalui proses penilaian otomatis, yaitu jika total_score'nya TIDAK null
             // });
 
             //paket soal latihan mandiri
-            $res2 = \App\Models\Session::withCount('questions')->with('assigments.grade')->where('user_id',auth('api')->user()->id)
-            ->whereDate('created_at',\Carbon\Carbon::today())
-            ->whereHas('assigments',function($query)use($educationalLevelId){
-                $query->whereNull('teacher_id')->whereHas('grade', function($query)use($educationalLevelId){
-                   $query->where('educational_level_id',$educationalLevelId);
-                });
-            })->whereHas('assigment_session',function($query){
-               $query->whereNotNull('total_score');  //hanya mengambil paket soal latihan mandiri yang telah dinilai oleh guru, yaitu jika total_score'nya TIDAK null
+            $res2 = \App\Models\Session::withCount('questions')->with('assigments.grade')->where('user_id', auth('api')->user()->id)
+                ->whereDate('created_at', \Carbon\Carbon::today())
+                ->whereHas('assigments', function ($query) use ($educationalLevelId) {
+                    $query->whereNull('teacher_id')->whereHas('grade', function ($query) use ($educationalLevelId) {
+                        $query->where('educational_level_id', $educationalLevelId);
+                    });
+                })->whereHas('assigment_session', function ($query) {
+                $query->whereNotNull('total_score'); //hanya mengambil paket soal latihan mandiri yang telah dinilai oleh guru, yaitu jika total_score'nya TIDAK null
             });
-            return ["main_assigment"=>$res->get(), "training_assigment"=>$res2->get()];
+            return ["main_assigment" => $res->get(), "training_assigment" => $res2->get()];
 
-       });
+        });
 
         Route::apiResources([
             'role' => 'RoleController',
@@ -285,18 +286,21 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'ad' => 'AdController',
             'questionnary' => 'QuestionnaryController',
             'questionnarysesion' => 'QuestionnarySessionController',
-            'modules.comments'=>'ModuleCommentController',
-            'modules.likes'=>'ModuleLikeController',
-            'bank_account'=>'BankAccountController',
-            'surah'=>'SurahController',
-            'conversation'=>'ConversationController',
-            'paymentvendor'=>'PaymentVendorController',
-            'room'=>'RoomController',
-            'student/room'=>'Student\RoomController',
-            'tag'=>'TagController',
+            'modules.comments' => 'ModuleCommentController',
+            'modules.likes' => 'ModuleLikeController',
+            'bank_account' => 'BankAccountController',
+            'surah' => 'SurahController',
+            'conversation' => 'ConversationController',
+            'paymentvendor' => 'PaymentVendorController',
+            'room' => 'RoomController',
+            'student/room' => 'Student\RoomController',
+            'tag' => 'TagController',
+            'department/dpp' => 'DppDepartmentController',
+            'province.department' => 'DpwDepartmentController',
+            'city.department' => 'DpdDepartmentController',
         ]);
 
-        Route::delete('module/{moduleId}/dislike','ModuleLikeController@dislike');
+        Route::delete('module/{moduleId}/dislike', 'ModuleLikeController@dislike');
 
         // api resources untuk penilaian digital
         Route::apiResources([
@@ -318,10 +322,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'answer' => 'AnswerController',
         ]);
 
-        Route::post('/rooms/join','RoomController@join');
+        Route::post('/rooms/join', 'RoomController@join');
         Route::post('/rooms/changename', 'RoomController@changeRoomName');
         Route::get('/rooms/{roomid}/viewmember', 'RoomController@viewMembers');
-        Route::get('/rooms/{room_id}/userlist','RoomController@userlist');
+        Route::get('/rooms/{room_id}/userlist', 'RoomController@userlist');
         Route::get('/rooms/getuserrooms', 'RoomController@get_user_rooms');
         Route::get('/eventyears', 'EventController@get_event_years');
         Route::post('/filterevent', 'EventController@filter_event');
@@ -336,7 +340,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/ownstudentpost', 'PostController@ownstudentpost');
         Route::get('/mediapost', 'PostController@mediapost');
         Route::get('/assigments/search/{key}', 'AssigmentController@search');
-
 
         /////////////////API PUBLISH untuk GURU///////////////////
         Route::get('/assigments/publish', 'AssigmentController@publish');
@@ -358,7 +361,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/assigments/start/{code}/{ktaId}', 'AssigmentController@start');
         Route::post('/assigments/check', 'AssigmentController@check');
         Route::post('/assigments/share', 'AssigmentController@share');
-        Route::post('/assigments/{id}/update','AssigmentController@update');
+        Route::post('/assigments/{id}/update', 'AssigmentController@update');
         Route::post('/assigments/setpublic', 'AssigmentController@setAssigmentToPublic');
         Route::get('/assigments/getsharedpublish', 'AssigmentController@getSharedAssigment');
         Route::get('/assigments/getassigmentworks', 'AssigmentController@getAssigmentWorks');
@@ -386,6 +389,24 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         ]);
 
         Route::get('/users/count', 'UserController@count');
+
+        Route::get('/users/pns/search/{key}', 'UserController@searchPnsUsers');
+
+        Route::get('/users/nonpns/search/{key}', 'UserController@searchNonPnsUsers');
+
+        Route::get('/users/pns/count', 'UserController@getPnsCount');
+
+        Route::get('/users/getexpired', 'UserController@getExpiredMembers');
+
+        Route::get('/users/getexpired/count', 'UserController@getExpiredMembersCount');
+
+        Route::get('/users/getexpired/search/{key}', 'UserController@searchExpiredMembers');
+
+        Route::get('/users/pns', 'UserController@getPnsUsers');
+
+        Route::get('/users/nonpns/count', 'UserController@getNonPnsCount');
+
+        Route::get('/users/nonpns', 'UserController@getNonPnsUsers');
 
         Route::get('/users/setDefaultAvatar/{userId}', 'UserController@setDefaultAvatar'); // SET DEFAULT AVATAR FOR GIVEN USER ID
 
@@ -449,17 +470,77 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::get('/payments/getvaluetransactionstotaldpd/{city_id}', 'PaymentController@paymenttransactiontotalDPD');
 
-        Route::get('/payments/getprovincepayment','PaymentController@getProvincePayment');
+        Route::get('/payments/getprovincepayment', 'PaymentController@getProvincePayment');
 
-        Route::get('/payments/getcitypayment','PaymentController@getCityPayment');
+        Route::get('/payments/getcitypayment', 'PaymentController@getCityPayment');
 
-        Route::post('/payments/getuniquepayment','PaymentController@makeUniquePayment');
+        Route::post('/payments/getuniquepayment', 'PaymentController@makeUniquePayment');
 
-        Route::post('/payments/confirmuniquepayment','PaymentController@confirmUniquePayment');
+        Route::post('/payments/confirmuniquepayment', 'PaymentController@confirmUniquePayment');
 
-        Route::post('/payments/confirmovopayment','PaymentController@confirmOvoPayment');
+        Route::post('/payments/confirmovopayment', 'PaymentController@confirmOvoPayment');
 
+        Route::get('/departments/dpp/getperiode', 'DppDepartmentController@getPeriode');
 
+        Route::get('/departments/dpp/getbyperiode/{start_year}', 'DppDepartmentController@getByPeriode');
+
+        Route::get('/provinces/{id}/departments/dpw/getperiode', 'DpwDepartmentController@getPeriode');
+
+        Route::get('/provinces/{id}/departments/dpw/getbyperiode/{start_year}', 'DpwDepartmentController@getByPeriode');
+
+        Route::get('/provinces/{provinceId}/pnsusers/search/{key}', 'ProvinceController@searchPnsUsers');
+
+        Route::get('/provinces/{provinceId}/nonpnsusers/search/{key}', 'ProvinceController@searchNonPnsUsers');
+
+        Route::get('/provinces/{id}/pnscount', 'ProvinceController@getPnsCount');
+
+        Route::get('/provinces/{id}/getexpiredmembers', 'ProvinceController@getExpiredMembers');
+
+        Route::get('/provinces/{id}/getexpiredmembers/count', 'ProvinceController@getExpiredMembersCount');
+
+        Route::get('/provinces/{id}/getexpiredmembers/search/{key}', 'ProvinceController@searchExpiredMembers');
+
+        Route::get('/provinces/{id}/pnsusers', 'ProvinceController@getPnsUsers');
+
+        Route::get('/provinces/{id}/nonpnscount', 'ProvinceController@getNonPnsCount');
+
+        Route::get('/provinces/{id}/nonpnsusers', 'ProvinceController@getNonPnsUsers');
+
+        Route::get('/cities/{cityId}/pnsusers/search/{key}', 'CityController@searchPnsUsers');
+
+        Route::get('/cities/{cityId}/nonpnsusers/search/{key}', 'CityController@searchNonPnsUsers');
+
+        Route::get('/cities/{cityId}/pnscount', 'CityController@getPnsCount');
+
+        Route::get('/cities/{cityId}/getexpiredmembers', 'CityController@getExpiredMembers');
+
+        Route::get('/cities/{cityId}/getexpiredmembers/count', 'CityController@getExpiredMembersCount');
+
+        Route::get('/cities/{cityId}/getexpiredmembers/search/{key}', 'CityController@searchExpiredMembers');
+
+        Route::get('/cities/{cityId}/pnsusers', 'CityController@getPnsUsers');
+
+        Route::get('/cities/{cityId}/nonpnscount', 'CityController@getNonPnsCount');
+
+        Route::get('/cities/{cityId}/nonpnsusers', 'CityController@getNonPnsUsers');
+
+        Route::get('/districts/{districtId}/pnsusers/search/{key}', 'DistrictController@searchPnsUsers');
+
+        Route::get('/districts/{districtId}/nonpnsusers/search/{key}', 'DistrictController@searchNonPnsUsers');
+
+        Route::get('/districts/{districtId}/pnscount', 'DistrictController@getPnsCount');
+
+        Route::get('/districts/{districtId}/getexpiredmembers', 'DistrictController@getExpiredMembers');
+
+        Route::get('/districts/{districtId}/getexpiredmembers/count', 'DistrictController@getExpiredMembersCount');
+
+        Route::get('/districts/{districtId}/getexpiredmembers/search/{key}', 'DistrictController@searchExpiredMembers');
+
+        Route::get('/districts/{districtId}/pnsusers', 'DistrictController@getPnsUsers');
+
+        Route::get('/districts/{districtId}/nonpnscount', 'DistrictController@getNonPnsCount');
+
+        Route::get('/districts/{districtId}/nonpnsusers', 'DistrictController@getNonPnsUsers');
 
         Route::get('/lessonplans/getbyeducationallevel/{id}', 'LessonPlanController@getByEducationalLevel'); // GET RPP BY EDUCATIONAL LEVEL
 
@@ -471,24 +552,23 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::get('/assigmentquestionlists/search/{key}', 'AssigmentQuestionListController@search');
 
-        Route::get('/getpostbycommentid/{id}',function($id){
+        Route::get('/getpostbycommentid/{id}', function ($id) {
             return \App\Models\Comment::with('commentable')->findOrFail($id);
         });
 
-        Route::get('/payments/getstatus/{userId}','PaymentController@getStatus');
+        Route::get('/payments/getstatus/{userId}', 'PaymentController@getStatus');
         // Route::get('/payments/getstatusfrombank/{userId}','PaymentController@getStatus');
 
+        Route::get('/modules/getmodulescount', 'ModuleController@getmodulescount');
+        Route::get('/modules/getlikedcount', 'ModuleController@getlikedcount');
+        Route::get('/modules/getlikescount', 'ModuleController@getlikescount');
+        Route::get('/modules/getpublish', 'ModuleController@getpublish');
+        Route::get('/modules/getunpublish', 'ModuleController@getunpublish');
+        Route::get('/modules/getalllatest', 'ModuleController@getalllatest');
+        Route::get('/modules/getbyeducationallevel/{educationalLevelId}/{search?}', 'ModuleController@getbyeducationallevel');
+        Route::get('/modules/read/{id}', 'ModuleController@readModule');
 
-        Route::get('/modules/getmodulescount','ModuleController@getmodulescount');
-        Route::get('/modules/getlikedcount','ModuleController@getlikedcount');
-        Route::get('/modules/getlikescount','ModuleController@getlikescount');
-        Route::get('/modules/getpublish','ModuleController@getpublish');
-        Route::get('/modules/getunpublish','ModuleController@getunpublish');
-        Route::get('/modules/getalllatest','ModuleController@getalllatest');
-        Route::get('/modules/getbyeducationallevel/{educationalLevelId}/{search?}','ModuleController@getbyeducationallevel');
-        Route::get('/modules/read/{id}','ModuleController@readModule');
-
-        Route::get('/conversations/get_unread_count','ConversationController@getUnreadCount');
+        Route::get('/conversations/get_unread_count', 'ConversationController@getUnreadCount');
         // Route::delete('/conversations/{conversation_id}', 'ConversationController@destroy');
         //Route::get('/modules/s/{educationalLevelId}/{search?}','ModuleController@getbyeducationallevel');
         //Route::get('/modules/')
@@ -496,36 +576,33 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         //api untuk semua modul
         //Route::get('/template/owned','TemplateController@owned');
 
-        Route::middleware('isTeacher')->get('/question_item/payable','QuestionListController@payableItemList');
-        Route::middleware('isTeacher')->post('/question_item/setispaid/{question_list_id}','QuestionListController@setIsPaid');
-        Route::middleware('isTeacher')->get('/question_item/payable/{question_list_id}','QuestionListController@getPayableItem');
+        Route::middleware('isTeacher')->get('/question_item/payable', 'QuestionListController@payableItemList');
+        Route::middleware('isTeacher')->post('/question_item/setispaid/{question_list_id}', 'QuestionListController@setIsPaid');
+        Route::middleware('isTeacher')->get('/question_item/payable/{question_list_id}', 'QuestionListController@getPayableItem');
 
+        Route::middleware('isTeacher')->get('/question_package/payable', 'AssigmentController@payableItemList');
+        Route::middleware('isTeacher')->post('/question_package/setispaid/{assigment_id}', 'AssigmentController@setIsPaid');
+        Route::middleware('isTeacher')->get('/question_package/payable/{assigment_id}', 'AssigmentController@getPayableItem');
 
-
-
-        Route::middleware('isTeacher')->get('/question_package/payable','AssigmentController@payableItemList');
-        Route::middleware('isTeacher')->post('/question_package/setispaid/{assigment_id}','AssigmentController@setIsPaid');
-        Route::middleware('isTeacher')->get('/question_package/payable/{assigment_id}','AssigmentController@getPayableItem');
-
-        Route::middleware('isTeacher')->get('/assignment/payablecount','AssigmentController@getPayableCount');
+        Route::middleware('isTeacher')->get('/assignment/payablecount', 'AssigmentController@getPayableCount');
 
         Route::middleware('isTeacher')->get('/assignment/payable/profit', 'UserController@profit');
-        Route::middleware('isTeacher')->get('/assignment/payable/profit/question_items','QuestionListController@getPayableLists');
-        Route::middleware('isTeacher')->get('/assignment/payable/profit/question_packages','AssigmentController@getPayableLists');
+        Route::middleware('isTeacher')->get('/assignment/payable/profit/question_items', 'QuestionListController@getPayableLists');
+        Route::middleware('isTeacher')->get('/assignment/payable/profit/question_packages', 'AssigmentController@getPayableLists');
 
-        Route::get('balance', function(Request $request){
+        Route::get('balance', function (Request $request) {
             $user = $request->user();
             return $user->balance();
         });
 
         // Route::get('/question_package/payable');
-        Route::middleware('isTeacher')->get('/test',function(Request $request){
+        Route::middleware('isTeacher')->get('/test', function (Request $request) {
             return $request->user()->role;
         });
 
         //===BEGIN [menampilkan question_lists.answer_lists tanpa kunci jawabannya]=========///
-        Route::get('/assigments/{assigment_id}/show','AssigmentController@show2');
-        Route::get('/assigments/{assigment_id}/show_shuffle','AssigmentController@show2shuffle');
+        Route::get('/assigments/{assigment_id}/show', 'AssigmentController@show2');
+        Route::get('/assigments/{assigment_id}/show_shuffle', 'AssigmentController@show2shuffle');
         //==================================END============================================/
 
         Route::post('/assigmentsessions/store2', 'AssigmentSessionController@store2');
@@ -538,8 +615,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/assigments_tag/history', 'AssigmentSessionController@assigmentsTagHistory');
         Route::post('assigments_tag', 'TaggableController@assigmentsTag');
 
-
-
     });
 
     // END API WITH SECURITY ---------------------------------------------------------------------------------
@@ -550,7 +625,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
     Route::get('/users/searchbyemail/{key}', 'UserController@searchbyemail'); // SEARCH USER BY Email
     Route::post('/quickpaymentUrl', 'PaymentController@quickPaymentUrl'); //route untuk pembayaran seperti store payment tapi return url untuk webview reactnative
-    Route::get('/quickgetstatus/{userId}','PaymentController@getStatus');
+    Route::get('/quickgetstatus/{userId}', 'PaymentController@getStatus');
 
     Route::apiResources([
         'settings' => 'SettingController',
@@ -574,34 +649,36 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
     Route::post('/post/read', 'PostController@readPost');
 
-    Route::get('/ads/getactive','AdController@getactive');
+    Route::get('/ads/getactive', 'AdController@getactive');
 
-    Route::get('/questionnaries/getactive','QuestionnaryController@getactive');
+    Route::get('/questionnaries/getactive', 'QuestionnaryController@getactive');
 
-    Route::apiResource('/notification','NotificationController');
+    Route::apiResource('/notification', 'NotificationController');
 
-    Route::get('/notification_total',function(){
-        $user_id = auth('api')->user()?auth('api')->user()->id:null;
-        if(!$user_id)return abort(403,"User not authenticated");
+    Route::get('/notification_total', function () {
+        $user_id = auth('api')->user() ? auth('api')->user()->id : null;
+        if (!$user_id) {
+            return abort(403, "User not authenticated");
+        }
+
         return \App\Models\User::withCount('unreadNotifications')->findOrFail($user_id);
     });
 
-    Route::post('/notification_markasread', function(Request $request){
+    Route::post('/notification_markasread', function (Request $request) {
         return \App\Models\User::findOrFail(auth('api')->user()->id)->unreadNotifications()->update(['read_at' => now()]);
     });
 
     Route::get('/assigments/statistics', 'AssigmentController@statistics');
     Route::get('/assigments/{id}/{teacher_id}/downloadexcel', 'AssigmentController@downloadexcel');
 
-
-    Route::get('/testgan',function(){
+    Route::get('/testgan', function () {
         return \DB::table('users')->paginate();
-        $questionnary_id=1;
-       $res = \App\Models\QuestionList::with(['answer_lists'=>function($query){
-           $query->withCount('answers');
-       }])->has('answer_lists')->whereHas('questionnaries',function($query){
-        $query->where('questionnary_id','=',1);
-       });
+        $questionnary_id = 1;
+        $res = \App\Models\QuestionList::with(['answer_lists' => function ($query) {
+            $query->withCount('answers');
+        }])->has('answer_lists')->whereHas('questionnaries', function ($query) {
+            $query->where('questionnary_id', '=', 1);
+        });
         return $res->get();
         return $res->assigment->code;
         $a = \App\Models\Post::find(1);
@@ -609,7 +686,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         return $a->readers()->syncWithoutDetaching([1]);
     });
     // END API WITHOUT SECURITY ------------------------------------------------------------------------
-
 
     // New ------------------------------------------
     // Mengambil data acara dan peserta nya

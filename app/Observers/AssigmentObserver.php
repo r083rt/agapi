@@ -3,9 +3,6 @@
 namespace App\Observers;
 
 use App\Models\Assigment;
-use Illuminate\Support\Facades\Log;
-
-use App\Notifications\AssigmentSharedNotification;
 
 class AssigmentObserver
 {
@@ -18,13 +15,12 @@ class AssigmentObserver
     public function created(Assigment $assigment)
     {
         //Jika master soal dishare oleh guru lain, maka kirim notifikasi ke pembuat soal
-        if($assigment->teacher_id!=null){
-            if($assigment->user_id!=$assigment->teacher_id){
-                $assigment->load('user','teacher');
+        if ($assigment->teacher_id != null) {
+            if ($assigment->user_id != $assigment->teacher_id) {
+                $assigment->load('user', 'teacher');
                 // Log::info($assigment);
                 \App\Events\AssigmentSharedEvent::dispatch($assigment);
                 // $data->user->notify(new AssigmentSharedNotification($data));
-                
             }
         }
         //Log::debug('anjay');

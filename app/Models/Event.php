@@ -9,6 +9,8 @@ class Event extends Model
     //
     protected $guarded = ['id'];
 
+    protected $appends = ['is_paid'];
+
     public function user()
     {
         return $this->belongsTo('App\Models\User');
@@ -28,4 +30,15 @@ class Event extends Model
     {
         return $this->belongsToMany('App\Models\User', 'event_guests')->withPivot('created_at')->withTimestamps()->orderBy('created_at', 'desc');
     }
+
+    public function payments()
+    {
+        return $this->morphMany('App\Models\Payment', 'payment');
+    }
+
+    public function getIsPaidAttribute()
+    {
+        return $this->payments()->where('status', 'success')->count() > 0;
+    }
+
 }
