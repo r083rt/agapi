@@ -666,4 +666,59 @@ class UserController extends Controller
         return response()->json($search);
     }
 
+    public function getActiveUsers()
+    {
+        $res = User::where('user_activated_at', '!=', null)
+            ->count();
+        return response()->json($res);
+    }
+
+    public function getMemberGrown()
+    {
+        $res = DB::table('users')
+            ->where('user_activated_at', '!=', null)
+            ->where('created_at', '!=', null)
+            ->select(
+                DB::raw('count(*) as total'),
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('MONTHNAME(created_at) as month')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->get();
+        return response()->json($res);
+    }
+
+    public function getMemberGrownYears()
+    {
+        $res = DB::table('users')
+            ->where('user_activated_at', '!=', null)
+            ->where('created_at', '!=', null)
+            ->select(
+                DB::raw('YEAR(created_at) as year'),
+            )
+            ->groupBy('year')
+            ->orderBy('year', 'desc')
+            ->get();
+        return response()->json($res);
+
+    }
+
+    public function getMemberGrownByYear($year)
+    {
+        $res = DB::table('users')
+            ->where('user_activated_at', '!=', null)
+            ->where('created_at', '!=', null)
+            ->whereYear('created_at', $year)
+            ->select(
+                DB::raw('count(*) as total'),
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('MONTHNAME(created_at) as month')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->get();
+        return response()->json($res);
+    }
+
 }

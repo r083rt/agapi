@@ -7,7 +7,6 @@ use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-
 class DpwDepartmentController extends Controller
 {
     public function DpwDepartment()
@@ -103,7 +102,7 @@ class DpwDepartmentController extends Controller
         return response()->json($res);
     }
 
-    public function getByTitle($provinceId, $title, $start_year)
+    public function getByTitle($provinceId, $title)
     {
         $res = DB::table('users')
             ->join('departments', 'users.id', '=', 'departments.user_id')
@@ -111,7 +110,6 @@ class DpwDepartmentController extends Controller
             ->where('departments.title', $title)
             ->where('departments.departmentable_type', 'App\Models\Province')
             ->where('departments.departmentable_id', $provinceId)
-            ->whereYear('departments.start_date', $start_year)
             ->select(
                 DB::raw('year(departments.start_date) as start_year'),
                 DB::raw('year(departments.end_date) as end_year'),

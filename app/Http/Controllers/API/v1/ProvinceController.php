@@ -74,6 +74,18 @@ class ProvinceController extends Controller
         //
     }
 
+    public function getProvinceById($provinceId)
+    {
+        $res = Province::findOrFail($provinceId);
+        return response()->json($res);
+    }
+
+    public function getProvinces()
+    {
+        $res = Province::get();
+        return response()->json($res);
+    }
+
     public function getPnsCount($provinceId)
     {
         $res = User::

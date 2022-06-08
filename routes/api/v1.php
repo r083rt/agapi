@@ -388,6 +388,14 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'comment' => 'CommentController',
         ]);
 
+        Route::get('/users/active/count', 'UserController@getActiveUsers');
+
+        Route::get('/users/active/listyear', 'UserController@getMemberGrownYears');
+
+        Route::get('/users/active/grownbyyear/{year}', 'UserController@getMemberGrownByYear');
+
+        Route::get('/users/active/grown', 'UserController@getMemberGrown');
+
         Route::get('/users/count', 'UserController@count');
 
         Route::get('/users/pns/search/{key}', 'UserController@searchPnsUsers');
@@ -480,9 +488,19 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::post('/payments/confirmovopayment', 'PaymentController@confirmOvoPayment');
 
+        Route::get('/departments/dpw/provinces/{id}/getbytitle/{title}', 'DpwDepartmentController@getByTitle');
+
+        Route::get('/departments/dpp/image', 'DppDepartmentController@getDepartmentTreeImage');
+
+        Route::get('/departments/dpp/getbytitle/{title}', 'DppDepartmentController@getByTitle');
+
         Route::get('/departments/dpp/getperiode', 'DppDepartmentController@getPeriode');
 
         Route::get('/departments/dpp/getbyperiode/{start_year}', 'DppDepartmentController@getByPeriode');
+
+        Route::get('/provinces/getprovinces', 'ProvinceController@getProvinces');
+
+        Route::get('/provinces/{id}/getprovincebyid', 'ProvinceController@getProvinceById');
 
         Route::get('/provinces/{id}/departments/dpw/getperiode', 'DpwDepartmentController@getPeriode');
 

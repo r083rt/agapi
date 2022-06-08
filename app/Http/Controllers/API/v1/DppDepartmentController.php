@@ -75,6 +75,8 @@ class DppDepartmentController extends Controller
         //
     }
 
+    // untuk mengambil data tahun periode berdasarkan data yang ada di database
+
     public function getPeriode()
     {
         $res = DB::table('departments')
@@ -88,6 +90,7 @@ class DppDepartmentController extends Controller
         return response()->json($res);
     }
 
+    // mengambil data semua jabatan dpp berdasarkan tahun periode yang dipilih
     public function getByPeriode($start_year)
     {
         $res = $this->DppDepartment()
@@ -97,13 +100,13 @@ class DppDepartmentController extends Controller
         return response()->json($res);
     }
 
-    public function getByTitle($title, $start_year)
+    // mengambil data jabatan tertentu ex. ketua umum semua tahun periode
+    public function getByTitle($title)
     {
         $res = DB::table('users')
             ->join('departments', 'users.id', '=', 'departments.user_id')
             ->where('departments.key', 'DPP')
             ->where('departments.title', $title)
-            ->whereYear('departments.start_date', $start_year)
             ->select(
                 DB::raw('year(departments.start_date) as start_year'),
                 DB::raw('year(departments.end_date) as end_year'),
