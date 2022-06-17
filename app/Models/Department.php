@@ -18,4 +18,14 @@ class Department extends Model
     {
         return $this->morphTo();
     }
+
+    public function sub_departments()
+    {
+        return $this->hasMany(Department::class, 'parent_id')->with('user.profile');
+    }
+
+    public function children()
+    {
+        return $this->sub_departments()->with('children');
+    }
 }

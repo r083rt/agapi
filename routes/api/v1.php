@@ -388,6 +388,24 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'comment' => 'CommentController',
         ]);
 
+        Route::get('/users/grown/year/{year}/total', 'UserController@getMemberGrownByYear');
+
+        Route::get('/users/grown/year/{year}/pnsmember', 'UserController@getPnsMemberByYear');
+
+        Route::get('/users/grown/year/{year}/nonpnsmember', 'UserController@getNonPnsMemberByYear');
+
+        Route::get('/users/grown/pnsmember', 'UserController@getPnsMember');
+
+        Route::get('/users/grown/year/{year}/extendedmember', 'UserController@getExtendedMemberByYear');
+
+        Route::get('/users/extendedmember', 'UserController@getExtendedMember');
+
+        Route::get('/users/{id}/kongres/getkongres', 'UserController@getKongres2022SuratMandat');
+
+        Route::post('/kongres/store', 'UserController@storeKongres2022SuratMandat');
+
+        Route::post('/kongres/payment/paymentUrl', 'PaymentController@createKongresPayment');
+
         Route::get('/users/active/count', 'UserController@getActiveUsers');
 
         Route::get('/users/active/listyear', 'UserController@getMemberGrownYears');

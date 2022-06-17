@@ -56,6 +56,7 @@ return [
         ],
         'wasabi' => [
             'driver' => 's3',
+            // 'root' => 'agpaiidigital',
             'key' => env('WAS_ACCESS_KEY_ID'),
             'secret' => env('WAS_SECRET_ACCESS_KEY'),
             'region' => env('WAS_DEFAULT_REGION'),
@@ -64,7 +65,7 @@ return [
         ],
         's3' => [
             'driver' => 's3',
-            'root' => 'agpaiidigital',
+            // 'root' => 'agpaiidigital',
             'key' => env('AWS_ACCESS_KEY_ID'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'region' => env('AWS_DEFAULT_REGION'),

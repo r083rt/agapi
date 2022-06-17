@@ -323,13 +323,16 @@ class User extends \TCG\Voyager\Models\User
             } else {
                 return false;
             }
-
         }
-
     }
 
     public function departments()
     {
         return $this->hasMany('App\Models\Department');
+    }
+
+    public function kongres_2022_surat_mandat()
+    {
+        return $this->morphOne('App\Models\File', 'fileable')->where('key', 'kongres_2022_surat_mandat');
     }
 }

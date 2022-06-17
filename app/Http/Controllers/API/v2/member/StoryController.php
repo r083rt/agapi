@@ -19,6 +19,7 @@ class StoryController extends Controller
         $stories = File::where('key', 'story')
             ->where('file_type', 'App\Models\User')
             ->with('author.profile')
+            ->whereDate('created_at', date('Y-m-d'))
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();

@@ -12,7 +12,7 @@ class DppDepartmentController extends Controller
 {
     public function DppDepartment()
     {
-        return Department::with('user.profile')
+        return Department::with('user.profile', 'children.user.profile')
             ->where('key', 'DPP');
     }
     /**

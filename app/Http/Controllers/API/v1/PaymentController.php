@@ -50,7 +50,7 @@ class PaymentController extends Controller
 
     /*
     Mengecek status dari midtrans
-    */
+     */
     public function getStatus($userId)
     {
         $user = User::findOrFail($userId);
@@ -77,7 +77,7 @@ class PaymentController extends Controller
                     $user->update(['user_activated_at' => $date]);
                     $user->payment_success = $payment;
                     break;
-                } elseif($payment->status == 'success'){
+                } elseif ($payment->status == 'success') {
                     $user->payment_success = $payment;
                     $user->update(['user_activated_at' => $date]);
                     break;
@@ -553,15 +553,17 @@ class PaymentController extends Controller
         if ($request->user()->user_activated_at == null) {
             $payment_value = setting('admin.member_price');
             $payment_text = "Pembayaran Member KTA";
+            $key = "pendaftaran";
         } else {
             $payment_value = setting('admin.extend_member_period');
             $payment_text = "Pembayaran Iuran Anggota Selama 6 Bulan";
+            $key = "perpanjangan_anggota";
         }
 
-        $data = new Payment(['value' => $payment_value]);
+        $data = new Payment(['value' => $payment_value, 'key' => $key]);
         $uniqueId = 1;
         try {
-            $payment = $request->user()->payment()->save($data);
+            $payment = $request->user()->save($data);
         } catch (\Illuminate\Database\QueryException $e) {
             $errorCode = $e->errorInfo[1];
             if ($errorCode == '1062') {
@@ -569,7 +571,7 @@ class PaymentController extends Controller
                     $uniqueId++;
                 }
                 $newdata = new Payment(['id' => $uniqueId, 'value' => $payment_value]);
-                $payment = $request->user()->payment()->save($newdata);
+                $payment = $request->user()->save($newdata);
             }
         }
         $data->id = $payment->id;
@@ -631,15 +633,17 @@ class PaymentController extends Controller
         if ($request->user()->user_activated_at == null) {
             $payment_value = setting('admin.member_price');
             $payment_text = "Pembayaran Member KTA";
+            $key = "pendaftaran";
         } else {
             $payment_value = setting('admin.extend_member_period');
             $payment_text = "Pembayaran Iuran Anggota Selama 6 Bulan";
+            $key = "perpanjangan_anggota";
         }
 
-        $data = new Payment(['value' => $payment_value]);
+        $data = new Payment(['value' => $payment_value, 'key' => $key]);
         $uniqueId = 1;
         try {
-            $payment = $request->user()->payment()->save($data);
+            $payment = $request->user()->save($data);
         } catch (\Illuminate\Database\QueryException $e) {
             $errorCode = $e->errorInfo[1];
             if ($errorCode == '1062') {
@@ -647,7 +651,7 @@ class PaymentController extends Controller
                     $uniqueId++;
                 }
                 $newdata = new Payment(['id' => $uniqueId, 'value' => $payment_value]);
-                $payment = $request->user()->payment()->save($newdata);
+                $payment = $request->user()->save($newdata);
             }
         }
         $data->id = $payment->id;
@@ -697,15 +701,17 @@ class PaymentController extends Controller
         if ($user->user_activated_at == null) {
             $payment_value = setting('admin.member_price');
             $payment_text = "Pembayaran Member KTA";
+            $key = "pendaftaran";
         } else {
             $payment_value = setting('admin.extend_member_period');
             $payment_text = "Pembayaran Iuran Anggota Selama 6 Bulan";
+            $key = "perpanjangan_anggota";
         }
 
-        $data = new Payment(['value' => $payment_value]);
+        $data = new Payment(['value' => $payment_value, 'key' => $key]);
         $uniqueId = 1;
         try {
-            $payment = $user->payment()->save($data);
+            $payment = $user->save($data);
         } catch (\Illuminate\Database\QueryException $e) {
             $errorCode = $e->errorInfo[1];
             if ($errorCode == '1062') {
@@ -713,7 +719,7 @@ class PaymentController extends Controller
                     $uniqueId++;
                 }
                 $newdata = new Payment(['id' => $uniqueId, 'value' => $payment_value]);
-                $payment = $request->user()->payment()->save($newdata);
+                $payment = $request->user()->save($newdata);
             }
         }
         $data->id = $payment->id;
@@ -992,7 +998,7 @@ class PaymentController extends Controller
         $payment->necessary_id = $necessary->id;
         $payment->type = 'OUT';
         $payment->value = intval($request->transfer_value);
-        $transaction->payment()->save($payment);
+        $transaction->save($payment);
         return $transaction->load('payment');
         //$payment->status='pend
     }
@@ -1022,7 +1028,7 @@ class PaymentController extends Controller
         $payment->necessary_id = $necessary->id;
         $payment->type = 'OUT';
         $payment->value = intval($request->transfer_value);
-        $transaction->payment()->save($payment);
+        $transaction->save($payment);
         return $transaction->load('payment');
         //$payment->status='pend
     }
@@ -1052,7 +1058,7 @@ class PaymentController extends Controller
         $payment->necessary_id = $necessary->id;
         $payment->type = 'OUT';
         $payment->value = intval($request->transfer_value);
-        $transaction->payment()->save($payment);
+        $transaction->save($payment);
         return $transaction->load('payment');
         //$payment->status='pend
     }
@@ -1104,8 +1110,8 @@ class PaymentController extends Controller
         $user = $request->user();
 
         // jika dalam 1 hari ini ada payment pending, ambil payment itu
-        $last_today_pending_payment = $user->getTodayPendingPayment()->first();
-        if($last_today_pending_payment){
+        $last_today_pending_payment = $user->getTodayPending->first();
+        if ($last_today_pending_payment) {
             $last_today_pending_payment->load('payment_vendor');
             return $last_today_pending_payment;
         }
@@ -1122,7 +1128,7 @@ class PaymentController extends Controller
         do {
             # code...
             $client = new Client();
-            $res = $client->post(env('MASTER_PAYMENT_URL','https://phpstack-530371-1844729.cloudwaysapps.com').'/createpayment', [
+            $res = $client->post(env('MASTER_PAYMENT_URL', 'https://phpstack-530371-1844729.cloudwaysapps.com') . '/createpayment', [
                 'json' => [
                     'value' => $payment_value,
                     'payment_vendor' => $request->payment_vendor,
@@ -1133,7 +1139,7 @@ class PaymentController extends Controller
             try {
                 //code...
                 $data = new Payment(['payment_vendor_id' => $request->payment_vendor, 'master_payment_id' => $data['id'], 'value' => $data['value']]);
-                $store = $request->user()->payment()->save($data);
+                $store = $request->user()->save($data);
                 if ($store) {
                     $try = false;
                 }
@@ -1149,18 +1155,18 @@ class PaymentController extends Controller
     // public function checkUserIsExpired($user)
     /* cek pembayaran hanya hari ini
     / jika tgl 1 user A membuat transaksi 35001, tpi ditransfer tgl 2, maka transaksi tsb tidak terbaca
-    */
+     */
     public function confirmUniquePayment(Request $request)
     {
         $user = $request->user();
 
         $items = Payment::with('payment_vendor')->where('master_payment_id', '!=', null)
-        ->has('payment_vendor')->whereDate('created_at', Carbon::today())
-        ->whereHas('user', function ($query) use ($user) {
-            $query->where('users.id', $user->id);
-        })
-        ->orderBy('id','DESC') // harus di `order by payments.id DESC` agar payment 'perpanjang' berada di urutan atas
-        ->get();
+            ->has('payment_vendor')->whereDate('created_at', Carbon::today())
+            ->whereHas('user', function ($query) use ($user) {
+                $query->where('users.id', $user->id);
+            })
+            ->orderBy('id', 'DESC') // harus di `order by payments.id DESC` agar payment 'perpanjang' berada di urutan atas
+            ->get();
         // return $items;die;
         // $items[2]->value = 10000;
 
@@ -1169,18 +1175,18 @@ class PaymentController extends Controller
         $payment = null;
         foreach ($items as $item) {
 
-            $url = env('MASTER_PAYMENT_URL','https://phpstack-530371-1844729.cloudwaysapps.com');
+            $url = env('MASTER_PAYMENT_URL', 'https://phpstack-530371-1844729.cloudwaysapps.com');
 
             $client = new \GuzzleHttp\Client();
-            $res = $client->get($url."/checkstatus/{$item->master_payment_id}");
+            $res = $client->get($url . "/checkstatus/{$item->master_payment_id}");
             $result_json = json_decode($res->getBody());
 
-            if(json_last_error() != JSON_ERROR_NONE){
+            if (json_last_error() != JSON_ERROR_NONE) {
                 return abort(500, 'Format JSON dari master payment invalid');
             }
 
             // print_r($result_json);die;
-            if($result_json->status=='success'){
+            if ($result_json->status == 'success') {
                 // set payment ke sukses dan set user_activated_at berdasarkan unix_timestamp payment tsb dibuat
                 $item->setSuccess($result_json->cekmutasi_response[0]->unix_timestamp);
                 $paid = true;
@@ -1195,19 +1201,69 @@ class PaymentController extends Controller
             $user->payment_success = $payment;
             return $user;
 
-        }else{
+        } else {
             return abort(404, 'Belum ada yang dibayarkan');
         }
 
-
     }
-    public function paymentHandler(Request $request){
+    public function paymentHandler(Request $request)
+    {
         $request->validate([
-            'master_payment_id'=>'required',
-            'data.'
+            'master_payment_id' => 'required',
+            'data.',
         ]);
         // $master_payment_id = $request->master_payment_id;
+    }
 
+    public function createKongresPayment(Request $request)
+    {
+        $payment_value = setting('admin.kongres_2022_price');
+
+        $request->validate([
+            'user_id' => 'required',
+            function ($validator) { // validasi user_id
+                $user = User::findOrFail($validator->getData()['user_id']);
+                if ($user->user_activated_at == null) {
+                    $validator->errors()->add('user_id', 'User belum menjadi anggota');
+                }
+            },
+            function ($validator) { // pengecekan user pernah melakukan pembayaran kongres
+                $user = User::findOrFail($validator->getData()['user_id']);
+                $payment = $user->where('status', 'success')
+                    ->where('key', 'pendaftaran_kongres_tahun_2022')
+                    ->exists();
+                if ($payment) {
+                    $validator->errors()->add('user_id', 'User sudah melakukan pembayaran kongres');
+                }
+            },
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+
+        $payment = new Payment([
+            'value' => $payment_value,
+            'key' => "pendaftaran_kongres_tahun_2022",
+            'type' => 'IN',
+        ]);
+
+        $user->payments()->save($payment);
+
+        $payload = [
+            'transaction_details' => [
+                'order_id' => $payment->id,
+                'gross_amount' => $payment->value,
+            ],
+            'customer_details' => [
+                'first_name' => $user->name,
+                'email' => $user->email,
+            ],
+        ];
+
+        $paymentUrl = Veritrans_Snap::createTransaction($payload)->redirect_url;
+
+        $this->response['payment_url'] = $paymentUrl;
+
+        return response()->json($this->response);
 
     }
 

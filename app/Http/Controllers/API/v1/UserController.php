@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v1;
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\District;
+use App\Models\File;
 use App\Models\Like;
 use App\Models\Profile;
 use App\Models\Rating;
@@ -719,6 +720,140 @@ class UserController extends Controller
             ->orderBy('year', 'asc')
             ->get();
         return response()->json($res);
+    }
+
+    // mengambil data member yang melakukan perpanjangan tiap bulan dan tahun nya
+    public function getExtendedMember()
+    {
+        // ini versi code mysql nya untuk di test di phpmyadmin
+        // $res = DB::select("select count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total, YEAR(payments.created_at) as year, MONTHNAME(payments.created_at) as month from `users` inner join `payments` on `users`.`id` = `payments`.`payment_id` where `user_activated_at` is not null and `payments`.`payment_type` = 'App\\\Models\\\User' group by `year`, `month` order by `year` asc");
+        $res = DB::table('users')
+            ->where('user_activated_at', '!=', null)
+            ->join('payments', 'users.id', '=', 'payments.payment_id')
+            ->where('payments.payment_type', '=', 'App\Models\User')
+            ->select(
+                DB::raw("count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total"),
+                DB::raw('YEAR(payments.created_at) as year'),
+                DB::raw('MONTHNAME(payments.created_at) as month')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->get();
+        return response()->json($res);
+    }
+
+    public function getExtendedMemberByYear($year)
+    {
+        // ini versi code mysql nya untuk di test di phpmyadmin
+        // $res = DB::select("select count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total, YEAR(payments.created_at) as year, MONTHNAME(payments.created_at) as month from `users` inner join `payments` on `users`.`id` = `payments`.`payment_id` where `user_activated_at` is not null and `payments`.`payment_type` = 'App\\\Models\\\User' group by `year`, `month` order by `year` asc");
+        $res = DB::table('users')
+            ->where('user_activated_at', '!=', null)
+            ->join('payments', 'users.id', '=', 'payments.payment_id')
+            ->where('payments.payment_type', '=', 'App\Models\User')
+            ->whereYear('users.created_at', $year)
+            ->select(
+                DB::raw("count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total"),
+                DB::raw('YEAR(payments.created_at) as year'),
+                DB::raw('MONTHNAME(payments.created_at) as month')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->get();
+        return response()->json($res);
+    }
+
+    public function getPnsMember()
+    {
+        $res = User::whereHas('pns_status', function ($query) {
+            $query->where('is_pns', 1);
+        })
+            ->select(
+                DB::raw('count(*) as total'),
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('MONTHNAME(created_at) as month')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->get();
+        return response()->json($res);
+    }
+
+    public function getPnsMemberByYear($year)
+    {
+        $res = User::whereHas('pns_status', function ($query) {
+            $query->where('is_pns', 1);
+        })
+            ->whereYear('created_at', '=', $year)
+            ->select(
+                DB::raw('count(*) as total'),
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('MONTHNAME(created_at) as month')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->get();
+        return response()->json($res);
+    }
+
+    public function getNonPnsMember()
+    {
+        $res = User::whereHas('pns_status', function ($query) {
+            $query->where('is_pns', 0);
+        })
+            ->select(
+                DB::raw('count(*) as total'),
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('MONTHNAME(created_at) as month')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->get();
+        return response()->json($res);
+    }
+
+    public function getNonPnsMemberByYear($year)
+    {
+        $res = User::whereYear('created_at', '=', $year)
+            ->whereHas('pns_status', function ($query) use ($year) {
+                $query->where('is_pns', 0)->whereYear('created_at', '=', $year);
+            })
+            ->select(
+                DB::raw('count(*) as total'),
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('MONTHNAME(created_at) as month')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->get();
+        return response()->json($res);
+    }
+
+    public function getKongres2022SuratMandat($userId)
+    {
+        $file = File::where('file_id', $userId)
+            ->where('key', 'kongres_2022_surat_mandat')
+            ->first();
+        return response()->json($file);
+    }
+
+    public function storeKongres2022SuratMandat(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|max:2048',
+        ]);
+        $filename = $request->file('file')->getClientOriginalName();
+        $filemimetype = $request->file('file')->getClientMimeType();
+        $path = $request->file('file')->store('files/kongres_2022_surat_mandat');
+        $file = new File();
+        $file->file_type = "App\Models\User";
+        $file->file_id = auth('api')->user()->id;
+        $file->src = $path;
+        $file->name = $filename;
+        $file->type = $filemimetype;
+        $file->key = 'kongres_2022_surat_mandat';
+        $file->save();
+        return response()->json($file);
+
     }
 
 }
