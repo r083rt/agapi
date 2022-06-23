@@ -2,12 +2,12 @@
 
 namespace App\Jobs;
 
+use App\Models\Payment;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Models\Payment;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Veritrans_Notification;
 
 class ProcessHandlePayment implements ShouldQueue
@@ -37,7 +37,8 @@ class ProcessHandlePayment implements ShouldQueue
         $type = $notif->payment_type;
         $orderId = $notif->order_id;
         $fraud = $notif->fraud_status;
-        $payment = Payment::findOrFail($orderId);
+
+        $payment = Payment::where('midtrans_id', $orderId)->firstOrFail();
 
         if ($transaction == 'capture') {
 

@@ -19,7 +19,11 @@ class User extends \TCG\Voyager\Models\User
 
     protected $fillable = [
         'name', 'email', 'password', 'kta_id', 'user_activated_at', 'avatar', 'role_id',
-        'point',
+        'point', 'expired_at',
+    ];
+
+    protected $dates = [
+        'user_activated_at',
     ];
 
     /**
@@ -42,7 +46,8 @@ class User extends \TCG\Voyager\Models\User
 
     public function payment()
     {
-        return $this->morphOne('App\Models\Payment', 'payment');
+        return $this->hasOne(Payment::class);
+        // return $this->morphOne('App\Models\Payment', 'payment');
     }
 
     public function profile()
@@ -52,7 +57,8 @@ class User extends \TCG\Voyager\Models\User
 
     public function payments()
     {
-        return $this->morphMany('App\Models\Payment', 'payment');
+        return $this->hasMany('App\Models\Payment');
+        // return $this->morphMany('App\Models\Payment', 'payment');
     }
 
     public function guest_events()

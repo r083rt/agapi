@@ -2,13 +2,14 @@
 
 namespace App\Jobs;
 
+use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Payment;
 use Veritrans_Snap;
 
 class ProcessMakePayment implements ShouldQueue
@@ -34,77 +35,54 @@ class ProcessMakePayment implements ShouldQueue
     public function handle()
     {
         //
-        if (strtotime(Auth::user()->created_at) < strtotime('-6 months')) {
-            // jika umur akunnya lebih dari 6 bulan akan dikenakan biaya perpanjangan
-            $payment_value = setting('admin.extend_member_period');
-            $payment_text = "Pembayaran Iuran Anggota Selama 6 Bulan";
-        } else {
-            // bula kurang dari 6 bulan akan dikenakan biaya daftar baru
+
+        $user = User::findOrFail(Auth::id());
+
+        if ($user->user_activated_at == null) {
             $payment_value = setting('admin.member_price');
             $payment_text = "Pembayaran Member KTA";
+            $key = "pendaftaran";
+        } else {
+            $payment_value = setting('admin.extend_member_period');
+            $payment_text = "Pembayaran Iuran Anggota Selama 6 Bulan";
+            $key = "perpanjangan_anggota";
         }
 
-        $data = new Payment(['value' => $payment_value]);
-        $uniqueId = 1;
-        try {
-            $payment = Auth::user()->payment()->save($data);
-        } catch (\Illuminate\Database\QueryException $e) {
-            $errorCode = $e->errorInfo[1];
-            if ($errorCode == '1062') {
-                while (Payment::where('id', $uniqueId)->exists()) {
-                    $uniqueId++;
-                }
-                $newdata = new Payment(['id' => $uniqueId, 'value' => $payment_value]);
-                $payment = Auth::user()->payment()->save($newdata);
-            }
-        }
-        $data->id = $payment->id;
-        $data->update();
+        // generate unique Id untuk midtrans transaction
+        $midtransId = "AD-$user->id-" . time();
+
+        $data = new Payment([
+            'value' => $payment_value,
+            'key' => $key,
+            'midtrans_id' => $midtransId,
+        ]);
+
+        $payment = $user->payments()->save($data);
 
         $payload = [
             'transaction_details' => [
-                'order_id'      => $data->id,
-                'gross_amount'  => $payment->value,
+                'order_id' => $midtransId,
+                'gross_amount' => $payment->value,
             ],
             'customer_details' => [
-                'first_name'    => Auth::user()->name,
-                'email'         => Auth::user()->email
+                'first_name' => $user->name,
+                'email' => $user->email,
             ],
             'item_details' => [
                 [
-                    'id'       => $payment->id,
-                    'price'    => $payment->value,
+                    'id' => $payment->id,
+                    'price' => $payment->value,
                     'quantity' => 1,
-                    'name'     => ucwords(str_replace('_', ' ', $payment_text))
-                ]
-            ]
+                    'name' => ucwords(str_replace('_', ' ', $payment_text)),
+                ],
+            ],
         ];
 
-        do {
-            try {
-                $tryAgain = false;
-                $snapToken = Veritrans_Snap::getSnapToken($payload);
-                // $paymentUrl = Veritrans_Snap::createTransaction($payload)->redirect_url;
-            } catch (\Exception $e) {
-                $tryAgain = true;
-                if ($e->getCode() == '400') {
-                    $uniqueId++;
-                    $data->id = $uniqueId;
-                    $data->update();
-                    $payload['transaction_details']['order_id'] = $data->id;
-                    $snapToken = Veritrans_Snap::getSnapToken($payload);
-                    // $paymentUrl = Veritrans_Snap::createTransaction($payload)->redirect_url;
-                }
-            }
-        } while ($tryAgain);
+        $snapToken = Veritrans_Snap::getSnapToken($payload);
 
-        $payment->snap_token = $snapToken;
-        $payment->update();
-
-        // Beri response snap token
         $this->response['snap_token'] = $snapToken;
-        // $this->response['payment_url'] = $paymentUrl;
 
         return response()->json($this->response);
+
     }
 }

@@ -41,4 +41,14 @@ class Event extends Model
         return $this->payments()->where('status', 'success')->count() > 0;
     }
 
+    public function partisipants()
+    {
+        return $this->belongsToMany('App\Models\User', 'event_guests')->withPivot('created_at')->withTimestamps()->orderBy('created_at', 'desc');
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo('App\Models\User', 'user_id');
+    }
+
 }

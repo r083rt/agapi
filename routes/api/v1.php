@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -210,7 +212,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         // });
 
         Route::get('/auth/assigment/student/finishedtoday', function (Request $request) {
-            $userProfile = auth('api')->user()->load('profile');
+            $user = App\Models\User::findOrfail(auth('api')->user()->id);
+            $userProfile = $user->load('profile');
             $educationalLevelId = $userProfile->profile->educational_level_id;
             if ($educationalLevelId == null) {
                 return response()->json(['error_jenjang' => 'Harus pilih jenjang dulu']);
@@ -400,11 +403,45 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::get('/users/extendedmember', 'UserController@getExtendedMember');
 
-        Route::get('/users/{id}/kongres/getkongres', 'UserController@getKongres2022SuratMandat');
+        Route::get('/users/{id}/kongres/getkongres', 'Kongres2022Controller@getKongres2022SuratMandat');
 
-        Route::post('/kongres/store', 'UserController@storeKongres2022SuratMandat');
+        Route::post('/kongres/store', 'Kongres2022Controller@storeKongres2022SuratMandat');
 
-        Route::post('/kongres/payment/paymentUrl', 'PaymentController@createKongresPayment');
+        Route::post('/kongres/payment/paymentUrl', 'Kongres2022Controller@createKongres2022Payment');
+
+        Route::post('/kongres/attendance/store', 'AttendanceController@store');
+
+        Route::get('/kongres/setting', 'Kongres2022Controller@getSetting');
+
+        Route::get('/kongres/users/{id}/payment/checkstatus', 'Kongres2022Controller@checkPaymentStatus');
+
+        Route::get('/kongres/users/{id}/payment/checkpayment', 'Kongres2022Controller@checkKongres2022Payment');
+
+        Route::get('events/users/{id}/profitsum', 'EventController@getEventProfitSum');
+
+        Route::get('events/users/{id}/profit', 'EventController@getEventProfit');
+
+        Route::get('events/users/{id}/profitdates', 'EventController@getEventProtitDates');
+
+        Route::get('events/users/{id}/withdrawprofit', 'EventController@getWithdrawEventProfit');
+
+        Route::get('events/users/{id}/withdrawprofitdates', 'EventController@getWithdrawEventProfitDates');
+
+        Route::get('events/payments/{id}/withdrawdetail', 'EventController@withdrawDetail');
+
+        Route::post('events/users/requestwithdraw', 'EventController@requestWithdrawEventProfit');
+
+        Route::get('events/{id}/registered/users', 'EventController@getRegisteredUsers');
+
+        Route::post('events/{id}/paymenturl', 'EventController@paymentUrl');
+
+        Route::get('events/{id}/paymentstatus', 'EventController@checkPaymentStatus');
+
+        Route::get('events/{id}/partisipants', 'EventController@getPartisipants');
+
+        Route::get('events/{id}/registered/users/count', 'EventController@getRegisteredUsersCount');
+
+        Route::get('events/{id}/partisipants/count', 'EventController@getPartisipantsCount');
 
         Route::get('/users/active/count', 'UserController@getActiveUsers');
 
@@ -421,6 +458,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/users/nonpns/search/{key}', 'UserController@searchNonPnsUsers');
 
         Route::get('/users/pns/count', 'UserController@getPnsCount');
+
+        Route::get('/users/getall', 'UserController@index');
+
+        Route::get('/users/getall/count', 'UserController@count');
 
         Route::get('/users/getexpired', 'UserController@getExpiredMembers');
 
@@ -530,11 +571,17 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::get('/provinces/{id}/pnscount', 'ProvinceController@getPnsCount');
 
+        Route::get('/provinces/{id}/getallmembers', 'UserController@getByProvince');
+
         Route::get('/provinces/{id}/getexpiredmembers', 'ProvinceController@getExpiredMembers');
 
         Route::get('/provinces/{id}/getexpiredmembers/count', 'ProvinceController@getExpiredMembersCount');
 
+        Route::get('/provinces/{id}/getallmembers/count', 'UserController@getByProvinceCount');
+
         Route::get('/provinces/{id}/getexpiredmembers/search/{key}', 'ProvinceController@searchExpiredMembers');
+
+        Route::get('/provinces/{id}/getallmembers/search/{key}', 'UserController@searchByProvince');
 
         Route::get('/provinces/{id}/pnsusers', 'ProvinceController@getPnsUsers');
 
@@ -548,11 +595,17 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::get('/cities/{cityId}/pnscount', 'CityController@getPnsCount');
 
+        Route::get('/cities/{cityId}/getallmembers', 'UserController@getByCity');
+
         Route::get('/cities/{cityId}/getexpiredmembers', 'CityController@getExpiredMembers');
 
         Route::get('/cities/{cityId}/getexpiredmembers/count', 'CityController@getExpiredMembersCount');
 
+        Route::get('/cities/{cityId}/getallmembers/count', 'UserController@getByCityCount');
+
         Route::get('/cities/{cityId}/getexpiredmembers/search/{key}', 'CityController@searchExpiredMembers');
+
+        Route::get('/cities/{cityId}/getallmembers/search/{key}', 'UserController@searchByCity');
 
         Route::get('/cities/{cityId}/pnsusers', 'CityController@getPnsUsers');
 
@@ -566,9 +619,15 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::get('/districts/{districtId}/pnscount', 'DistrictController@getPnsCount');
 
+        Route::get('/districts/{districtId}/getallmembers', 'UserController@getByDistrict');
+
         Route::get('/districts/{districtId}/getexpiredmembers', 'DistrictController@getExpiredMembers');
 
+        Route::get('/districts/{districtId}/getallmembers/count', 'UserController@getByDistrictCount');
+
         Route::get('/districts/{districtId}/getexpiredmembers/count', 'DistrictController@getExpiredMembersCount');
+
+        Route::get('/districts/{districtId}/getallmembers/search/{key}', 'UserController@searchByDistrict');
 
         Route::get('/districts/{districtId}/getexpiredmembers/search/{key}', 'DistrictController@searchExpiredMembers');
 
@@ -708,7 +767,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
     Route::get('/assigments/{id}/{teacher_id}/downloadexcel', 'AssigmentController@downloadexcel');
 
     Route::get('/testgan', function () {
-        return \DB::table('users')->paginate();
+        return DB::table('users')->paginate();
         $questionnary_id = 1;
         $res = \App\Models\QuestionList::with(['answer_lists' => function ($query) {
             $query->withCount('answers');

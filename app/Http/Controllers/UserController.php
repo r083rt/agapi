@@ -268,4 +268,12 @@ class UserController extends Controller
         // return response()->json($user);
         return response(Storage::disk('public')->get($user))->header('Content-Type', 'image/png');
     }
+
+    public function addExpiredDate()
+    {
+        // buat tanggal expired dari user_activated_at ditambah 6 bulan di user yang ada user_activated_at dalam bentuk mysql native
+        $db = DB::update('update users set expired_at = DATE_ADD(user_activated_at, INTERVAL 6 MONTH)');
+        return response()->json($db);
+
+    }
 }

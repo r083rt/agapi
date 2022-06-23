@@ -24,32 +24,14 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
-        if (Auth::user()->hasRole('admin')) {
-            $users = User::with('profile.district', 'role')
-                ->where('user_activated_at', '!=', null)
-                ->whereIn('role_id', [2, 7, 9, 10, 11])
-                ->paginate($request->show ?? 10);
-        } elseif (Auth::user()->hasRole('DPP')) {
-            $users = User::with('profile.district', 'role')->get();
-        } elseif (Auth::user()->hasRole('DPW')) {
-            $users = User::with('profile', 'role')->whereHas('profile.province', function ($query) {
-                $query->where('id', Auth::user()->province_id);
-            })->get();
-        } elseif (Auth::user()->hasRole('DPD')) {
-            $users = User::with('profile', 'role')->whereHas('profile.city', function ($query) {
-                $query->where('id', Auth::user()->city_id);
-            })->get();
-        } elseif (Auth::user()->hasRole('DPC')) {
-            $users = User::with('profile', 'role')->whereHas('profile.district', function ($query) {
-                $query->where('id', Auth::user()->province_id);
-            })->get();
-        } else {
-            $users = User::with('profile', 'role')->where('user_activated_at', '!=', null)->paginate($request->show ?? 10);
-        }
+        $res = User::with('profile', 'role')
+            ->where('user_activated_at', '!=', null)
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->paginate();
 
-        return response()->json($users);
+        return response()->json($res);
     }
 
     /**
@@ -269,15 +251,6 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //return $request->profile;
-        //return $request;
-        // Validator::make($request->all(), [
-        //     'profile.grade_id' => function ($attribute, $value, $fail)use($request){
-        //         if($request['profile']['educational_level_id']!=null && $value==null){
-        //             $fail('Kelas harus diisi');
-        //         }
-        //     },
-        // ])->validate();
         $user = User::with('profile')->findOrFail($id);
         $oldphoto = $user->avatar;
         $user->fill($request->all());
@@ -421,37 +394,109 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function getByProvince(Request $request, $provinceId)
+    public function getByProvince($provinceId)
     {
         $users = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
             ->whereIn('role_id', [2, 7, 9, 10, 11])
             ->whereHas('profile', function ($query) use ($provinceId) {
                 $query->where('province_id', $provinceId);
-            })->paginate($request->show ?? 10);
+            })->paginate();
         return response()->json($users);
     }
 
-    public function getByCity(Request $request, $cityId)
+    public function searchByProvince($provinceId, $key)
     {
         $users = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
             ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('profile', function ($query) use ($provinceId) {
+                $query->where('province_id', $provinceId);
+            })
+            ->where('name', 'like', '%' . $key . '%')
+            ->paginate();
+        return response()->json($users);
+    }
+
+    public function getByProvinceCount($provinceId)
+    {
+        $users = User::with('role', 'profile')
+            ->where('user_activated_at', '!=', null)
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('profile', function ($query) use ($provinceId) {
+                $query->where('province_id', $provinceId);
+            })->count();
+        return response()->json($users);
+    }
+
+    public function getByCity($cityId)
+    {
+        $res = User::with('role', 'profile')
+            ->where('user_activated_at', '!=', null)
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
             ->whereHas('profile', function ($query) use ($cityId) {
                 $query->where('city_id', $cityId);
-            })->paginate($request->show ?? 10);
-        return response()->json($users);
+            })->paginate();
+        return response()->json($res);
+    }
+
+    public function searchByCity($cityId, $key)
+    {
+        $res = User::with('role', 'profile')
+            ->where('user_activated_at', '!=', null)
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('profile', function ($query) use ($cityId) {
+                $query->where('city_id', $cityId);
+            })
+            ->where('name', 'like', '%' . $key . '%')
+            ->paginate();
+        return response()->json($res);
+    }
+
+    public function getByCityCount($cityId)
+    {
+        $res = User::with('role', 'profile')
+            ->where('user_activated_at', '!=', null)
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('profile', function ($query) use ($cityId) {
+                $query->where('city_id', $cityId);
+            })->count();
+        return response()->json($res);
     }
 
     public function getByDistrict($districtId)
     {
-        $users = User::with('role', 'profile')
+        $res = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
             ->whereIn('role_id', [2, 7, 9, 10, 11])
             ->whereHas('profile', function ($query) use ($districtId) {
                 $query->where('district_id', $districtId);
             })->get();
-        return response()->json($users);
+        return response()->json($res);
+    }
+
+    public function searchByDistrict($districtId, $key)
+    {
+        $res = User::with('role', 'profile')
+            ->where('user_activated_at', '!=', null)
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('profile', function ($query) use ($districtId) {
+                $query->where('district_id', $districtId);
+            })
+            ->where('name', 'like', '%' . $key . '%')
+            ->get();
+        return response()->json($res);
+    }
+
+    public function getByDistrictCount($districtId)
+    {
+        $res = User::with('role', 'profile')
+            ->where('user_activated_at', '!=', null)
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('profile', function ($query) use ($districtId) {
+                $query->where('district_id', $districtId);
+            })->count();
+        return response()->json($res);
     }
 
     public function searchbyname($key)
@@ -644,8 +689,11 @@ class UserController extends Controller
 
     public function getExpiredMembersCount()
     {
-        $res = User::where('user_activated_at', '!=', null)
-            ->where('user_activated_at', '<', (new \Carbon\Carbon)->submonths(6))
+        // menghitung jumlah member yang sudah expired, tanggal expired adalah user_activated_at + 6 bulan
+        $res = User::
+            where('user_activated_at', '!=', null)
+            ->whereDate('user_activated_at', '<', \Carbon\Carbon::now()->subMonths(6)->format('Y-m-d'))
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
             ->count();
         return response()->json($res);
     }
@@ -670,6 +718,7 @@ class UserController extends Controller
     public function getActiveUsers()
     {
         $res = User::where('user_activated_at', '!=', null)
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
             ->count();
         return response()->json($res);
     }
@@ -826,34 +875,6 @@ class UserController extends Controller
             ->orderBy('year', 'asc')
             ->get();
         return response()->json($res);
-    }
-
-    public function getKongres2022SuratMandat($userId)
-    {
-        $file = File::where('file_id', $userId)
-            ->where('key', 'kongres_2022_surat_mandat')
-            ->first();
-        return response()->json($file);
-    }
-
-    public function storeKongres2022SuratMandat(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|file|max:2048',
-        ]);
-        $filename = $request->file('file')->getClientOriginalName();
-        $filemimetype = $request->file('file')->getClientMimeType();
-        $path = $request->file('file')->store('files/kongres_2022_surat_mandat');
-        $file = new File();
-        $file->file_type = "App\Models\User";
-        $file->file_id = auth('api')->user()->id;
-        $file->src = $path;
-        $file->name = $filename;
-        $file->type = $filemimetype;
-        $file->key = 'kongres_2022_surat_mandat';
-        $file->save();
-        return response()->json($file);
-
     }
 
 }
