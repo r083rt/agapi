@@ -150,12 +150,13 @@ class PaymentController extends Controller
         // generate unique Id untuk midtrans transaction
         $midtransId = "AD-$user->id-" . time();
 
-        $data = new Payment([
+        $payment = new Payment([
             'value' => $payment_value,
             'key' => $key,
             'midtrans_id' => $midtransId,
         ]);
-        $payment = $user->payments()->save($data);
+
+        $user->payments()->save($payment);
 
         $payload = [
             'transaction_details' => [
