@@ -36,16 +36,14 @@ class PaymentController extends Controller
                 $query
                     ->orderBy('id', 'DESC')
                     ->where('value', setting('admin.member_price'))
-                    ->whereDate('created_at', date('Y-m-d'))
-                    ->first();
+                    ->get();
             }]);
         } else {
             //bayar perpanjangan
             $user->load(['payments' => function ($query) {
                 $query->orderBy('id', 'DESC')
-                    ->whereDate('created_at', date('Y-m-d'))
                     ->where('value', setting('admin.extend_member_period'))
-                    ->first();
+                    ->get();
             }]);
         }
         return response()->json($user);
@@ -98,13 +96,13 @@ class PaymentController extends Controller
         // generate unique Id untuk midtrans transaction
         $midtransId = "AD-$user->id-" . time();
 
-        $data = new Payment([
+        $payment = new Payment([
             'value' => $payment_value,
             'key' => $key,
             'midtrans_id' => $midtransId,
         ]);
 
-        $payment = $user->payments()->save($data);
+        $user->payments()->save($payment);
 
         $payload = [
             'transaction_details' => [
