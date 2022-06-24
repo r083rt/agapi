@@ -46,7 +46,7 @@ class PaymentController extends Controller
                     ->get();
             }]);
         }
-        return response()->json($user);
+        // return response()->json($user);
 
         foreach ($user->payments as $p => $payment) {
             # code...
