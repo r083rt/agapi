@@ -120,7 +120,7 @@ class EventController extends Controller
 
     public function getEventById($id)
     {
-        $event = Event::with('users.profile', 'user', 'users.role', 'event_guests')->findOrFail($id);
+        $event = Event::with('users.profile', 'user.profile', 'users.role', 'event_guests')->findOrFail($id);
         return response()->json($event);
     }
 
