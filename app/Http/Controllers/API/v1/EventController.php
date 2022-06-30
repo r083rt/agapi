@@ -37,6 +37,7 @@ class EventController extends Controller
         $request->validate([
             'name' => 'required',
             'start_at' => 'required',
+            'end_at' => 'required',
             function ($validator) { // validasi start_at
                 $start_at = $validator->getData()['start_at'];
                 $now = Carbon::now();
@@ -46,9 +47,10 @@ class EventController extends Controller
             },
         ]);
         $event = new Event;
-        $event->fill($request->except('start_at'));
+        $event->fill($request->except(['start_at', 'end_at']));
         $event->user_id = $request->user()->id;
         $event->start_at = date('Y-m-d h:i:s', strtotime($request->start_at));
+        $event->end_at = date('Y-m-d h:i:s', strtotime($request->end_at));
         $event->save();
 
         // $request->user()->guest_events()->sync($event, false);
@@ -64,7 +66,14 @@ class EventController extends Controller
      */
     public function show($id)
     {
-        $event = Event::with('users', 'user', 'partisipants', 'creator')->findOrFail($id);
+        $event = Event::with([
+            'users',
+            'user',
+            'partisipants',
+            'creator',
+            'registered_users',
+            'attended_users',
+        ])->findOrFail($id);
         return response()->json($event);
     }
 
@@ -78,6 +87,17 @@ class EventController extends Controller
     public function update(Request $request, $id)
     {
         //
+        $request->validate([
+            'name' => 'required',
+        ]);
+
+        $event = Event::findOrFail($id);
+        $event->name = $request->name;
+        if ($request->has('description')) {
+            $event->description = $request->description;
+        }
+        $event->save();
+        return response()->json($event);
     }
 
     /**
@@ -120,7 +140,7 @@ class EventController extends Controller
 
     public function getEventById($id)
     {
-        $event = Event::with('users.profile', 'user.profile', 'users.role', 'event_guests')->findOrFail($id);
+        $event = Event::with('users.profile', 'user.profile', 'users.role', 'event_guests', 'registered_users', 'attended_users', 'guide_book', 'banner')->findOrFail($id);
         return response()->json($event);
     }
 
@@ -299,7 +319,7 @@ class EventController extends Controller
                 $query->where('id', $userId);
             })
             ->where('key', 'pembayaran_acara')
-            ->where('type', 'IN')
+            ->where('payments.type', 'IN')
             ->where('payment_type', 'App\Models\Event')
             ->where('status', 'success')
             ->select(

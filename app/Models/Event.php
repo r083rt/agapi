@@ -46,6 +46,28 @@ class Event extends Model
         return $this->belongsToMany('App\Models\User', 'event_guests')->withPivot('created_at')->withTimestamps()->orderBy('created_at', 'desc');
     }
 
+    // users yang sudah melakukan pembayaran dan sukses dikatakan telah terdaftar
+    public function registered_users()
+    {
+        return $this->belongsTomany('App\Models\User', 'payments', 'payment_id', 'user_id')->where('status', 'success')->where('payment_type', 'App\Models\Event');
+    }
+
+    // users yang sudah melakukan absensi hadir
+    public function attended_users()
+    {
+        return $this->belongsToMany('App\Models\User', 'event_guests', 'event_id', 'user_id')->withTimestamps()->orderBy('created_at', 'desc');
+    }
+
+    public function guide_book()
+    {
+        return $this->morphOne('App\Models\File', 'file')->where('key', 'guide_book');
+    }
+
+    public function banner()
+    {
+        return $this->morphOne('App\Models\File', 'file')->where('key', 'banner');
+    }
+
     public function creator()
     {
         return $this->belongsTo('App\Models\User', 'user_id');
