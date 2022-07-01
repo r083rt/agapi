@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+// softDelete
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    //
+    //use softDelete
+    use SoftDeletes;
     protected $guarded = ['id'];
 
     protected $appends = ['is_paid'];

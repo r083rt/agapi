@@ -102,10 +102,18 @@ class Kongres2022Controller extends Controller
         return response()->json($file);
     }
 
+    public function getKongres2022SuratTugas($userId)
+    {
+        $file = File::where('file_id', $userId)
+            ->where('key', 'kongres_2022_surat_tugas')
+            ->first();
+        return response()->json($file);
+    }
+
     public function storeKongres2022SuratMandat(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|max:2048',
+            'file' => 'required|file',
         ]);
         $filename = $request->file('file')->getClientOriginalName();
         $filemimetype = $request->file('file')->getClientMimeType();
@@ -117,6 +125,25 @@ class Kongres2022Controller extends Controller
         $file->name = $filename;
         $file->type = $filemimetype;
         $file->key = 'kongres_2022_surat_mandat';
+        $file->save();
+        return response()->json($file);
+    }
+
+    public function storeKongres2022SuratTugas(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file',
+        ]);
+        $filename = $request->file('file')->getClientOriginalName();
+        $filemimetype = $request->file('file')->getClientMimeType();
+        $path = $request->file('file')->store('files/kongres_2022_surat_tugas');
+        $file = new File();
+        $file->file_type = "App\Models\User";
+        $file->file_id = auth('api')->user()->id;
+        $file->src = $path;
+        $file->name = $filename;
+        $file->type = $filemimetype;
+        $file->key = 'kongres_2022_surat_tugas';
         $file->save();
         return response()->json($file);
     }

@@ -403,9 +403,13 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::get('/users/extendedmember', 'UserController@getExtendedMember');
 
-        Route::get('/users/{id}/kongres/getkongres', 'Kongres2022Controller@getKongres2022SuratMandat');
+        Route::get('/users/{id}/kongres/surat-mandat', 'Kongres2022Controller@getKongres2022SuratMandat');
 
-        Route::post('/kongres/store', 'Kongres2022Controller@storeKongres2022SuratMandat');
+        Route::post('/kongres/surat-mandat', 'Kongres2022Controller@storeKongres2022SuratMandat');
+
+        Route::get('/users/{id}/kongres/surat-tugas', 'Kongres2022Controller@getKongres2022SuratTugas');
+
+        Route::post('/kongres/surat-tugas', 'Kongres2022Controller@storeKongres2022SuratTugas');
 
         Route::post('/kongres/payment/paymentUrl', 'Kongres2022Controller@createKongres2022Payment');
 
