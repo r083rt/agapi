@@ -140,7 +140,7 @@ class EventController extends Controller
 
     public function getEventById($id)
     {
-        $event = Event::with('users.profile', 'user.profile', 'users.role', 'event_guests', 'registered_users', 'attended_users', 'guide_book', 'banner')->findOrFail($id);
+        $event = Event::with('users.profile', 'user.profile', 'users.role', 'event_guests', 'registered_users', 'attended_users', 'guide_book', 'banner', 'guide_place')->findOrFail($id);
         return response()->json($event);
     }
 
@@ -231,7 +231,7 @@ class EventController extends Controller
     public function checkPaymentStatus($eventId)
     {
         $event = Event::findOrFail($eventId);
-        $user = auth()->user();
+        $user = User::findOrFail(auth()->user()->id);
 
         $isPaid = Payment::where('payment_type', 'App\Models\Event')
             ->where('user_id', $user->id)
@@ -262,12 +262,15 @@ class EventController extends Controller
 
         foreach ($payments as $payment) {
             try {
+
                 $status = Midtrans::status($payment->midtrans_id);
-                // return response()->json($status);
+
                 if ($status->transaction_status == 'settlement') {
                     $date = $payment->created_at;
                     $payment->status = 'success';
                     $payment->save();
+
+                    $this->kongresSpecialEffect($eventId, $user->id);
 
                     return response()->json([
                         "status" => true,
@@ -285,6 +288,28 @@ class EventController extends Controller
             "status" => false,
             "message" => "User belum melakukan pembayaran",
         ]);
+    }
+
+    public function kongresSpecialEffect($eventId, $userId)
+    {
+        if ($eventId == 3642 || $eventId == 3643 || $eventId == 3644) {
+            $user = User::findOrFail($userId);
+            // ----- pengecekan perpanjangan
+            // ----- masa perpanjangan yaitu tanggal aktif sampai 6 bulan
+            // 1. jika sudah lama expired set active dari tanggal bayar
+            // 2. jika belum expired maka tambah tanggal dari tanggal active
+            $expired_at = $user->user_activated_at->addMonths(6);
+            if ($expired_at < now()) {
+                $user->user_activated_at = date('Y-m-d H:i:s');
+                $user->expired_at = date('Y-m-d H:i:s', strtotime('+6 months'));
+                $user->save();
+            } else {
+                $user->user_activated_at = date('Y-m-d H:i:s', strtotime($user->user_activated_at . ' +6 months'));
+                $user->expired_at = date('Y-m-d H:i:s', strtotime($user->expired_at . ' +6 months'));
+                $user->save();
+            }
+        }
+
     }
 
     public function getEventProfitSum($userId)

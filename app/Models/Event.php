@@ -63,7 +63,12 @@ class Event extends Model
 
     public function guide_book()
     {
-        return $this->morphOne('App\Models\File', 'file')->where('key', 'guide_book');
+        return $this->morphMany('App\Models\File', 'file')->where('key', 'guide_book');
+    }
+
+    public function guide_place()
+    {
+        return $this->morphOne('App\Models\File', 'file')->where('key', 'guide_place');
     }
 
     public function banner()

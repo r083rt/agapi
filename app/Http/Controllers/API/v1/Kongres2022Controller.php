@@ -40,22 +40,25 @@ class Kongres2022Controller extends Controller
     {
 
         $request->validate([
-            'user_id' => 'required',
-            function ($validator) { // validasi user_id
-                $user = User::findOrFail($validator->getData()['user_id']);
-                if ($user->user_activated_at == null) {
-                    $validator->errors()->add('user_id', 'User belum menjadi anggota');
-                }
-            },
-            function ($validator) { // pengecekan user pernah melakukan pembayaran kongres
-                $user = User::findOrFail($validator->getData()['user_id']);
-                $payment = $user->where('status', 'success')
-                    ->where('key', 'pendaftaran_kongres_tahun_2022')
-                    ->exists();
-                if ($payment) {
-                    $validator->errors()->add('user_id', 'User sudah melakukan pembayaran kongres');
-                }
-            },
+            'user_id' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    $user = User::findOrFail($value);
+                    if ($user->user_activated_at == null) {
+                        return $fail("User belum menjadi anggota");
+                    }
+                },
+                function ($attribute, $value, $fail) {
+                    $user = User::findOrFail($value);
+                    $payment = $user->payments()->where('status', 'success')
+                        ->where('key', 'pendaftaran_kongres_tahun_2022')
+                        ->exists();
+                    if ($payment) {
+                        return $fail('User sudah melakukan pembayaran kongres');
+                    }
+
+                },
+            ],
         ]);
 
         $user = User::findOrFail($request->user_id);
@@ -97,14 +100,20 @@ class Kongres2022Controller extends Controller
     public function getKongres2022SuratMandat($userId)
     {
         $file = File::where('file_id', $userId)
+            ->where('file_type', 'App\Models\User')
             ->where('key', 'kongres_2022_surat_mandat')
             ->first();
-        return response()->json($file);
+        return response()->json([
+            "status" => $file != null,
+            "message" => $file != null ? "Surat mandat ditemukan" : "Surat mandat tidak ditemukan",
+            "file" => $file,
+        ]);
     }
 
     public function getKongres2022SuratTugas($userId)
     {
         $file = File::where('file_id', $userId)
+            ->where('file_type', 'App\Models\User')
             ->where('key', 'kongres_2022_surat_tugas')
             ->first();
         return response()->json($file);
@@ -146,6 +155,20 @@ class Kongres2022Controller extends Controller
         $file->key = 'kongres_2022_surat_tugas';
         $file->save();
         return response()->json($file);
+    }
+
+    public function getGuideLocation($eventId)
+    {
+        $file = File::where('file_id', $eventId)
+            ->where('file_type', 'App\Models\Event')
+            ->where('key', 'guide_location')
+            ->first();
+
+        return response()->json([
+            "status" => $file != null,
+            "message" => $file != null ? "Lokasi Guide ditemukan" : "Lokasi Guide tidak ditemukan",
+            "file" => $file,
+        ]);
     }
 
     public function checkPaymentStatus($userId)
