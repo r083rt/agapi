@@ -148,6 +148,11 @@ class EventController extends Controller
     public function getRegisteredUsers($eventId)
     {
         $partisipants = User::with('profile', 'role')
+            ->withCount(['guest_events as is_attended' => function ($query) use ($eventId) {
+                $query
+                    ->where('event_id', $eventId);
+
+            }])
             ->whereHas('payments', function ($query) use ($eventId) {
                 $query
                     ->where('status', 'success')
@@ -231,7 +236,7 @@ class EventController extends Controller
     public function checkPaymentStatus($eventId)
     {
         $event = Event::findOrFail($eventId);
-        $user = User::findOrFail(auth()->user()->id);
+        $user = User::findOrFail(auth('api')->user()->id);
 
         $isPaid = Payment::where('payment_type', 'App\Models\Event')
             ->where('user_id', $user->id)

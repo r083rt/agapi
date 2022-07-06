@@ -41,7 +41,11 @@ class Event extends Model
 
     public function getIsPaidAttribute()
     {
-        return $this->payments()->where('status', 'success')->count() > 0;
+        if (auth('api')->check()) {
+            return $this->payments()->where('status', 'success')
+                ->where('user_id', '=', auth('api')->user()->id)
+                ->count() > 0;
+        }
     }
 
     public function partisipants()

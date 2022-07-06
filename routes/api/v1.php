@@ -403,6 +403,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::get('/users/extendedmember', 'UserController@getExtendedMember');
 
+        Route::get('/kongres/{id}/guide-location', 'Kongres2022Controller@getGuideLocation');
+
+        Route::get('/kongres/{id}/guide-book', 'Kongres2022Controller@getGuideBook');
+
         Route::get('/users/{id}/kongres/surat-mandat', 'Kongres2022Controller@getKongres2022SuratMandat');
 
         Route::post('/kongres/surat-mandat', 'Kongres2022Controller@storeKongres2022SuratMandat');
@@ -784,6 +788,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         return $a->loadCount('user_reports');
         return $a->readers()->syncWithoutDetaching([1]);
     });
+
+    Route::get('/kongres/{eventId}/member/{userId}/payment/status', 'Kongres2022Controller@getPaymentStatus');
+
     // END API WITHOUT SECURITY ------------------------------------------------------------------------
 
     // New ------------------------------------------

@@ -116,7 +116,12 @@ class Kongres2022Controller extends Controller
             ->where('file_type', 'App\Models\User')
             ->where('key', 'kongres_2022_surat_tugas')
             ->first();
-        return response()->json($file);
+        return response()->json([
+            "status" => $file != null,
+            "message" => $file != null ? "Surat Tugas ditemukan" : "Surat Tugas tidak ditemukan",
+            "file" => $file,
+        ]);
+
     }
 
     public function storeKongres2022SuratMandat(Request $request)
@@ -166,9 +171,20 @@ class Kongres2022Controller extends Controller
 
         return response()->json([
             "status" => $file != null,
-            "message" => $file != null ? "Lokasi Guide ditemukan" : "Lokasi Guide tidak ditemukan",
+            "message" => $file != null ? "Denah ditemukan" : "Denah tidak ditemukan",
             "file" => $file,
         ]);
+    }
+
+    public function getGuideBook($eventId)
+    {
+        $files = File::where('file_id', $eventId)
+            ->where('file_type', 'App\Models\Event')
+            ->where('key', 'guide_book')
+            ->get();
+
+        return response()->json($files);
+
     }
 
     public function checkPaymentStatus($userId)
@@ -257,5 +273,18 @@ class Kongres2022Controller extends Controller
             "kongres_2022_id" => setting('kta-app.kongres_2022_id'),
         ];
         return response()->json($res);
+    }
+
+    public function getPaymentStatus($eventId, $userId)
+    {
+        $payment = Payment::where('payment_type', 'App\Models\Event')
+            ->where('payment_id', $eventId)
+            ->where('user_id', $userId)
+            ->where('status', 'success')
+            ->exists();
+        return response()->json([
+            "status" => $payment,
+            "message" => $payment ? "User sudah melakukan pembayaran" : "User belum melakukan pembayaran",
+        ]);
     }
 }
