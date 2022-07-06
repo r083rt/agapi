@@ -12,7 +12,7 @@ class Event extends Model
     use SoftDeletes;
     protected $guarded = ['id'];
 
-    protected $appends = ['is_paid'];
+    protected $appends = ['is_paid', 'is_attended', 'attended_at'];
 
     public function user()
     {
@@ -79,6 +79,24 @@ class Event extends Model
     public function creator()
     {
         return $this->belongsTo('App\Models\User', 'user_id');
+    }
+
+    public function getIsAttendedAttribute()
+    {
+        // jika ada user ter autentikasi
+        if (auth('api')->check()) {
+            return $this->attended_users()->where('user_id', auth('api')->user()->id)->count() > 0;
+        }
+    }
+
+    public function getAttendedAtAttribute()
+    {
+        // jika ada user ter autentikasi
+        if (auth('api')->check()) {
+            if ($this->attended_users()->where('user_id', auth('api')->user()->id)->count() > 0) {
+                return $this->attended_users()->where('user_id', auth('api')->user()->id)->first()->pivot->created_at;
+            }
+        }
     }
 
 }
