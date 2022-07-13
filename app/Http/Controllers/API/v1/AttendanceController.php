@@ -27,23 +27,22 @@ class AttendanceController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'event_id' => 'required|exists:events,id',
-            'user_id' => 'required|exists:users,id',
-            function ($validator) {
-                $validator->after(function ($validator) {
-                    $event = Event::findOrFail($validator->getFormValue('event_id'));
-                    if ($event->users()->where('id', $validator->getFormValue('user_id'))->count() > 0) {
-                        $validator->errors()->add('user_id', 'User is already partisipant of this event');
+            'event_id' => ['required', 'exists:events,id',
+                function ($attribute, $value, $fail) use ($request) {
+                    $event = Event::findOrFail($value);
+                    if ($event->users()->where('id', $request->user_id)->count() > 0) {
+                        return $fail('User is already partisipant of this event');
                     }
-                });
-            },
-            function ($validator) {
-                $event = Event::findOrFail($validator->getFormValue('event_id'));
-                // cek jika user belum melakukan pembayaran di attribute is_paid di event
-                if ($event->price && !$event->is_paid) {
-                    $validator->errors()->add('event_id', 'Event is not paid yet');
-                }
-            },
+                },
+                function ($attribute, $value, $fail) {
+                    $event = Event::findOrFail($value);
+                    // cek jika user belum melakukan pembayaran di attribute is_paid di event
+                    if ($event->price && !$event->is_paid) {
+                        return $fail('Event is not paid yet');
+                    }
+                },
+            ],
+            'user_id' => ['required', 'exists:users,id'],
         ]);
 
         $event = Event::findOrFail($request->event_id);
