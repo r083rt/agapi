@@ -287,4 +287,36 @@ class Kongres2022Controller extends Controller
             "message" => $payment ? "User sudah melakukan pembayaran" : "User belum melakukan pembayaran",
         ]);
     }
+
+    public function getSurat($eventId, $userId)
+    {
+        if ($eventId == 3642) {
+            $file = File::where('file_id', $userId)
+                ->where('file_type', 'App\Models\User')
+                ->where('key', 'kongres_2022_surat_mandat')
+                ->first();
+            return response()->json([
+                "status" => $file != null,
+                "message" => $file != null ? "Surat Tugas ditemukan" : "Surat Tugas tidak ditemukan",
+                "file" => $file,
+            ]);
+        } elseif ($eventId == 3643) {
+            $file = File::where('file_id', $userId)
+                ->where('file_type', 'App\Models\User')
+                ->where('key', 'kongres_2022_surat_tugas')
+                ->first();
+
+            return response()->json([
+                "status" => $file != null,
+                "message" => $file != null ? "Surat Mandat ditemukan" : "Surat Mandat tidak ditemukan",
+                "file" => $file,
+            ]);
+
+        }
+
+        return response()->json([
+            "status" => false,
+            "message" => "Permintaan tidak valid",
+        ]);
+    }
 }

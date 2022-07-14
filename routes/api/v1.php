@@ -791,6 +791,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
     Route::get('/kongres/{eventId}/member/{userId}/payment/status', 'Kongres2022Controller@getPaymentStatus');
 
+    Route::get('/kongres/{eventId}/users/{userId}/surat', 'Kongres2022Controller@getSurat');
+
     // END API WITHOUT SECURITY ------------------------------------------------------------------------
 
     // New ------------------------------------------
