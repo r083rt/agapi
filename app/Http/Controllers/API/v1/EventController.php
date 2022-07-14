@@ -275,7 +275,7 @@ class EventController extends Controller
                     $payment->status = 'success';
                     $payment->save();
 
-                    // $this->kongresSpecialEffect($eventId, $user->id);
+                    $this->kongresSpecialEffect($eventId, $user->id);
 
                     return response()->json([
                         "status" => true,
