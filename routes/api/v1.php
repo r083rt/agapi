@@ -793,6 +793,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
     Route::get('/kongres/{eventId}/users/{userId}/surat', 'Kongres2022Controller@getSurat');
 
+    Route::get('/event/{eventId}/report/excel/registered', 'EventController@registeredUserReportExcel');
+
+    Route::get('/event/{eventId}/report/excel/attended', 'EventController@attendedUserReportExcel');
+
     // END API WITHOUT SECURITY ------------------------------------------------------------------------
 
     // New ------------------------------------------

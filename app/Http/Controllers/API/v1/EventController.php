@@ -10,6 +10,9 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class EventController extends Controller
 {
@@ -450,6 +453,108 @@ class EventController extends Controller
     {
         $res = Payment::findOrfail($paymentId);
         return response()->json($res);
+    }
+
+    public function writeExcel($keyvalues, $query, $title = "Report")
+    {
+        $spreadsheet = new Spreadsheet();
+        //Specify the properties for this document
+        $spreadsheet->getProperties()
+            ->setTitle($title)
+            ->setSubject('A PHPExcel example')
+            ->setDescription('AGPAII Digital')
+            ->setCreator('CV Ardata Media')
+            ->setLastModifiedBy('CV Ardata Media');
+
+        //style
+        $colors = ['e9f7e9', 'd4c4ae'];
+        $styleArray = ['fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'color' => ['rgb' => 'aed4ae'],
+        ],
+
+        ];
+
+        //Adding data to the excel sheet
+        $spreadsheet->setActiveSheetIndex(0);
+        $now = \Carbon\Carbon::now()->timezone('Asia/Jakarta')->toDateTimeString();
+        $end_col = chr(65 + (count($keyvalues) - 1));
+        $spreadsheet->getActiveSheet()->setCellValue('A1', 'Data diambil pada ' . $now)->mergeCells('A1:' . $end_col . '1');
+
+        $row = 2;
+        $i = 0;
+        foreach ($keyvalues as $key => $value) {
+            $col = chr(65 + $i);
+            $spreadsheet->getActiveSheet()
+                ->setCellValue($col . $row, $value);
+
+            $i++;
+        }
+        $spreadsheet->getActiveSheet()->getStyle('A1')->getAlignment()->setHorizontal('center');
+        $spreadsheet->getActiveSheet()->getStyle('A2:' . $end_col . '2')->getAlignment()->setHorizontal('center');
+        $spreadsheet->getActiveSheet()->getStyle('A2:' . $end_col . '2')->getFont()->setBold(true);
+
+        $row = 3;
+        foreach ($query as $key => $data) {
+            $i = 0;
+            foreach ($keyvalues as $key => $value) {
+                $col = chr(65 + $i);
+                $spreadsheet->getActiveSheet()
+                    ->setCellValue($col . $row, $data->{$key});
+                $i++;
+            }
+            $row++;
+        }
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $title . '.xlsx"');
+        $writer->save('php://output');
+    }
+
+    public function registeredUserReportExcel($eventId)
+    {
+        $event = Event::findOrfail($eventId);
+
+        $query = User::join('profiles', 'profiles.user_id', '=', 'users.id')
+            ->join('roles', 'roles.id', '=', 'users.role_id')
+            ->whereHas('payments', function ($query) use ($eventId) {
+                $query
+                    ->where('status', 'success')
+                    ->where('payment_type', 'App\Models\Event')
+                    ->where('payment_id', $eventId);
+            })
+            ->select(
+                DB::raw('users.name as name'),
+                DB::raw('roles.display_name as role'),
+                DB::raw('profiles.school_place as tempat_dinas'),
+                DB::raw('users.kta_id as nomer_kta'),
+            )
+            ->get();
+
+        return $this->writeExcel(['nomer_kta' => 'Nomer KTA', 'name' => 'Nama', 'role' => 'Sebagai', 'tempat_dinas' => 'Tempat dinas'], $query, "Report anggota terdaftar - $event->name");
+
+    }
+
+    public function attendedUserReportExcel($eventId)
+    {
+        $event = Event::findOrfail($eventId);
+
+        $query = User::join('profiles', 'profiles.user_id', '=', 'users.id')
+            ->join('roles', 'roles.id', '=', 'users.role_id')
+            ->whereHas('guest_events', function ($query) use ($eventId) {
+                $query
+                    ->where('event_id', $eventId);
+            })
+            ->select(
+                DB::raw('users.name as name'),
+                DB::raw('roles.display_name as role'),
+                DB::raw('profiles.school_place as tempat_dinas'),
+                DB::raw('users.kta_id as nomer_kta'),
+            )
+            ->get();
+
+        return $this->writeExcel(['nomer_kta' => 'Nomer KTA', 'name' => 'Nama', 'role' => 'Sebagai', 'tempat_dinas' => 'Tempat dinas'], $query, "Report anggota absen - $event->name");
+
     }
 
 }

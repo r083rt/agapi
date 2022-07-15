@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ExcelController extends Controller
@@ -29,7 +31,7 @@ class ExcelController extends Controller
 
         //Adding data to the excel sheet
         $spreadsheet->setActiveSheetIndex(0);
-        $now = Carbon\Carbon::now()->timezone('Asia/Jakarta')->toDateTimeString();
+        $now = \Carbon\Carbon::now()->timezone('Asia/Jakarta')->toDateTimeString();
         $end_col = chr(65 + (count($keyvalues) - 1));
         $spreadsheet->getActiveSheet()->setCellValue('A1', 'Data diambil pada ' . $now)->mergeCells('A1:' . $end_col . '1');
 
