@@ -121,11 +121,13 @@ class UserController extends Controller
         return $hp;
     }
 
-    public function perpanjang($total)
+    public function perpanjang($total, $startDate, $endDate)
     {
         $content = "nama,no_hp,email";
         $content .= "\n";
-        $users = User::where('user_activated_at', '<', (new \Carbon\Carbon)->submonths(6))
+        // ambil data user yang expired dari tanggal startDate sampai endDate
+        $users = User::
+            whereDate('expired_at', '>=', $startDate)->whereDate('expired_at', '<=', $endDate)
             ->select(
                 DB::raw('users.*'),
                 DB::raw('DATEDIFF(users.user_activated_at,NOW()) as date_diff'),
