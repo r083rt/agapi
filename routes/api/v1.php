@@ -797,6 +797,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
     Route::get('/event/{eventId}/report/excel/attended', 'EventController@attendedUserReportExcel');
 
+    Route::get('/user/{userId}/expired/status', 'UserController@expiredStatus');
+
     // END API WITHOUT SECURITY ------------------------------------------------------------------------
 
     // New ------------------------------------------

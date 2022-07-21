@@ -877,4 +877,22 @@ class UserController extends Controller
         return response()->json($res);
     }
 
+    public function expiredStatus($userId)
+    {
+        $user = User::findOrFail($userId);
+        $expired_at = $user->expired_at;
+        $now = Carbon::now();
+        // expired jika sudah $now melewati tanggal $expired_at
+        $isExpired = $now->gt($expired_at);
+        return response()->json([
+            'status' => $isExpired,
+            'message' => $isExpired ? 'user expired' : 'user not expired',
+            'data' => [
+                'isExpired' => $isExpired,
+                'expired_at' => $expired_at,
+                'now' => $now,
+            ],
+        ]);
+    }
+
 }
