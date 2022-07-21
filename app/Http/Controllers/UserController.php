@@ -121,7 +121,50 @@ class UserController extends Controller
         return $hp;
     }
 
-    public function perpanjang($total, $startDate, $endDate)
+    public function perpanjangv1($total)
+    {
+        $content = "nama,no_hp,email";
+        $content .= "\n";
+        $users = User::where('user_activated_at', '<', (new \Carbon\Carbon)->submonths(6))
+            ->select(
+                DB::raw('users.*'),
+                DB::raw('DATEDIFF(users.user_activated_at,NOW()) as date_diff'),
+            )
+            ->has('profile')
+            ->with('profile', 'pns_status')
+            ->orderBy('date_diff', 'asc')
+            ->paginate($total ?? 50);
+        // return response()->json($users);
+        foreach ($users as $u => $user) {
+            # code...
+            $user->profile->contact = $this->convertPhoneNumber($user->profile->contact);
+            $user->late_paid = Carbon::parse(Carbon::now())->diffInMonths(Carbon::parse($user->user_activated_at));
+            $name = $user->name;
+            $contact = $user->profile->contact;
+
+            if ($contact) {
+                $name = str_replace(",", " ", $name);
+                $name = str_replace(".", " ", $name);
+                $content .= "$name,$contact,$user->email";
+                $content .= "\n";
+            }
+
+        }
+
+        // file name that will be used in the download
+        $fileName = "watzap_perpanjang.txt";
+
+        // use headers in order to generate the download
+        $headers = [
+            'Content-type' => 'text/plain',
+            'Content-Disposition' => sprintf('attachment; filename="%s"', $fileName),
+        ];
+        // make a response, with the content, a 200 response code and the headers
+        return response()->make($content, 200, $headers);
+
+    }
+
+    public function perpanjangv2($total, $startDate, $endDate)
     {
         $content = "nama,no_hp,email";
         $content .= "\n";
