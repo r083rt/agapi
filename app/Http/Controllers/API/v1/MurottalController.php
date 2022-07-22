@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\API\v1;
 
-use App\Models\Murottal;
-use App\Models\Click;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Click;
+use App\Models\Murottal;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class MurottalController extends Controller
@@ -67,43 +67,45 @@ class MurottalController extends Controller
         //
     }
 
-    public function listening(Request $request){
+    public function listening(Request $request)
+    {
         // return response()->json($request->all());
         // $click = Click::whereDate('created_at', \Carbon\Carbon::now())
         //                 ->exists();
         // if(!$click){
-           $murottal = Murottal::findOrFail($request->id);
-           $listening = new Click();
-           $listening->user_id = auth('api')->user()->id;
-           $murottal->listening()->save($listening);
+        $murottal = Murottal::findOrFail($request->id);
+        $listening = new Click();
+        $listening->user_id = auth('api')->user()->id;
+        $murottal->listening()->save($listening);
 
-           return response()->json($murottal->load("listening"));
+        return response()->json($murottal->load("listening"));
         // }
 
         // return response()->json($click);
     }
 
-    public function listening_show(){
+    public function listening_show()
+    {
         // $res = Click::with("user", "murottal")
         //                 ->where('clickable_type', 'App\Models\Murottal')
         //                 ->whereDate('created_at', \Carbon\Carbon::today())
         //                 ->get();
-        $today = \Carbon\Carbon::now()->subHours(3)->toDateTimeString();
+        $today = \Carbon\Carbon::now()->toDateTimeString();
         $res = DB::table('clicks')
-        ->join("murottals as m", "m.id", "=", "clicks.clickable_id")
-        ->join("users as u", "u.id", "=", "clicks.user_id")
+            ->join("murottals as m", "m.id", "=", "clicks.clickable_id")
+            ->join("users as u", "u.id", "=", "clicks.user_id")
         // ->select("clicks.id, m.name as murottal_name, u.name as")
-        ->select(
-            DB::raw('clicks.id'),
-            DB::raw('clicks.created_at'),
-            DB::raw('m.name as murottal_name'),
-            DB::raw('u.name as user_name')
-        )
-        ->groupBy('clicks.id')
-        ->where("clicks.clickable_type", "=", "App\Models\Murottal")
-        ->where("clicks.created_at", ">", $today)
-        ->get();
+            ->select(
+                DB::raw('clicks.id'),
+                DB::raw('clicks.created_at'),
+                DB::raw('m.name as murottal_name'),
+                DB::raw('u.name as user_name')
+            )
+            ->groupBy('clicks.id')
+            ->where("clicks.clickable_type", "=", "App\Models\Murottal")
+            ->where("clicks.created_at", ">", $today)
+            ->get();
         return $res;
-        }
+    }
 
 }
