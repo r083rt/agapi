@@ -799,6 +799,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
     Route::get('/user/{userId}/expired/status', 'UserController@expiredStatus');
 
+    Route::get('/contact/admin', 'ContactController@admin');
+
+    Route::get('/contact/edit-data', 'ContactController@editData');
+
     // END API WITHOUT SECURITY ------------------------------------------------------------------------
 
     // New ------------------------------------------
