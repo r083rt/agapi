@@ -471,4 +471,10 @@ class PaymentController extends Controller
         return response()->json($db[0]);
     }
 
+    public function getExtendedCount()
+    {
+        $db = Payment::where('status', 'success')->where('value', 65000)->count();
+        return response()->json($db);
+    }
+
 }

@@ -555,6 +555,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::post('/payments/confirmovopayment', 'PaymentController@confirmOvoPayment');
 
+        Route::get('/payments/extended/count', 'PaymentController@getExtendedCount');
+
         Route::get('/departments/dpw/provinces/{id}/getbytitle/{title}', 'DpwDepartmentController@getByTitle');
 
         Route::get('/departments/dpp/image', 'DppDepartmentController@getDepartmentTreeImage');
@@ -566,6 +568,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/departments/dpp/getbyperiode/{start_year}', 'DppDepartmentController@getByPeriode');
 
         Route::get('/provinces/getprovinces', 'ProvinceController@getProvinces');
+
+        Route::get('/provinces/payments/extended', 'ProvinceController@getPaymentsExtended');
 
         Route::get('/provinces/{id}/getprovincebyid', 'ProvinceController@getProvinceById');
 

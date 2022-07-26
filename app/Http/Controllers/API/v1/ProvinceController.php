@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Province;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProvinceController extends Controller
 {
@@ -201,5 +202,27 @@ class ProvinceController extends Controller
             ->where('name', 'like', '%' . $key . '%')
             ->paginate();
         return response()->json($search);
+    }
+
+    public function getPaymentsExtended()
+    {
+        $res = DB::table('provinces')
+        // join ke table profiles
+            ->join('profiles', 'provinces.id', '=', 'profiles.province_id')
+        // join ke table users
+            ->join('users', 'profiles.user_id', '=', 'users.id')
+        // join ke table payments melalui users
+            ->join('payments', 'users.id', '=', 'payments.user_id')
+            ->where('payments.status', '=', 'success')
+            ->where('payments.value', 65000)
+            ->select(
+                'provinces.id as id',
+                'provinces.name as name',
+                // count payment
+                DB::raw('count(payments.id) as total_payment'),
+            )
+            ->groupBy('name')
+            ->get();
+        return response()->json($res);
     }
 }
