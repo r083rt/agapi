@@ -26,6 +26,7 @@ Route::get('/watzap/perpanjang/{total}', 'UserController@perpanjangv1');
 Route::get('/watzap/perpanjang/ambil/{total}/dari/{start_date}/sampai/{end_date}', 'UserController@perpanjangv2');
 Route::get('/watzap/guruPns/{total}', 'UserController@guruPns');
 Route::get('/watzap/guruNonPns/{total}', 'UserController@guruNonPns');
+Route::get('/watzap/province/{provinceId}/users/active/{total}', 'WatzapController@getActiveUserByProvince');
 
 Auth::routes();
 //logout khusus questionnary page
