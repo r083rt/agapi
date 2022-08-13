@@ -279,11 +279,19 @@ class UserController extends Controller
             //return $pns_status;
             $pns_status->is_pns = $request->pns['status']['value'];
             if ($pns_status->is_pns == 1) {
-                $pns_status->is_certification = $request->pns['certification']['value'];
+                if (isset($request->pns['certification']) && isset($request->pns['certification']['value'])) {
+                    $pns_status->is_certification = $request->pns['certification']['value'];
+                }
+
                 $pns_status->is_non_pns_inpassing = null;
             } else {
-                $pns_status->is_non_pns_inpassing = $request->pns['non_pns_inpassing']['value'];
-                $pns_status->is_certification = $request->pns['certification']['value'];
+                if (isset($request->pns['non_pns_inpassing']) && isset($request->pns['non_pns_inpassing']['value'])) {
+                    $pns_status->is_non_pns_inpassing = $request->pns['non_pns_inpassing']['value'];
+                }
+
+                if (isset($request->pns['certification']) && isset($request->pns['certification']['value'])) {
+                    $pns_status->is_certification = $request->pns['certification']['value'];
+                }
 
             }
             $request->user()->pns_status()->save($pns_status);
