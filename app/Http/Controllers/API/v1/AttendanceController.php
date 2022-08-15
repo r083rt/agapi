@@ -30,16 +30,20 @@ class AttendanceController extends Controller
             'event_id' => ['required', 'exists:events,id',
                 function ($attribute, $value, $fail) use ($request) {
                     $event = Event::findOrFail($value);
-                    if ($event->users()->where('id', $request->user_id)->count() > 0) {
+                    if ($event->users()->where('users.id', $request->user_id)->count() > 0) {
                         return $fail('User is already partisipant of this event');
                     }
                 },
-                function ($attribute, $value, $fail) {
+                function ($attribute, $value, $fail) use ($request) {
                     $event = Event::findOrFail($value);
+                    $isPaid = $event->payments()->where('status', 'success')
+                        ->where('user_id', '=', $request->user_id)
+                        ->count() > 0;
                     // cek jika user belum melakukan pembayaran di attribute is_paid di event
-                    if ($event->price && !$event->is_paid) {
+                    if ($event->price && !$isPaid) {
                         return $fail('Event is not paid yet');
                     }
+
                 },
             ],
             'user_id' => ['required', 'exists:users,id'],
