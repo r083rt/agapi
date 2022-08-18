@@ -78,4 +78,43 @@ class WatzapController extends Controller
         return response()->make($content, 200, $headers);
 
     }
+
+    public function getActiveUsers($total, $startDate, $toDate)
+    {
+        // ambil data user yang aktif yang punya payment 35000 dan rentang tanggal created_at nya antara startDate dan toDate
+        $content = "nama,no_hp,email";
+        $content .= "\n";
+
+        $user = User::has('profile')->with('profile')
+            ->join('payments', 'users.id', '=', 'payments.user_id')
+            ->where('payments.value', '=', 35000)
+            ->where('payments.created_at', '>=', $startDate)
+            ->where('payments.created_at', '<=', $toDate)
+            ->select('users.*', 'payments.created_at as payment_created_at', 'payments.value as payment_value')
+            ->orderBy('payment_created_at', 'desc')
+            ->paginate($total ?? 50);
+        foreach ($user as $u => $user) {
+            # code...
+            $user->profile->contact = $this->convertPhoneNumber($user->profile->contact);
+            $name = $user->name;
+            $contact = $user->profile->contact;
+            if ($contact) {
+                $name = str_replace(",", " ", $name);
+                $name = str_replace(".", " ", $name);
+                $date = $user->payment_created_at;
+                $content .= "$name,$contact,$user->email";
+                $content .= "\n";
+            }
+        }
+        // file name that will be used in the download
+        $fileName = "watzap_user_active.txt";
+        // use headers in order to generate the download
+        $headers = [
+            'Content-type' => 'text/plain',
+            'Content-Disposition' => sprintf('attachment; filename="%s"', $fileName),
+        ];
+        // make a response, with the content, a 200 response code and the headers
+        return response()->make($content, 200, $headers);
+
+    }
 }

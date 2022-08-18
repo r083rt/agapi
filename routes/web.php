@@ -22,6 +22,7 @@ Route::get('/', function () {
 });
 
 Route::get('/perpanjangcepat', 'PaymentController@perpanjangcepat');
+Route::get('/watzap/user/active/{total}/from/{startDate}/to/{toDate}', 'WatzapController@getActiveUsers');
 Route::get('/watzap/perpanjang/{total}', 'UserController@perpanjangv1');
 Route::get('/watzap/perpanjang/ambil/{total}/dari/{start_date}/sampai/{end_date}', 'UserController@perpanjangv2');
 Route::get('/watzap/guruPns/{total}', 'UserController@guruPns');
