@@ -18,7 +18,7 @@ class PostController extends Controller
     public function index()
     {
         //
-        $posts = Post::with('images', 'videos', 'audios', 'docs', 'author.profile', 'author.role', 'comments.author', 'likes')
+        $posts = Post::with('images', 'videos', 'audios', 'docs', 'author.profile', 'author.role', 'comments.author', 'likes.user')
             ->withCount('likes', 'comments', 'liked')
             ->has('author')
         // ->has('images')
