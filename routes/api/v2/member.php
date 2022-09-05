@@ -6,10 +6,11 @@ Route::get('/me', 'AuthController@getUserAccount');
 Route::post('/register', 'AuthController@register');
 // api resources
 Route::resources([
-    'posts' => 'PostController',
-    'posts.comments' => 'PostCommentController', // comment post
-    'users.posts' => 'UserPostController',
-    'events' => 'EventController', // untuk acara
-    'users.stories' => 'UserStoryController', // untuk user story
-    'stories' => 'StoryController', // untuk story
+    'post' => 'PostController',
+    'post.comment' => 'PostCommentController', // comment post
+    'user.post' => 'UserPostController',
+    'event' => 'EventController', // untuk acara
+    'user.story' => 'UserStoryController', // untuk user story
+    'story' => 'StoryController', // untuk story
+    'user.gallery' => 'UserGalleryController', // untuk mengambil gallery dari user
 ]);

@@ -18,7 +18,8 @@ class PostController extends Controller
     public function index()
     {
         //
-        $posts = Post::with('images', 'videos', 'audios', 'docs', 'meeting_rooms', 'author.profile')
+        $posts = Post::with('images', 'videos', 'audios', 'docs', 'author.profile', 'author.role', 'comments.author', 'likes')
+            ->withCount('likes', 'comments', 'liked')
             ->has('author')
         // ->has('images')
             ->orderBy('created_at', 'desc')
@@ -54,14 +55,6 @@ class PostController extends Controller
                     $post->images()->save($image);
                 }
             }
-
-            if (isset($request->rooms)) {
-                $post->meeting_rooms()->attach($request->rooms);
-            }
-
-            if (isset($request->event)) {
-                $post->events()->attach($request->event);
-            }
         });
         return response()->json($post->load(['images', 'author.profile']));
 
@@ -73,9 +66,25 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function show(Post $post)
+    public function show($id)
     {
         //
+        $post = Post::with([
+            'images',
+            'bookmarked',
+            'authorId.role',
+            'authorId.profile',
+            'comments' => function ($query) {
+                $query
+                    ->with('likes.user', 'liked', 'author.profile', 'author.role')
+                    ->withCount('likes', 'liked')
+                    ->orderBy('created_at', 'asc');
+            },
+            'likes.user',
+        ])->withCount('comments', 'likes', 'liked')->find($id);
+
+        return response()->json($post);
+
     }
 
     /**

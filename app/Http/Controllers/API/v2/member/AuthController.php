@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Profile;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
@@ -66,9 +66,7 @@ class AuthController extends Controller
 
     public function getUserAccount(Request $request)
     {
-        $user = $request->user()->load(['profile'=>function($query){
-            $query->with(['province','city','district']);
-        }]);
+        $user = $request->user()->load(['profile']);
         return response()->json($user);
     }
 

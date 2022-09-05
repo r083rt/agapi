@@ -17,9 +17,9 @@ class PostCommentController extends Controller
     {
         //
         $comments = Comment::with('author.profile')
-        ->where('comment_type', 'App\Models\Post')
-        ->where('comment_id', $postId)
-        ->paginate();
+            ->where('comment_type', 'App\Models\Post')
+            ->where('comment_id', $postId)
+            ->paginate();
         return response()->json($comments);
     }
 
@@ -29,7 +29,7 @@ class PostCommentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request,$postId)
+    public function store(Request $request, $postId)
     {
         //
         $comment = new Comment();
@@ -38,7 +38,7 @@ class PostCommentController extends Controller
         $comment->user_id = $request->user()->id;
         $comment->value = $request->comment;
         $comment->save();
-        return response()->json($comment->load('author.profile'));
+        return response()->json($comment->load(['author.profile', 'author.role']));
     }
 
     /**
