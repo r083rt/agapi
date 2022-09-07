@@ -8,7 +8,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-
 class CityController extends Controller
 {
     /**
@@ -193,7 +192,7 @@ class CityController extends Controller
     {
         $res = DB::table('cities')
         // join ke table profiles
-            ->join('profiles', 'provinces.id', '=', 'profiles.city_id')
+            ->join('profiles', 'cities.id', '=', 'profiles.city_id')
         // join ke table users
             ->join('users', 'profiles.user_id', '=', 'users.id')
         // join ke table payments melalui users
