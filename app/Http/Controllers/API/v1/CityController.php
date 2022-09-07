@@ -186,4 +186,43 @@ class CityController extends Controller
             ->paginate();
         return response()->json($search);
     }
+
+    public function getPaymentsExtended($provinceId)
+    {
+        $res = DB::table('cities')
+        // join ke table profiles
+            ->join('profiles', 'provinces.id', '=', 'profiles.city_id')
+        // join ke table users
+            ->join('users', 'profiles.user_id', '=', 'users.id')
+        // join ke table payments melalui users
+            ->join('payments', 'users.id', '=', 'payments.user_id')
+            ->where('profiles.province_id', $provinceId)
+            ->where('payments.status', '=', 'success')
+            ->where('payments.value', 65000)
+            ->select(
+                'provinces.id as id',
+                'provinces.name as name',
+                // count payment
+                DB::raw('count(payments.id) as total_payment'),
+            )
+            ->groupBy('name')
+            ->get();
+        return response()->json($res);
+    }
+
+    public function getPaymentsExtendedCount($provinceId)
+    {
+        $res = DB::table('users')
+            ->join('profiles', 'users.id', '=', 'profiles.user_id')
+        // join ke table payments melalui users
+            ->join('payments', 'users.id', '=', 'payments.user_id')
+            ->where('profiles.province_id', $provinceId)
+            ->where('payments.status', '=', 'success')
+            ->where('payments.value', 65000)
+            ->count(
+                'payments.value'
+            );
+
+        return response()->json($res);
+    }
 }

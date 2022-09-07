@@ -571,6 +571,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::get('/provinces/payments/extended', 'ProvinceController@getPaymentsExtended');
 
+        Route::get('provinces/{id}/cities/payments/extended', 'CityController@getPaymentsExtended');
+
+        Route::get('provinces/{id}/cities/payments/extended/count', 'CityController@getPaymentsExtendedCount');
+
         Route::get('/provinces/{id}/getprovincebyid', 'ProvinceController@getProvinceById');
 
         Route::get('/provinces/{id}/departments/dpw/getperiode', 'DpwDepartmentController@getPeriode');
