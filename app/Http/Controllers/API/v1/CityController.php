@@ -200,8 +200,8 @@ class CityController extends Controller
             ->where('payments.status', '=', 'success')
             ->where('payments.value', 65000)
             ->select(
-                'provinces.id as id',
-                'provinces.name as name',
+                'cities.id as id',
+                'cities.name as name',
                 // count payment
                 DB::raw('count(payments.id) as total_payment'),
             )
