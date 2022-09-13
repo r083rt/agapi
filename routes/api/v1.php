@@ -605,6 +605,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::get('/provinces/{id}/nonpnsusers', 'ProvinceController@getNonPnsUsers');
 
+        Route::get('/cities/{cityId}/subscription-payments', 'CitySubscriptionPaymentController@index');
+
         Route::get('/cities/{cityId}/pnsusers/search/{key}', 'CityController@searchPnsUsers');
 
         Route::get('/cities/{cityId}/nonpnsusers/search/{key}', 'CityController@searchNonPnsUsers');

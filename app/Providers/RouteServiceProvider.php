@@ -135,6 +135,17 @@ class RouteServiceProvider extends ServiceProvider
             // V2 untuk murid API
             require base_path('routes/api/v2/student.php');
         });
+
+        Route::group([
+            'middleware' => 'auth:api',
+            'namespace' => \App\Http\Controllers\API\v2\admin::class,
+            'prefix' => 'api/v2/admin',
+            'name' => 'api.v2.admin.',
+        ], function ($router) {
+            // V2 untuk murid API
+            require base_path('routes/api/v2/admin.php');
+        });
+
     }
 
 }
