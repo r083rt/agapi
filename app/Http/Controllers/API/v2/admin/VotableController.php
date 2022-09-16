@@ -16,6 +16,8 @@ class VotableController extends Controller
     public function index()
     {
         //
+        $votables = Votable::with('user')->get();
+        return response()->json($votables);
     }
 
     /**
@@ -27,6 +29,26 @@ class VotableController extends Controller
     public function store(Request $request)
     {
         //
+        $request->validate([
+            'user_id' => [
+                'require',
+                function($attribute, $fail, $value){
+                    $exists = Votable::where('user_id', $value)->exists();
+                    if($exists){
+                        return $fail("User ini sudah di masukan");
+                    }
+                }
+            ]
+        ]);
+
+        $votable = new Votable();
+        $votable->save($request->all());
+
+        return response()->json([
+            'status' => true,
+            'message' => "Berhasil",
+            'data' => $votable->load('user')
+        ]);
     }
 
     /**
@@ -61,5 +83,9 @@ class VotableController extends Controller
     public function destroy(Votable $votable)
     {
         //
+        $votable = Votable::findOrFail($votable->id);
+        $votable->delete();
+
+        return response()->json($votable);
     }
 }

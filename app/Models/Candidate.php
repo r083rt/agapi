@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Candidate extends Model
 {
     use HasFactory;
+    protected $guarderd = ["id"];
+
+
+    public function votes(){
+
+    }
 }

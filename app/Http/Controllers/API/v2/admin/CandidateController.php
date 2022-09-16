@@ -29,6 +29,10 @@ class CandidateController extends Controller
     public function store(Request $request)
     {
         //
+        $candidate = new Candidate();
+        $candidate->save($request->all());
+
+        return response()->json($candidate);
     }
 
     /**
@@ -40,6 +44,9 @@ class CandidateController extends Controller
     public function show(Candidate $candidate)
     {
         //
+        $candidate = Candidate::findOrFail($candidate->id);
+
+        return response()->json($candidate);
     }
 
     /**
@@ -52,6 +59,10 @@ class CandidateController extends Controller
     public function update(Request $request, Candidate $candidate)
     {
         //
+        $candidate = Candidate::findOrFail($candidate->id);
+        $candidate->update($request->all());
+
+        return response()->json($candidate);
     }
 
     /**
@@ -63,5 +74,9 @@ class CandidateController extends Controller
     public function destroy(Candidate $candidate)
     {
         //
+        $candidate = Candidate::findOrFail($candidate->id);
+        $candidate->delete();
+
+        return response($candidate);
     }
 }

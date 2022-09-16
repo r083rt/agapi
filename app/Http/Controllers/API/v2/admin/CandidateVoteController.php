@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\v2\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Candidate;
 use Illuminate\Http\Request;
 
 class CandidateVoteController extends Controller
@@ -12,9 +13,12 @@ class CandidateVoteController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($candidate_id)
     {
         //
+        $candidate = Candidate::findOrFail($candidate_id);
+
+        return response()->json($candidate);
     }
 
     /**
