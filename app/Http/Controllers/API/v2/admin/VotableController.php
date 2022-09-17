@@ -31,7 +31,7 @@ class VotableController extends Controller
         //
         $request->validate([
             'user_id' => [
-                'require',
+                'required',
                 function($attribute, $fail, $value){
                     $exists = Votable::where('user_id', $value)->exists();
                     if($exists){
