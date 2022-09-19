@@ -903,4 +903,41 @@ class UserController extends Controller
         ]);
     }
 
+    public function search($keyword)
+    {
+        $res = User::with('profile.province')->has('profile.province')->where(function ($query) {
+            $query->whereHas('payments', function ($query) {
+                $query
+                    ->where('status', 'success')
+                    ->where(function ($query) {
+                        $query->where('payment_id', 3642); // untuk panitia
+                        $query->orWhere('payment_id', 3643); // untuk peserta
+                        $query->orWhere('payment_id', 3644); // untuk partisipan
+                    }); // untuk panitia
+            });
+        })
+            ->where(function ($query) use ($keyword) {
+                $query->where('name', 'like', '%' . $keyword . '%');
+                $query->orWhere('email', 'like', '%' . $keyword . '%');
+                $query->orWhere('kta_id', 'like', '%' . $keyword . '%');
+            })
+            ->withCount(['payments as is_paid_kongres_panitia' => function ($query) {
+                $query
+                    ->where('status', 'success')
+                    ->where('payment_id', 3642); // untuk panitia
+            }])
+            ->withCount(['payments as is_paid_kongres_peserta' => function ($query) {
+                $query
+                    ->where('status', 'success')
+                    ->where('payment_id', 3643); // untuk peserta
+            }])
+            ->withCount(['payments as is_paid_kongres_partisipan' => function ($query) {
+                $query
+                    ->where('status', 'success')
+                    ->where('payment_id', 3644); // untuk partisipan
+            }])
+            ->paginate();
+        return response()->json($res);
+    }
+
 }

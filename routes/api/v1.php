@@ -813,6 +813,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
     Route::get('/contact/edit-data', 'ContactController@editData');
 
+    Route::get('/user/search/{keyword}', 'UserController@search');
+
     // END API WITHOUT SECURITY ------------------------------------------------------------------------
 
     // New ------------------------------------------

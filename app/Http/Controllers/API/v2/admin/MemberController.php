@@ -73,4 +73,12 @@ class MemberController extends Controller
         //
     }
 
+    public function search($keyword)
+    {
+        $res = User::where('name', 'like', '%' . $keyword . '%')
+            ->orWhere('kta_id', 'like', '%' . $keyword . '%')
+            ->orWhere('email', 'like', '%' . $keyword . '%')->paginate();
+        return response()->json($res);
+    }
+
 }
