@@ -54,7 +54,7 @@ class UserVoteController extends Controller
         $user->votes()->sync([$request->candidate_id => ['votable_id' => $user->votable->id]]);
 
         // -- update firestore candidates related votes
-        $candidates = Candidate::withCount('votes')->with(['votes', 'user.profile'])->get();
+        $candidates = Candidate::withCount('votes')->with(['user.profile'])->get();
         $dbFirestore = new Firestore();
         foreach ($candidates as $index => $candidate) {
             # code...
