@@ -12,7 +12,7 @@ class Firestore
         $this->db = new FirestoreClient([
             // get key file with full path
             'keyFile' => json_decode(file_get_contents(
-                storage_path('app/google/credential.json')
+                storage_path(env('GOOGLE_CLOUD_KEY_FILE'))
             ), true),
         ]);
     }
