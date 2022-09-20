@@ -32,22 +32,22 @@ class VotableController extends Controller
         $request->validate([
             'user_id' => [
                 'required',
-                function($attribute, $fail, $value){
-                    $exists = Votable::where('user_id', $value)->exists();
-                    if($exists){
+                function ($attribute, $value, $fail) {
+                    $exists = Votable::where('user_id', $value)->first();
+                    if ($exists) {
                         return $fail("User ini sudah di masukan");
                     }
-                }
-            ]
+                },
+            ],
         ]);
 
-        $votable = new Votable();
-        $votable->save($request->all());
+        $votable = new Votable($request->all());
+        $votable->save();
 
         return response()->json([
             'status' => true,
             'message' => "Berhasil",
-            'data' => $votable->load('user')
+            'data' => $votable->load('user'),
         ]);
     }
 
@@ -80,10 +80,10 @@ class VotableController extends Controller
      * @param  \App\Models\Votable  $votable
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Votable $votable)
+    public function destroy($id)
     {
         //
-        $votable = Votable::findOrFail($votable->id);
+        $votable = Votable::findOrFail($id);
         $votable->delete();
 
         return response()->json($votable);

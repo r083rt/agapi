@@ -150,7 +150,7 @@ class EventController extends Controller
     // user yang terdaftar kedalam adalah user yang sudah melakukan pembayaran ( jika acara berbayar )
     public function getRegisteredUsers($eventId)
     {
-        $partisipants = User::with('profile', 'role')
+        $partisipants = User::with('profile', 'role', 'votable')
             ->withCount(['guest_events as is_attended' => function ($query) use ($eventId) {
                 $query
                     ->where('event_id', $eventId);

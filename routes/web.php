@@ -1,5 +1,5 @@
 <?php
-
+use App\Helper\Firestore;
 use Illuminate\Http\Request;
 // use Thumbnail;
 /*
@@ -375,4 +375,24 @@ from users u
         return view('statistic.pemetaan_jenjang', ['data' => $anjay, 'category1' => $category1, 'data2' => $data2]);
     }
 
+});
+
+Route::get('/tes', function () {
+    $firestore = new Firestore;
+
+    $data = [
+        'user_id' => 1,
+        'candidate_id' => 2,
+    ];
+
+    $store = $firestore->storeVote($data);
+
+    $firestore = $firestore->getDb()->collection('candidates');
+    // return response()->json($firestore);
+    $documents = $firestore->documents();
+    $data = [];
+    foreach ($documents as $document) {
+        $data[] = $document->data();
+    }
+    return response()->json($data);
 });

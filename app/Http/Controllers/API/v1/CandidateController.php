@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\v2\admin;
+namespace App\Http\Controllers\API\v1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Candidate;
@@ -16,8 +16,8 @@ class CandidateController extends Controller
     public function index()
     {
         //
-        $res = Candidate::with('user')->get();
-        return response()->json($res);
+        $candidates = Candidate::with('user.profile.province')->get();
+        return response()->json($candidates);
     }
 
     /**
@@ -29,10 +29,6 @@ class CandidateController extends Controller
     public function store(Request $request)
     {
         //
-        $candidate = new Candidate($request->all());
-        $candidate->save();
-
-        return response()->json($candidate);
     }
 
     /**
@@ -44,9 +40,6 @@ class CandidateController extends Controller
     public function show(Candidate $candidate)
     {
         //
-        $candidate = Candidate::findOrFail($candidate->id);
-
-        return response()->json($candidate);
     }
 
     /**
@@ -56,16 +49,9 @@ class CandidateController extends Controller
      * @param  \App\Models\Candidate  $candidate
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(Request $request, Candidate $candidate)
     {
         //
-        $candidate = Candidate::findOrFail($request->id);
-        $candidate->user_id = $request->user_id;
-        $candidate->title = $request->title;
-        $candidate->description = $request->description;
-        $candidate->save();
-
-        return response()->json($candidate);
     }
 
     /**
@@ -74,13 +60,8 @@ class CandidateController extends Controller
      * @param  \App\Models\Candidate  $candidate
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Candidate $candidate)
     {
         //
-        // return response()->json($candidate);
-        $candidate = Candidate::findOrFail($id);
-        $candidate->delete();
-
-        return response($candidate);
     }
 }

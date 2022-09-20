@@ -15,6 +15,8 @@
         "fruitcake/laravel-cors": "^2.0",
         "google/cloud": "^0.189.0",
         "google/cloud-firestore": "^1.25",
+        "google/protobuf": "^3.17",
+        "grpc/grpc": "^1.38",
         "guzzlehttp/guzzle": "^7.4.4",
         "lakshmaji/thumbnail": "^1.4",
         "laravel/framework": "^8.12",

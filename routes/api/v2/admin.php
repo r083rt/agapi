@@ -8,4 +8,7 @@ Route::resources([
     'candidate' => 'CandidateController',
     'candidate.vote' => 'CandidateVoteController',
     'votable' => 'VotableController',
+    'user.votable' => 'UserVotableController',
 ]);
+
+Route::get('/user/search/{keyword}', 'UserController@search');

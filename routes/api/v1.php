@@ -323,6 +323,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'assigmentsession' => 'AssigmentSessionController',
             'question' => 'QuestionController',
             'answer' => 'AnswerController',
+            'user.vote' => 'UserVoteController',
+            'user.votable' => 'UserVotableController',
+            'candidate' => 'CandidateController',
         ]);
 
         Route::post('/rooms/join', 'RoomController@join');

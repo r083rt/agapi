@@ -44,6 +44,16 @@ class User extends \TCG\Voyager\Models\User
         'email_verified_at' => 'datetime',
     ];
 
+    public function votable()
+    {
+        return $this->hasOne('App\Models\Votable');
+    }
+
+    public function votes()
+    {
+        return $this->belongsToMany('App\Models\Candidate', 'votes', 'user_id', 'candidate_id')->withPivot('created_at', 'votable_id');
+    }
+
     public function payment()
     {
         return $this->hasOne(Payment::class);
