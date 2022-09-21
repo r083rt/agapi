@@ -165,6 +165,30 @@ class EventController extends Controller
         return response()->json($partisipants);
     }
 
+    public function searchRegisteredUsers($eventId, $key)
+    {
+        // return response()->json($key);
+        $partisipants = User::with('profile', 'role', 'votable')
+            ->withCount(['guest_events as is_attended' => function ($query) use ($eventId) {
+                $query
+                    ->where('event_id', $eventId);
+
+            }])
+            ->whereHas('payments', function ($query) use ($eventId) {
+                $query
+                    ->where('status', 'success')
+                    ->where('payment_type', 'App\Models\Event')
+                    ->where('payment_id', $eventId);
+            })
+            ->where(function ($query) use ($key) {
+                $query->where('name', 'like', '%' . $key . '%')
+                    ->orWhere('email', 'like', '%' . $key . '%')
+                    ->orWhere('kta_id', 'like', '%' . $key . '%');
+            })
+            ->paginate();
+        return response()->json($partisipants);
+    }
+
     public function getPartisipants($eventId)
     {
         $partisipants = User::with('profile', 'role')
@@ -172,6 +196,22 @@ class EventController extends Controller
                 $query
                     ->where('event_id', $eventId);
             })->paginate();
+        return response()->json($partisipants);
+    }
+
+    public function searchPartisipants($eventId, $keyword)
+    {
+        $partisipants = User::with('profile', 'role')
+            ->whereHas('guest_events', function ($query) use ($eventId) {
+                $query
+                    ->where('event_id', $eventId);
+            })
+            ->where(function ($query) use ($keyword) {
+                $query->where('name', 'like', '%' . $keyword . '%')
+                    ->orWhere('email', 'like', '%' . $keyword . '%')
+                    ->orWhere('kta_id', 'like', '%' . $keyword . '%');
+            })
+            ->paginate();
         return response()->json($partisipants);
     }
 

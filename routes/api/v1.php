@@ -444,11 +444,15 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
 
         Route::get('events/{id}/registered/users', 'EventController@getRegisteredUsers');
 
+        Route::get('events/{id}/registered/users/search/{key}', 'EventController@searchRegisteredUsers');
+
         Route::post('events/{id}/paymenturl', 'EventController@paymentUrl');
 
         Route::get('events/{id}/paymentstatus', 'EventController@checkPaymentStatus');
 
         Route::get('events/{id}/partisipants', 'EventController@getPartisipants');
+
+        Route::get('events/{id}/partisipants/search/{keyword}', 'EventController@searchPartisipants');
 
         Route::get('events/{id}/registered/users/count', 'EventController@getRegisteredUsersCount');
 

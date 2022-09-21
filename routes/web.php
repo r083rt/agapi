@@ -1,6 +1,5 @@
 <?php
 use App\Helper\Firestore;
-use Illuminate\Http\Request;
 // use Thumbnail;
 /*
 |--------------------------------------------------------------------------
@@ -12,7 +11,6 @@ use Illuminate\Http\Request;
 | contains the "web" middleware group. Now create something great!
 |
  */
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 
@@ -88,294 +86,294 @@ Route::group(['prefix' => 'admin'], function () {
     });
 });
 
-Route::group(['middleware' => ['auth', 'checkSubAdmin']], function () {
-    Route::get('/users_report', "UserController@index2");
-});
+// Route::group(['middleware' => ['auth', 'checkSubAdmin']], function () {
+//     Route::get('/users_report', "UserController@index2");
+// });
 
-Route::group(['middleware' => ['admin.user']], function () {
+// Route::group(['middleware' => ['admin.user']], function () {
 
-    Route::get('/userreport', 'UserController@index');
-    Route::get('/paymentreport', 'PaymentController@report');
-    Route::get('/secure/makeFilePublic', 'SecureController@makeFilePublic');
+//     Route::get('/userreport', 'UserController@index');
+//     Route::get('/paymentreport', 'PaymentController@report');
+//     Route::get('/secure/makeFilePublic', 'SecureController@makeFilePublic');
 
-});
+// });
 
 Route::get('/terms-conditions', 'TermConditionController@index');
-Route::get('/rekap', function () {
-    return Redirect::to('https://docs.google.com/spreadsheets/d/1ZXmrGnNJZ9-kjq2rDeNcNdIdeb6v8J34HeRd1WYJ1K8/edit?usp=sharing');
-});
+// Route::get('/rekap', function () {
+//     return Redirect::to('https://docs.google.com/spreadsheets/d/1ZXmrGnNJZ9-kjq2rDeNcNdIdeb6v8J34HeRd1WYJ1K8/edit?usp=sharing');
+// });
 
 Route::group(['middleware' => [
     'expired',
     'auth',
 ]], function () {
-    Route::get('/resetsuccess', function () {
-        return view('auth.passwords.success');
-    });
-    // -----------------------
-    Route::get('/home', function () {
-        return abort(403, 'Untuk pendaftaran KTA DIGITAL silahkan menggunakan aplikasi yang bisa didownload di playstore');
-    });
-    Route::get('/test/{paymentId}', 'PaymentController@test');
+    // Route::get('/resetsuccess', function () {
+    //     return view('auth.passwords.success');
+    // });
+    // // -----------------------
+    // Route::get('/home', function () {
+    //     return abort(403, 'Untuk pendaftaran KTA DIGITAL silahkan menggunakan aplikasi yang bisa didownload di playstore');
+    // });
+    // Route::get('/test/{paymentId}', 'PaymentController@test');
 });
 
 Route::get('/getcontactnumber', function () {
-    $numbers = [
-        '6285641161238', //nomer mas rendy
-    ];
-    return $numbers[rand(0, count($numbers) - 1)];
+    // $numbers = [
+    //     '6285641161238', //nomer mas rendy
+    // ];
+    // return $numbers[rand(0, count($numbers) - 1)];
 });
 
-Route::get('/best', 'ExcelController@best');
+// Route::get('/best', 'ExcelController@best');
 
-Route::get('/pns-statuses', [App\Http\Controllers\Voyager\PnsStatusController::class, 'index']);
+// Route::get('/pns-statuses', [App\Http\Controllers\Voyager\PnsStatusController::class, 'index']);
 
-Route::get('/total_pns_semua_jenjang', function () {
-    $data = DB::select("select
-	el.name,count(*) as total_guru_pns
-from users u
-	inner join profiles p on p.user_id=u.id
-    inner join educational_levels el on el.id=p.educational_level_id
-    inner join pns_statuses ps on ps.user_id=u.id
-    where
-		p.educational_level_id is not null and
-        ps.is_pns=1
-	group by p.educational_level_id");
-    echo "<table border=1><tr><th>Jenjang</th><th>Jumlah guru pns</th></tr>";
-    $t = 0;
-    foreach ($data as $d) {
-        echo "<tr><td>{$d->name}</td><td>{$d->total_guru_pns}</td></tr>";
-        $t += $d->total_guru_pns;
-    }
-    echo "</table>";
-    echo "<br>Total: {$t}";
-});
+// Route::get('/total_pns_semua_jenjang', function () {
+//     $data = DB::select("select
+//     el.name,count(*) as total_guru_pns
+// from users u
+//     inner join profiles p on p.user_id=u.id
+//     inner join educational_levels el on el.id=p.educational_level_id
+//     inner join pns_statuses ps on ps.user_id=u.id
+//     where
+//         p.educational_level_id is not null and
+//         ps.is_pns=1
+//     group by p.educational_level_id");
+//     echo "<table border=1><tr><th>Jenjang</th><th>Jumlah guru pns</th></tr>";
+//     $t = 0;
+//     foreach ($data as $d) {
+//         echo "<tr><td>{$d->name}</td><td>{$d->total_guru_pns}</td></tr>";
+//         $t += $d->total_guru_pns;
+//     }
+//     echo "</table>";
+//     echo "<br>Total: {$t}";
+// });
 
-Route::get('/total_non_pns_semua_jenjang', function () {
-    $data = DB::select("select
-	el.name,count(*) as total_guru_non_pns
-from users u
-	inner join profiles p on p.user_id=u.id
-    inner join educational_levels el on el.id=p.educational_level_id
-    inner join pns_statuses ps on ps.user_id=u.id
-    where
-		p.educational_level_id is not null and
-        ps.is_pns=0
-	group by p.educational_level_id");
-    echo "<table border=1><tr><th>Jenjang</th><th>Jumlah guru NON pns</th></tr>";
-    $t = 0;
-    foreach ($data as $d) {
-        echo "<tr><td>{$d->name}</td><td>{$d->total_guru_non_pns}</td></tr>";
-        $t += $d->total_guru_non_pns;
-    }
-    echo "</table>";
-    echo "<br>Total: {$t}";
-});
+// Route::get('/total_non_pns_semua_jenjang', function () {
+//     $data = DB::select("select
+//     el.name,count(*) as total_guru_non_pns
+// from users u
+//     inner join profiles p on p.user_id=u.id
+//     inner join educational_levels el on el.id=p.educational_level_id
+//     inner join pns_statuses ps on ps.user_id=u.id
+//     where
+//         p.educational_level_id is not null and
+//         ps.is_pns=0
+//     group by p.educational_level_id");
+//     echo "<table border=1><tr><th>Jenjang</th><th>Jumlah guru NON pns</th></tr>";
+//     $t = 0;
+//     foreach ($data as $d) {
+//         echo "<tr><td>{$d->name}</td><td>{$d->total_guru_non_pns}</td></tr>";
+//         $t += $d->total_guru_non_pns;
+//     }
+//     echo "</table>";
+//     echo "<br>Total: {$t}";
+// });
 
-Route::get('/pemetaan_provinsi', function () {
-    $data = DB::select("select
-	ps.is_pns,p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
-from users u
-	inner join profiles p on p.user_id=u.id
-    inner join educational_levels el on el.id=p.educational_level_id
-    inner join provinces pr on pr.id=p.province_id
-    inner join pns_statuses ps on ps.user_id=u.id
-    where
-        ps.is_pns in (0,1) and
-        p.educational_level_id is not null and
-        p.province_id is not null
-    group by p.educational_level_id,p.province_id,ps.is_pns");
+// Route::get('/pemetaan_provinsi', function () {
+//     $data = DB::select("select
+//     ps.is_pns,p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
+// from users u
+//     inner join profiles p on p.user_id=u.id
+//     inner join educational_levels el on el.id=p.educational_level_id
+//     inner join provinces pr on pr.id=p.province_id
+//     inner join pns_statuses ps on ps.user_id=u.id
+//     where
+//         ps.is_pns in (0,1) and
+//         p.educational_level_id is not null and
+//         p.province_id is not null
+//     group by p.educational_level_id,p.province_id,ps.is_pns");
 
-    $anjay = [];
-    foreach ($data as $key => $val) {
-        $jenjang = ['SD' => 0, 'SMP' => 0, 'SMA' => 0, 'SMK' => 0, 'TK' => 0, 'SLB' => 0];
-        $anjay[$val->provinsi]['pns'] = $jenjang;
-        $anjay[$val->provinsi]['nonpns'] = $jenjang;
-    }
-    foreach ($data as $key => $val) {
-        $status_pns = $val->is_pns ? 'pns' : 'nonpns';
-        $anjay[$val->provinsi][$status_pns][$val->jenjang] = $val->total;
-    }
-    return view('statistic.pns_statuses_provinsi', ['data' => $anjay]);
+//     $anjay = [];
+//     foreach ($data as $key => $val) {
+//         $jenjang = ['SD' => 0, 'SMP' => 0, 'SMA' => 0, 'SMK' => 0, 'TK' => 0, 'SLB' => 0];
+//         $anjay[$val->provinsi]['pns'] = $jenjang;
+//         $anjay[$val->provinsi]['nonpns'] = $jenjang;
+//     }
+//     foreach ($data as $key => $val) {
+//         $status_pns = $val->is_pns ? 'pns' : 'nonpns';
+//         $anjay[$val->provinsi][$status_pns][$val->jenjang] = $val->total;
+//     }
+//     return view('statistic.pns_statuses_provinsi', ['data' => $anjay]);
 
-});
+// });
 
-Route::get('/pemetaan_jenjang', function () {
-    $data = DB::select("select
-	el.name as jenjang,ps.is_pns,count(*) as total
-from users u
-	inner join profiles p on p.user_id=u.id
-    inner join educational_levels el on el.id=p.educational_level_id
-    inner join pns_statuses ps on ps.user_id=u.id
-    where
-		p.educational_level_id is not null and
-        ps.is_pns in (0,1)
-	group by p.educational_level_id, ps.is_pns");
+// Route::get('/pemetaan_jenjang', function () {
+//     $data = DB::select("select
+//     el.name as jenjang,ps.is_pns,count(*) as total
+// from users u
+//     inner join profiles p on p.user_id=u.id
+//     inner join educational_levels el on el.id=p.educational_level_id
+//     inner join pns_statuses ps on ps.user_id=u.id
+//     where
+//         p.educational_level_id is not null and
+//         ps.is_pns in (0,1)
+//     group by p.educational_level_id, ps.is_pns");
 
-    $anjay = [];
-    foreach ($data as $key => $val) {
-        $status_pns = $val->is_pns ? 'pns' : 'nonpns';
-        $anjay[$val->jenjang][$status_pns] = $val->total;
-    }
-    return view('statistic.pns_statuses_jenjang', ['data' => $anjay]);
+//     $anjay = [];
+//     foreach ($data as $key => $val) {
+//         $status_pns = $val->is_pns ? 'pns' : 'nonpns';
+//         $anjay[$val->jenjang][$status_pns] = $val->total;
+//     }
+//     return view('statistic.pns_statuses_jenjang', ['data' => $anjay]);
 
-});
+// });
 
-Route::get('/pemetaan_provinsi/sertifikasi', function () {
-    $data = DB::select("select
-	ps.is_certification,p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
-from users u
-	inner join profiles p on p.user_id=u.id
-    inner join educational_levels el on el.id=p.educational_level_id
-    inner join provinces pr on pr.id=p.province_id
-    inner join pns_statuses ps on ps.user_id=u.id
-    where
-        ps.is_certification in (0,1) and
-        p.educational_level_id is not null and
-        p.province_id is not null
-    group by p.educational_level_id,p.province_id,ps.is_certification");
+// Route::get('/pemetaan_provinsi/sertifikasi', function () {
+//     $data = DB::select("select
+//     ps.is_certification,p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
+// from users u
+//     inner join profiles p on p.user_id=u.id
+//     inner join educational_levels el on el.id=p.educational_level_id
+//     inner join provinces pr on pr.id=p.province_id
+//     inner join pns_statuses ps on ps.user_id=u.id
+//     where
+//         ps.is_certification in (0,1) and
+//         p.educational_level_id is not null and
+//         p.province_id is not null
+//     group by p.educational_level_id,p.province_id,ps.is_certification");
 
-    $anjay = [];
-    foreach ($data as $key => $val) {
-        $jenjang = ['SD' => 0, 'SMP' => 0, 'SMA' => 0, 'SMK' => 0, 'TK' => 0, 'SLB' => 0];
-        $anjay[$val->provinsi]['certificated'] = $jenjang;
-        $anjay[$val->provinsi]['noncertificated'] = $jenjang;
-    }
-    foreach ($data as $key => $val) {
-        $status_sertfifikasi = $val->is_certification ? 'certificated' : 'noncertificated';
-        $anjay[$val->provinsi][$status_sertfifikasi][$val->jenjang] = $val->total;
-    }
-    return view('statistic.is_sertifikasi_provinsi', ['data' => $anjay]);
-});
+//     $anjay = [];
+//     foreach ($data as $key => $val) {
+//         $jenjang = ['SD' => 0, 'SMP' => 0, 'SMA' => 0, 'SMK' => 0, 'TK' => 0, 'SLB' => 0];
+//         $anjay[$val->provinsi]['certificated'] = $jenjang;
+//         $anjay[$val->provinsi]['noncertificated'] = $jenjang;
+//     }
+//     foreach ($data as $key => $val) {
+//         $status_sertfifikasi = $val->is_certification ? 'certificated' : 'noncertificated';
+//         $anjay[$val->provinsi][$status_sertfifikasi][$val->jenjang] = $val->total;
+//     }
+//     return view('statistic.is_sertifikasi_provinsi', ['data' => $anjay]);
+// });
 
-Route::get('/pemetaan_jenjang/sertifikasi', function () {
-    $data = DB::select("select
-	el.name as jenjang,ps.is_certification,count(*) as total
-from users u
-	inner join profiles p on p.user_id=u.id
-    inner join educational_levels el on el.id=p.educational_level_id
-    inner join pns_statuses ps on ps.user_id=u.id
-    where
-		p.educational_level_id is not null and
-        ps.is_certification in (0,1)
-	group by p.educational_level_id, ps.is_certification");
+// Route::get('/pemetaan_jenjang/sertifikasi', function () {
+//     $data = DB::select("select
+//     el.name as jenjang,ps.is_certification,count(*) as total
+// from users u
+//     inner join profiles p on p.user_id=u.id
+//     inner join educational_levels el on el.id=p.educational_level_id
+//     inner join pns_statuses ps on ps.user_id=u.id
+//     where
+//         p.educational_level_id is not null and
+//         ps.is_certification in (0,1)
+//     group by p.educational_level_id, ps.is_certification");
 
-    $anjay = [];
-    foreach ($data as $key => $val) {
-        $status_sertfifikasi = $val->is_certification ? 'certificated' : 'noncertificated';
-        $anjay[$val->jenjang][$status_sertfifikasi] = $val->total;
-    }
-    return view('statistic.is_sertifikasi_jenjang', ['data' => $anjay]);
-});
+//     $anjay = [];
+//     foreach ($data as $key => $val) {
+//         $status_sertfifikasi = $val->is_certification ? 'certificated' : 'noncertificated';
+//         $anjay[$val->jenjang][$status_sertfifikasi] = $val->total;
+//     }
+//     return view('statistic.is_sertifikasi_jenjang', ['data' => $anjay]);
+// });
 
-Route::get('/pemetaan_jumlah_guru', function (Request $request) {
+// Route::get('/pemetaan_jumlah_guru', function (Request $request) {
 
-    $category1 = $request->query('category1') == 'sertifikasi' ? 'sertifikasi' : 'pns';
-    $category2 = $request->query('category2') == 'jenjang' ? 'jenjang' : 'provinsi';
+//     $category1 = $request->query('category1') == 'sertifikasi' ? 'sertifikasi' : 'pns';
+//     $category2 = $request->query('category2') == 'jenjang' ? 'jenjang' : 'provinsi';
 
-    $column1 = $category1 == 'pns' ? 'is_pns' : 'is_certification';
+//     $column1 = $category1 == 'pns' ? 'is_pns' : 'is_certification';
 
-    if ($category2 == "provinsi") {
-        $data = DB::select("select
-	ps.{$column1},p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
-from users u
-	inner join profiles p on p.user_id=u.id
-    inner join educational_levels el on el.id=p.educational_level_id
-    inner join provinces pr on pr.id=p.province_id
-    inner join pns_statuses ps on ps.user_id=u.id
-    where
-        ps.{$column1} in (0,1) and
-        p.educational_level_id is not null and
-        p.province_id is not null
-    group by p.educational_level_id,p.province_id,ps.{$column1}");
+//     if ($category2 == "provinsi") {
+//         $data = DB::select("select
+//     ps.{$column1},p.educational_level_id,el.name as jenjang, p.province_id, pr.name as provinsi,count(*) as total
+// from users u
+//     inner join profiles p on p.user_id=u.id
+//     inner join educational_levels el on el.id=p.educational_level_id
+//     inner join provinces pr on pr.id=p.province_id
+//     inner join pns_statuses ps on ps.user_id=u.id
+//     where
+//         ps.{$column1} in (0,1) and
+//         p.educational_level_id is not null and
+//         p.province_id is not null
+//     group by p.educational_level_id,p.province_id,ps.{$column1}");
 
-        $anjay = [];
+//         $anjay = [];
 
-        $status = $category1 == 'pns' ? 'pns' : 'certificated';
-        $status_non = $category1 == 'pns' ? 'nonpns' : 'noncertificated';
-        foreach ($data as $key => $val) {
-            $jenjang = ['SD' => 0, 'SMP' => 0, 'SMA' => 0, 'SMK' => 0, 'TK' => 0, 'SLB' => 0];
-            // $index = array_search($val->jenjang,array_keys($jenjang));
+//         $status = $category1 == 'pns' ? 'pns' : 'certificated';
+//         $status_non = $category1 == 'pns' ? 'nonpns' : 'noncertificated';
+//         foreach ($data as $key => $val) {
+//             $jenjang = ['SD' => 0, 'SMP' => 0, 'SMA' => 0, 'SMK' => 0, 'TK' => 0, 'SLB' => 0];
+//             // $index = array_search($val->jenjang,array_keys($jenjang));
 
-            $anjay[$val->provinsi][$status] = $jenjang;
-            $anjay[$val->provinsi][$status_non] = $jenjang;
+//             $anjay[$val->provinsi][$status] = $jenjang;
+//             $anjay[$val->provinsi][$status_non] = $jenjang;
 
-        }
+//         }
 
-        $arr_check = ['pns', 'nonpns'];
-        if ($category1 == 'sertifikasi') {
-            $arr_check = ['certificated', 'noncertificated'];
-        }
+//         $arr_check = ['pns', 'nonpns'];
+//         if ($category1 == 'sertifikasi') {
+//             $arr_check = ['certificated', 'noncertificated'];
+//         }
 
-        foreach ($data as $key => $val) {
-            $status_ = $val->{$column1} ? $arr_check[0] : $arr_check[1];
-            $anjay[$val->provinsi][$status_][$val->jenjang] = $val->total;
-        }
+//         foreach ($data as $key => $val) {
+//             $status_ = $val->{$column1} ? $arr_check[0] : $arr_check[1];
+//             $anjay[$val->provinsi][$status_][$val->jenjang] = $val->total;
+//         }
 
-        return view('statistic.pemetaan_provinsi', ['data' => $anjay, 'category1' => $category1]);
+//         return view('statistic.pemetaan_provinsi', ['data' => $anjay, 'category1' => $category1]);
 
-    } else {
-        $data = DB::select("select
-        el.name as jenjang,ps.{$column1},count(*) as total
-    from users u
-        inner join profiles p on p.user_id=u.id
-        inner join educational_levels el on el.id=p.educational_level_id
-        inner join pns_statuses ps on ps.user_id=u.id
-        where
-            p.educational_level_id is not null and
-            ps.{$column1} in (0,1)
-        group by p.educational_level_id, ps.{$column1}");
+//     } else {
+//         $data = DB::select("select
+//         el.name as jenjang,ps.{$column1},count(*) as total
+//     from users u
+//         inner join profiles p on p.user_id=u.id
+//         inner join educational_levels el on el.id=p.educational_level_id
+//         inner join pns_statuses ps on ps.user_id=u.id
+//         where
+//             p.educational_level_id is not null and
+//             ps.{$column1} in (0,1)
+//         group by p.educational_level_id, ps.{$column1}");
 
-        if ($column1 == 'is_pns') {
-            //#total user yang aktif dan sudah isi profile tapi belum mengisi status PNS
-            $data2 = DB::select("select
-                    count(*) as total
-                from users u
-                where u.user_activated_at is not null and
-                exists (
-                    select 1 from profiles p where p.user_id=u.id
-                ) and
-                not exists (
-                    select 1 from pns_statuses ps where ps.user_id=u.id
-                )
-                ");
+//         if ($column1 == 'is_pns') {
+//             //#total user yang aktif dan sudah isi profile tapi belum mengisi status PNS
+//             $data2 = DB::select("select
+//                     count(*) as total
+//                 from users u
+//                 where u.user_activated_at is not null and
+//                 exists (
+//                     select 1 from profiles p where p.user_id=u.id
+//                 ) and
+//                 not exists (
+//                     select 1 from pns_statuses ps where ps.user_id=u.id
+//                 )
+//                 ");
 
-        } else {
-            //#total user yang aktif dan sudah isi profile, atau sudah isi status PNS, tapi belum mengisi status sertifikasi
-            $data2 = DB::select("
-                select
-                    count(*) as total
-                from users u
-                where u.user_activated_at is not null and
-                exists (
-                    select 1 from profiles p where p.user_id=u.id
-                ) and
-                (not exists (
-                        select 1 from pns_statuses ps where ps.user_id=u.id
-                    ) or
-                    exists (
-                        select 1 from pns_statuses ps where ps.user_id=u.id and ps.is_certification is null
-                    )
-                )
-                ");
-        }
+//         } else {
+//             //#total user yang aktif dan sudah isi profile, atau sudah isi status PNS, tapi belum mengisi status sertifikasi
+//             $data2 = DB::select("
+//                 select
+//                     count(*) as total
+//                 from users u
+//                 where u.user_activated_at is not null and
+//                 exists (
+//                     select 1 from profiles p where p.user_id=u.id
+//                 ) and
+//                 (not exists (
+//                         select 1 from pns_statuses ps where ps.user_id=u.id
+//                     ) or
+//                     exists (
+//                         select 1 from pns_statuses ps where ps.user_id=u.id and ps.is_certification is null
+//                     )
+//                 )
+//                 ");
+//         }
 
-        $anjay = [];
+//         $anjay = [];
 
-        $arr_check = ['pns', 'nonpns'];
-        if ($category1 == 'sertifikasi') {
-            $arr_check = ['certificated', 'noncertificated'];
-        }
+//         $arr_check = ['pns', 'nonpns'];
+//         if ($category1 == 'sertifikasi') {
+//             $arr_check = ['certificated', 'noncertificated'];
+//         }
 
-        foreach ($data as $key => $val) {
-            $status = $val->{$column1} ? $arr_check[0] : $arr_check[1];
-            $anjay[$val->jenjang][$status] = $val->total;
-        }
+//         foreach ($data as $key => $val) {
+//             $status = $val->{$column1} ? $arr_check[0] : $arr_check[1];
+//             $anjay[$val->jenjang][$status] = $val->total;
+//         }
 
-        return view('statistic.pemetaan_jenjang', ['data' => $anjay, 'category1' => $category1, 'data2' => $data2]);
-    }
+//         return view('statistic.pemetaan_jenjang', ['data' => $anjay, 'category1' => $category1, 'data2' => $data2]);
+//     }
 
-});
+// });
 
 Route::get('/tes', function () {
     $firestore = new Firestore;
