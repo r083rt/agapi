@@ -16,7 +16,7 @@ class CandidateController extends Controller
     public function index()
     {
         //
-        $res = Candidate::with('user')->get();
+        $res = Candidate::with('user', 'votes')->get();
         return response()->json($res);
     }
 
@@ -41,10 +41,10 @@ class CandidateController extends Controller
      * @param  \App\Models\Candidate  $candidate
      * @return \Illuminate\Http\Response
      */
-    public function show(Candidate $candidate)
+    public function show($id)
     {
         //
-        $candidate = Candidate::findOrFail($candidate->id);
+        $candidate = Candidate::with('user', 'votes')->findOrFail($id);
 
         return response()->json($candidate);
     }

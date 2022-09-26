@@ -16,6 +16,9 @@ Route::resources([
     'candidate.vote' => 'CandidateVoteController',
     'votable' => 'VotableController',
     'user.votable' => 'UserVotableController',
+    'department-division' => 'DepartmentDivisionController',
+    'department' => 'DepartmentController',
+    'department.user' => 'DepartmentUserController',
 ]);
 
 Route::get('/user/search/{keyword}', 'UserController@search');

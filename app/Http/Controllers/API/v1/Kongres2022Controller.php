@@ -319,4 +319,95 @@ class Kongres2022Controller extends Controller
             "message" => "Permintaan tidak valid",
         ]);
     }
+
+    // mengambilan data anggota yang melakukan pembayaran kongres dengan id acara 3642, 3643 dan 3644
+    public function getPaymentUsers()
+    {
+        $payments = Payment::with('user')->where('payment_type', 'App\Models\Event')
+            ->whereIn('payment_id', [3642, 3643, 3644])
+            ->where('status', 'success')
+            ->get();
+        return response()->json($payments);
+    }
+
+    public function getPaymentUsersCount()
+    {
+        $payments = Payment::with('user')->where('payment_type', 'App\Models\Event')
+            ->whereIn('payment_id', [3642, 3643, 3644])
+            ->where('status', 'success')
+            ->count();
+        return response()->json($payments);
+    }
+
+    public function getPaymentUserByProvince($provinceId)
+    {
+        $payments = Payment::with('user')->where('payment_type', 'App\Models\Event')
+            ->whereIn('payment_id', [3642, 3643, 3644])
+            ->where('status', 'success')
+            ->whereHas('user.profile', function ($query) use ($provinceId) {
+                $query->where('province_id', $provinceId);
+            })
+            ->get();
+        return response()->json($payments);
+    }
+
+    public function getPaymentUserByProvinceCount($provinceId)
+    {
+        $payments = Payment::with('user')->where('payment_type', 'App\Models\Event')
+            ->whereIn('payment_id', [3642, 3643, 3644])
+            ->where('status', 'success')
+            ->whereHas('user.profile', function ($query) use ($provinceId) {
+                $query->where('province_id', $provinceId);
+            })
+            ->count();
+        return response()->json($payments);
+    }
+
+    public function getPaymentUserByCity($cityId)
+    {
+        $payments = Payment::with('user')->where('payment_type', 'App\Models\Event')
+            ->whereIn('payment_id', [3642, 3643, 3644])
+            ->where('status', 'success')
+            ->whereHas('user.profile', function ($query) use ($cityId) {
+                $query->where('city_id', $cityId);
+            })
+            ->get();
+        return response()->json($payments);
+    }
+
+    public function getPaymentUserByCityCount($cityId)
+    {
+        $payments = Payment::with('user')->where('payment_type', 'App\Models\Event')
+            ->whereIn('payment_id', [3642, 3643, 3644])
+            ->where('status', 'success')
+            ->whereHas('user.profile', function ($query) use ($cityId) {
+                $query->where('city_id', $cityId);
+            })
+            ->count();
+        return response()->json($payments);
+    }
+
+    public function getPaymentUserByDistrict($districtId)
+    {
+        $payments = Payment::with('user')->where('payment_type', 'App\Models\Event')
+            ->whereIn('payment_id', [3642, 3643, 3644])
+            ->where('status', 'success')
+            ->whereHas('user.profile', function ($query) use ($districtId) {
+                $query->where('district_id', $districtId);
+            })
+            ->get();
+        return response()->json($payments);
+    }
+
+    public function getPaymentUserByDistrictCount($districtId)
+    {
+        $payments = Payment::with('user')->where('payment_type', 'App\Models\Event')
+            ->whereIn('payment_id', [3642, 3643, 3644])
+            ->where('status', 'success')
+            ->whereHas('user.profile', function ($query) use ($districtId) {
+                $query->where('district_id', $districtId);
+            })
+            ->count();
+        return response()->json($payments);
+    }
 }

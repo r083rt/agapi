@@ -21,6 +21,7 @@ class Candidate extends Model
     public function votes()
     {
         return $this->belongsToMany('App\Models\User', 'votes', 'candidate_id', 'user_id');
+        // return $this->hasMany(Vote::class);
     }
 
     public function getVotablesCountAttribute()
