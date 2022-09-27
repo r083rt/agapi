@@ -301,6 +301,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'department/dpp' => 'DppDepartmentController',
             'province.department' => 'DpwDepartmentController',
             'city.department' => 'DpdDepartmentController',
+            'department-division' => 'DepartmentDivisionController',
         ]);
 
         Route::delete('module/{moduleId}/dislike', 'ModuleLikeController@dislike');
@@ -427,6 +428,22 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         Route::get('/kongres/users/{id}/payment/checkstatus', 'Kongres2022Controller@checkPaymentStatus');
 
         Route::get('/kongres/users/{id}/payment/checkpayment', 'Kongres2022Controller@checkKongres2022Payment');
+
+        Route::get('/kongres/payments', 'Kongres2022Controller@getPaymentUsers');
+
+        Route::get('/kongres/payments/count', 'Kongres2022Controller@getPaymentUsersCount');
+
+        Route::get('/kongres/province/{provinceId}/payments', 'Kongres2022Controller@getPaymentUserByProvince');
+
+        Route::get('/kongres/province/{provinceId}/payments/count', 'Kongres2022Controller@getPaymentUserByProvinceCount');
+
+        // Route::get('/kongres/city/{cityId}/payments')
+
+        // Route::get('/kongres/city/{cityId}/payments/count')
+
+        // Route::get('/kongres/district/{districtId}/payments')
+
+        // Route::get('/kongres/district/{districtId}/payments/count')
 
         Route::get('events/users/{id}/profitsum', 'EventController@getEventProfitSum');
 
