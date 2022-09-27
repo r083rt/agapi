@@ -46,7 +46,7 @@ class DepartmentController extends Controller
     public function show($id)
     {
         //
-        $department = Department::findOrFail($id);
+        $department = Department::with('department', 'division', 'user')->findOrFail($id);
         return response()->json($department);
     }
 

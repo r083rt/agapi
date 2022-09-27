@@ -20,6 +20,16 @@ class Department extends Model
         return $this->morphTo();
     }
 
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'parent_id', 'id');
+    }
+
+    public function division()
+    {
+        return $this->belongsTo(DepartmentDivision::class);
+    }
+
     public function sub_departments()
     {
         return $this->hasMany(Department::class, 'parent_id')->with('user.profile');
