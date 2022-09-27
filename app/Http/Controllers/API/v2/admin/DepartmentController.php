@@ -16,7 +16,7 @@ class DepartmentController extends Controller
     public function index()
     {
         //
-        $res = Department::with('children')
+        $res = Department::with('children', 'user')
             ->where('parent_id', null)
             ->get();
         return response()->json($res);
@@ -30,6 +30,16 @@ class DepartmentController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'start_date' => [
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($value > $request->end_date) {
+                        return $fail("Tanggal tidak valid");
+                    }
+                },
+            ],
+        ]);
+
         $department = new Department($request->all());
 
         $department->save();
