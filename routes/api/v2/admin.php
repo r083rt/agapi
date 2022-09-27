@@ -22,3 +22,4 @@ Route::resources([
 ]);
 
 Route::get('/user/search/{keyword}', 'UserController@search');
+Route::get('/departments/search/{keyword}', 'DepartmentController@search');

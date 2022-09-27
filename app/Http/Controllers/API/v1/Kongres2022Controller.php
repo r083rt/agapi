@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Models\User;
 // memanggil helper Midtrans
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class Kongres2022Controller extends Controller
 {
@@ -323,9 +324,20 @@ class Kongres2022Controller extends Controller
     // mengambilan data anggota yang melakukan pembayaran kongres dengan id acara 3642, 3643 dan 3644
     public function getPaymentUsers()
     {
-        $payments = Payment::with('user')->where('payment_type', 'App\Models\Event')
+        $payments = Payment::
+            join('users', 'users.id', '=', 'payments.user_id')
+            ->join('profiles', 'profiles.user_id', '=', 'users.id')
+            ->join('provinces', 'provinces.id', '=', 'profiles.province_id')
+            ->with('user')
+            ->where('payment_type', 'App\Models\Event')
             ->whereIn('payment_id', [3642, 3643, 3644])
             ->where('status', 'success')
+            ->select(
+                'provinces.id as id',
+                DB::raw('count(payments.id) as total_payment'),
+                'provinces.name as name'
+            )
+            ->groupBy('name')
             ->get();
         return response()->json($payments);
     }
@@ -341,12 +353,19 @@ class Kongres2022Controller extends Controller
 
     public function getPaymentUserByProvince($provinceId)
     {
-        $payments = Payment::with('user')->where('payment_type', 'App\Models\Event')
+        $payments = Payment::
+            join('users', 'payments.user_id', '=', 'users.id')
+            ->join('profiles', 'users.id', '=', 'profiles.user_id')
+            ->join('cities', 'profiles.city_id', '=', 'cities.id')
+            ->where('payment_type', 'App\Models\Event')
             ->whereIn('payment_id', [3642, 3643, 3644])
             ->where('status', 'success')
-            ->whereHas('user.profile', function ($query) use ($provinceId) {
-                $query->where('province_id', $provinceId);
-            })
+            ->where('profiles.province_id', $provinceId)
+            ->select(
+                'cities.id as id',
+                DB::raw('count(payments.id) as total_payment'),
+                'cities.name as name'
+            )
             ->get();
         return response()->json($payments);
     }

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Department extends Model
 {
     use HasFactory;
+    protected $guarded = ["id"];
 
     public function user()
     {
@@ -17,6 +18,16 @@ class Department extends Model
     public function departmentable()
     {
         return $this->morphTo();
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'parent_id', 'id');
+    }
+
+    public function division()
+    {
+        return $this->belongsTo(DepartmentDivision::class);
     }
 
     public function sub_departments()
