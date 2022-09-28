@@ -301,6 +301,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'department/dpp' => 'DppDepartmentController',
             'province.department' => 'DpwDepartmentController',
             'city.department' => 'DpdDepartmentController',
+            'department.file' => 'DepartmentFileController',
             'department-division' => 'DepartmentDivisionController',
         ]);
 
