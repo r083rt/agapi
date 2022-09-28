@@ -97,6 +97,7 @@ class DppDepartmentController extends Controller
         $res = $this->DppDepartment()
             ->whereYear('start_date', $start_year)
             ->orderBy('order', 'asc')
+            ->take(3)
             ->get();
         return response()->json($res);
     }
