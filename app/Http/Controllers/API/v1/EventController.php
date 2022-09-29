@@ -557,6 +557,9 @@ class EventController extends Controller
 
         $query = User::join('profiles', 'profiles.user_id', '=', 'users.id')
             ->join('roles', 'roles.id', '=', 'users.role_id')
+            ->join('provinces', 'provinces.id', '=', 'profiles.province_id')
+            ->join('cities', 'cities.id', '=', 'profiles.city_id')
+            ->join('districts', 'districts.id', '=', 'profiles.district_id')
             ->whereHas('payments', function ($query) use ($eventId) {
                 $query
                     ->where('status', 'success')
@@ -568,10 +571,25 @@ class EventController extends Controller
                 DB::raw('roles.display_name as role'),
                 DB::raw('profiles.school_place as tempat_dinas'),
                 DB::raw('users.kta_id as nomer_kta'),
+                DB::raw('profiles.gender as jenis_kelamin'),
+                DB::raw('provinces.name as provinsi'),
+                DB::raw('cities.name as kota'),
+                DB::raw('districts.name as kecamatan'),
+                DB::raw('profiles.contact as kontak')
             )
             ->get();
 
-        return $this->writeExcel(['nomer_kta' => 'Nomer KTA', 'name' => 'Nama', 'role' => 'Sebagai', 'tempat_dinas' => 'Tempat dinas'], $query, "Report anggota terdaftar - $event->name");
+        return $this->writeExcel([
+            'nomer_kta' => 'Nomer KTA',
+            'name' => 'Nama',
+            'role' => 'Sebagai',
+            'tempat_dinas' => 'Tempat dinas',
+            'jenis_kelamin' => 'Jenis Kelamin',
+            'provinsi' => 'Provinsi',
+            'kota' => 'Kab/Kota',
+            'kecamatan' => 'Kecamatan',
+            'kontak' => 'Kontak',
+        ], $query, "Report anggota terdaftar - $event->name");
 
     }
 
