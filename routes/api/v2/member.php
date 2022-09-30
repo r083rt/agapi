@@ -13,4 +13,5 @@ Route::resources([
     'user.story' => 'UserStoryController', // untuk user story
     'story' => 'StoryController', // untuk story
     'user.gallery' => 'UserGalleryController', // untuk mengambil gallery dari user
+    'user.personal-conversation' => 'UserPersonalConversationController', // untuk mengambil conversation chat dari user
 ]);
