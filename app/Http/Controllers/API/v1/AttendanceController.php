@@ -28,12 +28,12 @@ class AttendanceController extends Controller
     {
         $request->validate([
             'event_id' => ['required', 'exists:events,id',
-                function ($attribute, $value, $fail) use ($request) {
-                    $event = Event::findOrFail($value);
-                    if ($event->attended_users()->where('users.id', $request->user_id)->count() > 0) {
-                        return $fail('User is already partisipant of this event');
-                    }
-                },
+                // function ($attribute, $value, $fail) use ($request) {
+                //     $event = Event::findOrFail($value);
+                //     if ($event->attended_users()->where('users.id', $request->user_id)->count() > 0) {
+                //         return $fail('User is already partisipant of this event');
+                //     }
+                // },
                 function ($attribute, $value, $fail) use ($request) {
                     $event = Event::findOrFail($value);
                     $isPaid = $event->payments()->where('status', 'success')
