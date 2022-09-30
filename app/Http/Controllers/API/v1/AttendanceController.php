@@ -50,7 +50,7 @@ class AttendanceController extends Controller
         ]);
 
         $att_id = null;
-        if ((int) $request->user_id == (int) $request->user()->id) {
+        if ((int) $request->user_id == (int) $request->event_id) {
             $att_id = $request->user()->id;
         } else {
             $att_id = $request->user_id;
