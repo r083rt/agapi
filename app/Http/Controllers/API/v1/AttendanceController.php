@@ -49,9 +49,16 @@ class AttendanceController extends Controller
             'user_id' => ['required', 'exists:users,id'],
         ]);
 
+        $att_id = null;
+        if ($request->user_id == $request->user()->id) {
+            $att_id = $request->user()->id;
+        } else {
+            $att_id = $request->user_id;
+        }
+
         $event = Event::findOrFail($request->event_id);
         // $event_guest = new EventGuest(['user_id'=>$request->user_id]);
-        $event->users()->sync($request->user()->id, false);
+        $event->users()->sync($att_id, false);
         return response()->json($event->load('users'));
     }
 
