@@ -24,4 +24,9 @@ class Conversation extends Model
     {
         return $this->hasMany('App\Models\Member\Chat', 'conversation_id');
     }
+
+    public function last_chat()
+    {
+        return $this->hasOne('App\Models\Member\Chat', 'conversation_id')->latest();
+    }
 }

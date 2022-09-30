@@ -57,10 +57,20 @@ class UserPersonalConversationController extends Controller
 
         $conversation->chats()->save($chat);
         // set ke firebase collection conversations
-        $$conversation = $conversation->load(['creator', 'users', 'chats' => function ($query) {
-            // take last chats
-            $query->orderBy('created_at', 'desc')->take(1);
-        }]);
+        $conversation = $conversation->load(['last_chat']);
+        // map users object to array of id
+        $conversation->member_ids = $conversation->users->map(function ($user) {
+            return $user->id;
+        })->toArray();
+        $conversation->members = $conversation->users->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'avatar' => $user->avatar,
+            ];
+        })->toArray();
+        // delete attribute users on conversation
+        unset($conversation->users);
         $dbFirestore = new Firestore();
         $dbFirestore->getDb()->collection('conversations')->document($conversation->id)->set($conversation->toArray());
 
