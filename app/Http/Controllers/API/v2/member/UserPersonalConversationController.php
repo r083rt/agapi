@@ -75,7 +75,7 @@ class UserPersonalConversationController extends Controller
         $dbFirestore->getDb()->collection('conversations')->document($conversation->id)->set($conversation->toArray());
 
         // set ke firebase collection chats
-        $dbFirestore->getDb()->collection('chats')->document($chat->id)->set($chat->toArray());
+        $dbFirestore->getDb()->collection('chats')->document($chat->id)->set($chat->load('sender')->toArray());
 
         return response()->json($conversation);
     }
