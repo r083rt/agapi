@@ -51,7 +51,7 @@ class AttendanceController extends Controller
 
         $event = Event::findOrFail($request->event_id);
         // $event_guest = new EventGuest(['user_id'=>$request->user_id]);
-        $event->users()->attach($request->user_id);
+        $event->users()->attach($request->user()->id);
         return response()->json($event->load('users'));
     }
 
