@@ -83,7 +83,7 @@ class UserPersonalConversationController extends Controller
 
         $dbFirestore->getDb()->collection('chats')->document($chat->id)->set($chat->toArray());
 
-        return response()->json($chat->load('sender'));
+        return response()->json($chat);
     }
 
     /**
