@@ -4,7 +4,6 @@ namespace App\Http\Controllers\APi\v2\member;
 
 use App\Helper\Firestore;
 use App\Http\Controllers\Controller;
-use App\Models\Member\Chat;
 use App\Models\Member\Conversation;
 use Illuminate\Http\Request;
 
@@ -50,14 +49,24 @@ class UserPersonalConversationController extends Controller
 
         $conversation = $conversation->first();
 
-        $chat = new Chat([
+        $chat = [
+            'id' => time(),
+            'conversation_id' => $conversation->id,
             'sender_id' => $request->user()->id,
             'value' => $request->message,
-        ]);
+            'sender' => [
+                'id' => $request->user()->id,
+                'name' => $request->user()->name,
+                'avatar' => $request->user()->avatar,
+            ],
+            'created_at' => now()->toDateTimeString(),
+        ];
 
-        $conversation->chats()->save($chat);
+        // $conversation->chats()->save($chat);
+
         // set ke firebase collection conversations
-        $conversation = $conversation->load(['last_chat']);
+        // $conversation = $conversation->load(['last_chat']);
+        $conversation->last_chat = $chat;
         // map users object to array of id
         $conversation->member_ids = $conversation->users->map(function ($user) {
             return $user->id;
@@ -74,14 +83,7 @@ class UserPersonalConversationController extends Controller
         $dbFirestore = new Firestore();
         $dbFirestore->getDb()->collection('conversations')->document($conversation->id)->set($conversation->toArray());
 
-        // set ke firebase collection chats
-        $chat->sender = [
-            'id' => $chat->sender->id,
-            'name' => $chat->sender->name,
-            'avatar' => $chat->sender->avatar,
-        ];
-
-        $dbFirestore->getDb()->collection('chats')->document($chat->id)->set($chat->toArray());
+        $dbFirestore->getDb()->collection('chats')->document($chat['id'])->set($chat);
 
         return response()->json($chat);
     }
