@@ -59,7 +59,7 @@ class UserPersonalConversationController extends Controller
                 'name' => $request->user()->name,
                 'avatar' => $request->user()->avatar,
             ],
-            'created_at' => now()->toDateTimeString(),
+            'created_at' => \Carbon\Carbon::now()->toString(),
         ];
 
         // $conversation->chats()->save($chat);
@@ -85,7 +85,7 @@ class UserPersonalConversationController extends Controller
 
         $dbFirestore->getDb()->collection('chats')->document($chat['id'])->set($chat);
 
-        return response()->json($chat);
+        return response()->json($conversation);
     }
 
     /**
