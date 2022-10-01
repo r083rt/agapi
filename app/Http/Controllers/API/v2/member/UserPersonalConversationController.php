@@ -34,13 +34,13 @@ class UserPersonalConversationController extends Controller
             // nanti ada validasi apakah yang ngechat di blok oleh penerima
         ]);
 
-        // $conversation = Conversation::
-        //     whereHas('users', function ($query) use ($request, $receiverId) {
-        //     return $query->whereIn('user_id', [$request->user()->id, $receiverId]);
-        // });
-        $exist = User::findOrFail($request->user()->id)->conversations()->where('user_id', $receiverId)->exists();
+        $conversation = Conversation::
+            whereHas('users', function ($query) use ($request, $receiverId) {
+            return $query->whereIn('user_id', [$request->user()->id, $receiverId]);
+        });
+        // $exist = User::findOrFail($request->user()->id)->conversations()->where('user_id', $receiverId)->exists();
 
-        if (!$exist) {
+        if ($conversation->doesntExist()) {
             $conversation = new Conversation();
             $conversation->creator_id = $request->user()->id;
             $conversation->save();
@@ -85,7 +85,7 @@ class UserPersonalConversationController extends Controller
 
         $dbFirestore->getDb()->collection('chats')->document($chat['id'])->set($chat);
 
-        return response()->json($conversation);
+        return response()->json($conversation->load('users'));
     }
 
     /**
