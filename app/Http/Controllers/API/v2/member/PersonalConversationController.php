@@ -66,21 +66,13 @@ class PersonalConversationController extends Controller
     public function search($keyword)
     {
         $users = User::
-            with('conversations.users')
-            ->where(function ($query) use ($keyword) {
-                $query->where('name', 'like', '%' . $keyword . '%')
-                    ->orWhere('email', 'like', '%' . $keyword . '%')
-                    ->orWhere('kta_id', 'like', '%' . $keyword . '%')
-                    ->whereHas('conversations.users', function ($query) {
-                        $query->where('user_id', auth()->user()->id);
-                    });
-            })
-            ->orWhere(function ($query) use ($keyword) {
-                $query->where('name', 'like', '%' . $keyword . '%')
-                    ->orWhere('email', 'like', '%' . $keyword . '%')
-                    ->orWhere('kta_id', 'like', '%' . $keyword . '%')
-                    ->orDoesntHave('conversations');
-            })
+            with(['conversations'])
+            ->where('name', 'like', '%' . $keyword . '%')
+            ->orWhere('email', 'like', '%' . $keyword . '%')
+            ->orWhere('kta_id', 'like', '%' . $keyword . '%')
+        // ->whereHas('conversation.users', function ($query) {
+        //     $query->where('users.id', auth()->user()->id);
+        // })
             ->paginate();
         return response()->json($users);
     }
