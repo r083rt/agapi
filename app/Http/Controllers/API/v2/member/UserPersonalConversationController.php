@@ -36,8 +36,11 @@ class UserPersonalConversationController extends Controller
 
         $conversation = Conversation::
             whereHas('users', function ($query) use ($request, $receiverId) {
-            return $query->whereIn('user_id', [$request->user()->id, $receiverId]);
+            return $query->where('user_id', $request->user()->id);
+        })->whereHas('users', function ($query) use ($request, $receiverId) {
+            return $query->where('user_id', $receiverId);
         });
+
         // $exist = User::findOrFail($request->user()->id)->conversations()->where('user_id', $receiverId)->exists();
 
         if ($conversation->doesntExist()) {
