@@ -5,6 +5,7 @@ namespace App\Http\Controllers\APi\v2\member;
 use App\Helper\Firestore;
 use App\Http\Controllers\Controller;
 use App\Models\Member\Conversation;
+use App\Models\Member\User;
 use Illuminate\Http\Request;
 
 class UserPersonalConversationController extends Controller
@@ -33,14 +34,13 @@ class UserPersonalConversationController extends Controller
             // nanti ada validasi apakah yang ngechat di blok oleh penerima
         ]);
 
-        $conversation = Conversation::
-            whereHas('users', function ($query) use ($request) {
-            return $query->where('user_id', $request->user()->id);
-        })
-            ->whereHas('users', function ($query) use ($receiverId) {
-                return $query->where('user_id', $receiverId);
-            });
-        if ($conversation->doesntExist()) {
+        // $conversation = Conversation::
+        //     whereHas('users', function ($query) use ($request, $receiverId) {
+        //     return $query->whereIn('user_id', [$request->user()->id, $receiverId]);
+        // });
+        $exist = User::findOrFail($request->user()->id)->conversations()->where('user_id', $receiverId)->exists();
+
+        if (!$exist) {
             $conversation = new Conversation();
             $conversation->creator_id = $request->user()->id;
             $conversation->save();
