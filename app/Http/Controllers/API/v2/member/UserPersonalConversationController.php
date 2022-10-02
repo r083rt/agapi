@@ -51,7 +51,8 @@ class UserPersonalConversationController extends Controller
         }
 
         $conversation = $conversation->first();
-        $conversation->update();
+        // $conversation->update();
+        $conversation->uniqueId = time();
 
         $chat = [
             'id' => time(),
