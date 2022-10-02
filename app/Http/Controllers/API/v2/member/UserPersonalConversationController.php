@@ -52,13 +52,14 @@ class UserPersonalConversationController extends Controller
 
         $conversation = $conversation->first();
         $conversation->touch();
-        $conversation->read_at = null;
 
         $chat = [
             'id' => time(),
             'conversation_id' => $conversation->id,
             'sender_id' => $request->user()->id,
             'value' => $request->message,
+            'sent_at' => null,
+            'read_at' => null,
             'sender' => [
                 'id' => $request->user()->id,
                 'name' => $request->user()->name,
