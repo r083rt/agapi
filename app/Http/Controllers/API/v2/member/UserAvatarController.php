@@ -24,9 +24,21 @@ class UserAvatarController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $user)
     {
         //
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $path = $request->file('avatar')->store('public/avatar', env('FILESYSTEM_DRIVER', 'public'));
+        $user->avatar = $path;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Avatar berhasil diubah',
+            'data' => $user,
+        ]);
     }
 
     /**
@@ -50,18 +62,7 @@ class UserAvatarController extends Controller
     public function update(Request $request, User $user)
     {
         //
-        $request->validate([
-            'avatar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
 
-        $path = $request->file('avatar')->store('public/avatar', env('FILESYSTEM_DRIVER', 'public'));
-        $user->avatar = $path;
-        $user->save();
-
-        return response()->json([
-            'message' => 'Avatar berhasil diubah',
-            'data' => $user,
-        ]);
     }
 
     /**
