@@ -30,6 +30,7 @@ class UserAvatarController extends Controller
         $request->validate([
             'avatar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
+        $user = $user->firstOrFail();
         // store as public
         $path = $request->file('avatar')->store('users', [
             'disk' => env('FILESYSTEM_DRIVER', 'public'),
