@@ -24,13 +24,13 @@ class UserAvatarController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store($user, Request $request)
+    public function store($userId, Request $request)
     {
         //
         $request->validate([
             'avatar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
-        $user = $user->firstOrFail();
+        $user = User::findOrFail($userId);
         // store as public
         $path = $request->file('avatar')->store('users', [
             'disk' => env('FILESYSTEM_DRIVER', 'public'),
