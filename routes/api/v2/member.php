@@ -14,6 +14,7 @@ Route::resources([
     'story' => 'StoryController', // untuk story
     'user.gallery' => 'UserGalleryController', // untuk mengambil gallery dari user
     'user.personal-conversation' => 'UserPersonalConversationController', // untuk mengambil conversation chat dari user
+    'user.avatar' => 'UserAvatarController',
 ]);
 
 Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
