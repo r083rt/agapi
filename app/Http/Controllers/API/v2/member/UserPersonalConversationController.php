@@ -52,7 +52,7 @@ class UserPersonalConversationController extends Controller
 
         $conversation = $conversation->first();
         $conversation->touch();
-        $conversation->uniqueId = time();
+        $conversation->read_at = null;
 
         $chat = [
             'id' => time(),
