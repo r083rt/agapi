@@ -24,7 +24,7 @@ class UserAvatarController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, $user)
+    public function store($user, Request $request)
     {
         //
         $request->validate([
