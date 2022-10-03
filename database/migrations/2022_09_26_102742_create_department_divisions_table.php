@@ -35,10 +35,10 @@ class CreateDepartmentDivisionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('department_divisions');
         Schema::table('departments', function (Blueprint $table) {
             $table->dropForeign(['department_division_id']);
             $table->dropColumn('department_division_id');
         });
+        Schema::dropIfExists('department_divisions');
     }
 }
