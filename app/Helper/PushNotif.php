@@ -28,6 +28,7 @@ class PushNotif
                 'title' => $this->title,
                 'body' => $this->body,
                 'data' => $this->data,
+                'sound' => 'default',
             ],
         ]);
         return $response->getBody();
