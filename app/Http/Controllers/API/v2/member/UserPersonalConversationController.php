@@ -47,10 +47,11 @@ class UserPersonalConversationController extends Controller
             $conversation = new Conversation();
             $conversation->creator_id = $request->user()->id;
             $conversation->save();
-            $conversation->users()->sync([$request->user()->id, $receiverId]);
+            $conversation->users()->sync([$request->user()->id, $receiverId], false);
+        } else {
+            $conversation = $conversation->first();
         }
 
-        $conversation = $conversation->first();
         $conversation->touch();
 
         $chat = [
