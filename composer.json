@@ -27,7 +27,7 @@
         "phpoffice/phpspreadsheet": "^1.15",
         "predis/predis": "^1.1",
         "pusher/pusher-php-server": "^4.1",
-        "spatie/browsershot": "^3.40",
+        "spatie/browsershot": "^3.57",
         "spatie/laravel-backup": "^6.11",
         "spatie/pdf-to-image": "^2.0",
         "superbalist/laravel-google-cloud-storage": "^2.2",
