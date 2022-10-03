@@ -96,7 +96,7 @@ class UserPersonalConversationController extends Controller
         // send notif to receiver
         $receiver = User::findOrFail($receiverId);
         foreach ($receiver->push_tokens as $push_token) {
-            $pushNotif = new PushNotif($push_token->token, 'Pesan Baru', $request->message, [
+            $pushNotif = new PushNotif($push_token->token, $request->user()->name, $request->message, [
                 'type' => 'chat',
                 'conversation_id' => $conversation->id,
             ]);
