@@ -47,7 +47,7 @@ class UserPersonalConversationController extends Controller
             $conversation = new Conversation();
             $conversation->creator_id = $request->user()->id;
             $conversation->save();
-            $conversation->users()->sync([$request->user()->id, $receiverId], false);
+            $conversation->users()->sync([$request->user()->id, $receiverId]);
         }
 
         $conversation = $conversation->first();
