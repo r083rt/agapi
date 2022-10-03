@@ -38,6 +38,7 @@ class UserPushTokenController extends Controller
         ]);
         $push_token->fill($request->all());
         $push_token->type = "expo";
+        $push_token->save();
         $user->push_tokens()->sync($push_token->id, false);
 
         return response()->json([
