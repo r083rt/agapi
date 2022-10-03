@@ -30,4 +30,9 @@ class User extends Model
     {
         return $this->belongsToMany('App\Models\Member\Conversation', 'user_conversations', 'user_id', 'conversation_id');
     }
+
+    public function push_tokens()
+    {
+        return $this->belongsToMany('App\Models\Member\PushToken', 'user_push_tokens', 'user_id', 'push_token_id');
+    }
 }
