@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\APi\v2\member;
 
 use App\Helper\Firestore;
+use App\Helper\PushNotif;
 use App\Http\Controllers\Controller;
 use App\Models\Member\Conversation;
 use App\Models\Member\User;
@@ -91,6 +92,16 @@ class UserPersonalConversationController extends Controller
         $dbFirestore->getDb()->collection('conversations')->document($conversation->id)->set($conversation->toArray());
 
         $dbFirestore->getDb()->collection('chats')->document($chat['id'])->set($chat);
+
+        // send notif to receiver
+        $receiver = User::findOrFail($receiverId);
+        foreach ($receiver->push_tokens as $push_token) {
+            $pushNotif = new PushNotif($push_token->token, 'Pesan Baru', $request->message, [
+                'type' => 'chat',
+                'conversation_id' => $conversation->id,
+            ]);
+            $pushNotif->send();
+        }
 
         return response()->json($conversation->load('users'));
     }

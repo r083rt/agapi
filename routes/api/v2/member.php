@@ -1,4 +1,5 @@
 <?php
+use Illuminate\Support\Facades\Route;
 
 // api untuk mendapatkan data user yang sedang login
 Route::get('/me', 'AuthController@getUserAccount');
@@ -15,6 +16,7 @@ Route::resources([
     'user.gallery' => 'UserGalleryController', // untuk mengambil gallery dari user
     'user.personal-conversation' => 'UserPersonalConversationController', // untuk mengambil conversation chat dari user
     'user.avatar' => 'UserAvatarController',
+    'user.push-token' => 'UserPushTokenController',
 ]);
 
 Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
