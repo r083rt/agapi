@@ -34,10 +34,10 @@ class UserPersonalConversationController extends Controller
             // nanti ada validasi apakah yang ngechat di blok oleh penerima
         ]);
 
-        $conversation = Conversation::
-            whereHas('users', function ($query) use ($request, $receiverId) {
-            return $query->where('user_id', $request->user()->id);
-        })->whereHas('users', function ($query) use ($request, $receiverId) {
+        $conversation = Conversation::where('type', 'personal')
+            ->whereHas('users', function ($query) use ($request, $receiverId) {
+                return $query->where('user_id', $request->user()->id);
+            })->whereHas('users', function ($query) use ($request, $receiverId) {
             return $query->where('user_id', $receiverId);
         });
 
