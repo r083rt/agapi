@@ -15,7 +15,8 @@ class UserMemberCardController extends Controller
     public function index(User $user)
     {
         //
-        return view('member-card.kartu-tanda-anggota', compact('user'));
+        $storageUrl = env('STORAGE_URL', env('APP_URL', 'localhost:8000'));
+        return view('member-card.kartu-tanda-anggota', compact('user', 'storageUrl'));
     }
 
     /**

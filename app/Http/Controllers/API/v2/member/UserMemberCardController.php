@@ -19,8 +19,9 @@ class UserMemberCardController extends Controller
     {
         //
         $url = env('APP_URL', 'localhost:8000');
-        $file = Browsershot::url("$url/member/$user->id/member-card")
+        $file = Browsershot::url("$url/user/$user->id/member-card")
             ->noSandbox()
+            ->windowSize(586, 1070)
             ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
             ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
             ->base64Screenshot();
