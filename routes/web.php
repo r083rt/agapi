@@ -29,6 +29,7 @@ Route::get('/watzap/province/{provinceId}/users/active/{total}', 'WatzapControll
 
 // Route::get('/user/{userId}/generate-membercard', 'API\v2\member\UserMemberCardController@index');
 Route::apiResource('user.member-card', 'API\v2\member\UserMemberCardController');
+Route::resource('member.member-card', 'UserMemberCardController');
 
 Auth::routes();
 //logout khusus questionnary page

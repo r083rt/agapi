@@ -1,12 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\API\v2\member;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Member\User;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
-use Spatie\Browsershot\Browsershot;
 
 class UserMemberCardController extends Controller
 {
@@ -18,15 +15,17 @@ class UserMemberCardController extends Controller
     public function index(User $user)
     {
         //
-        $file = Browsershot::url('/member/' . $user->id . '/member-card')
-            ->noSandbox()
-            ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
-            ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
-            ->base64Screenshot();
+        return view('member-card.kartu-tanda-anggota', compact('user'));
+    }
 
-        $image = imagecreatefromstring(base64_decode($file));
-        header('Content-type: image/png');
-        return imagejpeg($image);
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
     }
 
     /**
@@ -47,6 +46,17 @@ class UserMemberCardController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
     {
         //
     }
