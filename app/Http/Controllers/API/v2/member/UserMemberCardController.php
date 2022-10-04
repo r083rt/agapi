@@ -19,6 +19,7 @@ class UserMemberCardController extends Controller
     {
         //
         $url = env('APP_URL', 'localhost:8000');
+        return "$url/user/$user->id/member-card";
         $file = Browsershot::url("$url/user/$user->id/member-card")
             ->noSandbox()
             ->windowSize(586, 1070)
