@@ -16,7 +16,7 @@ class MurottalController extends Controller
     public function index()
     {
         //
-        $res = Murottal::with('audio')->get();
+        $res = Murottal::with('audio')->paginate();
         return response()->json($res);
     }
 

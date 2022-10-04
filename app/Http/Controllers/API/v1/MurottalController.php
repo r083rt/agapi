@@ -18,7 +18,7 @@ class MurottalController extends Controller
     public function index()
     {
         //
-        $res = Murottal::with('file')->paginate();
+        $res = Murottal::with('file')->get();
         return response()->json($res);
     }
 
