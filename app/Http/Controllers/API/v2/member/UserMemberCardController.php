@@ -18,7 +18,8 @@ class UserMemberCardController extends Controller
     public function index(User $user)
     {
         //
-        $file = Browsershot::url('/member/' . $user->id . '/member-card')
+        $url = env('APP_URL', 'localhost:8000');
+        $file = Browsershot::url("$url/member/$user->id/member-card")
             ->noSandbox()
             ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
             ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
