@@ -52,7 +52,7 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         var qrcode = new QRCode("qrcode", {
-            text: "{{ $user->kta_id }}",
+            text: "{{ $user->id }}",
             width: 200,
             height: 200,
             colorDark: "#000000",
