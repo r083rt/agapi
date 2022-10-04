@@ -23,6 +23,7 @@ class UserMemberCardController extends Controller
         $file = Browsershot::url("$url/user/$user->id/member-card")
             ->noSandbox()
             ->windowSize(586, 1070)
+            ->fullPage()
             ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
             ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
             ->base64Screenshot();
