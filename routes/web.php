@@ -28,7 +28,7 @@ Route::get('/watzap/guruNonPns/{total}', 'UserController@guruNonPns');
 Route::get('/watzap/province/{provinceId}/users/active/{total}', 'WatzapController@getActiveUserByProvince');
 
 // Route::get('/user/{userId}/generate-membercard', 'API\v2\member\UserMemberCardController@index');
-Route::apiResource('cetak.member-card', 'API\v2\member\UserMemberCardController');
+Route::apiResource('user.cetak-member-card', 'API\v2\member\UserMemberCardController');
 Route::resource('user.member-card', 'UserMemberCardController');
 Route::get('check-env', function () {
     return response()->json([env('APP_URL'), env('STORAGE_URL'), env('NODE_BINARY_PATH')]);
