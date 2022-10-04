@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    <div style="width: 586px; height: 1070px; background-image: url('/img/membercard.jpeg'); background-size: cover;">
+    <div style="width: 100vw; height: 100vh; background-image: url('/img/membercard.jpeg'); background-size: cover;">
         <div style="padding: 20px 20px 0 20px;">
             <div style="display: flex; justify-content: space-between;">
                 <div style="font-size: 20px; font-weight: bold;">{{ $user->name }}</div>
