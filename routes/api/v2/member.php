@@ -16,7 +16,8 @@ Route::resources([
     'user.gallery' => 'UserGalleryController', // untuk mengambil gallery dari user
     'user.personal-conversation' => 'UserPersonalConversationController', // untuk mengambil conversation chat dari user
     'user.avatar' => 'UserAvatarController',
-    'user.push-token' => 'UserPushTokenController',
+    'user.push-token' => 'UserPushTokenController', // untuk menyimpan expo push token ke database
+    'user.member-card' => 'UserMemberCardController', // untuk generate kartu tanda anggota
 ]);
 
 Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');

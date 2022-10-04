@@ -28,9 +28,14 @@ class UserMemberCardController extends Controller
             ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
             ->base64Screenshot();
 
-        $image = imagecreatefromstring(base64_decode($file));
-        header('Content-type: image/png');
-        return imagejpeg($image);
+        // $image = imagecreatefromstring(base64_decode($file));
+        // header('Content-type: image/png');
+        // return imagejpeg($image);
+
+        return response()->json([
+            'data' => $file,
+            'message' => 'Kartu Tanda Anggota Ter generate',
+        ]);
     }
 
     /**
