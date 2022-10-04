@@ -30,8 +30,20 @@ Route::get('/watzap/province/{provinceId}/users/active/{total}', 'WatzapControll
 // Route::get('/user/{userId}/generate-membercard', 'API\v2\member\UserMemberCardController@index');
 Route::apiResource('user.cetak-member-card', 'API\v2\member\UserMemberCardController');
 Route::resource('user.member-card', 'UserMemberCardController');
-Route::get('check-env', function () {
-    return response()->json([env('APP_URL'), env('STORAGE_URL'), env('NODE_BINARY_PATH')]);
+Route::get('duplicate-murottal', function () {
+    $file_murottals = \App\Models\File::where('file_type', 'App\Models\Murottal')->get();
+    // return $file_murottals;
+    $audio_murottals = [];
+    foreach ($file_murottals as $index => $file_murottal) {
+        $audio_murottal[$index] = \App\Models\Member\File::firstOrNew([
+            'name' => $file_murottal->name,
+            'file_type' => 'App\Models\Member\Murottal',
+        ]);
+        $audio_murottal[$index]->fill($file_murottal->toArray());
+        $audio_murottal[$index]->file_type = 'App\Models\Member\Murottal';
+        $audio_murottal[$index]->save();
+    }
+    return response()->json($audio_murottals);
 });
 
 Auth::routes();
