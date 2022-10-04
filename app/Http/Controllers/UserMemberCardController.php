@@ -16,6 +16,7 @@ class UserMemberCardController extends Controller
     {
         //
         $storageUrl = env('STORAGE_URL', env('APP_URL', 'localhost:8000'));
+        return response()->json([$storageUrl, $user]);
         return view('member-card.kartu-tanda-anggota', compact('user', 'storageUrl'));
     }
 
