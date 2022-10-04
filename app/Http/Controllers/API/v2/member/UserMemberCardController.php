@@ -18,10 +18,10 @@ class UserMemberCardController extends Controller
     {
         //
         $base64 = Browsershot::url('https://google.com')
-        // ->screenshot();
             ->noSandbox()
             ->setNodeBinary('/usr/bin/node')
-            ->base64Screenshot();
+            ->screenshot();
+        // ->base64Screenshot();
 
         return response()->json($base64);
     }
