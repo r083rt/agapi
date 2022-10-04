@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\Member\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Spatie\Browsershot\Browsershot;
@@ -15,12 +14,12 @@ class UserMemberCardController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(User $user)
+    public function index($userId)
     {
         //
         $url = env('APP_URL', 'localhost:8000');
-        return "$url/user/$user->id/member-card";
-        $file = Browsershot::url("$url/user/$user->id/member-card")
+        // return "$url/user/$userId/member-card";
+        $file = Browsershot::url("$url/user/$userId/member-card")
             ->noSandbox()
             ->windowSize(586, 1070)
             ->fullPage()
