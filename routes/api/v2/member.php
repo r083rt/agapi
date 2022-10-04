@@ -18,6 +18,7 @@ Route::resources([
     'user.avatar' => 'UserAvatarController',
     'user.push-token' => 'UserPushTokenController', // untuk menyimpan expo push token ke database
     'user.member-card' => 'UserMemberCardController', // untuk generate kartu tanda anggota
+    'murottal' => 'MurottalController', // untuk murottal audio
 ]);
 
 Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
