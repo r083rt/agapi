@@ -48,7 +48,7 @@ Route::get('duplicate-daily-prayer', function () {
 });
 
 Route::get('/replace-murottal-src', function () {
-    $files = \App\Models\File::where('file_type', 'App\Models\Murottal')->get();
+    $files = \App\Models\File::where('file_type', 'App\Models\Member\Murottal')->get();
 
     $files = $files->map(function ($file) {
         $json = json_decode($file->src);
@@ -62,7 +62,7 @@ Route::get('/replace-murottal-src', function () {
         return $file;
     });
 
-    $files = \App\Models\File::where('file_type', 'App\Models\DailyPrayer')->get();
+    $files = \App\Models\File::where('file_type', 'App\Models\Member\DailyPrayer')->get();
 
     $files = $files->map(function ($file) {
         $json = json_decode($file->src);
