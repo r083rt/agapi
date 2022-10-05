@@ -47,6 +47,38 @@ Route::get('duplicate-daily-prayer', function () {
     return response()->json($audios);
 });
 
+Route::get('/replace-murottal-src', function () {
+    $files = \App\Models\File::where('file_type', 'App\Models\Murottal')->get();
+
+    $files = $files->map(function ($file) {
+        $json = json_decode($file->src);
+        // $file->src = $json;
+        if (isset($json[0])) {
+            $file->src = $json[0]->download_link;
+        } else {
+            $file->src = $json;
+        }
+        $file->save();
+        return $file;
+    });
+
+    $files = \App\Models\File::where('file_type', 'App\Models\DailyPrayer')->get();
+
+    $files = $files->map(function ($file) {
+        $json = json_decode($file->src);
+        // $file->src = $json;
+        if (isset($json[0])) {
+            $file->src = $json[0]->download_link;
+        } else {
+            $file->src = $json;
+        }
+        $file->save();
+        return $file;
+    });
+
+    return response()->json($files);
+});
+
 Auth::routes();
 //logout khusus questionnary page
 Route::post('/logout2', function () {
