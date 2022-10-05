@@ -30,20 +30,21 @@ Route::get('/watzap/province/{provinceId}/users/active/{total}', 'WatzapControll
 // Route::get('/user/{userId}/generate-membercard', 'API\v2\member\UserMemberCardController@index');
 Route::apiResource('user.cetak-member-card', 'API\v2\member\UserMemberCardController');
 Route::resource('user.member-card', 'UserMemberCardController');
-Route::get('duplicate-murottal', function () {
-    $file_murottals = \App\Models\File::where('file_type', 'App\Models\Murottal')->get();
+Route::get('duplicate-daily-prayer', function () {
+    $files = \App\Models\File::where('file_type', 'App\Models\DailyPrayer')->get();
     // return $file_murottals;
-    $audio_murottals = [];
-    foreach ($file_murottals as $index => $file_murottal) {
-        $audio_murottal[$index] = \App\Models\Member\File::firstOrNew([
-            'name' => $file_murottal->name,
-            'file_type' => 'App\Models\Member\Murottal',
+    $audios = [];
+    foreach ($files as $index => $file) {
+        $res = \App\Models\Member\File::firstOrNew([
+            'name' => $file->name,
+            'file_type' => 'App\Models\Member\DailyPrayer',
         ]);
-        $audio_murottal[$index]->fill($file_murottal->toArray());
-        $audio_murottal[$index]->file_type = 'App\Models\Member\Murottal';
-        $audio_murottal[$index]->save();
+        $res->fill($file->toArray());
+        $res->file_type = 'App\Models\Member\DailyPrayer';
+        $audios[$index] = $res;
+        $res->save();
     }
-    return response()->json($audio_murottals);
+    return response()->json($audios);
 });
 
 Auth::routes();
