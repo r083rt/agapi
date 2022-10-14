@@ -22,14 +22,8 @@ class PostController extends Controller
             'images', 'videos',
             'author.profile',
             'author.role',
-            'comments' => function ($query) {
-                // ambil satu saja
-                $query->with('user.profile')->limit(1);
-            },
-            'likes' => function ($query) {
-                // ambil satu saja
-                $query->with('user.profile')->limit(1);
-            },
+            'comments.user',
+            'likes.user',
         ])
             ->has('author')
             ->orderBy('created_at', 'desc')
