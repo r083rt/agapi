@@ -33,7 +33,7 @@ class PostLikeController extends Controller
             ], 400);
         }
 
-        $like = $post->likes()->create([
+        $post->likes()->create([
             'user_id' => auth('api')->user()->id,
         ]);
 
