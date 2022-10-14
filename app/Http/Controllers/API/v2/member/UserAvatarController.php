@@ -37,7 +37,10 @@ class UserAvatarController extends Controller
 
         $path = Storage::disk(env('FILESYSTEM_DRIVER', 'public'))->put('avatars', $compressedImage);
 
-        return response()->json($path);
+        return response()->json([
+            'message' => 'Avatar berhasil diupload',
+            'path' => $path,
+        ]);
 
         $user->avatar = $path;
 
