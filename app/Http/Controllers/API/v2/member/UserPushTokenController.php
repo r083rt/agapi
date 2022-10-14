@@ -41,7 +41,7 @@ class UserPushTokenController extends Controller
         $push_token->last_used_at = now();
         $push_token->save();
 
-        $push_token()->users()->sync($user->id);
+        $push_token->users()->sync($user->id);
 
         return response()->json([
             "message" => "Push token berhasil disimpan",
