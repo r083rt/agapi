@@ -13,21 +13,21 @@ class Post extends Model
 
     public function likes()
     {
-        return $this->morphMany('App\Models\Member\Like', 'like');
+        return $this->morphMany('App\Models\Like', 'like');
     }
 
     public function images()
     {
-        return $this->morphMany('App\Models\Member\File', 'file')->whereIn('type', ['image/jpeg', 'image/png', 'image/gif', 'image/jpg']);
+        return $this->morphMany('App\Models\File', 'file')->whereIn('type', ['image/jpeg', 'image/png', 'image/gif', 'image/jpg']);
     }
 
     public function videos()
     {
-        return $this->morphMany('App\Models\Member\File', 'file')->whereIn('type', ['video/mp4', 'video/ogg', 'video/webm']);
+        return $this->morphMany('App\Models\File', 'file')->whereIn('type', ['video/mp4', 'video/ogg', 'video/webm']);
     }
 
     public function author()
     {
-        return $this->belongsTo('App\Models\Member\User', 'author_id', 'id');
+        return $this->belongsTo('App\Models\User', 'author_id', 'id');
     }
 }
