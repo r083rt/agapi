@@ -32,10 +32,12 @@ Route::apiResource('user.cetak-member-card', 'API\v2\member\UserMemberCardContro
 Route::resource('user.member-card', 'UserMemberCardController')->names('web.user.member-card');
 
 Route::get('test', function () {
+    $images = App\Models\File::where('type', 'like', 'image%')->limit(10)->orderBy('created_at', 'desc')->count();
     return [
         "status" => "success",
         "FILE DRIVER" => env('FILESYSTEM_DRIVER'),
         "APP NAME" => env("APP_NAME"),
+        "TOTAL GAMBAR" => $images,
     ];
 });
 Route::get('duplicate-daily-prayer', function () {
