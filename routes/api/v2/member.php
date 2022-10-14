@@ -20,6 +20,7 @@ Route::resources([
     'user.member-card' => 'UserMemberCardController', // untuk generate kartu tanda anggota
     'murottal' => 'MurottalController', // untuk murottal audio
     'daily-prayer' => 'DailyPrayerController', // untuk doa harian
+    'post.like' => 'PostLikeController', // untuk like postingan
 ]);
 
 Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
