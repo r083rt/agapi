@@ -296,7 +296,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'conversation' => 'ConversationController',
             'paymentvendor' => 'PaymentVendorController',
             'room' => 'RoomController',
-            'student/room' => 'Student\RoomController',
             'tag' => 'TagController',
             'department/dpp' => 'DppDepartmentController',
             'province.department' => 'DpwDepartmentController',
@@ -304,6 +303,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
             'department.file' => 'DepartmentFileController',
             'department-division' => 'DepartmentDivisionController',
         ]);
+
+        Route::apiResource('student/room','Student\RoomController')->name('api.students.room');
 
         Route::delete('module/{moduleId}/dislike', 'ModuleLikeController@dislike');
 
