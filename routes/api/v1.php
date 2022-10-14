@@ -305,8 +305,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         ]);
 
         Route::apiResource('student/room', 'Student\RoomController')->names([
-            'index' => 'student.room.index',
-            'show' => 'student.room.show',
+            'index' => 'students.rooms.index',
+            'show' => 'students.rooms.show',
+            'store' => 'students.rooms.store',
+            'update' => 'students.rooms.update',
+            'destroy' => 'students.rooms.destroy',
         ]);
 
         Route::delete('module/{moduleId}/dislike', 'ModuleLikeController@dislike');
