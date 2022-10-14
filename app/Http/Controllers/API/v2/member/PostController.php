@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Member\File;
 use App\Models\Member\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
@@ -53,7 +54,19 @@ class PostController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $index => $image) {
                     $image = new File();
-                    $path = $request->file('images')[$index]->store('images', env('FILESYSTEM_DRIVER'));
+                    // $path = $request->file('images')[$index]->store('images', env('FILESYSTEM_DRIVER'));
+                    $fileName = time() . '.' . $request->file('avatar')->extension();
+
+                    $compressedImage = \Image::make($request->file('images')[$index])->resize(1080, null, function ($constraint) {
+                        $constraint->aspectRatio();
+                    })->encode('jpg', 60);
+
+                    $folderPath = "images";
+                    $path = "{$folderPath}/{$fileName}";
+
+                    // simpan gambar
+                    Storage::disk(env('FILESYSTEM_DRIVER', 'public'))->put($path, $compressedImage);
+
                     $image->src = $path;
                     $image->type = $request->file('images')[$index]->getClientMimeType();
                     $post->images()->save($image);
