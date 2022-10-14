@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\File;
-use App\Models\Post;
+use App\Models\Member\File;
+use App\Models\Member\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
