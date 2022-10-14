@@ -42,7 +42,7 @@ class PostLikeController extends Controller
         return response()->json([
             'message' => 'Berhasil like post',
             'data' => $post->load('likes'),
-            'id' => $post->id,
+            'id' => $post,
             'res' => $res,
         ], 200);
 
