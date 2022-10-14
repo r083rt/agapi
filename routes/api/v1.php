@@ -25,7 +25,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         // 'verified'
     ]], function () {
 
-        Route::prefix('student')->group(function () {
+        Route::prefix('student')->name('api.v1.student.')->group(function () {
             // Route::post('student/createassigmentsession',[App\Http\Controllers\API\v1\Student\AssigmentSessionController::class, 'createAssigmentSession']);
             include "v1/student.php";
         });

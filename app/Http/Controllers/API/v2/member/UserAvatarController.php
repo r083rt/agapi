@@ -32,37 +32,22 @@ class UserAvatarController extends Controller
             'avatar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
         $user = User::findOrFail($userId);
-        // return response()->json([
-        //     'message' => 'success',
-        //     'data' => $user,
-        // ]);
-        // compress size gambar terlebih dahulu sebelum diupload sebesar 30% menggunakan imagejpeg
-        $compressedImage = imagejpeg(imagecreatefromstring(file_get_contents($request->file('avatar'))), null, 30);
 
-        return response()->json([
-            'message' => 'success',
-            'data' => $compressedImage,
-        ]);
+        $fileName = time() . '.' . $request->file('avatar')->extension();
 
-        $path = Storage::disk(env('FILESYSTEM_DRIVER', 'public'))->put('avatars', $compressedImage);
-
-        return response()->json([
-            'message' => 'Avatar berhasil diupload',
-            'path' => $path,
-        ]);
+        $compressedImage = \Image::make($request->file('avatar'))->resize(1080, null, function ($constraint) {
+            $constraint->aspectRatio();
+        })->encode('jpg', 60);
+        $folderPath = "avatar";
+        $path = "{$folderPath}/{$fileName}";
+        // simpan gambar
+        Storage::disk(env('FILESYSTEM_DRIVER', 'public'))->put($path, $compressedImage);
 
         $user->avatar = $path;
-
-        // // store as public
-        // $path = $request->file('avatar')->store('users', [
-        //     'disk' => env('FILESYSTEM_DRIVER', 'public'),
-        //     'visibility' => 'public',
-        // ]);
-        // $user->avatar = $path;
         $user->save();
 
         return response()->json([
-            'message' => 'Avatar berhasil diubah',
+            'message' => "Avatar berhasil diupload ke " . env('FILESYSTEM_DRIVER', 'public'),
             'data' => $user,
         ]);
     }
