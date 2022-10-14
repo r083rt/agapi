@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
+use App\Models\Member\Like;
 use App\Models\Member\Post;
 use Illuminate\Http\Request;
 
@@ -24,19 +25,19 @@ class PostLikeController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Post $post, Request $request)
+    public function store(Request $request, Post $post)
     {
         // user hanya bisa like post sekali saja
-        return response()->json($post);
+        // return response()->json($post);
         if ($post->likes()->where('user_id', auth('api')->user()->id)->count() > 0) {
             return response()->json([
                 'message' => 'Anda sudah like post ini',
             ], 400);
         }
 
-        $post->likes()->create([
+        $post->likes()->save(new Like([
             'user_id' => auth('api')->user()->id,
-        ]);
+        ]));
 
         return response()->json([
             'message' => 'Berhasil like post',
