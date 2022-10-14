@@ -35,4 +35,9 @@ class User extends Model
     {
         return $this->belongsToMany('App\Models\Member\PushToken', 'user_push_tokens', 'user_id', 'push_token_id');
     }
+
+    public function role()
+    {
+        return $this->belongsTo('App\Models\Member\Role', 'role_id', 'id');
+    }
 }
