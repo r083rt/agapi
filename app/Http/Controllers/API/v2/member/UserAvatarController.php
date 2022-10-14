@@ -37,6 +37,8 @@ class UserAvatarController extends Controller
 
         $path = Storage::disk(env('FILESYSTEM_DRIVER', 'public'))->put('avatars', $compressedImage);
 
+        return response()->json($path);
+
         $user->avatar = $path;
 
         // // store as public
