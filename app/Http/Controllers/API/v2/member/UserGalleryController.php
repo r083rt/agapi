@@ -24,7 +24,7 @@ class UserGalleryController extends Controller
             ->where('files.type', 'like', 'image/' . '%')
             ->select('files.*')
             ->orderBy('files.created_at', 'desc')
-            ->paginte();
+            ->paginate();
         return response()->json($gallery);
     }
 
