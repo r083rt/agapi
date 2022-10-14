@@ -18,6 +18,11 @@ class Post extends Model
         return $this->morphMany('App\Models\Member\Like', 'like');
     }
 
+    public function comments()
+    {
+        return $this->morphMany('App\Models\Member\Comment', 'comment');
+    }
+
     public function images()
     {
         return $this->morphMany('App\Models\Member\File', 'file')->whereIn('type', ['image/jpeg', 'image/png', 'image/gif', 'image/jpg']);
