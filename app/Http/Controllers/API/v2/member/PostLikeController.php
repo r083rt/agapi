@@ -32,8 +32,8 @@ class PostLikeController extends Controller
         // return response()->json($post->id);
         if ($post->likes()->where('user_id', auth('api')->user()->id)->count() > 0) {
             return response()->json([
-                'message' => 'Anda sudah like post ini',
-            ], 400);
+                'message' => 'Anda sudah menyukai postingan ini',
+            ], 200);
         }
 
         $res = $post->likes()->save(new Like([
@@ -42,9 +42,7 @@ class PostLikeController extends Controller
 
         return response()->json([
             'message' => 'Berhasil like post',
-            'data' => $post->load('likes'),
-            'id' => $post,
-            'res' => $res,
+            'data' => $res,
         ], 200);
 
     }
