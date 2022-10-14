@@ -19,7 +19,7 @@ class UserGalleryController extends Controller
         //
         $user = User::findOrFail($userId);
         $gallery = File::join('posts', 'posts.id', '=', 'files.file_id')
-            ->where('files.file_type', 'App\Models\Post')
+            ->where('files.file_type', 'App\Models\Member\Post')
             ->where('posts.author_id', $user->id)
             ->where('files.type', 'like', 'image/' . '%')
             ->select('files.*')
