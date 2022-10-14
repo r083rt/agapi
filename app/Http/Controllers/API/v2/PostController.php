@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API\v2;
 
 use App\Http\Controllers\Controller;
-use App\Models\Post;
+use App\Models\Member\Post;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -16,7 +16,7 @@ class PostController extends Controller
     public function index()
     {
         //
-        $posts = Post::with('images','videos','audios','docs','room_meetings','author.profile')->paginate();
+        $posts = Post::with('images', 'videos', 'author.profile')->paginate();
         return response()->json($posts);
     }
 
