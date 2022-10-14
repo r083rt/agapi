@@ -33,12 +33,13 @@ class PostLikeController extends Controller
             ], 400);
         }
 
-        $post->likes()->create([
+        $like = $post->likes()->create([
             'user_id' => auth('api')->user()->id,
         ]);
 
         return response()->json([
             'message' => 'Berhasil like post',
+            'data' => $like,
         ], 200);
 
     }
