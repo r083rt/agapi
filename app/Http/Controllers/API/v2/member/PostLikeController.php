@@ -27,6 +27,7 @@ class PostLikeController extends Controller
     public function store(Post $post, Request $request)
     {
         // user hanya bisa like post sekali saja
+        return response()->json($post);
         if ($post->likes()->where('user_id', auth('api')->user()->id)->count() > 0) {
             return response()->json([
                 'message' => 'Anda sudah like post ini',
