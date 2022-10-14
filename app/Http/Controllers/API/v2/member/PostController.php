@@ -18,10 +18,20 @@ class PostController extends Controller
     public function index()
     {
         //
-        $posts = Post::with('images', 'videos', 'audios', 'docs', 'author.profile', 'author.role', 'comments.author', 'likes.user')
-            ->withCount('likes', 'comments', 'liked')
+        $posts = Post::with([
+            'images', 'videos',
+            'author.profile',
+            'author.role',
+            'comments' => function ($query) {
+                // ambil satu saja
+                $query->with('author.profile')->take(1);
+            },
+            'likes' => function ($query) {
+                // ambil satu saja
+                $query->with('author.profile')->take(1);
+            },
+        ])
             ->has('author')
-        // ->has('images')
             ->orderBy('created_at', 'desc')
             ->paginate();
         return response()->json($posts);
