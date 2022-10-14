@@ -25,23 +25,25 @@ class PostLikeController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, Post $post)
+    public function store(Post $post, Request $request)
     {
         // user hanya bisa like post sekali saja
-        return response()->json($post);
+        // return response()->json($post->id);
         if ($post->likes()->where('user_id', auth('api')->user()->id)->count() > 0) {
             return response()->json([
                 'message' => 'Anda sudah like post ini',
             ], 400);
         }
 
-        $post->likes()->save(new Like([
+        $res = $post->likes()->save(new Like([
             'user_id' => auth('api')->user()->id,
         ]));
 
         return response()->json([
             'message' => 'Berhasil like post',
             'data' => $post->load('likes'),
+            'id' => $post->id,
+            'res' => $res,
         ], 200);
 
     }
