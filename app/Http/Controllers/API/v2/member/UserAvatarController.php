@@ -35,6 +35,8 @@ class UserAvatarController extends Controller
         // compress size gambar terlebih dahulu sebelum diupload sebesar 30% menggunakan imagejpeg
         $compressedImage = imagejpeg(imagecreatefromstring(file_get_contents($request->file('avatar'))), null, 30);
 
+        return $compressedImage;
+
         $path = Storage::disk(env('FILESYSTEM_DRIVER', 'public'))->put('avatars', $compressedImage);
 
         return response()->json([
