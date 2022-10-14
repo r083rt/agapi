@@ -11,7 +11,7 @@ class Like extends Model
 
     protected $guarded = ['id'];
 
-    public function author()
+    public function user()
     {
         return $this->belongsTo('App\Models\Member\User', 'user_id', 'id');
     }

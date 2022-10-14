@@ -24,11 +24,11 @@ class PostController extends Controller
             'author.role',
             'comments' => function ($query) {
                 // ambil satu saja
-                $query->with('author.profile')->limit(1);
+                $query->with('user.profile')->limit(1);
             },
             'likes' => function ($query) {
                 // ambil satu saja
-                $query->with('author.profile')->limit(1);
+                $query->with('user.profile')->limit(1);
             },
         ])
             ->has('author')
