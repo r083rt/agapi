@@ -32,7 +32,7 @@ Route::apiResource('user.cetak-member-card', 'API\v2\member\UserMemberCardContro
 Route::resource('user.member-card', 'UserMemberCardController')->names('web.user.member-card');
 
 Route::get('test', function () {
-    return env('FILESYSTEM_DRIVER', 'public');
+    return env('FILESYSTEM_DRIVER');
 });
 Route::get('duplicate-daily-prayer', function () {
     $files = \App\Models\File::where('file_type', 'App\Models\DailyPrayer')->get();
