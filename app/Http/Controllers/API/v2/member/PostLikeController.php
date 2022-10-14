@@ -25,7 +25,7 @@ class PostLikeController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, Post $post)
+    public function store(Post $post, Request $request)
     {
         // user hanya bisa like post sekali saja
         // return response()->json($post->id);
