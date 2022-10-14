@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use App\Models\Member\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class UserAvatarController extends Controller
 {
@@ -31,12 +32,19 @@ class UserAvatarController extends Controller
             'avatar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
         $user = User::findOrFail($userId);
-        // store as public
-        $path = $request->file('avatar')->store('users', [
-            'disk' => env('FILESYSTEM_DRIVER', 'public'),
-            'visibility' => 'public',
-        ]);
+        // compress size gambar terlebih dahulu sebelum diupload sebesar 30% menggunakan imagejpeg
+        $compressedImage = imagejpeg(imagecreatefromstring(file_get_contents($request->file('avatar'))), null, 30);
+
+        $path = Storage::disk(env('FILESYSTEM_DRIVER', 'public'))->put('avatars', $compressedImage);
+
         $user->avatar = $path;
+
+        // // store as public
+        // $path = $request->file('avatar')->store('users', [
+        //     'disk' => env('FILESYSTEM_DRIVER', 'public'),
+        //     'visibility' => 'public',
+        // ]);
+        // $user->avatar = $path;
         $user->save();
 
         return response()->json([
