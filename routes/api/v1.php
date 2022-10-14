@@ -25,10 +25,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
         // 'verified'
     ]], function () {
 
-        Route::prefix('student')->name('api.v1.student.')->group(function () {
-            // Route::post('student/createassigmentsession',[App\Http\Controllers\API\v1\Student\AssigmentSessionController::class, 'createAssigmentSession']);
-            include "v1/student.php";
-        });
+        // Route::prefix('student')->name('api.v1.student.')->group(function () {
+        //     // Route::post('student/createassigmentsession',[App\Http\Controllers\API\v1\Student\AssigmentSessionController::class, 'createAssigmentSession']);
+        //     include "v1/student.php";
+        // });
 
         Route::get('/auth/assigment', function (Request $request) { // GET USER AUTH FOR ASSIGMENT APPS
             $res = $request->user()
