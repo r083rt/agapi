@@ -28,8 +28,8 @@ Route::get('/watzap/guruNonPns/{total}', 'UserController@guruNonPns');
 Route::get('/watzap/province/{provinceId}/users/active/{total}', 'WatzapController@getActiveUserByProvince');
 
 // Route::get('/user/{userId}/generate-membercard', 'API\v2\member\UserMemberCardController@index');
-Route::apiResource('user.cetak-member-card', 'API\v2\member\UserMemberCardController');
-Route::resource('user.member-card', 'UserMemberCardController');
+Route::apiResource('user.cetak-member-card', 'API\v2\member\UserMemberCardController')->names('web.user.cetak-member-card');
+Route::resource('user.member-card', 'UserMemberCardController')->names('user.member-card');
 Route::get('duplicate-daily-prayer', function () {
     $files = \App\Models\File::where('file_type', 'App\Models\DailyPrayer')->get();
     // return $file_murottals;
