@@ -39,24 +39,56 @@ class DoCompressAllImages extends Command
      */
     public function handle()
     {
-        $images = File::where('type', 'like', 'image%')->limit(10)->orderBy('created_at', 'desc')->get();
+        $images = File::where('type', 'like', 'image%')
+            ->where('file_type', 'App\Models\Post')
+            ->limit(20)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         foreach ($images as $image) {
-            // read file dari wasabi
-            $file = Storage::disk('wasabi')->get($image->src);
-            // decode file
-            $compressed = \Image::make($file);
-            // resize
-            $compressed->resize(1080, null, function ($constraint) {
-                $constraint->aspectRatio();
-            });
-            // encode
-            $compressed->encode('jpg', 60);
+            // return $this->info($image->toArray());
+            // if file doesnt exist in storage, skip
+            if (!Storage::disk('wasabi')->exists($image->src)) {
+                $this->warn("File {$image->path} tidak ditemukan di storage - Skipped");
+                continue;
+            }
 
-            // simpan gambar
-            Storage::disk('public')->put($image->src, $compressed);
+            try {
+                // read file dari wasabi
+                $file = Storage::disk('wasabi')->get($image->src);
+                // $extension = pathinfo($image->src, PATHINFO_EXTENSION);
+                // // return $this->info($extension);
+                // $fileName = time() . '.' . $extension;
+                // $folder = 'images';
+                // $path = $folder . '/' . $fileName;
 
-            // log
-            $this->info("{$image->src} compressed");
+                $path = "compressed_" . $image->src;
+
+                $this->info("Prosesing {$path}...");
+
+                // decode file
+                $compressed = \Image::make($file)->resize(1080, null, function ($constraint) {
+                    $constraint->aspectRatio();
+                })->encode('jpg', 60);
+
+                // simpan gambar
+                Storage::disk('wasabi')->put($path, $compressed);
+
+                // log
+                $this->info("{$image->src} compressed");
+
+                $newFile = File::firstOrNew([
+                    'src' => $path,
+                ]);
+                $newFile->fill($image->toArray());
+                $newFile->src = $path;
+                $newFile->file_type = "App\Models\Member\Post";
+                $newFile->save();
+
+            } catch (\Exception $e) {
+                $this->error("{$image->src} failed to compress - Skipped");
+            }
+
         }
         return 0;
     }
