@@ -32,6 +32,10 @@ class UserAvatarController extends Controller
             'avatar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
         $user = User::findOrFail($userId);
+        return response()->json([
+            'message' => 'success',
+            'data' => $user,
+        ]);
         // compress size gambar terlebih dahulu sebelum diupload sebesar 30% menggunakan imagejpeg
         $compressedImage = imagejpeg(imagecreatefromstring(file_get_contents($request->file('avatar'))), null, 30);
 
