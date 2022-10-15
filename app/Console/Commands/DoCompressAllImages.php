@@ -53,6 +53,10 @@ class DoCompressAllImages extends Command
 
         foreach ($images as $index => $image) {
             // return $this->info($image->toArray());
+            // tunjukan total progress dan jumlah dari total
+            $this->info("Progress: {$index} dari {$total}");
+            $this->info("Progress: " . round(($index / $total) * 100, 2) . "%");
+
             // if file doesnt exist in storage, skip
             if (!Storage::disk('wasabi')->exists($image->src)) {
                 $this->warn("File {$image->path} tidak ditemukan di storage - Skipped");
@@ -94,10 +98,6 @@ class DoCompressAllImages extends Command
 
                 // log sukses warna hijau
                 $this->info("{$image->src} saved");
-
-                // tunjukan total progress dan jumlah dari total
-                $this->info("{$index} dari {$total} selesai");
-                $this->info("Progress: " . round(($index / $total) * 100, 2) . "%");
                 // $newFile = File::firstOrNew([
                 //     'src' => $path,
                 // ]);
