@@ -53,6 +53,12 @@ class DoCompressAllImages extends Command
                 continue;
             }
 
+            // jika ukuran file lebih kecil dari 300 kb maka skip
+            if (Storage::disk('wasabi')->size($image->src) < 300000) {
+                $this->warn("File {$image->path} ukurannya lebih kecil dari 300 kb - Skipped");
+                continue;
+            }
+
             try {
                 // read file dari wasabi
                 $file = Storage::disk('wasabi')->get($image->src);
@@ -62,9 +68,9 @@ class DoCompressAllImages extends Command
                 // $folder = 'images';
                 // $path = $folder . '/' . $fileName;
 
-                $path = "compressed-" . $image->src;
+                $newPath = "compressed-" . $image->src;
 
-                $this->info("Prosesing {$path}...");
+                $this->info("Prosesing {$newPath}...");
 
                 // decode file
                 $compressed = \Image::make($file)->resize(1080, null, function ($constraint) {
@@ -72,18 +78,23 @@ class DoCompressAllImages extends Command
                 })->encode('jpg', 60);
 
                 // simpan gambar
-                Storage::disk('wasabi')->put($path, $compressed);
+                Storage::disk('wasabi')->put($newPath, $compressed);
 
                 // log
                 $this->info("{$image->src} compressed");
 
-                $newFile = File::firstOrNew([
-                    'src' => $path,
-                ]);
-                $newFile->fill($image->toArray());
-                $newFile->src = $path;
-                $newFile->file_type = "App\Models\Member\Post";
-                $newFile->save();
+                $image->src = $newPath;
+                $image->save();
+
+                // log sukses warna hijau
+                $this->info("{$image->src} saved");
+                // $newFile = File::firstOrNew([
+                //     'src' => $path,
+                // ]);
+                // $newFile->fill($image->toArray());
+                // $newFile->src = $path;
+                // $newFile->file_type = "App\Models\Member\Post";
+                // $newFile->save();
 
             } catch (\Exception $e) {
                 $this->error("{$image->src} failed to compress - Skipped");
