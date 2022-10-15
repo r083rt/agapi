@@ -41,7 +41,7 @@ class DoCompressAllImages extends Command
     {
         $images = File::where('type', 'like', 'image%')
             ->where('file_type', 'App\Models\Post')
-            ->limit(20)
+        // ->limit(20)
             ->orderBy('created_at', 'desc')
             ->get();
 
