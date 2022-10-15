@@ -44,6 +44,7 @@ class PostController extends Controller
         $request->validate([
             'body' => "required",
         ]);
+        return response()->json([$request->all(), $request->hasFile('images'), $request->file('images')[0]->getClientOriginalName()]);
         $post = new Post($request->all());
 
         \DB::transaction(function () use ($request, $post) {
@@ -54,11 +55,10 @@ class PostController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $index => $image) {
                     $image = new File();
-                    // $path = $request->file('images')[$index]->store('images', env('FILESYSTEM_DRIVER'));
-                    $fileName = time() . '.' . $request->file('avatar')->extension();
+                    $fileName = time() . '.' . $request->file('images')[$index]->extension();
 
                     $compressedImage = \Image::make($request->file('images')[$index])->resize(1080, null, function ($constraint) {
-                        $constraint->aspectRatio();
+                        $constraint->aspectRatio("1:1");
                     })->encode('jpg', 60);
 
                     $folderPath = "images";

@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers\API\v1;
 
-use App\Models\File;
 use App\Http\Controllers\Controller;
+use App\Models\File;
 use App\Models\Post;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Thumbnail;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
@@ -237,7 +236,6 @@ class PostController extends Controller
         //     return response()->json(['error'=>'Anda sudah melaporkan postingan ini','description'=>$post->reports[0]->description]);
         // }
 
-
     }
     public function readPost(Request $request)
     {
@@ -268,8 +266,8 @@ class PostController extends Controller
                 //$query->where('role_id',\App\Models\Role::where('name','=','student')->first()->id);
                 $query->where('name', '=', 'student');
             })->whereHas('authorId.profile', function ($query) {
-                $query->where('educational_level_id', '=', auth('api')->user()->profile->educational_level_id);
-            })
+            $query->where('educational_level_id', '=', auth('api')->user()->profile->educational_level_id);
+        })
             ->orderBy('created_at', 'desc')
             ->paginate($request->show ?? 10); //$request->show ?? 10
         return response()->json($posts);
@@ -312,9 +310,12 @@ class PostController extends Controller
                 }
             },
         ])->validate();
-        $educationalLevelId  = $userProfile->profile->educational_level_id;
+        $educationalLevelId = $userProfile->profile->educational_level_id;
 
-        if ($educationalLevelId == null) return abort(404);
+        if ($educationalLevelId == null) {
+            return abort(404);
+        }
+
         $posts = Post::with([
             'events',
             'meeting_rooms',
@@ -339,7 +340,6 @@ class PostController extends Controller
         $posts->whereHas('authorId.profile', function ($query) use ($educationalLevelId) {
             $query->where('educational_level_id', $educationalLevelId);
         })->get();
-
 
         $posts = $posts->paginate($request->show ?? 10);
         return response()->json($posts);

@@ -62,7 +62,7 @@ class DoCompressAllImages extends Command
                 // $folder = 'images';
                 // $path = $folder . '/' . $fileName;
 
-                $path = "compressed_" . $image->src;
+                $path = "compressed-" . $image->src;
 
                 $this->info("Prosesing {$path}...");
 

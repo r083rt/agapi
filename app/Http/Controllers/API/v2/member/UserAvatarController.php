@@ -29,7 +29,7 @@ class UserAvatarController extends Controller
     {
         //
         $request->validate([
-            'avatar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'avatar' => 'required|image|mimes:jpeg,png,jpg',
         ]);
         $user = User::findOrFail($userId);
 
