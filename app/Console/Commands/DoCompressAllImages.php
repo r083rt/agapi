@@ -98,6 +98,7 @@ class DoCompressAllImages extends Command
 
             } catch (\Exception $e) {
                 $this->error("{$image->src} failed to compress - Skipped");
+                $this->error("{$e->getMessage()}");
             }
 
         }
