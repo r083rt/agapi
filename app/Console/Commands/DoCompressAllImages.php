@@ -45,7 +45,13 @@ class DoCompressAllImages extends Command
             ->orderBy('created_at', 'desc')
             ->get();
 
-        foreach ($images as $image) {
+        $total = File::where('type', 'like', 'image%')
+            ->where('file_type', 'App\Models\Post')
+        // ->limit(20)
+            ->orderBy('created_at', 'desc')
+            ->count();
+
+        foreach ($images as $index => $image) {
             // return $this->info($image->toArray());
             // if file doesnt exist in storage, skip
             if (!Storage::disk('wasabi')->exists($image->src)) {
@@ -88,6 +94,10 @@ class DoCompressAllImages extends Command
 
                 // log sukses warna hijau
                 $this->info("{$image->src} saved");
+
+                // tunjukan total progress dan jumlah dari total
+                $this->info("{$index} dari {$total} selesai");
+                $this->info("Progress: " . round(($index / $total) * 100, 2) . "%");
                 // $newFile = File::firstOrNew([
                 //     'src' => $path,
                 // ]);
