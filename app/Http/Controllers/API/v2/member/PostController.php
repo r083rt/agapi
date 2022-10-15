@@ -44,7 +44,7 @@ class PostController extends Controller
         $request->validate([
             'body' => "required",
         ]);
-        return response()->json([$request->all(), $request->hasFile('images'), $request->file('images')[0]->getClientOriginalName()]);
+        // return response()->json([$request->all(), $request->hasFile('images'), $request->file('images')[0]->getClientOriginalName()]);
         $post = new Post($request->all());
 
         \DB::transaction(function () use ($request, $post) {
