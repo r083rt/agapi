@@ -86,7 +86,15 @@ class PostController extends Controller
                 if (strpos($request->allFiles()['files'][$f]->getClientMimeType(), 'image') !== false) {
 
                     $file = new File();
-                    $path = $request->allFiles()['files'][$f]->store('files', 'wasabi');
+                    // $path = $request->allFiles()['files'][$f]->store('files', 'wasabi');
+                    $path = "files/" . time() . '.' . $request->allFiles()['files'][$f]->extension();
+
+                    $compressedImage = \Image::make($request->allFiles()['files'][$f])->resize(1080, null, function ($constraint) {
+                        $constraint->aspectRatio("1:1");
+                    })->encode('jpg', 60);
+
+                    Storage::disk('wasabi')->put($path, $compressedImage);
+
                     $file->src = $path;
                     $file->type = $request->allFiles()['files'][$f]->getClientMimeType();
                     $post->files()->save($file);
