@@ -52,10 +52,12 @@ class DoCompressAllAvatar extends Command
         //     ->count();
         $images = User::where('avatar', '!=', null)
             ->orWhere('avatar', '!=', 'users/default.png')
+            ->orWhere('avatar', '!=', '/users/default.png')
             ->orderBy('created_at', 'desc')
             ->get();
         $total = User::where('avatar', '!=', null)
             ->orWhere('avatar', '!=', 'users/default.png')
+            ->orWhere('avatar', '!=', '/users/default.png')
             ->orderBy('created_at', 'desc')
             ->count();
 
