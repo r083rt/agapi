@@ -94,7 +94,7 @@ class DoCompressAllAvatar extends Command
 
                 // decode file
                 $compressed = \Image::make($file)->resize(1080, null, function ($constraint) {
-                    $constraint->aspectRatio();
+                    $constraint->aspectRatio("1:1");
                 })->encode('jpg', 60);
 
                 // simpan gambar

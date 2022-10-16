@@ -261,12 +261,11 @@ class UserController extends Controller
                 Storage::disk('wasabi')->delete($oldphoto);
             }
             // $path = $request->file('avatar')->store('users', 'wasabi');
-            $extension = $request->file('avatar')->getClientOriginalExtension();
-            $path = "users/$user->id-" . time() . '.' . $extension;
+            $path = "users/$user->id-" . time() . '.jpg';
 
             // decode file
             $compressed = \Image::make($request->file('avatar'))->resize(1080, null, function ($constraint) {
-                $constraint->aspectRatio();
+                $constraint->aspectRatio("1:1");
             })->encode('jpg', 60);
 
             // simpan gambar
