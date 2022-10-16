@@ -260,7 +260,18 @@ class UserController extends Controller
             if ($oldphoto != 'users/default.png' && $oldphoto != '/users/default.png' && $oldfileexists) {
                 Storage::disk('wasabi')->delete($oldphoto);
             }
-            $path = $request->file('avatar')->store('users', 'wasabi');
+            // $path = $request->file('avatar')->store('users', 'wasabi');
+            $extension = $request->file('avatar')->getClientOriginalExtension();
+            $path = "users/$user->id-" . time() . '.' . $extension;
+
+            // decode file
+            $compressed = \Image::make($request->file('avatar'))->resize(1080, null, function ($constraint) {
+                $constraint->aspectRatio();
+            })->encode('jpg', 60);
+
+            // simpan gambar
+            Storage::disk('wasabi')->put($path, $compressed);
+
             $disk->setVisibility($path, 'public');
             $user->avatar = $path;
         }
