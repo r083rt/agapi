@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\API\v2\member;
+namespace App\Http\Controllers\API\v2\admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\user;
+use App\Models\Province;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class ProvinceUserController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -32,24 +32,22 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\Province  $province
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Province $province)
     {
         //
-        $user = User::with('profile')->findOrFail($id);
-        return response()->json($user);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Models\Province  $province
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Province $province)
     {
         //
     }
@@ -57,10 +55,10 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\Province  $province
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Province $province)
     {
         //
     }

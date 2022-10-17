@@ -77,7 +77,6 @@ class RouteServiceProvider extends ServiceProvider
     {
         Route::middleware('web')
             ->namespace($this->namespace)
-            ->name('web.')
             ->group(base_path('routes/web.php'));
     }
 
@@ -146,7 +145,7 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         Route::group([
-            'middleware' => ['auth:api', 'isAdmin'],
+            // 'middleware' => ['auth:api', 'isAdmin'],
             'namespace' => \App\Http\Controllers\API\v2\admin::class,
             'prefix' => 'api/v2/admin',
             'name' => 'api.v2.admin.',
