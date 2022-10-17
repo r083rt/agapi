@@ -83,7 +83,11 @@ class AuthController extends Controller
         $user->fill($request->all());
         $user->password = bcrypt($request->password);
         $user->save();
-        $user->profile()->save(new Profile());
+        $profile = new Profile();
+        if ($request->has('profile')) {
+            $profile->fill($request->profile);
+        }
+        $user->profile()->save($profile);
         $success['access_token'] = $user->createToken('AGPAII DIGITAL')->accessToken;
         $success['token_type'] = 'Bearer';
         return response()->json($success);
