@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
+use App\Models\user;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -37,6 +38,8 @@ class UserController extends Controller
     public function show($id)
     {
         //
+        $user = User::with('profile')->findOrFail($id);
+        return response()->json($user);
     }
 
     /**

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class UserPostController extends Controller
@@ -17,9 +17,9 @@ class UserPostController extends Controller
     public function index($userId)
     {
         //
-        $posts = Post::where('author_id',$userId)
-        ->with('author.profile')
-        ->paginate();
+        $posts = Post::where('author_id', $userId)
+            ->with('author.profile')
+            ->paginate();
         return response()->json($posts);
     }
 
