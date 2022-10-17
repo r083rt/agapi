@@ -19,6 +19,8 @@ Route::resources([
     'department-division' => 'DepartmentDivisionController',
     'department' => 'DepartmentController',
     'department.user' => 'DepartmentUserController',
+    'excel/province.user' => 'Excel\ProvinceUserController',
+    'province' => 'ProvinceController',
 ]);
 
 Route::get('/user/search/{keyword}', 'UserController@search');
