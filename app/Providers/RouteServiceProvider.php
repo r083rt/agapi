@@ -125,7 +125,7 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         Route::group([
-            'middleware' => 'auth:api',
+            // 'middleware' => 'auth:api',
             'namespace' => \App\Http\Controllers\API\v2\member::class,
             'prefix' => 'api/v2/member',
             'name' => 'api.v2.member.',
