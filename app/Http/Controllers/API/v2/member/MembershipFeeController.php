@@ -29,7 +29,8 @@ class MembershipFeeController extends Controller
     {
         //
         $user = $request->user();
-        $payment_value = setting('admin.member_price');
+        // $payment_value = setting('admin.member_price');
+        $payment_value = 1;
         $payment_text = "Pembayaran Member KTA";
         $key = "pendaftaran";
         // generate unique Id untuk midtrans transaction
