@@ -24,6 +24,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'daily-prayer' => 'DailyPrayerController', // untuk doa harian
         'post.like' => 'PostLikeController', // untuk like postingan
         'user' => 'UserController', // untuk anggota
+        'membership' => 'MembershipController', // untuk membership
     ]);
 
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
