@@ -25,7 +25,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'post.like' => 'PostLikeController', // untuk like postingan
         'user' => 'UserController', // untuk anggota
         'membership-fee' => 'MembershipFeeController', // untuk membership
-        'membership-fee.status' => 'MembershipFeeStatusController', // untuk status membership
+        'membership-fee-status' => 'MembershipFeeStatusController', // untuk status membership
     ]);
 
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
