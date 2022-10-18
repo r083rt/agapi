@@ -11,7 +11,7 @@ class Membership
     {
         $user = User::find($user_id);
         // expired ditambah 1
-        $user->expired_at = $user->expired_at->addDays($days);
+        $user->expired_at = now()->addDays($days);
         $user->save();
     }
 
@@ -19,7 +19,8 @@ class Membership
     public static function add($user_id, $days)
     {
         $user = User::find($user_id);
-        $user->expired_at = now()->addDays($days);
+        $user->expired_at = $user->expired_at->addDays($days);
+
         $user->save();
     }
 
