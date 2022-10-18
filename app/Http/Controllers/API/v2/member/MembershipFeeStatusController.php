@@ -22,7 +22,7 @@ class MembershipFeeStatusController extends Controller
         // where created_at is today
             ->whereDate('created_at', now())
             ->where('status', 'pending')
-            ->get();
+            ->count();
 
         // foreach ($pendingPayments as $payment) {
         //     $midtrans = new Midtrans();
