@@ -16,7 +16,7 @@ class ArticleController extends Controller
     public function index()
     {
         //
-        $articles = Article::with('author', 'thumbnail')->where('status', 'publish')
+        $articles = Article::with('author', 'thumbnail')->where('status', 'PUBLISHED')
             ->orderBy('created_at', 'desc')
             ->paginate();
         return response()->json($articles);
