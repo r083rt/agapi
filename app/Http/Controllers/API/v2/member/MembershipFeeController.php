@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 
-class MembershipController extends Controller
+class MembershipFeeController extends Controller
 {
     /**
      * Display a listing of the resource.
