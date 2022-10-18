@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\API\v2\member;
 
+use App\Helper\Membership;
+use App\Helper\Midtrans;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\User;
@@ -22,18 +24,24 @@ class MembershipFeeStatusController extends Controller
         // where created_at is today
             ->whereDate('created_at', now())
             ->where('status', 'pending')
-            ->count();
+            ->get();
 
-        // foreach ($pendingPayments as $payment) {
-        //     $midtrans = new Midtrans();
-        //     $status = $midtrans->status($payment->midtrans_id);
-        //     if ($status->transaction_status == 'settlement') {
-        //         $payment->status = 'success';
-        //         $payment->save();
-        //         // tambah masa aktif
-        //         Membership::add($payment->user_id, 1);
-        //     }
-        // }
+        // return response()->json($pendingPayments->first());
+
+        foreach ($pendingPayments as $payment) {
+            try {
+                $status = Midtrans::status($payment->midtrans_id);
+                if ($status->transaction_status == 'settlement') {
+                    $payment->status = 'success';
+                    $payment->save();
+                    // tambah masa aktif
+                    Membership::add($payment->user_id, 1);
+                }
+
+            } catch (\Exception $e) {
+
+            }
+        }
 
         $successPayments = Payment::where('user_id', auth()->user()->id)
             ->where('key', 'pendaftaran')
@@ -49,7 +57,7 @@ class MembershipFeeStatusController extends Controller
             'success' => true,
             'message' => 'Data pembayaran hari ini',
             'data' => [
-                'pending' => $pendingPayments,
+                'pending' => $pendingPayments->count(),
                 'success' => $successPayments,
                 'expired_at' => $user->expired_at,
             ],

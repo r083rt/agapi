@@ -10,7 +10,8 @@ class Membership
     public static function renew($user_id, $days)
     {
         $user = User::find($user_id);
-        $user->expired_at = now()->addDays($days);
+        // expired ditambah 1
+        $user->expired_at = $user->expired_at->addDays($days);
         $user->save();
     }
 
