@@ -20,10 +20,9 @@ class MembershipFeeStatusController extends Controller
     {
         //
         $pendingPayments = Payment::where('user_id', auth()->user()->id)
-            ->where('type', 'Pendaftaran')
-        // today
-        // where date created is today
-            ->whereDate('created_at', now()->toDateString())
+            ->where('type', 'pendaftaran')
+        // where created_at is today
+            ->whereDate('created_at', now())
             ->where('status', '!=', 'success')
             ->get();
 
@@ -39,10 +38,10 @@ class MembershipFeeStatusController extends Controller
         }
 
         $successPayments = Payment::where('user_id', auth()->user()->id)
-            ->where('type', 'Pendaftaran')
+            ->where('type', 'pendaftaran')
         // today
         // where date created is today
-            ->whereDate('created_at', now()->toDateString())
+            ->whereDate('created_at', now())
             ->where('status', 'success')
             ->count();
 
