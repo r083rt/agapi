@@ -18,6 +18,6 @@ class Article extends Model
     public function thumbnail()
     {
         // morphOne File
-        return $this->morphOne('App\Models\File', 'file')->where('type', 'thumbnail');
+        return $this->morphOne('App\Models\File', 'file')->where('key', 'thumbnail');
     }
 }
