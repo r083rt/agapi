@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\v2\member;
 
+use App\Helper\Midtrans;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
