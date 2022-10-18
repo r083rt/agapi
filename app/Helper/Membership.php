@@ -19,7 +19,7 @@ class Membership
     public static function add($user_id, $days)
     {
         $user = User::find($user_id);
-        $user->expired_at = $user->expired_at->addDays($days);
+        $user->expired_at = \Carbon\Carbon::parse($user->expired_at)->addDays($days);
 
         $user->save();
     }
