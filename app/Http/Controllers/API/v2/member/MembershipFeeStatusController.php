@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\API\v2\member;
 
-use App\Helper\Membership;
-use App\Helper\Midtrans;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\User;
@@ -26,16 +24,16 @@ class MembershipFeeStatusController extends Controller
             ->where('status', 'pending')
             ->get();
 
-        foreach ($pendingPayments as $payment) {
-            $midtrans = new Midtrans();
-            $status = $midtrans->status($payment->midtrans_id);
-            if ($status->transaction_status == 'settlement') {
-                $payment->status = 'success';
-                $payment->save();
-                // tambah masa aktif
-                Membership::add($payment->user_id, 1);
-            }
-        }
+        // foreach ($pendingPayments as $payment) {
+        //     $midtrans = new Midtrans();
+        //     $status = $midtrans->status($payment->midtrans_id);
+        //     if ($status->transaction_status == 'settlement') {
+        //         $payment->status = 'success';
+        //         $payment->save();
+        //         // tambah masa aktif
+        //         Membership::add($payment->user_id, 1);
+        //     }
+        // }
 
         $successPayments = Payment::where('user_id', auth()->user()->id)
             ->where('key', 'pendaftaran')
