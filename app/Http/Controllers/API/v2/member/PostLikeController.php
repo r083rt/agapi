@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\Member\Like;
-use App\Models\Member\Post;
+use App\Models\Like;
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class PostLikeController extends Controller
