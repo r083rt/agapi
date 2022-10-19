@@ -26,7 +26,9 @@ class PostController extends Controller
             'comments.user',
             'likes.user',
         ])
-            ->has('author')
+            ->whereHas('author', function ($query) {
+                $query->where('role_id', '!=', 8);
+            })
             ->orderBy('created_at', 'desc')
             ->paginate();
         return response()->json($posts);
