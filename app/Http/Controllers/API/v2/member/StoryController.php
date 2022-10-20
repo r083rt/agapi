@@ -50,13 +50,13 @@ class StoryController extends Controller
             'file' => 'required|file|mimes:jpg,jpeg,png,mp4,mov,ogg,qt',
         ]);
 
-        // return response()->json([
-        //     'message' => 'ok',
-        //     'type' => $request->file('file')->getMimeType(),
-        //     'type2' => $request->file('file')->getClientMimeType(),
-        //     'type3' => $request->file('file')->extension(),
-        //     'type4' => $request->file('file')->getType(),
-        // ]);
+        return response()->json([
+            'message' => 'ok',
+            'type' => $request->file('file')->getMimeType(),
+            'type2' => $request->file('file')->getClientMimeType(),
+            'type3' => $request->file('file')->extension(),
+            'type4' => $request->file('file')->getType(),
+        ]);
         $mimeType = $request->file('file')->getClientMimeType();
         // jika gambar
         if (strpos($mimeType, 'image') !== false) {
