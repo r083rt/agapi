@@ -45,7 +45,7 @@ class StoryController extends Controller
     {
         //
         $request->validate([
-            'image' => 'required|image',
+            'file' => 'required|image',
         ]);
 
         $file = new File();
@@ -53,13 +53,26 @@ class StoryController extends Controller
         $file->file_type = 'App\Models\Member\User';
         $file->file_id = $request->user()->id;
 
-        $compressed = \Image::make($request->file('image'))->resize(1080, null, function ($constraint) {
-            $constraint->aspectRatio();
-        })->encode('jpg', 60);
+        $extension = $request->file('file')->extension();
+        $fileName = time() . '.' . $extension;
 
-        $fileName = time() . '.jpg';
-        $path = 'stories/' . $fileName;
-        Storage::disk(env('FILESYSTEM_DRIVER'))->put($path, $compressed);
+        // jika gambar
+        if ($request->file('file')->isImage()) {
+            $file->type = 'image/' . $extension;
+            $path = 'stories/' . $fileName;
+
+            $compressed = \Image::make($request->file('file'))->resize(1080, null, function ($constraint) {
+                $constraint->aspectRatio();
+            })->encode('jpg', 60);
+            Storage::disk(env('FILESYSTEM_DRIVER'))->put($path, $compressed);
+
+        }
+
+        // jika video
+        if ($request->file('file')->isVideo()) {
+            $file->type = 'video/' . $extension;
+            $path = $request->file('file')->store('stories', env('FILESYSTEM_DRIVER', 'public'));
+        }
 
         $file->src = $path;
         $file->save();
