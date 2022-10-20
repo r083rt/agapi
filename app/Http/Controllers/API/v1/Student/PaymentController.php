@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\v1\student;
+namespace App\Http\Controllers\API\v1\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payment;

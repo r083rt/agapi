@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\v1\student;
+namespace App\Http\Controllers\API\v1\Student;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -121,7 +121,7 @@ class AssigmentController extends Controller
         }elseif($type=='masterassigment'){ //menampilkan master soal (latihan soal) yang telah dikerjakan
             $query->whereNull('teacher_id')->where('is_public','=',true);
         }else{
-            return abort(404);   
+            return abort(404);
         }
         // return $query->get();
         $data = $query->paginate();
@@ -141,18 +141,18 @@ class AssigmentController extends Controller
                 $session->actualStartTime = Carbon::parse($session->created_at)->getTimeStamp();
 
             }
-            
+
             if(!empty($session->end_at)){
                 $end_at = new Carbon($session->end_at);
                 $is_expired = Carbon::now()->greaterThanOrEqualTo($end_at);
                 $session->is_expired = $is_expired;
             }
-            
-            
+
+
         }
         return $data;
         //sharedassigment = paket soal hasil salinan dari master paket soal
-       
+
     }
     function checkIsSame($a, $b){
         if(count($a)!==count($b))return false;
@@ -164,13 +164,13 @@ class AssigmentController extends Controller
         return true;
     }
     public function search($key){
-      
+
         // return 'cok';
         $userProfile = auth('api')->user()->load('profile');
         $educationalLevelId = $userProfile->profile->educational_level_id;
         if($educationalLevelId==null)return response()->json(['error_jenjang'=>true]);
 
-        // cari apakah ada session dgn assigment code $key 
+        // cari apakah ada session dgn assigment code $key
         $assigment = Assigment::with('teacher','grade')
         ->withCount('question_lists')
         ->whereHas('grade',function($query)use($educationalLevelId){
@@ -185,7 +185,7 @@ class AssigmentController extends Controller
             $query->where('assigments.id',$assigment->id);
         });
 
-        
+
         //jika ada maka proses session tersebut
         if($session->exists()){
             $session = $session->with('assigments')->withCount('questions')->first();
@@ -206,19 +206,19 @@ class AssigmentController extends Controller
                 }
             }
 
-            
+
             $session->is_timer_ended = $is_timer_ended;
             $session->is_submitted = $is_submitted;
             $assigment->session = $session;
         }
 
         $is_expired = false; //jika melewati waktu assigments.end_at
-        $is_workable = true; //jika belum maksuk waktu assigments.start_at 
+        $is_workable = true; //jika belum maksuk waktu assigments.start_at
         // jika end_at kosong dan jika tgl sekarang belum masuk dalam start_at, maka belum dimulai
         if(!empty($assigment->start_at) && empty($assigment->end_at)){
             $start_at = new Carbon($assigment->start_at);
             $is_workable = Carbon::now()->greaterThanOrEqualTo($start_at);
-        
+
         }
         // jika start_at kosong dan jika tgl sekarang sudah melewati end_at, maka expired
         elseif(empty($assigment->start_at) && !empty($assigment->end_at)){
@@ -234,7 +234,7 @@ class AssigmentController extends Controller
             $is_expired = !$is_workable;
             // return $is_workable;
         }
-        
+
         $assigment->is_workable = $is_workable;
         $assigment->is_expired = $is_expired;
 
@@ -250,10 +250,10 @@ class AssigmentController extends Controller
                 'required'
             ]
         ]);
-        
+
         $premium_assigment_repo = new \App\Repositories\PremiumAssigmentRepository;
         $assigment = $premium_assigment_repo->findOrFail($request->id);
-        
+
 
         $user = $request->user();
         // cek apakah user sudah membeli assigment ini
@@ -263,7 +263,7 @@ class AssigmentController extends Controller
         if($purchased_assigment->isExists()){
             throw new \Exception("Kamu sudah membeli item ini");
         }
-        
+
         // jika saldo kurang maka return Error
         $user_balance = $user->balance();
         if($user_balance<$assigment->is_paid){
@@ -285,12 +285,12 @@ class AssigmentController extends Controller
             $payment_out->value = $assigment->is_paid;
             $user->payments()->save($payment_out);
 
-           
+
 
             //bagi keuntungan
             $assigment_question_list_payment_sharing = new \App\Helper\AssigmentQuestionListPaymentSharingHelper($assigment);
             $assigment_question_list_payment_sharing->sharingFrom($payment_out);
-            
+
 
             DB::commit();
             return $assigment;
@@ -299,7 +299,7 @@ class AssigmentController extends Controller
             DB::rollBack();
             return response($e->getMessage(), 500);
         }
-      
+
     }
     public function ranking(Request $request){
         $request->validate([
@@ -307,7 +307,7 @@ class AssigmentController extends Controller
             'month'=>'nullable|integer',
             'range_in'=>'nullable|integer',
             'grade_id'=>'nullable|integer',
-            
+
         ]);
         // jika range_in tidak kosong, maka akan ignore year dan month
         $grade_id  = $request->query('grade_id')??null;
@@ -316,10 +316,10 @@ class AssigmentController extends Controller
         $range_in = $request->query('range_in')??null;
 
         $user_assigment_sessions = DB::table('sessions as s')->selectRaw('
-        s.user_id, 
+        s.user_id,
         u.name,
         u.avatar,
-		count(1) as session_count,   
+		count(1) as session_count,
         sum(ass.total_score) as scores_sum,
 		s.created_at
         ')
@@ -347,7 +347,7 @@ class AssigmentController extends Controller
                 $user_assigment_sessions->whereMonth('s.created_at',$month);
             }
         }
-  
+
         $query = DB::table($user_assigment_sessions,'t')->selectRaw('t.user_id,
         t.name,
         t.avatar,
@@ -371,13 +371,13 @@ class AssigmentController extends Controller
         //     }else{
         //         $data->normalized_session_count = ($data->session_count - $min_sessions_count)/($max_sessions_count - $min_sessions_count);
         //     }
-            
+
         //     if($min_score===$max_score){
         //         $data->normalized_score = $data->score/count($dataset);
         //     }else{
         //         $data->normalized_score = ($data->score - $min_score)/($max_score - $min_score);
         //     }
-            
+
         // }
         // // return $dataset;
 
@@ -431,14 +431,14 @@ class AssigmentController extends Controller
             $join->on('purchased_assigments.purchased_item_id', '=', 'assigments.id');
         })
         ->whereNull('teacher_id') //teacher_id NULL berarti master paket soal
-        ->where('is_paid','>',0) //hanya mengambi soal yg berbayar 
+        ->where('is_paid','>',0) //hanya mengambi soal yg berbayar
         ->where('expired_at','>', $now); //hanya mengambil data yang belum expired
 
         $res->orderBy('id','desc');
         // $query = Assignment::
         $data = $res->paginate();
         foreach($data as $payment_data){
-          
+
             $is_payment_expired = false;
 
             if($payment_data->status=="pending"){
@@ -479,12 +479,12 @@ class AssigmentController extends Controller
             }
 
             foreach ($assignment->question_lists as $ql => $question_list) {
-           
+
                 # code...
                 // $question_list->pivot->user = \App\Models\User::find($question_list->pivot->user_id);
                 // $question_list->pivot->creator = User::find($question_list->pivot->creator_id);
                 $question_list->pivot->assigment_type = $assigment_types_db_key_based[$question_list->pivot->assigment_type_id];
-    
+
                 //jika murid, maka hilangkan/kosongkan field `name` dari answer_list karena itu adalah kunci jawaban dari soal tsb
                 if($user->role->name=="student"){
                     if($question_list->pivot->assigment_type->description=="textarea" || $question_list->pivot->assigment_type->description=="textfield"){
@@ -494,7 +494,7 @@ class AssigmentController extends Controller
                         });
                     }
                 }
-    
+
             }
 
             return $assignment;
@@ -519,7 +519,7 @@ class AssigmentController extends Controller
             ->where('status','success'); //hanya mengambil payment yang success
         })
         ->orderBy('purchased_items.id','desc');
-        
+
         return $res->paginate();
     }
     /*
@@ -552,9 +552,9 @@ class AssigmentController extends Controller
             $join->on('purchased_assigments.purchased_item_id', '=', 'assigments.id');
         })
         ->whereNull('teacher_id') //teacher_id NULL berarti master paket soal
-        ->where('is_paid','>',0) //hanya mengambi soal yg berbayar 
+        ->where('is_paid','>',0) //hanya mengambi soal yg berbayar
         ->where('grade_id', $user->profile->grade_id); // mengambil berdasarkan jenjang siswa
-       
+
         // ->where(function($query)use($user){
         //     //belum dibeli
         //     $query->whereDoesntHave('payments', function($query2)use($user){
@@ -568,13 +568,13 @@ class AssigmentController extends Controller
         //         ->whereNull('payments.status');
         //     });
         // });
-        
+
 
         $res->orderBy('id','desc');
 
         $data =  $res->paginate();
         foreach($data as $payment_data){
-          
+
             $is_payment_expired = false;
 
             if($payment_data->status=="pending"){
@@ -588,7 +588,7 @@ class AssigmentController extends Controller
     public function getPayment($assigment_id){
         $assigment = Assigment::with('user.profile')->findOrFail($assigment_id);
         if(!$assigment->is_paid)throw new \Exception('Paket soal harus premium');
-        
+
         $user = auth()->user();
         $payment = $assigment->payments()->whereHasMorph('paymentable', \App\Models\User::class, function(Builder $query)use($user){
             $query->where('users.id', $user->id);
@@ -605,7 +605,7 @@ class AssigmentController extends Controller
         else throw new \Exception('Anda belum membeli paket soal dengan ID '.$assigment->id);
     }
     public function paidAssignmentDetails($assigment_id){
-        
+
         $assigment = Assigment::with('user.profile')->findOrFail($assigment_id);
         if(!$assigment->is_paid)throw new \Exception('Paket soal harus premium');
 
@@ -634,15 +634,15 @@ class AssigmentController extends Controller
             $is_audio2 =  $assigment->question_lists_select_options_only()->has('audio')->exists();
             $assigment->is_audio = $is_audio1 || $is_image2;
         }
-        
+
         if($assigment->is_image && !$assigment->is_audio)$notes[] = 'Terdapat gambar untuk memudahkan memahami soal';
         elseif(!$assigment->is_image && $assigment->is_audio)$notes[] = 'Terdapat suara untuk memudahkan memahami soal';
         elseif($assigment->is_image && $assigment->is_audio)$notes[] = 'Terdapat gambar dan suara untuk memudahkan memahami soal';
 
         if($assigment->timer)$notes[] = 'Terdapat timer selama '.$assigment->timer.' Menit';
 
-     
-     
+
+
         $assigment->rank = $assigment->paidRank();
 
         if($assigment->rank){
@@ -715,13 +715,13 @@ class AssigmentController extends Controller
                     $payment->remaining_time = $remaining_time;
                     return $payment;
                 }
-                
+
             }
 
             //Buat payment baru dengan `status` NULL (belum dikonfirmasi)
             $client = new \GuzzleHttp\Client();
             $json_data = ['service_code'=>$payment_vendor->service_code,'value'=>$assigment->is_paid,'account_number'=>$payment_vendor->account_number];
-    
+
             $res = $client->post(env('MASTER_PAYMENT_URL').'/createpaymenttoaccountnumber',[
                 'json'=> $json_data
             ]);
@@ -731,7 +731,7 @@ class AssigmentController extends Controller
                 'json'=> ['account_number'=>$payment_vendor->account_number,'service_code'=>$payment_vendor->service_code]
             ]);
             $today_total_payments = json_decode($res->getBody());
-            
+
             // Hapus semua payments dengan `status` NULL
             $assigment->payments()->whereNull('payments.status')->delete();
 
@@ -748,13 +748,13 @@ class AssigmentController extends Controller
             $purchased_item = new \App\Models\PurchasedItem;
             $purchased_item->payment_id = $payment->id;
             $assigment->purchased_items()->save($purchased_item);
-            
+
             $payment->today_total_payments = $today_total_payments;
-            
-            DB::commit();   
+
+            DB::commit();
             return $payment;
 
-          
+
 
         }catch (\PDOException $e) {
             DB::rollBack();
@@ -766,7 +766,7 @@ class AssigmentController extends Controller
     */
     public function checkAssignmentPayment($assignment_id){
         $user = auth()->user();
-       
+
         $user_morph_query = function($query)use($user){
             $query->whereHasMorph('paymentable', \App\Models\User::class, function(Builder $query2)use($user){
                 $query2->where('users.id', $user->id);
@@ -788,7 +788,7 @@ class AssigmentController extends Controller
         $master_payment = json_decode($res->getBody());
 
         try{
-            
+
             DB::beginTransaction();
 
            if($master_payment->status==="success"){
@@ -808,7 +808,7 @@ class AssigmentController extends Controller
             DB::rollBack();
             return response($e->getMessage(), 500);
         }
-      
+
 
     }
 }

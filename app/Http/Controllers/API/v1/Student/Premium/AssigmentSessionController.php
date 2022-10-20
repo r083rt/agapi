@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\v1\student\Premium;
+namespace App\Http\Controllers\API\v1\Student\Premium;
 
 use App\Http\Controllers\Controller;
 use App\Models\Answer;
