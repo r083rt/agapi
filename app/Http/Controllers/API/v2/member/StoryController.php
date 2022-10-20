@@ -53,7 +53,7 @@ class StoryController extends Controller
         $file->file_type = 'App\Models\Member\User';
         $file->file_id = $request->user()->id;
 
-        $compressed = \Image::make($request->file('file'))->resize(1080, null, function ($constraint) {
+        $compressed = \Image::make($request->file('image'))->resize(1080, null, function ($constraint) {
             $constraint->aspectRatio();
         })->encode('jpg', 60);
 
