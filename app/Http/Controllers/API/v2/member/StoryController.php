@@ -25,7 +25,7 @@ class StoryController extends Controller
                 ->orderBy('created_at', 'desc');
         }])
             ->whereHas('stories', function ($query) {
-                $query->whereDate('created_at', date('Y-m-d'));
+                $query->where('type', '!=', null)->whereDate('created_at', date('Y-m-d'));
             })
             ->select(
                 DB::raw('id, name, avatar'),
