@@ -18,6 +18,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'user.story' => 'UserStoryController', // untuk user story
         'user.post' => 'UserPostController',
         'user.gallery' => 'UserGalleryController', // untuk mengambil gallery dari user
+        'user.album' => 'UserAlbumController', // untuk album
         'user.personal-conversation' => 'UserPersonalConversationController', // untuk mengambil conversation chat dari user
         'user.avatar' => 'UserAvatarController',
         'user.push-token' => 'UserPushTokenController', // untuk menyimpan expo push token ke database
