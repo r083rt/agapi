@@ -23,7 +23,10 @@ class UserGalleryController extends Controller
             ->where('files.file_type', 'App\Models\Post')
             ->where('posts.author_id', $user->id)
             ->where('files.type', 'like', 'image/' . '%')
-            ->select('files.*')
+            ->select(
+                'files.*',
+                'posts.id as post_id',
+            )
         // where post exist
             ->whereExists(function ($query) {
                 $query->select(DB::raw(1))
