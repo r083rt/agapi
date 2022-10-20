@@ -21,9 +21,7 @@ class StoryController extends Controller
         //
         $stories = User::with(['stories' => function ($query) {
             $query->whereDate('created_at', date('Y-m-d'))
-                ->orderBy('created_at', 'desc')
-            // ambil yang terbaru
-                ->limit(1);
+                ->orderBy('created_at', 'desc');
         }])
             ->whereHas('stories', function ($query) {
                 $query->whereDate('created_at', date('Y-m-d'));
