@@ -45,7 +45,7 @@ class StoryController extends Controller
     {
         //
         $request->validate([
-            'file' => 'required|image',
+            'image' => 'required|image',
         ]);
 
         $file = new File();
