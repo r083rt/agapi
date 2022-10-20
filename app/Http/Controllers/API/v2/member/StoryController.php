@@ -45,11 +45,11 @@ class StoryController extends Controller
     public function store(Request $request)
     {
         //
-        return response()->json($request->all());
-        // $request->validate([
-        //     // bisa gambar dan video
-        //     'file' => 'required|file|mimes:jpg,jpeg,png,mp4,mov,ogg,qt',
-        // ]);
+        // return response()->json($request->all());
+        $request->validate([
+            // bisa gambar dan video
+            'file' => 'required|file|mimes:jpg,jpeg,png,mp4,mov,ogg,qt',
+        ]);
         // return response()->json('test');
         // return response()->json([
         //     'message' => 'ok',
