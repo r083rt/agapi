@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\v1\Student;
+namespace App\Http\Controllers\API\v1\student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Room;
