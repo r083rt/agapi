@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
  */
 
 // API VERSION 1
-Route::group(['prefix' => 'v1', 'namespace' => 'API\\v1'], function () {
+Route::group(['prefix' => 'v1'], function () {
 
     // API WITH SECUTIRY -------------------------------------------------------------------------------
     Route::group(['middleware' => [
