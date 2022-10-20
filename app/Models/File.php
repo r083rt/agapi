@@ -8,10 +8,17 @@ class File extends Model
 {
     //
 
-    public function type(){
-        return $this->morphOne('App\Models\Type','type');
+    public function type()
+    {
+        return $this->morphOne('App\Models\Type', 'type');
     }
-    public function fileable(){
+    public function fileable()
+    {
         return $this->morphTo(__FUNCTION__, 'file_type', 'file_id');
+    }
+
+    public function thumbnail()
+    {
+        return $this->morphOne('App\Models\File', 'file')->where('key', 'thumbnail');
     }
 }
