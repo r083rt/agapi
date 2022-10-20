@@ -61,7 +61,7 @@ class StoryController extends Controller
         $path = 'stories/' . $fileName;
         Storage::disk(env('FILESYSTEM_DRIVER'))->put($path, $compressed);
 
-        $file->path = $path;
+        $file->src = $path;
         $file->save();
 
         return response()->json($file);
