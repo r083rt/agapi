@@ -45,7 +45,8 @@ class StoryController extends Controller
     {
         //
         $request->validate([
-            'file' => 'required|image',
+            // bisa gambar dan video
+            'file' => 'required|file|mimes:jpg,jpeg,png,mp4',
         ]);
 
         $file = new File();
