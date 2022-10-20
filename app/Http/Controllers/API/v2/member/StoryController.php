@@ -111,7 +111,7 @@ class StoryController extends Controller
             // assign the value to time_to_image (which will get screenshot of video at that specified seconds)
             // $time_to_image    = floor(($data['video_length'])/2);
             $time_to_image = 0.1;
-            $thumbnail_status = Thumbnail::getThumbnail($request->file('file'), $thumbnail_path, $thumbnail_image, $time_to_image);
+            Thumbnail::getThumbnail($request->file('file'), $thumbnail_path, $thumbnail_image, $time_to_image);
             $storagePublic = Storage::disk('wasabi')->put('thumbnails/' . $thumbnail_image, Storage::disk('public')->get('thumbnails/' . $thumbnail_image));
 // dd($storagePublic);
             if ($storagePublic) {

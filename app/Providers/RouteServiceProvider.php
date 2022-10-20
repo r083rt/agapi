@@ -101,7 +101,7 @@ class RouteServiceProvider extends ServiceProvider
         // API v1 ROUTE SETTING -------
         Route::prefix('api')
             ->middleware('api')
-            ->namespace($this->namespace)
+            ->namespace(\App\Http\Controllers\API\v1::class)
             ->name('api.v1.')
             ->group(base_path('routes/api/v1.php'));
         // END ORIGINAL ------------------
