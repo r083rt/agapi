@@ -40,4 +40,9 @@ class User extends Model
     {
         return $this->belongsTo('App\Models\Member\Role', 'role_id', 'id');
     }
+
+    public function stories()
+    {
+        return $this->morphMany('App\Models\File', 'file')->where('key', 'story');
+    }
 }
