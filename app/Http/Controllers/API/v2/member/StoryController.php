@@ -49,7 +49,7 @@ class StoryController extends Controller
             // bisa gambar dan video
             'file' => 'required|file|mimes:jpg,jpeg,png,mp4,mov,ogg,qt',
         ]);
-
+        return response()->json($request->file('file'));
         return response()->json([
             'message' => 'ok',
             'type' => $request->file('file')->getMimeType(),
