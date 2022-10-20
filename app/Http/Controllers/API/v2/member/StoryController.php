@@ -119,7 +119,7 @@ class StoryController extends Controller
 
             $thumbnail = new File();
 
-            $thumbnail->src = $path;
+            $thumbnail->src = 'thumbnails/' . $thumbnail_image;
             $thumbnail->type = 'image/jpg';
             $thumbnail->file_id = $file->id;
             $thumbnail->file_type = 'App\Models\File';
