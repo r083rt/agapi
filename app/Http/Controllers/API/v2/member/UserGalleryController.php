@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserGalleryController extends Controller
 {
@@ -23,6 +24,12 @@ class UserGalleryController extends Controller
             ->where('posts.author_id', $user->id)
             ->where('files.type', 'like', 'image/' . '%')
             ->select('files.*')
+        // where post exist
+            ->whereExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('posts')
+                    ->whereRaw('posts.id = files.file_id');
+            })
             ->orderBy('files.created_at', 'desc')
             ->paginate();
         return response()->json($gallery);
