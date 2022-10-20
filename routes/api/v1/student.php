@@ -1,10 +1,8 @@
 <?php
 
-Route::post('createassigmentsession',
-    [AssigmentSessionController::class, 'createAssigmentSession']);
+Route::post('createassigmentsession', [AssigmentSessionController::class, 'createAssigmentSession']);
 
-Route::get('/assigments/search/{key}',
-    [AssigmentController::class, 'search']);
+Route::get('/assigments/search/{key}', [AssigmentController::class, 'search']);
 // Route::get('/')
 Route::apiResource('/assigmentsession', AssigmentSessionController::class);
 Route::post('/premium/storeassigmentsession', [AssigmentSessionController::class, 'storePremium']);
