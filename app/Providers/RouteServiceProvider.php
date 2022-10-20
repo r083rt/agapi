@@ -109,7 +109,7 @@ class RouteServiceProvider extends ServiceProvider
         // API v1 ROUTE SETTING -------
         Route::prefix('api/v1/student')
             ->middleware('api')
-            ->namespace(\App\Http\Controllers\API\v1\Student::class)
+            ->namespace(\App\Http\Controllers\API\v1\student::class)
             ->name('api.v1.student.')
             ->group(base_path('routes/api/v1/student.php'));
         // END ORIGINAL ------------------
@@ -134,15 +134,15 @@ class RouteServiceProvider extends ServiceProvider
             require base_path('routes/api/v2/member.php');
         });
 
-        Route::group([
-            'middleware' => 'auth:api',
-            'namespace' => \App\Http\Controllers\API\v2\student::class,
-            'prefix' => 'api/v2/student',
-            'name' => 'api.v2.student.',
-        ], function ($router) {
-            // V2 untuk murid API
-            require base_path('routes/api/v2/student.php');
-        });
+        // Route::group([
+        //     'middleware' => 'auth:api',
+        //     'namespace' => \App\Http\Controllers\API\v2\Student::class,
+        //     'prefix' => 'api/v2/student',
+        //     'name' => 'api.v2.student.',
+        // ], function ($router) {
+        //     // V2 untuk murid API
+        //     require base_path('routes/api/v2/student.php');
+        // });
 
         Route::group([
             // 'middleware' => ['auth:api', 'isAdmin'],
