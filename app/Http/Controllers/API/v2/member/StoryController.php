@@ -30,6 +30,7 @@ class StoryController extends Controller
                 DB::raw('id, name, avatar'),
                 DB::raw('(SELECT created_at FROM stories WHERE file_id = users.id AND file_type = App\Models\Member\User ORDER BY created_at DESC LIMIT 1) as last_story'),
             )
+            ->orderBy('last_story', 'desc')
             ->paginate();
         return response()->json($stories);
     }
