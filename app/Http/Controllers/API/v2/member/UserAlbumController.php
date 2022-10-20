@@ -17,7 +17,13 @@ class UserAlbumController extends Controller
     {
         //
         $posts = Post::where('author_id', $userId)
-            ->with('images')
+            ->with([
+                'images',
+                'author.profile',
+                'author.role',
+                'comments.user',
+                'likes.user',
+            ])
             ->has('images')
             ->orderBy('created_at', 'desc')
             ->paginate();
