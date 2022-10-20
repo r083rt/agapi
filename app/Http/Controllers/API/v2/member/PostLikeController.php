@@ -79,5 +79,10 @@ class PostLikeController extends Controller
     public function destroy($id)
     {
         //
+        $post = Post::findOrFail($id);
+        $post->likes()->where('user_id', auth('api')->user()->id)->delete();
+        return response()->json([
+            'message' => 'Berhasil unlike post',
+        ], 200);
     }
 }
