@@ -19,7 +19,7 @@ class UserStoryController extends Controller
         //
         $res = File::where('key', 'story')
             ->where('file_id', auth('api')->user()->id)
-            ->where('file_type', 'App\Models\User')->paginate();
+            ->where('file_type', 'App\Models\User')->get();
         return response()->json($res);
     }
 
