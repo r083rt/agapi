@@ -33,6 +33,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'article' => 'ArticleController', // untuk artikel
         'year.month.event' => 'YearMonthEventController', // untuk mengambil event berdasarkan tahun dan bulan
         'year.month.province.event' => 'YearMonthProvinceEventController', // untuk mengambil event berdasarkan tahun, bulan, dan provinsi
+        'province' => 'ProvinceController', // untuk mengambil provinsi
     ]);
 
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
