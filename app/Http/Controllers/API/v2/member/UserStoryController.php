@@ -14,12 +14,15 @@ class UserStoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($userId)
     {
         //
         $res = File::where('key', 'story')
-            ->where('file_id', auth('api')->user()->id)
-            ->where('file_type', 'App\Models\User')->get();
+            ->where('file_id', $userId)
+        // ambil yang hari ini
+            ->whereDate('created_at', date('Y-m-d'))
+            ->where('file_type', 'App\Models\User')
+            ->get();
         return response()->json($res);
     }
 
