@@ -26,9 +26,9 @@ class PostController extends Controller
             'author.role',
         ])
             ->withCount(['comments', 'likes', 'comments as last_comment' => function ($query) {
-                $query->with('user')->orderBy('created_at', 'desc')->limit(1);
+                $query->with('user')->orderBy('created_at', 'desc')->first();
             }, 'likes as last_like' => function ($query) {
-                $query->with('user')->orderBy('created_at', 'desc')->limit(1);
+                $query->with('user')->orderBy('created_at', 'desc')->first();
             }])
             ->whereHas('author', function ($query) {
                 $query->where('role_id', '!=', 8);
