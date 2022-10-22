@@ -38,7 +38,7 @@ class UserController extends Controller
     public function show($id)
     {
         //
-        $user = User::with('profile')->findOrFail($id);
+        $user = User::with('profile', 'pns_status')->findOrFail($id);
         return response()->json($user);
     }
 
