@@ -31,6 +31,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'subscribe-fee' => 'SubscribeFeeController', // untuk subscribe
         'subscribe-fee-status' => 'SubscribeFeeStatusController', // untuk status subscribe
         'article' => 'ArticleController', // untuk artikel
+        'notification' => 'NotificationController',
     ]);
 
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
