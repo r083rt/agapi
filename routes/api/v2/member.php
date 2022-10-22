@@ -12,6 +12,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'post' => 'PostController',
         'post.comment' => 'PostCommentController', // comment post
         'post.like' => 'PostLikeController', // untuk like postingan
+        'personal-conversation' => 'PersonalConversationController', // untuk mengelola pesan pribadi
         'event' => 'EventController', // untuk acara
         'story' => 'StoryController', // untuk story
         'user' => 'UserController', // untuk anggota
