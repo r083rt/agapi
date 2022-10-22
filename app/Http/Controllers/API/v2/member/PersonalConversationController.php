@@ -38,6 +38,15 @@ class PersonalConversationController extends Controller
     public function show($id)
     {
         //
+        $user = User::
+            with(['conversations' => function ($query) {
+            $query->whereHas('users', function ($query) {
+                $query->where('user_id', auth()->user()->id);
+            });
+        }])
+            ->findOrFail($id);
+        return response()->json($user);
+
     }
 
     /**
