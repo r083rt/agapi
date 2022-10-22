@@ -24,14 +24,10 @@ class PostController extends Controller
             'images', 'videos',
             'author.profile',
             'author.role',
+            'last_like',
+            'last_comment',
         ])
-            ->withCount(['comments', 'likes', 'comments as last_comment' => function ($query) {
-                // ambil latest morhpMany comments not count but object instead
-                $query->latest();
-            }, 'likes as last_like' => function ($query) {
-                $query->latest();
-
-            }])
+            ->withCount(['comments', 'likes'])
             ->whereHas('author', function ($query) {
                 $query->where('role_id', '!=', 8);
             })

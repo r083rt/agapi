@@ -88,6 +88,15 @@ class Post extends Model
         return $this->morphMany('App\Models\Like', 'like');
     }
 
+    public function last_like()
+    {
+        return $this->morphMany('App\Models\Like', 'like')->latest();
+    }
+
+    public function last_comment(){
+        return $this->morphMany('App\Models\Comment', 'comment')->latest();
+    }
+
     public function liked()
     {
         $user = auth('api')->user();
