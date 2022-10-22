@@ -24,16 +24,12 @@ class PostController extends Controller
             'images', 'videos',
             'author.profile',
             'author.role',
-            'comments' => function ($query) {
-                //ambil yang terakhir
-                $query->with('user')->orderBy('created_at', 'desc')->take(1);
-            },
-            'likes' => function ($query) {
-                // yang terakhir
-                $query->with('user')->orderBy('created_at', 'desc')->take(1);
-            },
         ])
-            ->withCount(['comments', 'likes'])
+            ->withCount(['comments', 'likes', 'comments as last_comment' => function ($query) {
+                $query->with('user')->orderBy('created_at', 'desc')->first();
+            }, 'likes as last_like' => function ($query) {
+                $query->with('user')->orderBy('created_at', 'desc')->first();
+            }])
             ->whereHas('author', function ($query) {
                 $query->where('role_id', '!=', 8);
             })
