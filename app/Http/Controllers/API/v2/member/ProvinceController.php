@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\user;
+use App\Models\Province;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class ProvinceController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,6 +16,8 @@ class UserController extends Controller
     public function index()
     {
         //
+        $res = Province::paginate();
+        return response()->json($res);
     }
 
     /**
@@ -38,8 +40,6 @@ class UserController extends Controller
     public function show($id)
     {
         //
-        $user = User::with('profile', 'pns_status')->findOrFail($id);
-        return response()->json($user);
     }
 
     /**

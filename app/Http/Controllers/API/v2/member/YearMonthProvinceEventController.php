@@ -3,19 +3,26 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\user;
+use App\Models\Event;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class YearMonthProvinceEventController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($year, $month, $provinceId)
     {
         //
+        $events = Event::whereYear('start_at', $year)
+            ->whereMonth('start_at', $month)
+            ->whereHas('author.profile', function ($query) use ($provinceId) {
+                $query->where('province_id', $provinceId);
+            })
+            ->paginate();
+        return response()->json($events);
     }
 
     /**
@@ -38,8 +45,6 @@ class UserController extends Controller
     public function show($id)
     {
         //
-        $user = User::with('profile', 'pns_status')->findOrFail($id);
-        return response()->json($user);
     }
 
     /**

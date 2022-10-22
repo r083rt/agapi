@@ -19,20 +19,23 @@ class UserGalleryController extends Controller
     {
         //
         $user = User::findOrFail($userId);
-        $gallery = File::join('posts', 'posts.id', '=', 'files.file_id')
+        $gallery = File::
+            join('posts', 'posts.id', '=', 'files.file_id')
             ->where('files.file_type', 'App\Models\Post')
             ->where('posts.author_id', $user->id)
             ->where('files.type', 'like', 'image/' . '%')
-            ->select(
-                'files.*',
-                'posts.id as post_id',
-            )
         // where post exist
             ->whereExists(function ($query) {
                 $query->select(DB::raw(1))
                     ->from('posts')
-                    ->whereRaw('posts.id = files.file_id');
+                    ->whereRaw('posts.id = files.file_id')
+                    ->where('posts.deleted_at', null)
+                    ->where('files.file_type', 'App\Models\Post');
             })
+            ->select(
+                'files.*',
+                'posts.id as post_id',
+            )
             ->orderBy('files.created_at', 'desc')
             ->paginate();
         return response()->json($gallery);

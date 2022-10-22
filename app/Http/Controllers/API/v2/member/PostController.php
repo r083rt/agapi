@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -124,10 +125,11 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, Post $post)
+    public function destroy($postId)
     {
         //
-        $delete = $request->user()->posts()->findOrFail($post->id)->delete();
+        $user = User::findOrFail(auth()->user()->id);
+        $delete = $user->posts()->findOrFail($postId)->delete();
         return response()->json([
             'message' => 'Post deleted',
             'deleted' => $delete,

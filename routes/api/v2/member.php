@@ -12,6 +12,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'post' => 'PostController',
         'post.comment' => 'PostCommentController', // comment post
         'post.like' => 'PostLikeController', // untuk like postingan
+        'personal-conversation' => 'PersonalConversationController', // untuk mengelola pesan pribadi
         'event' => 'EventController', // untuk acara
         'story' => 'StoryController', // untuk story
         'user' => 'UserController', // untuk anggota
@@ -32,6 +33,9 @@ Route::group(['middleware' => 'auth:api'], function () {
         'subscribe-fee-status' => 'SubscribeFeeStatusController', // untuk status subscribe
         'article' => 'ArticleController', // untuk artikel
         'notification' => 'NotificationController',
+        'year.month.event' => 'YearMonthEventController', // untuk mengambil event berdasarkan tahun dan bulan
+        'year.month.province.event' => 'YearMonthProvinceEventController', // untuk mengambil event berdasarkan tahun, bulan, dan provinsi
+        'province' => 'ProvinceController', // untuk mengambil provinsi
     ]);
 
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
