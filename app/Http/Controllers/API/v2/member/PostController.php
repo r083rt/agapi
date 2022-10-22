@@ -24,8 +24,8 @@ class PostController extends Controller
             'images', 'videos',
             'author.profile',
             'author.role',
-            'last_like',
-            'last_comment',
+            'last_like.user',
+            'last_comment.user',
         ])
             ->withCount(['comments', 'likes'])
             ->whereHas('author', function ($query) {
