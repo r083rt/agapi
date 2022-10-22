@@ -26,9 +26,11 @@ class PostController extends Controller
             'author.role',
         ])
             ->withCount(['comments', 'likes', 'comments as last_comment' => function ($query) {
-                $query->comments()->latest();
+                // ambil latest morhpMany comments not count but object instead
+                $query->latest();
             }, 'likes as last_like' => function ($query) {
-                $query->likes()->latest();
+                $query->latest();
+
             }])
             ->whereHas('author', function ($query) {
                 $query->where('role_id', '!=', 8);
