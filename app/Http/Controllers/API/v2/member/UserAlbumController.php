@@ -21,10 +21,10 @@ class UserAlbumController extends Controller
                 'images',
                 'author.profile',
                 'author.role',
-                'comments.user',
-                'likes.user',
+                'last_comment.user',
+                'last_like.user',
             ])
-            ->has('images')
+        // ->has('images')
             ->orderBy('created_at', 'desc')
             ->paginate();
         return response()->json($posts);
