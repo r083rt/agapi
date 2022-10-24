@@ -51,7 +51,7 @@ class KtaController extends Controller
         if ($member->doesntExist()) {
             $user->kta_id = $district->id . '001';
         } else {
-            $kta_id = $member->latest()->kta_id ?? $district->id . '001';
+            $kta_id = $member->latest()->first()->kta_id ?? $district->id . '001';
             while (User::where('kta_id', $kta_id)->exists()) {
                 $kta_id++;
             }
