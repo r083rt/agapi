@@ -40,6 +40,8 @@ class ProvinceController extends Controller
     public function show($id)
     {
         //
+        $res = Province::findOrFail($id);
+        return response()->json($res);
     }
 
     /**
