@@ -14,9 +14,13 @@ class PostLikeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($postId)
     {
         //
+        $post = Post::findOrFail($postId);
+        // post likes paginate
+        $likes = $post->likes()->paginate();
+        return response()->json($likes);
     }
 
     /**
