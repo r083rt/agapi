@@ -19,6 +19,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'user' => 'UserController', // untuk anggota
         'user.story' => 'UserStoryController', // untuk user story
         'user.post' => 'UserPostController',
+        'user.profile' => 'UserProfileController',
         'user.gallery' => 'UserGalleryController', // untuk mengambil gallery dari user
         'user.album' => 'UserAlbumController', // untuk album
         'user.personal-conversation' => 'UserPersonalConversationController', // untuk mengambil conversation chat dari user
