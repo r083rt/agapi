@@ -35,10 +35,11 @@ class DistrictController extends Controller
      * @param  \App\Models\District  $district
      * @return \Illuminate\Http\Response
      */
-    public function show(District $district)
+    public function show($id)
     {
         //
-        return response()->json($district->first());
+        $res = District::findOrFail($id);
+        return response()->json($res);
     }
 
     /**

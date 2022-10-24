@@ -35,10 +35,11 @@ class CityController extends Controller
      * @param  \App\Models\City  $city
      * @return \Illuminate\Http\Response
      */
-    public function show(City $city)
+    public function show($id)
     {
         //
-        return response()->json($city->first());
+        $res = City::findOrFail($id);
+        return response()->json($res);
     }
 
     /**
