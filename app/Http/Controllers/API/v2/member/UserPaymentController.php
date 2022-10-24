@@ -16,7 +16,10 @@ class UserPaymentController extends Controller
     public function index($userId)
     {
         //
-        $payment = Payment::where('user_id', $userId)->paginate();
+        $payment = Payment::where('user_id', $userId)
+            ->where('status', 'success')
+            ->orderBy('created_at', 'desc')
+            ->paginate();
         return response()->json($payment);
     }
 
