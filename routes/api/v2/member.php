@@ -38,7 +38,9 @@ Route::group(['middleware' => 'auth:api'], function () {
         'year.month.province.event' => 'YearMonthProvinceEventController', // untuk mengambil event berdasarkan tahun, bulan, dan provinsi
         'province' => 'ProvinceController', // untuk mengambil provinsi
         'province.city' => 'ProvinceCityController', // untuk mengambil kota
+        'city' => 'CityController', // untuk mengambil kota
         'city.district' => 'CityDistrictController', // untuk mengambil kecamatan
+        'district' => 'DistrictController', // untuk mengambil kecamatan
         'generate-kta' => 'GenerateKtaController', // untuk generate kartu tanda anggota
     ]);
 
