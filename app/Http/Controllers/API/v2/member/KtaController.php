@@ -7,7 +7,7 @@ use App\Models\District;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class GenerateKtaController extends Controller
+class KtaController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -67,7 +67,6 @@ class GenerateKtaController extends Controller
         ]);
 
         $user->update();
-
 
         return response()->json([
             'message' => 'KTA berhasil dibuat',

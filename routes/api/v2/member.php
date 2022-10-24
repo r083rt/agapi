@@ -42,7 +42,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'city' => 'CityController', // untuk mengambil kota
         'city.district' => 'CityDistrictController', // untuk mengambil kecamatan
         'district' => 'DistrictController', // untuk mengambil kecamatan
-        'generate-kta' => 'GenerateKtaController', // untuk generate kartu tanda anggota
+        'kta' => 'KtaController', // untuk generate kartu tanda anggota
     ]);
 
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
