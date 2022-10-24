@@ -39,6 +39,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'province' => 'ProvinceController', // untuk mengambil provinsi
         'province.city' => 'ProvinceCityController', // untuk mengambil kota
         'city.district' => 'CityDistrictController', // untuk mengambil kecamatan
+        'generate-kta' => 'GenerateKtaController', // untuk generate kartu tanda anggota
     ]);
 
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
