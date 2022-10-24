@@ -37,9 +37,11 @@ class ProvinceCityController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($provinceId, $id)
     {
         //
+        $city = City::where('province_id', $provinceId)->findOrFail($id);
+        return response()->json($city);
     }
 
     /**
