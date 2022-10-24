@@ -38,7 +38,7 @@ class CityController extends Controller
     public function show(City $city)
     {
         //
-        return response()->json($city);
+        return response()->json($city->first());
     }
 
     /**

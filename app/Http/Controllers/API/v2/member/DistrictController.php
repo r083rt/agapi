@@ -38,7 +38,7 @@ class DistrictController extends Controller
     public function show(District $district)
     {
         //
-        return response()->json($district);
+        return response()->json($district->first());
     }
 
     /**
