@@ -42,18 +42,16 @@ class KtaController extends Controller
             ], 400);
         }
 
-        $district = District::with('profiles')->findOrFail($request->profile['district_id']);
-        $lastmember = User::whereHas('profile.district', function ($query) use ($request) {
-            $query->where('id', $request->profile['district_id']);
+        $district = District::with('profiles')->findOrFail($request->district_id);
+        $member = User::whereHas('profile.district', function ($query) use ($district) {
+            $query->where('id', $district->id);
         })
-            ->where('kta_id', '!=', null)
-            ->where('id', '!=', $request->user()->id)
-            ->orderBy('id', 'desc');
+            ->where('kta_id', '!=', null);
 
-        if ($lastmember->doesntExist()) {
-            $user->kta_id = $request->profile['district_id'] . '001';
+        if ($member->doesntExist()) {
+            $user->kta_id = $district->id . '001';
         } else {
-            $kta_id = $lastmember->kta_id ?? $request->profile['district_id'] . '001';
+            $kta_id = $member->latest()->kta_id ?? $district->id . '001';
             while (User::where('kta_id', $kta_id)->exists()) {
                 $kta_id++;
             }
