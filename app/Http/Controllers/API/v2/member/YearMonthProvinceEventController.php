@@ -29,6 +29,7 @@ class YearMonthProvinceEventController extends Controller
                 'events.start_at as event_start_at',
                 'events.end_at as event_end_at',
                 'events.address as event_address',
+                'users.id as author_id',
                 'users.name as author_name',
                 'users.email as author_email',
                 'users.avatar as author_avatar',
