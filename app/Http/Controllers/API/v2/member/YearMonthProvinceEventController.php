@@ -23,6 +23,7 @@ class YearMonthProvinceEventController extends Controller
             ->whereYear('events.start_at', $year)
             ->whereMonth('events.start_at', $month)
             ->select(
+                'events.id as event_id',
                 'events.name as event_name',
                 'events.description as event_description',
                 'events.start_at as event_start_at',
