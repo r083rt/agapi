@@ -19,7 +19,9 @@ class PostLikeController extends Controller
         //
         $post = Post::findOrFail($postId);
         // post likes paginate
-        $likes = $post->likes()->paginate();
+        // $likes = $post->likes()->paginate();
+        // likes with user paginate
+        $likes = $post->likes()->with('user')->paginate();
         return response()->json($likes);
     }
 
