@@ -3,24 +3,32 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
-class YearMonthEventController extends Controller
+class ProvinceCalendarEventController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($year, $month)
+    public function index($provinceId)
     {
         //
-        $events = Event::whereYear('start_at', $year)
-            ->whereMonth('start_at', $month)
-            ->with('author.profile')
+        $res = DB::table('events')
+            ->join('users', 'events.user_id', '=', 'users.id')
+            ->join('profiles', 'users.id', '=', 'profiles.user_id')
+            ->where('profiles.province_id', $provinceId)
+            ->select(
+                'events.name as event_name',
+                'events.description as event_description',
+                'events.start_at as event_start_at',
+                'events.address as event_address',
+            )
+            ->orderBy('events.start_at', 'desc')
             ->paginate();
-        return response()->json($events);
+        return response()->json($res);
     }
 
     /**

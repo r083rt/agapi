@@ -21,6 +21,7 @@ class YearMonthProvinceEventController extends Controller
             ->whereHas('author.profile', function ($query) use ($provinceId) {
                 $query->where('province_id', $provinceId);
             })
+            ->with('author.profile')
             ->paginate();
         return response()->json($events);
     }
