@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class YearMonthEventController extends Controller
 {
@@ -16,10 +16,25 @@ class YearMonthEventController extends Controller
     public function index($year, $month)
     {
         //
-        $events = Event::whereYear('start_at', $year)
-            ->whereMonth('start_at', $month)
-            ->with('author.profile')
-            ->paginate();
+        $events = DB::table('events')
+            ->join('users', 'events.user_id', '=', 'users.id')
+            ->join('profiles', 'users.id', '=', 'profiles.user_id')
+            ->whereYear('events.start_at', $year)
+            ->whereMonth('events.start_at', $month)
+            ->select(
+                'events.name as event_name',
+                'events.description as event_description',
+                'events.start_at as event_start_at',
+                'events.end_at as event_end_at',
+                'events.address as event_address',
+                'users.name as author_name',
+                'users.email as author_email',
+                'users.avatar as author_avatar',
+                'users.kta_id as author_kta_id',
+            )
+            ->orderBy('events.start_at', 'desc')
+            ->get();
+
         return response()->json($events);
     }
 
