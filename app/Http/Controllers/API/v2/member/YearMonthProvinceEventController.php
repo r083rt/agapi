@@ -21,7 +21,7 @@ class YearMonthProvinceEventController extends Controller
             ->join('profiles', 'users.id', '=', 'profiles.user_id')
             ->where('profiles.province_id', $provinceId)
             ->whereYear('events.start_at', $year)
-            ->whereMonth('events.start_at', $month)
+        // ->whereMonth('events.start_at', $month)
             ->select(
                 'events.id as event_id',
                 'events.name as event_name',
