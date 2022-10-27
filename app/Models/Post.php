@@ -125,10 +125,6 @@ class Post extends Model
         return $this->morphMany('App\Models\File', 'file');
     }
 
-    public function ads()
-    {
-        return $this->morphMany('App\Models\Ad', 'ad');
-    }
     public function documents()
     {
         return $this->morphMany('App\Models\File', 'file');
@@ -162,6 +158,11 @@ class Post extends Model
     public function docs()
     {
         return $this->morphMany('App\Models\File', 'file')->whereIn('type', ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']);
+    }
+
+    public function ads()
+    {
+        return $this->morphMany('App\Models\Ad', 'adable');
     }
 
     // accessor -----------------------------------------------------------------------------------------

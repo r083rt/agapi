@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\API\v2;
+namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\Member\Post;
+use App\Models\Post;
 use Illuminate\Http\Request;
 
-class PostController extends Controller
+class AdPostController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,8 +16,16 @@ class PostController extends Controller
     public function index()
     {
         //
-        $posts = Post::with('images', 'videos', 'author.profile', 'likes')->where('key', '!=', 'ad')->paginate();
-        return response()->json($posts);
+        $ads = Post::where('type', 'ad')
+        // ->whereDoesntHave('readers', function ($query) {
+        //     $query->where('user_id', auth()->user()->id);
+        // })
+            ->whereHas('ads.ad_targets', function ($query) {
+                $query->where('target_id', auth()->user()->id);
+            })
+            ->limit(2)
+            ->get();
+        return response()->json($ads);
     }
 
     /**
