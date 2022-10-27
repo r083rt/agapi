@@ -47,7 +47,7 @@ class PostController extends Controller
                 $query
                     ->whereIn('role_id', $role_ids);
             })->orderBy('id', 'desc')
-            ->where('key', '!=', 'ad')
+        // ->where('key', '!=', 'ad')
             ->paginate($request->show ?? 10);
         return $posts;
     }

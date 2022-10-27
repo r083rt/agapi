@@ -31,7 +31,7 @@ class PostController extends Controller
             ->whereHas('author', function ($query) {
                 $query->where('role_id', '!=', 8);
             })
-            ->where('key', '!=', 'ad')
+        // ->where('key', '!=', 'ad')
             ->orderBy('created_at', 'desc')
             ->paginate();
         return response()->json($posts);
