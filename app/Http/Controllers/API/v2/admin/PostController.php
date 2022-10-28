@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\API\v2;
+namespace App\Http\Controllers\API\v2\admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Member\Post;
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -13,12 +13,22 @@ class PostController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
         $posts = Post::with('images', 'videos', 'author.profile', 'likes')
-        // ->where('key', '!=', 'ad')
-            ->paginate();
+            ->where('key', 'ad');
+
+        if ($request->filter) {
+            $posts->where(function ($query) use ($request) {
+                $query->whereHas('author', function ($query2) use ($request) {
+                    $query2->where('name', 'like', "%$request->filter%");
+                });
+            })
+                ->orWhere('body', 'like', "%$request->filter%");
+        }
+
+        $posts = $posts->paginate();
         return response()->json($posts);
     }
 
@@ -39,9 +49,10 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function show(Post $post)
+    public function show($id)
     {
         //
+        return Post::with('images', 'videos', 'author.profile', 'likes')->findOrFail($id);
     }
 
     /**
@@ -70,8 +81,15 @@ class PostController extends Controller
     public function search($keyword)
     {
         $posts = Post::with('images', 'videos', 'author.profile', 'likes')
-            ->where('body', 'like', "%$keyword%")->paginate();
+            ->where(function ($query) use ($keyword) {
+                $query->whereHas('author', function ($query2) use ($keyword) {
+                    $query2->where('name', 'like', "%$keyword%");
+                });
+            })
+            ->orWhere('body', 'like', "%$keyword%")
+            ->paginate();
 
         return response()->json($posts);
     }
+
 }

@@ -362,4 +362,12 @@ class PostController extends Controller
         $res->save();
         return $res;
     }
+
+    public function search($keyword)
+    {
+        $posts = Post::with('images', 'videos', 'author.profile', 'likes')
+            ->where('body', 'like', "%$keyword%")->paginate();
+
+        return response()->json($posts);
+    }
 }

@@ -39,6 +39,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'year.month.province.event' => 'YearMonthProvinceEventController', // untuk mengambil event berdasarkan tahun, bulan, dan provinsi
         'province' => 'ProvinceController', // untuk mengambil provinsi
         'province.city' => 'ProvinceCityController', // untuk mengambil kota
+        'province.event' => 'ProvinceEventController', // untuk mengambil event berdasarkan provinsi
         'province.calendar-event' => 'ProvinceCalendarEventController', // untuk mengambil event berdasarkan provinsi
         'city' => 'CityController', // untuk mengambil kota
         'city.district' => 'CityDistrictController', // untuk mengambil kecamatan

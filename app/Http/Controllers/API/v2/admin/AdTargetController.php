@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\API\v2\member;
+namespace App\Http\Controllers\API\v2\admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Event;
 use Illuminate\Http\Request;
 
-class EventController extends Controller
+class AdTargetController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,20 +15,6 @@ class EventController extends Controller
     public function index()
     {
         //
-        // $events = Event::with('author.profile')
-        //     ->orderBy('start_at', 'desc')
-        //     ->paginate();
-
-        // data berisi object tanggal lalu tiap tanggal berisi array event
-        $events = Event::with('author.profile')
-            ->orderBy('start_at', 'desc')
-            ->get()
-            ->groupBy(function ($item, $key) {
-                return $item->start_at->format('Y-m-d');
-            });
-
-        return response()->json($events);
-
     }
 
     /**
@@ -41,15 +26,16 @@ class EventController extends Controller
     public function store(Request $request)
     {
         //
+
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Event  $event
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Event $event)
+    public function show($id)
     {
         //
     }
@@ -58,10 +44,10 @@ class EventController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Event  $event
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Event $event)
+    public function update(Request $request, $id)
     {
         //
     }
@@ -69,10 +55,10 @@ class EventController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Event  $event
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Event $event)
+    public function destroy($id)
     {
         //
     }

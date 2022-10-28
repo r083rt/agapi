@@ -21,6 +21,8 @@ Route::resources([
     'department.user' => 'DepartmentUserController',
     'excel/province.user' => 'Excel\ProvinceUserController',
     'province' => 'ProvinceController',
+    'ads' => 'AdsController',
+    'post' => 'PostController',
 ]);
 
 Route::get('/user/search/{keyword}', 'UserController@search');

@@ -6,30 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Illuminate\Http\Request;
 
-class EventController extends Controller
+class ProvinceEventController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($provinceId)
     {
         //
-        // $events = Event::with('author.profile')
-        //     ->orderBy('start_at', 'desc')
-        //     ->paginate();
-
-        // data berisi object tanggal lalu tiap tanggal berisi array event
         $events = Event::with('author.profile')
+            ->whereHas('author.profile', function ($query) use ($provinceId) {
+                $query->where('province_id', $provinceId);
+            })
             ->orderBy('start_at', 'desc')
             ->get()
             ->groupBy(function ($item, $key) {
                 return $item->start_at->format('Y-m-d');
             });
-
         return response()->json($events);
-
     }
 
     /**
