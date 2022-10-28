@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 // api untuk daftar guru ke aplikasi agpaii digital
 Route::post('/register', 'AuthController@register');
 
-Route::group(['middleware' => 'auth:api'], function () {
+Route::group(['middleware' => null], function () {
     // api untuk mendapatkan data user yang sedang login
     Route::get('/me', 'AuthController@getUserAccount');
     // api resources

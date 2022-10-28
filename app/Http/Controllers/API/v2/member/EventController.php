@@ -17,7 +17,8 @@ class EventController extends Controller
     public function index()
     {
         // data berisi object tanggal lalu tiap tanggal berisi array event
-        $events = Event::join('users', 'events.user_id', '=', 'users.id')
+        $events = DB::table('events')
+            ->join('users', 'events.user_id', '=', 'users.id')
             ->select(
                 'events.id as event_id',
                 'events.name as event_name',
@@ -25,18 +26,22 @@ class EventController extends Controller
                 'events.start_at as event_start_at',
                 'events.end_at as event_end_at',
                 'events.address as event_address',
+                DB::raw('DATE_FORMAT(events.start_at, "%Y-%m-%d") as event_date'),
                 'users.id as author_id',
                 'users.name as author_name',
                 'users.email as author_email',
                 'users.avatar as author_avatar',
                 'users.kta_id as author_kta_id',
             )
-            ->orderBy('start_at', 'desc')
-            ->groupBy(
-                // group berdasarkan tanggal YYYY-MM-DD dari event_start_at
-                DB::raw('DATE(events.start_at) DESC')
-            )
-            ->paginate();
+        // group berdasarkan event_date menjadi object tanggal yang berisi array event
+            ->where('events.end_at', '>=', now())
+            ->orderBy('event_end_at', 'desc')
+        // yang hari ini atau mendatang
+            ->get()
+            ->groupBy(function ($item, $key) {
+                // return response()->json($item->event_start_at);
+                return \Carbon\Carbon::parse($item->event_date)->format('Y-m-d');
+            });
 
         return response()->json($events);
 

@@ -26,14 +26,17 @@ class ProvinceEventController extends Controller
                 'events.start_at as event_start_at',
                 'events.end_at as event_end_at',
                 'events.address as event_address',
+                DB::raw('DATE_FORMAT(events.start_at, "%Y-%m-%d") as event_date'),
                 'users.id as author_id',
                 'users.name as author_name',
                 'users.email as author_email',
                 'users.avatar as author_avatar',
                 'users.kta_id as author_kta_id',
             )
-            ->orderBy('start_at', 'desc')
-            ->paginate()
+            ->where('events.end_at', '>=', now())
+            ->orderBy('event_end_at', 'desc')
+        // yang hari ini atau mendatang
+            ->get()
             ->groupBy(function ($item, $key) {
                 return \Carbon\Carbon::parse($item->start_at)->format('Y-m-d');
             });
