@@ -34,7 +34,8 @@ class EventController extends Controller
                 'users.kta_id as author_kta_id',
             )
         // group berdasarkan event_date menjadi object tanggal yang berisi array event
-            ->where('events.end_at', '>=', now())
+        // ->where('events.end_at', '>=', now())
+            ->whereYear('events.start_at', '>=', now()->subYear()->year)
             ->orderBy('event_end_at', 'desc')
         // yang hari ini atau mendatang
             ->get()
