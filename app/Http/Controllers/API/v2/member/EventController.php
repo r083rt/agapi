@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
@@ -31,9 +32,10 @@ class EventController extends Controller
                 'users.kta_id as author_kta_id',
             )
             ->orderBy('start_at', 'desc')
-            ->groupBy(function ($item, $key) {
-                return \Carbon\Carbon::parse($item->event_start_at)->format('Y-m-d');
-            })
+            ->groupBy(
+                // group berdasarkan tanggal YYYY-MM-DD dari event_start_at
+                DB::raw('DATE(events.start_at) DESC')
+            )
             ->paginate();
 
         return response()->json($events);
