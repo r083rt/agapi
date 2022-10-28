@@ -21,7 +21,7 @@ class ProvinceEventController extends Controller
                 $query->where('province_id', $provinceId);
             })
             ->orderBy('start_at', 'desc')
-            ->get()
+            ->paginate()
             ->groupBy(function ($item, $key) {
                 return $item->start_at->format('Y-m-d');
             });

@@ -23,7 +23,7 @@ class EventController extends Controller
         // data berisi object tanggal lalu tiap tanggal berisi array event
         $events = Event::with('author.profile')
             ->orderBy('start_at', 'desc')
-            ->get()
+            ->paginate()
             ->groupBy(function ($item, $key) {
                 return $item->start_at->format('Y-m-d');
             });
