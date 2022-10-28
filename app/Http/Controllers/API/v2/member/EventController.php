@@ -37,14 +37,15 @@ class EventController extends Controller
         // ->where('events.end_at', '>=', now())
         // ->whereYear('events.start_at', '>=', now()->subYear()->year)
         // yang tahun ini
-            ->whereYear('events.start_at', '>=', now()->year)
+        // ->whereYear('events.start_at', '>=', now()->year)
             ->orderBy('event_end_at', 'desc')
         // yang hari ini atau mendatang
-            ->get()
-            ->groupBy(function ($item, $key) {
-                // return response()->json($item->event_start_at);
-                return \Carbon\Carbon::parse($item->event_date)->format('Y-m-d');
-            });
+        // ->get()
+        // ->groupBy(function ($item, $key) {
+        //     // return response()->json($item->event_start_at);
+        //     return \Carbon\Carbon::parse($item->event_date)->format('Y-m-d');
+        // });
+            ->paginate();
 
         return response()->json($events);
 
