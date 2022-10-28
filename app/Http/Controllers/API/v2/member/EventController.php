@@ -32,7 +32,7 @@ class EventController extends Controller
             )
             ->orderBy('start_at', 'desc')
             ->groupBy(function ($item, $key) {
-                return \Carbon\Carbon::parse($item->start_at)->format('Y-m-d');
+                return \Carbon\Carbon::parse($item->event_start_at)->format('Y-m-d');
             })
             ->paginate();
 
