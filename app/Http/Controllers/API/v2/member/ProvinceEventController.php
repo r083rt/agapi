@@ -35,7 +35,8 @@ class ProvinceEventController extends Controller
             )
         // ->where('events.end_at', '>=', now())
         // yang tahun dari tahun kemarin
-            ->whereYear('events.start_at', '>=', now()->subYear()->year)
+        // ->whereYear('events.start_at', '>=', now()->subYear()->year)
+            ->whereYear('events.start_at', '>=', now()->year)
             ->orderBy('event_end_at', 'desc')
         // yang hari ini atau mendatang
             ->get()
