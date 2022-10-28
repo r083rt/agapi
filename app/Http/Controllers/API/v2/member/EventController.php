@@ -32,11 +32,20 @@ class EventController extends Controller
             )
             ->orderBy('start_at', 'desc')
             ->paginate();
-        $events->groupBy(function ($item, $key) {
-            return \Carbon\Carbon::parse($item->start_at)->format('Y-m-d');
-        });
+        // $events->groupBy(function ($item, $key) {
+        //         return \Carbon\Carbon::parse($item->start_at)->format('Y-m-d');
+        //     });
+        // ubah data paginate menjadi object tanggal yang berisi array event
+        $data = [];
+        foreach ($events as $event) {
+            $date = \Carbon\Carbon::parse($event->event_start_at)->format('Y-m-d');
+            if (!isset($data[$date])) {
+                $data[$date] = [];
+            }
+            $data[$date][] = $event;
+        }
 
-        return response()->json($events);
+        return response()->json($data);
 
     }
 
