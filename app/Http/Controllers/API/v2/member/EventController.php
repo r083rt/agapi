@@ -31,9 +31,10 @@ class EventController extends Controller
                 'users.kta_id as author_kta_id',
             )
             ->orderBy('start_at', 'desc')
-            ->groupBy(function ($item, $key) {
-                return \Carbon\Carbon::parse($item->start_at)->format('Y-m-d');
-            })->paginate();
+            ->paginate();
+        $events->groupBy(function ($item, $key) {
+            return \Carbon\Carbon::parse($item->start_at)->format('Y-m-d');
+        });
 
         return response()->json($events);
 
