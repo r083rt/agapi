@@ -15,13 +15,21 @@ class EventController extends Controller
      */
     public function index()
     {
-        //
-        // $events = Event::with('author.profile')
-        //     ->orderBy('start_at', 'desc')
-        //     ->paginate();
-
         // data berisi object tanggal lalu tiap tanggal berisi array event
-        $events = Event::with('author.profile')
+        $events = Event::join('users', 'events.user_id', '=', 'users.id')
+            ->select(
+                'events.id as event_id',
+                'events.name as event_name',
+                'events.description as event_description',
+                'events.start_at as event_start_at',
+                'events.end_at as event_end_at',
+                'events.address as event_address',
+                'users.id as author_id',
+                'users.name as author_name',
+                'users.email as author_email',
+                'users.avatar as author_avatar',
+                'users.kta_id as author_kta_id',
+            )
             ->orderBy('start_at', 'desc')
             ->paginate()
             ->groupBy(function ($item, $key) {

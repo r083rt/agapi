@@ -16,10 +16,22 @@ class ProvinceEventController extends Controller
     public function index($provinceId)
     {
         //
-        $events = Event::with('author.profile')
-            ->whereHas('author.profile', function ($query) use ($provinceId) {
-                $query->where('province_id', $provinceId);
-            })
+        $events = Event::join('users', 'events.user_id', '=', 'users.id')
+            ->join('profiles', 'users.id', '=', 'profiles.user_id')
+            ->where('profiles.province_id', $provinceId)
+            ->select(
+                'events.id as event_id',
+                'events.name as event_name',
+                'events.description as event_description',
+                'events.start_at as event_start_at',
+                'events.end_at as event_end_at',
+                'events.address as event_address',
+                'users.id as author_id',
+                'users.name as author_name',
+                'users.email as author_email',
+                'users.avatar as author_avatar',
+                'users.kta_id as author_kta_id',
+            )
             ->orderBy('start_at', 'desc')
             ->paginate()
             ->groupBy(function ($item, $key) {
