@@ -27,6 +27,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'user.push-token' => 'UserPushTokenController', // untuk menyimpan expo push token ke database
         'user.member-card' => 'UserMemberCardController', // untuk generate kartu tanda anggota
         'user.payment' => 'UserPaymentController', // untuk pembayaran
+        'user.pns-status' => 'UserPnsStatusController', //untuk status pns user
         'murottal' => 'MurottalController', // untuk murottal audio
         'daily-prayer' => 'DailyPrayerController', // untuk doa harian
         'membership-fee' => 'MembershipFeeController', // untuk membership

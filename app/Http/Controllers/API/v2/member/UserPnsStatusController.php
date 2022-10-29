@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\Profile;
-use App\Models\User;
+use App\Models\PnsStatus;
 use Illuminate\Http\Request;
 
-class UserProfileController extends Controller
+class UserPnsStatusController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,20 +16,28 @@ class UserProfileController extends Controller
     public function index($userId)
     {
         //
-        $profile = Profile::where('user_id', $userId)->firstOrFail();
-        return response()->json($profile);
-    }
+        $pns_status = PnsStatus::where('user_id', $userId);
 
+        if ($pns_status->exists()) {
+            $newData = new PnsStatus();
+            $newData->user_id = $userId;
+            // $newData->is_pns = 0;
+            $newData->save();
+        } else {
+            $pns_status = $pns_status->first();
+        }
+        return response()->json($pns_status);
+        // return PnsStatus::where('user_id', $userId)->firstOrFail();
+    }
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store($userId, Request $request)
+    public function store(Request $request)
     {
         //
-
     }
 
     /**
@@ -51,15 +58,13 @@ class UserProfileController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $userId, $id)
+    public function update(Request $request, $userId)
     {
         //
-        // return response()->json([$userId, $request->all(), $id, $request->user()->profile()]);
-        $user = User::with('profile')->findOrFail($userId);
-        $profile = Profile::findOrFail($user->profile->id);
-        $profile->update($request->all());
-        return response()->json($user->profile);
+        $pns_status = PnsStatus::where('user_id', $userId)->firstOrFail();
+        $pns_status->update($request->all());
 
+        return response()->json($pns_status);
     }
 
     /**
