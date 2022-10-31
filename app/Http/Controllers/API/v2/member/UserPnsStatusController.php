@@ -23,6 +23,7 @@ class UserPnsStatusController extends Controller
             $newData->user_id = $userId;
             // $newData->is_pns = 0;
             $newData->save();
+            $pns_status = $pns_status->first();
         } else {
             $pns_status = $pns_status->first();
         }
@@ -61,8 +62,10 @@ class UserPnsStatusController extends Controller
     public function update(Request $request, $userId)
     {
         //
-        $pns_status = PnsStatus::where('user_id', $userId)->firstOrFail();
-        $pns_status->update($request->all());
+        // return response()->json($request->is_pns == false);
+        $pns_status = PnsStatus::where('user_id', $userId)->first();
+        $pns_status->is_pns = $request->is_pns;
+        $pns_status->save();
 
         return response()->json($pns_status);
     }
