@@ -103,4 +103,8 @@ class Event extends Model
         }
     }
 
+    public function location()
+    {
+        return $this->morphOne(Location::class, 'locationable');
+    }
 }

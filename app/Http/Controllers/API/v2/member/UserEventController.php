@@ -17,7 +17,10 @@ class UserEventController extends Controller
     {
         //
 
-        $events = Event::where('user_id', $userId)->paginate();
+        $events = Event::where('user_id', $userId)
+            ->where('deleted_at', null)
+            ->orderBy('id', 'desc')
+            ->paginate();
 
         return response()->json($events);
     }
@@ -30,7 +33,34 @@ class UserEventController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //validasi data
+        $this->validate($request, [
+            'name' => 'required|string|max:191',
+            'start_at' => 'required|date',
+            'address' => 'required|string|max:191',
+        ]);
+
+
+
+        //menambahkan data ke table event
+        $event = new Event();
+        $event->user_id = $request->user_id;
+        $event->name = $request->name;
+        $event->description = $request->description;
+        $event->start_at = $request->start_at;
+        $event->end_at = $request->end_at;
+        $event->address = $request->address;
+        $event->link = $request->link;
+        $event->type = $request->type;
+        $event->save();
+
+        //event menambahkan latitude dan longitude morph table  location
+        $event->location()->create([
+            'latitude' => $request->location['latitude'],
+            'longitude' => $request->location['longitude'],
+        ]);
+
+        return response()->json($event->load('location'));
     }
 
     /**
@@ -39,9 +69,10 @@ class UserEventController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($userId, $id)
     {
         //
+        return Event::with('location')->findOrFail($id);
     }
 
     /**
@@ -51,9 +82,17 @@ class UserEventController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $userId, $id)
     {
         //
+        $event = Event::findOrFail($id);
+        $event->fill($request->all());
+        $event->save();
+
+        if ($request->has('location')) {
+            $event->location()->update($request->location);
+        }
+        return response()->json($event->load('location'));
     }
 
     /**
@@ -62,8 +101,12 @@ class UserEventController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($userId, $id)
     {
         //
+        $event = Event::findOrFail($id);
+        $event->delete();
+
+        return response()->json($event);
     }
 }
