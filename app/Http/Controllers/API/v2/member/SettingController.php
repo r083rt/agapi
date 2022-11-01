@@ -3,22 +3,21 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\Profile;
-use App\Models\User;
 use Illuminate\Http\Request;
+use TCG\Voyager\Facades\Voyager;
 
-class UserProfileController extends Controller
+class SettingController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($userId)
+    public function index()
     {
         //
-        $profile = Profile::where('user_id', $userId)->firstOrFail();
-        return response()->json($profile);
+        $settings = Voyager::model('Setting')->orderBy('id', 'asc')->get();
+        return response()->json($settings);
     }
 
     /**
@@ -27,10 +26,9 @@ class UserProfileController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store($userId, Request $request)
+    public function store(Request $request)
     {
         //
-
     }
 
     /**
@@ -51,15 +49,9 @@ class UserProfileController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $userId, $id)
+    public function update(Request $request, $id)
     {
         //
-        // return response()->json([$userId, $request->all(), $id, $request->user()->profile()]);
-        $user = User::with('profile')->findOrFail($userId);
-        $profile = Profile::findOrFail($user->profile->id);
-        $profile->update($request->all());
-        return response()->json($user->load('profile'));
-
     }
 
     /**
@@ -71,5 +63,11 @@ class UserProfileController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getcsnumber()
+    {
+        $setting = Voyager::model('Setting')->where('key', 'kta-app.cs_number')->first();
+        return response()->json($setting);
     }
 }

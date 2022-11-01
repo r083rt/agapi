@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\Profile;
-use App\Models\User;
+use App\Models\Event;
 use Illuminate\Http\Request;
 
-class UserProfileController extends Controller
+class UserEventController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,8 +16,10 @@ class UserProfileController extends Controller
     public function index($userId)
     {
         //
-        $profile = Profile::where('user_id', $userId)->firstOrFail();
-        return response()->json($profile);
+
+        $events = Event::where('user_id', $userId)->paginate();
+
+        return response()->json($events);
     }
 
     /**
@@ -27,10 +28,9 @@ class UserProfileController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store($userId, Request $request)
+    public function store(Request $request)
     {
         //
-
     }
 
     /**
@@ -51,15 +51,9 @@ class UserProfileController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $userId, $id)
+    public function update(Request $request, $id)
     {
         //
-        // return response()->json([$userId, $request->all(), $id, $request->user()->profile()]);
-        $user = User::with('profile')->findOrFail($userId);
-        $profile = Profile::findOrFail($user->profile->id);
-        $profile->update($request->all());
-        return response()->json($user->load('profile'));
-
     }
 
     /**

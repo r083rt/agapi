@@ -28,6 +28,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'user.member-card' => 'UserMemberCardController', // untuk generate kartu tanda anggota
         'user.payment' => 'UserPaymentController', // untuk pembayaran
         'user.pns-status' => 'UserPnsStatusController', //untuk status pns user
+        'user.event' => 'UserEventController', //untuk acara user
         'murottal' => 'MurottalController', // untuk murottal audio
         'daily-prayer' => 'DailyPrayerController', // untuk doa harian
         'membership-fee' => 'MembershipFeeController', // untuk membership
@@ -46,8 +47,14 @@ Route::group(['middleware' => 'auth:api'], function () {
         'city.district' => 'CityDistrictController', // untuk mengambil kecamatan
         'district' => 'DistrictController', // untuk mengambil kecamatan
         'kta' => 'KtaController', // untuk generate kartu tanda anggota
+        'educational-level' => 'EducationalLevelController', //untuk mendapatkan data jenjang ajar
+        'grade' => 'GradeController', //untuk mendapatkan data kelas yang diajar
+        'setting' => 'SettingController', //untuk mendapatkan data dari table setting
     ]);
 
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
+
+    //mendapatkan cs number
+    Route::get('/cs-number', 'SettingController@getcsnumber');
 
 });

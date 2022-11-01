@@ -3,22 +3,20 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\Profile;
-use App\Models\User;
+use App\Models\Grade;
 use Illuminate\Http\Request;
 
-class UserProfileController extends Controller
+class GradeController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($userId)
+    public function index()
     {
         //
-        $profile = Profile::where('user_id', $userId)->firstOrFail();
-        return response()->json($profile);
+        return Grade::get();
     }
 
     /**
@@ -27,10 +25,9 @@ class UserProfileController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store($userId, Request $request)
+    public function store(Request $request)
     {
         //
-
     }
 
     /**
@@ -51,15 +48,9 @@ class UserProfileController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $userId, $id)
+    public function update(Request $request, $id)
     {
         //
-        // return response()->json([$userId, $request->all(), $id, $request->user()->profile()]);
-        $user = User::with('profile')->findOrFail($userId);
-        $profile = Profile::findOrFail($user->profile->id);
-        $profile->update($request->all());
-        return response()->json($user->load('profile'));
-
     }
 
     /**
