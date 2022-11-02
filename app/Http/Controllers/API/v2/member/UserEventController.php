@@ -85,13 +85,41 @@ class UserEventController extends Controller
     public function update(Request $request, $userId, $id)
     {
         //
-        $event = Event::findOrFail($id);
-        $event->fill($request->all());
-        $event->save();
-
-        if ($request->has('location')) {
-            $event->location()->update($request->location);
+        //validasi jika tipe event offline maka harus ada alamat dam lokasi
+        if ($request->type == 'Offline') {
+            $this->validate($request, [
+                'name' => 'required|string|max:191',
+                'start_at' => 'required|date',
+                'address' => 'required|string|max:191',
+                'location.latitude' => 'required',
+                'location.longitude' => 'required',
+            ]);
+        } else {
+            $this->validate($request, [
+                'name' => 'required|string|max:191',
+                'start_at' => 'required|date',
+                'link' => 'required|url',
+            ]);
         }
+
+        $event = Event::findOrFail($id);
+        $event->update($request->all());
+
+        // jika request location tidak null dan jika lokasi ada maka update jika tidak ada maka buat baru
+        if ($request->location != null) {
+            if ($event->location != null) {
+                $event->location->update([
+                    'latitude' => $request->location['latitude'],
+                    'longitude' => $request->location['longitude'],
+                ]);
+            } else {
+                $event->location()->create([
+                    'latitude' => $request->location['latitude'],
+                    'longitude' => $request->location['longitude'],
+                ]);
+            }
+        }
+
         return response()->json($event->load('location'));
     }
 

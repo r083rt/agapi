@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 
 // api untuk daftar guru ke aplikasi agpaii digital
@@ -15,6 +16,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'post.read' => 'PostReadController', // untuk mengambil post yang sudah dibaca
         'personal-conversation' => 'PersonalConversationController', // untuk mengelola pesan pribadi
         'event' => 'EventController', // untuk acara
+        'event.participant' => 'EventParticipantController', // untuk mengelola peserta acara
         'story' => 'StoryController', // untuk story
         'user' => 'UserController', // untuk anggota
         'user.story' => 'UserStoryController', // untuk user story
@@ -54,7 +56,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
 
+    Route::get('/event/{event_id}/participant/search/{search}', 'EventParticipantController@search');
+
     //mendapatkan cs number
     Route::get('/cs-number', 'SettingController@getcsnumber');
-
 });

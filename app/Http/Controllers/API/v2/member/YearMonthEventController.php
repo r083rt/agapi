@@ -19,8 +19,9 @@ class YearMonthEventController extends Controller
         $events = DB::table('events')
             ->join('users', 'events.user_id', '=', 'users.id')
             ->join('profiles', 'users.id', '=', 'profiles.user_id')
+            ->where('events.deleted_at', null)
             ->whereYear('events.start_at', $year)
-        // ->whereMonth('events.start_at', $month)
+            // ->whereMonth('events.start_at', $month)
             ->select(
                 'events.id as event_id',
                 'events.name as event_name',

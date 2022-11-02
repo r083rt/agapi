@@ -16,7 +16,7 @@ class EventController extends Controller
      */
     public function index()
     {
-        // data berisi object tanggal lalu tiap tanggal berisi array event
+        // data berisi object tanggal lalu tiap tanggal berisi array event yang belum dihapus
         $events = DB::table('events')
             ->join('users', 'events.user_id', '=', 'users.id')
             ->select(
@@ -68,9 +68,10 @@ class EventController extends Controller
      * @param  \App\Models\Event  $event
      * @return \Illuminate\Http\Response
      */
-    public function show(Event $event)
+    public function show($id)
     {
         //
+        return Event::with('location', 'user')->withCount('partisipants')->findOrFail($id);
     }
 
     /**
