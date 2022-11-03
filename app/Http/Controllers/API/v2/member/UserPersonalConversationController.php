@@ -39,8 +39,8 @@ class UserPersonalConversationController extends Controller
             ->whereHas('users', function ($query) use ($request, $receiverId) {
                 return $query->where('user_id', $request->user()->id);
             })->whereHas('users', function ($query) use ($request, $receiverId) {
-            return $query->where('user_id', $receiverId);
-        });
+                return $query->where('user_id', $receiverId);
+            });
 
         // $exist = User::findOrFail($request->user()->id)->conversations()->where('user_id', $receiverId)->exists();
 
@@ -112,9 +112,23 @@ class UserPersonalConversationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($targetId)
     {
         //
+        $user = User::with(['conversations' => function ($query) {
+            $query->whereHas('users', function ($query) {
+                $query->where('user_id', auth()->user()->id);
+            })->where('type', 'personal');
+        }])->findOrFail($targetId);
+
+        return response()->json([
+            "data" => [
+                'user' => $user,
+                'conversations' => $user->conversations[0] ?? null,
+            ],
+            "message" => $user->conversations[0] ? "Conversation found" : "Conversation not found",
+            "status" => $user->conversations[0] ? 200 : 404,
+        ]);
     }
 
     /**
