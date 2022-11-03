@@ -11,19 +11,22 @@ Route::get('/kongres/member/search/{keyword}', 'Kongres2022Controller@searchMemb
 
 Route::post('/kongres/member/{id}/manual-payment/{key}', 'Kongres2022Controller@addMemberPayment');
 
-Route::resources([
-    'candidate' => 'CandidateController',
-    'candidate.vote' => 'CandidateVoteController',
-    'votable' => 'VotableController',
-    'user.votable' => 'UserVotableController',
-    'department-division' => 'DepartmentDivisionController',
-    'department' => 'DepartmentController',
-    'department.user' => 'DepartmentUserController',
-    'excel/province.user' => 'Excel\ProvinceUserController',
-    'province' => 'ProvinceController',
-    'ads' => 'AdsController',
-    'post' => 'PostController',
-]);
+Route::group(['as' => 'api.v2.admin.'], function () {
+    Route::apiResources([
+        'candidate' => 'CandidateController',
+        'candidate.vote' => 'CandidateVoteController',
+        'votable' => 'VotableController',
+        'user.votable' => 'UserVotableController',
+        'department-division' => 'DepartmentDivisionController',
+        'department' => 'DepartmentController',
+        'department.user' => 'DepartmentUserController',
+        'excel/province.user' => 'Excel\ProvinceUserController',
+        'ads' => 'AdsController',
+        'post' => 'PostController',
+        'province' => 'ProvinceController'
+    ]);
+});
+
 
 Route::get('/user/search/{keyword}', 'UserController@search');
 Route::get('/departments/search/{keyword}', 'DepartmentController@search');

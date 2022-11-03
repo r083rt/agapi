@@ -31,13 +31,15 @@ Route::get('/watzap/province/{provinceId}/users/active/{total}', 'WatzapControll
 // Route::get('/user/{userId}/generate-membercard', 'API\v2\member\UserMemberCardController@index');
 Route::apiResource('user.cetak-member-card', 'API\v2\member\UserMemberCardController')->names('web.user.cetak-member-card');
 Route::resource('user.member-card', 'UserMemberCardController')->names('web.user.member-card');
+Route::resource('event.barcode', 'EventBarcodeController')->names('web.event.barcode');
 
 Route::get('test', function () {
-    $images = App\Models\File::where('type', 'like', 'image%')->limit(10)->orderBy('created_at', 'desc')->count();
+    $images = App\Models\File::where('type', 'like', 'imagPe%')->limit(10)->orderBy('created_at', 'desc')->count();
     return [
         "status" => "success",
         "FILE DRIVER" => env('FILESYSTEM_DRIVER'),
         "APP NAME" => env("APP_NAME"),
+        "NODE PATH" => env('NODE_BINARY_PATH'),
         "TOTAL GAMBAR" => $images,
     ];
 });

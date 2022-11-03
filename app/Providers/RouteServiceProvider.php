@@ -153,7 +153,5 @@ class RouteServiceProvider extends ServiceProvider
             // V2 untuk murid API
             require base_path('routes/api/v2/admin.php');
         });
-
     }
-
 }

@@ -140,8 +140,8 @@ Route::group(['prefix' => 'v1'], function () {
             $user_id = $user->id;
             $res = $user
                 ->load(['profile', 'role'])->loadCount(['rooms' => function ($query) {
-                $query->where('type', 'class');
-            }]);
+                    $query->where('type', 'class');
+                }]);
             $res->count_question_lists = \App\Models\QuestionList::whereHas('assigments', function ($query) use ($user_id) {
                 $query->where('assigments.user_id', '=', $user_id)->where('is_publish', false);
             })->count();
@@ -239,10 +239,9 @@ Route::group(['prefix' => 'v1'], function () {
                         $query->where('educational_level_id', $educationalLevelId);
                     });
                 })->whereHas('assigment_session', function ($query) {
-                $query->whereNotNull('total_score'); //hanya mengambil paket soal latihan mandiri yang telah dinilai oleh guru, yaitu jika total_score'nya TIDAK null
-            });
+                    $query->whereNotNull('total_score'); //hanya mengambil paket soal latihan mandiri yang telah dinilai oleh guru, yaitu jika total_score'nya TIDAK null
+                });
             return ["main_assigment" => $res->get(), "training_assigment" => $res2->get()];
-
         });
 
         Route::apiResources([
@@ -759,7 +758,6 @@ Route::group(['prefix' => 'v1'], function () {
 
         Route::get('/assigments_tag/history', 'AssigmentSessionController@assigmentsTagHistory');
         Route::post('assigments_tag', 'TaggableController@assigmentsTag');
-
     });
 
     // END API WITH SECURITY ---------------------------------------------------------------------------------

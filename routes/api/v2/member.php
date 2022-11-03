@@ -17,6 +17,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'personal-conversation' => 'PersonalConversationController', // untuk mengelola pesan pribadi
         'event' => 'EventController', // untuk acara
         'event.participant' => 'EventParticipantController', // untuk mengelola peserta acara
+        'event.barcode' => 'EventBarcodeController', // untuk mengelola barcode acara
         'story' => 'StoryController', // untuk story
         'user' => 'UserController', // untuk anggota
         'user.story' => 'UserStoryController', // untuk user story
