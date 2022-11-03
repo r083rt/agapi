@@ -34,7 +34,7 @@ class EventBarcodeController extends Controller
         $base64 = $file->base64Screenshot();
         // convert $base64 as image file and download without save to local storage
         $file = base64_decode($base64);
-        $fileName = "event-$eventId-barcode.png";
+        $fileName = "barcode absensi - $event->name.png";
         return response($file, 200, $headers)->header('Content-Disposition', "attachment; filename=$fileName");
     }
 }
