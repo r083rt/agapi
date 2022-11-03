@@ -52,7 +52,7 @@ class EventParticipantController extends Controller
         $event_participant = new EventGuest($request->all());
         $event_participant->save();
 
-        return response()->json($event_participant);
+        return response()->json($event_participant->load('user'));
     }
 
     /**
