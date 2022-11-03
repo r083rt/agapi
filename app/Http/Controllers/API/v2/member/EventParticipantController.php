@@ -43,7 +43,7 @@ class EventParticipantController extends Controller
                         ->first();
 
                     if ($eventGuest) {
-                        $fail('Anda sudah absen pada event ini');
+                        return $fail('Anda sudah absen pada event ini');
                     }
                 }
             ],
