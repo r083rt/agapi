@@ -28,10 +28,10 @@ class UserPersonalConversationController extends Controller
         return response()->json([
             "data" => [
                 'user' => $user,
-                'conversations' => $user->conversations ?? null,
+                'conversation' => $user->conversations[0] ?? null,
             ],
-            "message" => $user->conversations[0] ? "Conversation found" : "Conversation not found",
-            "status" => $user->conversations[0] ? 200 : 404,
+            "message" => sizeof($user->conversations) > 1 ? "Conversation found" : "Conversation not found",
+            "status" => sizeof($user->conversations) > 1 ? 200 : 404,
         ]);
     }
 
