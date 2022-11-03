@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Spatie\Browsershot\Browsershot;
+use App\Models\Event;
 
 class EventBarcodeController extends Controller
 {
@@ -16,8 +17,8 @@ class EventBarcodeController extends Controller
     public function index($eventId)
     {
         //
-        // $url = env('APP_URL', 'localhost:8000');
-        $url = "http://192.168.1.13:8000";
+        $url = env('APP_URL', 'localhost:8000');
+        // $url = "http://192.168.1.13:8000";
         // return "$url/user/$userId/member-card";
         $file = Browsershot::url("$url/event/$eventId/barcode")
             ->noSandbox()
