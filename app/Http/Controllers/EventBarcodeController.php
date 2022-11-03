@@ -22,14 +22,14 @@ class EventBarcodeController extends Controller
         $url = env('APP_URL', 'localhost:8000');
         // $url = "http://192.168.1.13:8000";
         // return "$url/user/$userId/member-card";
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $event->name . '.jpg"');
+        $headers = array('Content-Type: image/png');
+        // header('Content-Disposition: attachment; filename="' . $event->name . '.jpg"');
         $file = Browsershot::url("$url/event/$eventId/barcode")
-            ->noSandbox()
-            ->windowSize(600, 600)
-            ->fullPage()
-            ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
-            ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
-            ->save('php://output');
+            // ->noSandbox()
+            // ->windowSize(600, 600)
+            // ->fullPage()
+            // ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
+            // ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
+            ->save('barcode.jpg');
     }
 }
