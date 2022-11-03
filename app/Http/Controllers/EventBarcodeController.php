@@ -32,11 +32,9 @@ class EventBarcodeController extends Controller
             ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
             ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'));
         $base64 = $file->base64Screenshot();
-        // download base64 as file without save to local storage
-        $headers = array(
-            'Content-Type' => 'image/png',
-            'Content-Disposition' => 'attachment; filename="barcode.png"',
-        );
-        return response()->download($base64, 'barcode.png', $headers);
+        // convert $base64 as image file and download without save to local storage
+        $file = base64_decode($base64);
+        $fileName = "event-$eventId-barcode.png";
+        return response($file, 200, $headers)->header('Content-Disposition', "attachment; filename=$fileName");
     }
 }
