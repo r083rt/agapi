@@ -33,6 +33,22 @@ class EventParticipantController extends Controller
     public function store(Request $request)
     {
         //
+        $request->validate([
+            'event_id' => 'required',
+            'user_id' => [
+                'required',
+                function ($attribute, $value, $fail) use ($request) {
+                    $eventGuest = EventGuest::where('event_id', $request->event_id)
+                        ->where('user_id', $value)
+                        ->first();
+
+                    if ($eventGuest) {
+                        $fail('Anda sudah absen pada event ini');
+                    }
+                }
+            ],
+        ]);
+
         $event_participant = new EventGuest($request->all());
         $event_participant->save();
 
@@ -45,9 +61,14 @@ class EventParticipantController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($eventId, $userId)
     {
         //
+        $event_participant = EventGuest::where('event_id', $eventId)
+            ->where('user_id', $userId)
+            ->first();
+
+        return response()->json($event_participant->load('user'));
     }
 
     /**
