@@ -16,9 +16,23 @@ class UserPersonalConversationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($targetId)
     {
         //
+        $user = User::with(['conversations' => function ($query) {
+            $query->whereHas('users', function ($query) {
+                $query->where('user_id', auth()->user()->id);
+            })->where('type', 'personal');
+        }])->findOrFail($targetId);
+
+        return response()->json([
+            "data" => [
+                'user' => $user,
+                'conversations' => $user->conversations[0] ?? null,
+            ],
+            "message" => $user->conversations[0] ? "Conversation found" : "Conversation not found",
+            "status" => $user->conversations[0] ? 200 : 404,
+        ]);
     }
 
     /**
@@ -115,20 +129,7 @@ class UserPersonalConversationController extends Controller
     public function show($targetId)
     {
         //
-        $user = User::with(['conversations' => function ($query) {
-            $query->whereHas('users', function ($query) {
-                $query->where('user_id', auth()->user()->id);
-            })->where('type', 'personal');
-        }])->findOrFail($targetId);
 
-        return response()->json([
-            "data" => [
-                'user' => $user,
-                'conversations' => $user->conversations[0] ?? null,
-            ],
-            "message" => $user->conversations[0] ? "Conversation found" : "Conversation not found",
-            "status" => $user->conversations[0] ? 200 : 404,
-        ]);
     }
 
     /**
