@@ -16,19 +16,6 @@ class EventBarcodeController extends Controller
         return view('barcode-event.barcode-event', compact('event'));
     }
 
-    public function show()
-    {
-        return 'as';
-    }
-
-    public function update()
-    {
-    }
-
-    public function destroy()
-    {
-    }
-
     public function download($eventId)
     {
         $event = Event::findOrFail($eventId);

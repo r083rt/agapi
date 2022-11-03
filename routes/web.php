@@ -31,8 +31,8 @@ Route::get('/watzap/province/{provinceId}/users/active/{total}', 'WatzapControll
 // Route::get('/user/{userId}/generate-membercard', 'API\v2\member\UserMemberCardController@index');
 Route::apiResource('user.cetak-member-card', 'API\v2\member\UserMemberCardController')->names('web.user.cetak-member-card');
 Route::resource('user.member-card', 'UserMemberCardController')->names('web.user.member-card');
-Route::resource('event.barcode', 'EventBarcodeController')->names('web.event.barcode');
-Route::get('event/{eventId}/download/barcode', 'EventBarcodeController@download')->name('web.event.barcode.download');
+Route::get('event/{eventId}/barcode', 'EventBarcodeController@index')->name('web.event.barcode');
+Route::get('event/{eventId}/download', 'EventBarcodeController@download');
 
 Route::get('test', function () {
     $images = App\Models\File::where('type', 'like', 'imagPe%')->limit(10)->orderBy('created_at', 'desc')->count();
