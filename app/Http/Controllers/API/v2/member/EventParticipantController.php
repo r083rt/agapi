@@ -33,6 +33,10 @@ class EventParticipantController extends Controller
     public function store(Request $request)
     {
         //
+        $event_participant = new EventGuest($request->all());
+        $event_participant->save();
+
+        return response()->json($event_participant);
     }
 
     /**
