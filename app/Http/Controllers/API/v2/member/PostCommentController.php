@@ -70,8 +70,12 @@ class PostCommentController extends Controller
      * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Comment $comment)
+    public function destroy($postId, $commentId)
     {
         //
+        $comment = Comment::findOrFail($commentId);
+        $comment->delete();
+
+        return response()->json($comment);
     }
 }
