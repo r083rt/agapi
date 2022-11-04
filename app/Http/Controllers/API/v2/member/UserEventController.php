@@ -19,6 +19,7 @@ class UserEventController extends Controller
 
         $events = Event::where('user_id', $userId)
             ->where('deleted_at', null)
+            ->withCount('partisipants')
             ->orderBy('id', 'desc')
             ->paginate();
 

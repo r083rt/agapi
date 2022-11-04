@@ -37,7 +37,7 @@ class YearMonthProvinceEventController extends Controller
                 'users.kta_id as author_kta_id',
             )
             ->orderBy('events.start_at', 'desc')
-            ->get();
+            ->paginate();
 
         return response()->json($events);
     }

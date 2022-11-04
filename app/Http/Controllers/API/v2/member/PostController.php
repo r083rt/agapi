@@ -31,7 +31,7 @@ class PostController extends Controller
             ->whereHas('author', function ($query) {
                 $query->where('role_id', '!=', 8);
             })
-        // ->where('key', '!=', 'ad')
+            // ->where('key', '!=', 'ad')
             ->orderBy('created_at', 'desc')
             ->paginate();
         return response()->json($posts);
@@ -78,8 +78,13 @@ class PostController extends Controller
                 }
             }
         });
-        return response()->json($post->load(['images', 'author.profile']));
-
+        return response()->json($post->load([
+            'images', 'videos',
+            'author.profile',
+            'author.role',
+            'last_like.user',
+            'last_comment.user',
+        ])->loadCount(['comments', 'likes']));
     }
 
     /**
@@ -106,7 +111,6 @@ class PostController extends Controller
         ])->withCount('comments', 'likes', 'liked')->find($id);
 
         return response()->json($post);
-
     }
 
     /**

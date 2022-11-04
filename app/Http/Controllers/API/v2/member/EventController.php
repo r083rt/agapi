@@ -16,35 +16,11 @@ class EventController extends Controller
      */
     public function index()
     {
-        // data berisi object tanggal lalu tiap tanggal berisi array event yang belum dihapus
-        $events = DB::table('events')
-            ->join('users', 'events.user_id', '=', 'users.id')
-            ->select(
-                'events.id as event_id',
-                'events.name as event_name',
-                'events.description as event_description',
-                'events.start_at as event_start_at',
-                'events.end_at as event_end_at',
-                'events.address as event_address',
-                DB::raw('DATE_FORMAT(events.start_at, "%Y-%m-%d") as event_date'),
-                'users.id as author_id',
-                'users.name as author_name',
-                'users.email as author_email',
-                'users.avatar as author_avatar',
-                'users.kta_id as author_kta_id',
-            )
-            // group berdasarkan event_date menjadi object tanggal yang berisi array event
-            // ->where('events.end_at', '>=', now())
-            // ->whereYear('events.start_at', '>=', now()->subYear()->year)
-            // yang tahun ini
-            // ->whereYear('events.start_at', '>=', now()->year)
-            ->orderBy('event_end_at', 'desc')
-            // yang hari ini atau mendatang
-            // ->get()
-            // ->groupBy(function ($item, $key) {
-            //     // return response()->json($item->event_start_at);
-            //     return \Carbon\Carbon::parse($item->event_date)->format('Y-m-d');
-            // });
+
+        $events = Event::with('author')
+            ->has('author')
+            ->withCount('partisipants')
+            ->orderBy('id', 'desc')
             ->paginate();
 
         return response()->json($events);

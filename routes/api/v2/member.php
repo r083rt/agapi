@@ -58,6 +58,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
 
     Route::get('/event/{event_id}/participant/search/{search}', 'EventParticipantController@search');
+
+    Route::get('/event/{eventId}/participant/{userId}/generate-card', 'EventParticipantController@generateCard');
+
     //mendapatkan cs number
     Route::get('/cs-number', 'SettingController@getcsnumber');
 });

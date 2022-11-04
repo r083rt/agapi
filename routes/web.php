@@ -33,6 +33,7 @@ Route::apiResource('user.cetak-member-card', 'API\v2\member\UserMemberCardContro
 Route::resource('user.member-card', 'UserMemberCardController')->names('web.user.member-card');
 Route::get('event/{eventId}/barcode', 'EventBarcodeController@index')->name('web.event.barcode');
 Route::get('event/{eventId}/download', 'EventBarcodeController@download')->name('web.event.download');
+Route::get('event/{eventId}/participant/{userId}', 'EventParticipantController@show')->name('web.event.participant');
 
 Route::get('test', function () {
     $images = App\Models\File::where('type', 'like', 'imagPe%')->limit(10)->orderBy('created_at', 'desc')->count();

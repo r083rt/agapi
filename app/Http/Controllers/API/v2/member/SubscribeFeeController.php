@@ -29,12 +29,12 @@ class SubscribeFeeController extends Controller
     {
         //
         $user = $request->user();
-// $payment_value = setting('admin.member_price');
-        $payment_value = 2;
+        $payment_value = setting('admin.member_price');
+        // $payment_value = 2;
         $payment_text = "Pembayaran Iuran Anggota Selama 6 Bulan";
         $key = "perpanjangan_anggota";
 
-// generate unique Id untuk midtrans transaction
+        // generate unique Id untuk midtrans transaction
         $midtransId = "AD-$user->id-" . time();
 
         $payment = new Payment([
@@ -72,7 +72,6 @@ class SubscribeFeeController extends Controller
                 "payment_url" => $paymentUrl,
             ],
         ]);
-
     }
 
     /**
