@@ -25,6 +25,7 @@ class UserMemberCardController extends Controller
             ->fullPage()
             ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
             ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
+            ->setChromePath(env('CHROME_BINARY_PATH', '/usr/lib/node_modules/chromium'))
             ->base64Screenshot();
 
         // $image = imagecreatefromstring(base64_decode($file));
