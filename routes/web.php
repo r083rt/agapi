@@ -43,6 +43,7 @@ Route::get('test', function () {
         "FILE DRIVER" => env('FILESYSTEM_DRIVER'),
         "APP NAME" => env("APP_NAME"),
         "NODE PATH" => env('NODE_BINARY_PATH'),
+        "CHROME PATH" => env('CHROME_BINARY_PATH'),
         "TOTAL GAMBAR" => $images,
     ];
 });
