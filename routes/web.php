@@ -1,6 +1,7 @@
 <?php
 
 use App\Helper\Firestore;
+use App\Http\Controllers\EventParticipantController;
 // use Thumbnail;
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,12 @@ Route::get('test', function () {
         "TOTAL GAMBAR" => $images,
     ];
 });
+
+Route::get('/generate', function () {
+    $card = EventParticipantController::generateCard(7, 1);
+    return $card;
+});
+
 Route::get('duplicate-daily-prayer', function () {
     $files = \App\Models\File::where('file_type', 'App\Models\DailyPrayer')->get();
     // return $file_murottals;
