@@ -128,7 +128,7 @@ class EventParticipantController extends Controller
 
         return response()->json([
             'data' => $file,
-            'message' => 'Barcode Acara',
+            'message' => 'Kartu absen',
         ]);
     }
 }

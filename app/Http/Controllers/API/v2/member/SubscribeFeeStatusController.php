@@ -21,12 +21,12 @@ class SubscribeFeeStatusController extends Controller
         //
         $pendingPayments = Payment::where('user_id', auth()->user()->id)
             ->where('key', 'perpanjangan_anggota')
-// where created_at is today
+            // where created_at is today
             ->whereDate('created_at', now())
             ->where('status', 'pending')
             ->get();
 
-// return response()->json($pendingPayments->first());
+        // return response()->json($pendingPayments->first());
 
         foreach ($pendingPayments as $payment) {
             try {
@@ -35,18 +35,16 @@ class SubscribeFeeStatusController extends Controller
                     $payment->status = 'success';
                     $payment->save();
                     // tambah masa aktif
-                    Membership::add($payment->user_id, 1);
+                    Membership::add($payment->user_id, 180);
                 }
-
             } catch (\Exception $e) {
-
             }
         }
 
         $successPayments = Payment::where('user_id', auth()->user()->id)
             ->where('key', 'perpanjangan_anggota')
-// today
-        // where date created is today
+            // today
+            // where date created is today
             ->whereDate('created_at', now())
             ->where('status', 'success')
             ->count();
@@ -62,7 +60,6 @@ class SubscribeFeeStatusController extends Controller
                 'expired_at' => $user->expired_at,
             ],
         ]);
-
     }
 
     /**

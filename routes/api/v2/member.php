@@ -32,6 +32,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'user.payment' => 'UserPaymentController', // untuk pembayaran
         'user.pns-status' => 'UserPnsStatusController', //untuk status pns user
         'user.event' => 'UserEventController', //untuk acara user
+        'user.event-attendance' => 'UserEventAttendanceController', // untuk mengambil data absensi user
         'murottal' => 'MurottalController', // untuk murottal audio
         'daily-prayer' => 'DailyPrayerController', // untuk doa harian
         'membership-fee' => 'MembershipFeeController', // untuk membership
