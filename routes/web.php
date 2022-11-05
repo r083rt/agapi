@@ -1,7 +1,7 @@
 <?php
 
 use App\Helper\Firestore;
-use App\Http\Controllers\EventParticipantController;
+use App\Http\Controllers\API\v2\membEventParticipantController;
 // use Thumbnail;
 /*
 |--------------------------------------------------------------------------
