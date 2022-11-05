@@ -58,7 +58,7 @@ Route::get('/generate2', function () {
 });
 
 Route::get('/generate3', function () {
-    $card = Spatie\Browsershot\Browsershot::url('https://google.com')
+    $card = \Spatie\Browsershot\Browsershot::url('https://google.com')
         ->noSandbox()
         ->windowSize(600, 600)
         ->fullPage()
