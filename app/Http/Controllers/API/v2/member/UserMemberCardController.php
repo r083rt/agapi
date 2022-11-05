@@ -33,7 +33,7 @@ class UserMemberCardController extends Controller
         // return imagejpeg($image);
 
         return response()->json([
-            'data' => $file,
+            'data' => "data:image/png;base64,$file",
             'message' => 'Kartu Tanda Anggota Ter generate',
         ]);
     }

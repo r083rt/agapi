@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\EventGuest;
 
 class UserEventAttendanceController extends Controller
 {
@@ -16,9 +17,9 @@ class UserEventAttendanceController extends Controller
     public function index($userId)
     {
         //
-        $user = User::with('guest_events')->find($userId);
-
-        return response()->json($user->guest_events()->paginate());
+        // $user = User::with('guest_events')->find($userId);
+        $eventGuest = EventGuest::with('event')->where('user_id', $userId)->paginate();
+        return response()->json($eventGuest);
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\EventGuest;
 use Illuminate\Http\Request;
 use Spatie\Browsershot\Browsershot;
+use Illuminate\Support\Facades\Storage;
 
 class EventParticipantController extends Controller
 {
@@ -112,23 +113,39 @@ class EventParticipantController extends Controller
     public function generateCard($eventId, $userId)
     {
         $url = env('APP_URL', 'localhost:8000');
-        // $url = "http://192.168.1.13:8000";
-        // return "$url/user/$userId/member-card";
-        $file = Browsershot::url("$url/event/$eventId/participant/$userId")
-            ->noSandbox()
-            ->windowSize(600, 600)
-            ->fullPage()
-            ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
-            ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
-            ->setChromePath(env('CHROME_BINARY_PATH', '/usr/lib/node_modules/chromium'))
-            ->base64Screenshot();
 
-        // $image = imagecreatefromstring(base64_decode($file));
-        // header('Content-type: image/png');
-        // return imagejpeg($image);
+        $event_guest = EventGuest::where('event_id', $eventId)
+            ->where('user_id', $userId)
+            // ->with('certificate')
+            // ->has('certificate')
+            ->first();
+
+
+
+        if ($event_guest->doesntHave('certificate')) {
+            // Storage::disk('wasabi')->delete($path);
+            $base64 = Browsershot::url("$url/event/$eventId/participant/$userId")
+                ->noSandbox()
+                ->windowSize(600, 600)
+                ->fullPage()
+                ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
+                ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
+                ->setChromePath(env('CHROME_BINARY_PATH', '/usr/lib/node_modules/chromium'))
+                ->base64Screenshot();
+
+            $file = base64_decode($base64);
+            $filename = 'certif_' . $eventId . '/' . $userId . '.png';
+            $path = '/files/certificates/' . $filename;
+
+            Storage::disk('wasabi')->put($path, $file);
+            $event_guest->certificate()->create([
+                'name' => $filename,
+                'src' => $path,
+            ]);
+        }
 
         return response()->json([
-            'data' => $file,
+            'data' => $event_guest->certificate->src,
             'message' => 'Kartu absen',
         ]);
     }

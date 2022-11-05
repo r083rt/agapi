@@ -18,4 +18,9 @@ class EventGuest extends Model
     {
         return $this->belongsTo('App\Models\Event');
     }
+
+    public function certificate()
+    {
+        return $this->morphOne('App\Models\File', 'file');
+    }
 }

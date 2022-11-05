@@ -26,6 +26,7 @@ class EventBarcodeController extends Controller
             ->fullPage()
             ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
             ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
+            ->setChromePath(env('CHROME_BINARY_PATH', '/usr/lib/node_modules/chromium'))
             ->base64Screenshot();
 
         // $image = imagecreatefromstring(base64_decode($file));
@@ -33,7 +34,7 @@ class EventBarcodeController extends Controller
         // return imagejpeg($image);
 
         return response()->json([
-            'data' => $file,
+            'data' => "data:image/png;base64,$file",
             'message' => 'Barcode Acara',
         ]);
     }
