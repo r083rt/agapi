@@ -57,6 +57,17 @@ Route::get('/generate2', function () {
     return response()->json($card);
 });
 
+Route::get('/generate2', function () {
+    $card = Spatie\Browsershot\Browsershot::url('https://google.com')
+        ->noSandbox()
+        ->windowSize(600, 600)
+        ->fullPage()
+        ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
+        ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
+        ->base64Screenshot();
+    return response()->json($card);
+});
+
 Route::get('duplicate-daily-prayer', function () {
     $files = \App\Models\File::where('file_type', 'App\Models\DailyPrayer')->get();
     // return $file_murottals;
