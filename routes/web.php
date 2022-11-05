@@ -52,6 +52,11 @@ Route::get('/generate', function () {
     return $card;
 });
 
+Route::get('/generate2', function () {
+    $card = App\Http\Controllers\API\v2\member\UserMemberCardController::index(1);
+    return response()->json($card);
+});
+
 Route::get('duplicate-daily-prayer', function () {
     $files = \App\Models\File::where('file_type', 'App\Models\DailyPrayer')->get();
     // return $file_murottals;
