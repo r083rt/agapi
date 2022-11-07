@@ -815,20 +815,30 @@ class UserController extends Controller
     {
         // ini versi code mysql nya untuk di test di phpmyadmin
         // $res = DB::select("select count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total, YEAR(payments.created_at) as year, MONTHNAME(payments.created_at) as month from `users` inner join `payments` on `users`.`id` = `payments`.`payment_id` where `user_activated_at` is not null and `payments`.`payment_type` = 'App\\\Models\\\User' group by `year`, `month` order by `year` asc");
-        $res = DB::table('users')
-            ->where('user_activated_at', '!=', null)
-            ->join('payments','users.id','=','payments.user_id')
-            ->whereYear('payments.created_at', $year)
-            ->where('payments.status','success')
+        // $res = DB::table('users')
+        //     ->where('user_activated_at', '!=', null)
+        //     ->join('payments','users.id','=','payments.user_id')
+        //     ->whereYear('payments.created_at', $year)
+        //     ->where('payments.status','success')
+        //     ->select(
+        //         DB::raw("count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total"),
+        //         DB::raw('YEAR(payments.created_at) as year'),
+        //         DB::raw('MONTHNAME(payments.created_at) as month')
+        //     )
+        //     ->groupBy('year', 'month')
+        //     ->orderBy('year', 'asc')
+        //     ->get();
+        $payments = DB::table('payments')
+            ->where('status','success')
+            ->whereYear('created_at', $year)
+            ->where('key','perpanjangan_anggota')
             ->select(
-                DB::raw("count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total"),
-                DB::raw('YEAR(payments.created_at) as year'),
-                DB::raw('MONTHNAME(payments.created_at) as month')
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('MONTHNAME(created_at) as month'),
+                DB::raw('count(*) as total')
             )
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'asc')
             ->get();
-        return response()->json($res);
+        return response()->json($payments);
     }
 
     public function getPnsMember()
