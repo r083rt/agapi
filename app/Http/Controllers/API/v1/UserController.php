@@ -799,6 +799,7 @@ class UserController extends Controller
             // ->join('payments', 'users.id', '=', 'payments.payment_id')
             // ->where('payments.payment_type', '=', 'App\Models\User')
             ->join('payments','users.id','=','payments.user_id')
+            ->where('payments.status','success')
             ->select(
                 DB::raw("count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total"),
                 DB::raw('YEAR(payments.created_at) as year'),
@@ -818,6 +819,7 @@ class UserController extends Controller
             ->where('user_activated_at', '!=', null)
             ->join('payments','users.id','=','payments.user_id')
             ->whereYear('payments.created_at', $year)
+            ->where('payments.status','success')
             ->select(
                 DB::raw("count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total"),
                 DB::raw('YEAR(payments.created_at) as year'),
