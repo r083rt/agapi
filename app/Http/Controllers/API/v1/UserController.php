@@ -837,6 +837,8 @@ class UserController extends Controller
                 DB::raw('MONTHNAME(created_at) as month'),
                 DB::raw('count(*) as total')
             )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
             ->get();
         return response()->json($payments);
     }
