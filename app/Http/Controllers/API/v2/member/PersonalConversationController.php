@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Member\User;
 use Illuminate\Http\Request;
 
+
 class PersonalConversationController extends Controller
 {
     /**
@@ -67,9 +68,12 @@ class PersonalConversationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($messageId)
     {
-        //
+        $dbFirestore = new Firestore();
+
+
+
     }
 
     public function search($keyword)

@@ -62,6 +62,9 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('/event/{eventId}/participant/{userId}/generate-card', 'EventParticipantController@generateCard');
 
+    //delete chat
+    Route:
+
     //mendapatkan cs number
     Route::get('/cs-number', 'SettingController@getcsnumber');
 });

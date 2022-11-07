@@ -38,6 +38,11 @@ Route::get('event/{eventId}/participant/{userId}', 'EventParticipantController@s
 
 Route::get('test', function () {
     $images = App\Models\File::where('type', 'like', 'imagPe%')->limit(10)->orderBy('created_at', 'desc')->count();
+    $payments = App\Models\Payment::where('value',65000)
+    // ambil yang tahun 2022 bulan september
+    ->whereYear('created_at',2022)
+    ->whereMonth('created_at',9)
+    ->count();
     return [
         "status" => "success",
         "FILE DRIVER" => env('FILESYSTEM_DRIVER'),
