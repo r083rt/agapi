@@ -817,7 +817,7 @@ class UserController extends Controller
         $res = DB::table('users')
             ->where('user_activated_at', '!=', null)
             ->join('payments','users.id','=','payments.user_id')
-            ->whereYear('users.created_at', $year)
+            ->whereYear('payments.created_at', $year)
             ->select(
                 DB::raw("count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total"),
                 DB::raw('YEAR(payments.created_at) as year'),
