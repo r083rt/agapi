@@ -795,7 +795,7 @@ class UserController extends Controller
         // ini versi code mysql nya untuk di test di phpmyadmin
         // $res = DB::select("select count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total, YEAR(payments.created_at) as year, MONTHNAME(payments.created_at) as month from `users` inner join `payments` on `users`.`id` = `payments`.`payment_id` where `user_activated_at` is not null and `payments`.`payment_type` = 'App\\\Models\\\User' group by `year`, `month` order by `year` asc");
         $res = DB::table('users')
-            ->where('user_activated_at', '!=', null)
+            // ->where('user_activated_at', '!=', null)
             ->join('payments', 'users.id', '=', 'payments.payment_id')
             ->where('payments.payment_type', '=', 'App\Models\User')
             ->select(
