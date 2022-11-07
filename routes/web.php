@@ -44,7 +44,7 @@ Route::get('test', function () {
             // ->where('user_activated_at', '!=', null)
             // ->join('payments', 'users.id', '=', 'payments.payment_id')
             // ->where('payments.payment_type', '=', 'App\Models\User')
-            ->where('payments.user_id', '=', 'users.id')
+            ->join('payments','users.id','=','payments.user_id')
             ->select(
                 DB::raw("count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total"),
                 DB::raw('YEAR(payments.created_at) as year'),
