@@ -2,6 +2,8 @@
 
 use App\Helper\Firestore;
 use App\Http\Controllers\API\v2\member\EventParticipantController;
+// use DB
+use Illuminate\Support\Facades\DB;
 // use Thumbnail;
 /*
 |--------------------------------------------------------------------------
@@ -38,11 +40,19 @@ Route::get('event/{eventId}/participant/{userId}', 'EventParticipantController@s
 
 Route::get('test', function () {
     $images = App\Models\File::where('type', 'like', 'imagPe%')->limit(10)->orderBy('created_at', 'desc')->count();
-    $payments = App\Models\Payment::where('value',65000)
-    // ambil yang tahun 2022 bulan september
-    ->whereYear('created_at',2022)
-    ->whereMonth('created_at',9)
-    ->count();
+    $res = DB::table('users')
+            // ->where('user_activated_at', '!=', null)
+            // ->join('payments', 'users.id', '=', 'payments.payment_id')
+            // ->where('payments.payment_type', '=', 'App\Models\User')
+            ->where('payments.user_id', '=', 'users.id')
+            ->select(
+                DB::raw("count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total"),
+                DB::raw('YEAR(payments.created_at) as year'),
+                DB::raw('MONTHNAME(payments.created_at) as month')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->get();
     return [
         "status" => "success",
         "FILE DRIVER" => env('FILESYSTEM_DRIVER'),
@@ -50,7 +60,7 @@ Route::get('test', function () {
         "NODE PATH" => env('NODE_BINARY_PATH'),
         "CHROME PATH" => env('CHROME_BINARY_PATH'),
         "TOTAL GAMBAR" => $images,
-        "payment count"=> $payments
+        "payment"=> $res
     ];
 });
 
