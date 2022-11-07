@@ -831,7 +831,8 @@ class UserController extends Controller
         $payments = DB::table('payments')
             ->where('status','success')
             ->whereYear('created_at', $year)
-            ->where('key','perpanjangan_anggota')
+            // ->where('key','perpanjangan_anggota')
+            ->where('value',65000)
             ->select(
                 DB::raw('YEAR(created_at) as year'),
                 DB::raw('MONTHNAME(created_at) as month'),
