@@ -50,6 +50,7 @@ Route::get('test', function () {
         "NODE PATH" => env('NODE_BINARY_PATH'),
         "CHROME PATH" => env('CHROME_BINARY_PATH'),
         "TOTAL GAMBAR" => $images,
+        "payment count"=> $payments
     ];
 });
 
