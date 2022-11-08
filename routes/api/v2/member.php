@@ -62,8 +62,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('/event/{eventId}/participant/{userId}/generate-card', 'EventParticipantController@generateCard');
 
-    //delete chat
-    Route:
+    //mendapatkan event berdasarkan tahun dan bulan
+    Route::get('event/month/{month}/year/{year}', 'EventController@geteventbydate');
 
     //mendapatkan cs number
     Route::get('/cs-number', 'SettingController@getcsnumber');

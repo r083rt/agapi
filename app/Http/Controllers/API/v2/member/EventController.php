@@ -72,4 +72,16 @@ class EventController extends Controller
     {
         //
     }
+
+    public function geteventbydate($month, $year){
+        $events = Event::with('author')
+            ->has('author')
+            ->withCount('partisipants')
+            ->whereMonth('start_at', $month)
+            ->whereYear('start_at', $year)
+            ->orderBy('start_at', 'asc')
+            ->paginate();
+
+        return response()->json($events);
+    }
 }
