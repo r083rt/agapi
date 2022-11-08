@@ -70,4 +70,18 @@ class ProvinceEventController extends Controller
     {
         //
     }
+
+    public function getprovinceeventbydate($provinceId, $month, $year)
+    {
+        $events = Event::with(['author'])
+            ->whereHas('author.profile', function ($query) use ($provinceId) {
+                $query->where('province_id', $provinceId);
+            })
+            ->whereMonth('start_at', $month)
+            ->whereYear('start_at', $year)
+            ->withCount('partisipants')
+            ->orderBy('id', 'desc')
+            ->paginate();
+        return response()->json($events);
+    }
 }
