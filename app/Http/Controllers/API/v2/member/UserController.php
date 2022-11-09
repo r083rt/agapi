@@ -74,8 +74,9 @@ class UserController extends Controller
         ]);
     }
 
-    public function getotalpnsmember(){
-        $total = User::whereHas('pns_status', function($query){
+    public function gettotalpnsmember()
+    {
+        $total = User::whereHas('pns_status', function ($query) {
             $query->where('is_pns', '1');
         })->count();
         return response()->json([
@@ -83,8 +84,9 @@ class UserController extends Controller
         ]);
     }
 
-     public function getotalnonpnsmember(){
-        $total = User::whereHas('pns_status', function($query){
+    public function gettotalnonpnsmember()
+    {
+        $total = User::whereHas('pns_status', function ($query) {
             $query->where('is_pns', '0');
         })->count();
         return response()->json([
@@ -92,8 +94,9 @@ class UserController extends Controller
         ]);
     }
 
-     public function gettotalexpiredmember(){
-       $total = User::where('expired_at', '<', Carbon::today())->count();
+    public function gettotalexpiredmember()
+    {
+        $total = User::where('expired_at', '<', Carbon::today())->count();
         return response()->json([
             'total' => $total
         ]);
