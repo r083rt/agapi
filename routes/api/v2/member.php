@@ -77,7 +77,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/province-pns-member/search/{keyword}', 'ProvincePnsMemberController@search');
     Route::get('/province-non-pns-member/search/{keyword}', 'ProvinceNonPnsMemberController@search');
     Route::get('/province-expired-member/search/{keyword}', 'ProvinceExpiredMemberController@search');
-    Route::get('/province-extend-member/search/{keyword}', 'ProvinceExpiredMemberController@search');
+    Route::get('/province-extend-member/search/{keyword}', 'ProvinceExtendController@search');
 
     //total member
     Route::get('/users/total-member', 'UserController@gettotalmember');
