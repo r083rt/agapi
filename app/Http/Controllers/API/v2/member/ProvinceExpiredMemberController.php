@@ -14,13 +14,13 @@ class ProvinceExpiredMemberController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($provinceId)
+    public function index()
     {
         //
          $province = Province::withCount(['users' => function($query){
             //ambil user yang expired at lebih kecil dari tanggal sekarang
             $query->where('expired_at', '<', Carbon::today());
-        }])->find($provinceId);
+        }])->paginate();
 
         return response()->json($province);
     }

@@ -13,14 +13,14 @@ class ProvinceNonPnsMemberController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($provinceId)
+    public function index()
     {
         //
          $province = Province::withCount(['users' => function($query){
             $query->whereHas('pns_status', function($query2){
                 $query2->where('is_pns', '0');
             });
-        }])->find($provinceId);
+        }])->paginate();
 
         return response()->json($province);
     }
