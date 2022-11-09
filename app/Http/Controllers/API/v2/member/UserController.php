@@ -64,4 +64,12 @@ class UserController extends Controller
     {
         //
     }
+
+    public function gettotalmember()
+    {
+        $total = User::count();
+        return response()->json([
+            'total' => $total
+        ]);
+    }
 }
