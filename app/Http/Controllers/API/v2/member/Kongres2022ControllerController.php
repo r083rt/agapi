@@ -79,7 +79,7 @@ class Kongres2022ControllerController extends Controller
                 'provinces.name as name'
             )
             ->groupBy('name')
-            ->get();
+            ->paginate();
         return response()->json($payments);
     }
 
@@ -110,7 +110,7 @@ class Kongres2022ControllerController extends Controller
                 'provinces.name as name'
             )
             ->groupBy('name')
-            ->get();
+            ->paginate();
         return response()->json($payments);
     }
 }
