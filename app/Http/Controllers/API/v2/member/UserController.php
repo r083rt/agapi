@@ -68,8 +68,7 @@ class UserController extends Controller
 
     public function gettotalmember()
     {
-        $total = User::with('profile', 'role')
-            ->where('user_activated_at', '!=', null)
+        $total = User::where('user_activated_at', '!=', null)
             ->whereIn('role_id', [2, 7, 9, 10, 11])
             ->count();
         return response()->json([
