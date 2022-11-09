@@ -18,8 +18,8 @@ class ProvincePnsMemberController extends Controller
     {
         //
         $province = Province::withCount(['users' => function($query){
-            $query->whereHas('pns_status', function($query){
-                $query->where('is_pns', '1');
+            $query->whereHas('pns_status', function($query2){
+                $query2->where('is_pns', '1');
             });
         }])->find($provinceId);
 

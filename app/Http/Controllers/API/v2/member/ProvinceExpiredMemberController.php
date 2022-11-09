@@ -4,17 +4,25 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Province;
+use Carbon\Carbon;
 
-class ProvinceNonExpiredMemberController extends Controller
+class ProvinceExpiredMemberController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($provinceId)
     {
         //
+         $province = Province::withCount(['users' => function($query){
+            //ambil user yang expired at lebih kecil dari tanggal sekarang
+            $query->where('expired_at', '<', Carbon::today());
+        }])->find($provinceId);
+
+        return response()->json($province);
     }
 
     /**
