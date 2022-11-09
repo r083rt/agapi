@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Payment;
 use Illuminate\Support\Facades\DB;
 
-class Kongres2022ControllerController extends Controller
+class Kongres2022Controller extends Controller
 {
     /**
      * Display a listing of the resource.
