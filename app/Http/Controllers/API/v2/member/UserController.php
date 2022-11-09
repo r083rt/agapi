@@ -68,7 +68,10 @@ class UserController extends Controller
 
     public function gettotalmember()
     {
-        $total = User::where('user_activated_at', '!=', null)->count();
+        $total = User::with('profile', 'role')
+            ->where('user_activated_at', '!=', null)
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->count();
         return response()->json([
             'total' => $total
         ]);
@@ -96,8 +99,9 @@ class UserController extends Controller
 
     public function gettotalexpiredmember()
     {
-        $total = User::where('expired_at', '!=', null)
-            ->where('expired_at', '<', Carbon::today())
+        $total = User::where('user_activated_at', '!=', null)
+            ->whereDate('user_activated_at', '<', \Carbon\Carbon::now()->subMonths(6)->format('Y-m-d'))
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
             ->count();
         return response()->json([
             'total' => $total

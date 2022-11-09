@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Province;
+use Illuminate\Support\Facades\DB;
 
 class ProvinceExtendMemberController extends Controller
 {
@@ -16,11 +17,23 @@ class ProvinceExtendMemberController extends Controller
     public function index()
     {
         //
-        $provinces = Province::withCount(['users' => function ($query) {
-            $query->whereHas('payments', function ($query2) {
-                $query2->where('key', 'perpanjangan_anggota');
-            });
-        }])->paginate();
+        $provinces = DB::table('provinces')
+            // join ke table profiles
+            ->join('profiles', 'provinces.id', '=', 'profiles.province_id')
+            // join ke table users
+            ->join('users', 'profiles.user_id', '=', 'users.id')
+            // join ke table payments melalui users
+            ->join('payments', 'users.id', '=', 'payments.user_id')
+            ->where('payments.status', '=', 'success')
+            ->where('payments.value', 65000)
+            ->select(
+                'provinces.id as id',
+                'provinces.name as name',
+                // count payment
+                DB::raw('count(payments.id) as total_payment'),
+            )
+            ->groupBy('name')
+            ->paginate();
 
         return response()->json($provinces);
     }
