@@ -74,6 +74,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     //mendapatkan event berdasarkan province_id, tahun dan bulan
     Route::get('/province/{province_id}/event/month/{month}/year/{year}', 'ProvinceEventController@getprovinceeventbydate');
 
+    Route::get('/province-member/search/{keyword}', 'ProvinceMemberController@search');
+
     //mendapatkan cs number
     Route::get('/cs-number', 'SettingController@getcsnumber');
 });

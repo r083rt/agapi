@@ -64,4 +64,11 @@ class ProvinceMemberController extends Controller
     {
         //
     }
+
+    public function search($keyword){
+        $provinces = Province::where('name', 'like', '%'.$keyword.'%')
+        ->withCount('users')
+        ->paginate();
+        return response()->json($provinces);
+    }
 }
