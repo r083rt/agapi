@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use App\Models\user;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -68,6 +69,31 @@ class UserController extends Controller
     public function gettotalmember()
     {
         $total = User::count();
+        return response()->json([
+            'total' => $total
+        ]);
+    }
+
+    public function getotalpnsmember(){
+        $total = User::whereHas('pns_status', function($query){
+            $query->where('is_pns', '1');
+        })->count();
+        return response()->json([
+            'total' => $total
+        ]);
+    }
+
+     public function getotalnonpnsmember(){
+        $total = User::whereHas('pns_status', function($query){
+            $query->where('is_pns', '0');
+        })->count();
+        return response()->json([
+            'total' => $total
+        ]);
+    }
+
+     public function gettotalexpiredmember(){
+       $total = User::where('expired_at', '<', Carbon::today())->count();
         return response()->json([
             'total' => $total
         ]);

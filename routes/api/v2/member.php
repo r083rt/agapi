@@ -60,8 +60,6 @@ Route::group(['middleware' => 'auth:api'], function () {
         'setting' => 'SettingController', //untuk mendapatkan data dari table setting
     ]);
 
-    Route::get('/users/total-member', 'UserController@gettotalmember');
-
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
 
     Route::get('/event/{event_id}/participant/search/{search}', 'EventParticipantController@search');
@@ -75,6 +73,13 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/province/{province_id}/event/month/{month}/year/{year}', 'ProvinceEventController@getprovinceeventbydate');
 
     Route::get('/province-member/search/{keyword}', 'ProvinceMemberController@search');
+
+    //total member
+    Route::get('/users/total-member', 'UserController@gettotalmember');
+    Route::get('/users/total-pns-member', 'UserController@gettotalpnsmember');
+    Route::get('/users/total-non-pns-member', 'UserController@gettotalnonpnsmember');
+    Route::get('/users/total-expired-member', 'UserController@gettotalexpiredmember');
+    //end total member
 
     //mendapatkan cs number
     Route::get('/cs-number', 'SettingController@getcsnumber');
