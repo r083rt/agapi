@@ -60,7 +60,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'setting' => 'SettingController', //untuk mendapatkan data dari table setting
     ]);
 
-    Route::get('/user/total-member', 'UserController@gettotalmember');
+    Route::get('/users/total-member', 'UserController@gettotalmember');
 
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
 
