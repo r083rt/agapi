@@ -16,8 +16,8 @@ class ProvinceNonPnsMemberController extends Controller
     public function index()
     {
         //
-         $province = Province::withCount(['users' => function($query){
-            $query->whereHas('pns_status', function($query2){
+        $province = Province::withCount(['users' => function ($query) {
+            $query->whereHas('pns_status', function ($query2) {
                 $query2->where('is_pns', '0');
             });
         }])->paginate();
@@ -68,5 +68,17 @@ class ProvinceNonPnsMemberController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function search($keyword)
+    {
+        $province = Province::where('name', 'like', '%' . $keyword . '%')
+            ->withCount(['users' => function ($query) {
+                $query->whereHas('pns_status', function ($query2) {
+                    $query2->where('is_pns', '0');
+                });
+            }])
+            ->paginate();
+        return response()->json($province);
     }
 }

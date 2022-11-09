@@ -17,7 +17,7 @@ class ProvinceExpiredMemberController extends Controller
     public function index()
     {
         //
-         $province = Province::withCount(['users' => function($query){
+        $province = Province::withCount(['users' => function ($query) {
             //ambil user yang expired at lebih kecil dari tanggal sekarang
             $query->where('expired_at', '<', Carbon::today());
         }])->paginate();
@@ -68,5 +68,14 @@ class ProvinceExpiredMemberController extends Controller
     public function destroy($id)
     {
         //
+    }
+    public function search($keyword)
+    {
+        $province = Province::where('name', 'like', '%' . $keyword . '%')
+            ->withCount(['users' => function ($query) {
+                $query->where('expired_at', '<', Carbon::today());
+            }])
+            ->paginate();
+        return response()->json($province);
     }
 }
