@@ -73,11 +73,13 @@ Route::group(['middleware' => 'auth:api'], function () {
     //mendapatkan event berdasarkan province_id, tahun dan bulan
     Route::get('/province/{province_id}/event/month/{month}/year/{year}', 'ProvinceEventController@getprovinceeventbydate');
 
+    //search province with total member
     Route::get('/province-member/search/{keyword}', 'ProvinceMemberController@search');
     Route::get('/province-pns-member/search/{keyword}', 'ProvincePnsMemberController@search');
     Route::get('/province-non-pns-member/search/{keyword}', 'ProvinceNonPnsMemberController@search');
     Route::get('/province-expired-member/search/{keyword}', 'ProvinceExpiredMemberController@search');
     Route::get('/province-extend-member/search/{keyword}', 'ProvinceExtendMemberController@search');
+    //end search province with total member
 
     //total member
     Route::get('/users/total-member', 'UserController@gettotalmember');
@@ -86,6 +88,13 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/users/total-expired-member', 'UserController@gettotalexpiredmember');
     Route::get('/payment/extended-total', 'PaymentController@gettotalextendmember');
     //end total member
+
+
+    //kongres 2022
+    Route::get('/kongres-2022/payments', 'Kongres2022PaymentController@getPaymentUsers');
+    Route::get('/kongres-2022/payments/total', 'Kongres2022PaymentController@getPaymentUsersCount');
+    Route::get('/kongres-2022/payments/search/{keyword}', 'Kongres2022PaymentController@search');
+    //end kongres 2022
 
     //mendapatkan cs number
     Route::get('/cs-number', 'SettingController@getcsnumber');

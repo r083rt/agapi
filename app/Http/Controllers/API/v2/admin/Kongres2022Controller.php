@@ -136,12 +136,14 @@ class Kongres2022Controller extends Controller
             $member->save();
         }
 
-        return response()->json($member->loadCount([
-            'payments as is_paid_kongres_panitia' => function ($query) {
-                $query
-                    ->where('status', 'success')
-                    ->where('payment_id', 3642); // untuk panitia
-            }])
+        return response()->json(
+            $member->loadCount([
+                'payments as is_paid_kongres_panitia' => function ($query) {
+                    $query
+                        ->where('status', 'success')
+                        ->where('payment_id', 3642); // untuk panitia
+                }
+            ])
                 ->loadCount(['payments as is_paid_kongres_peserta' => function ($query) {
                     $query
                         ->where('status', 'success')
@@ -157,6 +159,5 @@ class Kongres2022Controller extends Controller
 
     public function rollbackPayment($id, $key)
     {
-
     }
 }
