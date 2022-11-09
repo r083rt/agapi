@@ -91,9 +91,9 @@ Route::group(['middleware' => 'auth:api'], function () {
 
 
     //kongres 2022
-    Route::get('/kongres-2022/payments', 'Kongres2022PaymentController@getPaymentUsers');
-    Route::get('/kongres-2022/payments/total', 'Kongres2022PaymentController@getPaymentUsersCount');
-    Route::get('/kongres-2022/payments/search/{keyword}', 'Kongres2022PaymentController@search');
+    Route::get('/kongres/payments', 'Kongres2022PaymentController@getPaymentUsers');
+    Route::get('/kongres/payments/total', 'Kongres2022PaymentController@getPaymentUsersCount');
+    Route::get('/kongres/payments/search/{keyword}', 'Kongres2022PaymentController@search');
     //end kongres 2022
 
     //mendapatkan cs number

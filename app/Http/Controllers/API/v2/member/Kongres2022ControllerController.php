@@ -89,7 +89,9 @@ class Kongres2022ControllerController extends Controller
             ->whereIn('payment_id', [3642, 3643, 3644])
             ->where('status', 'success')
             ->count();
-        return response()->json($payments);
+        return response()->json([
+            'total' => $payments
+        ]);
     }
 
     public function search($keyword)
