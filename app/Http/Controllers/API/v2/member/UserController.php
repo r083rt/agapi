@@ -68,7 +68,7 @@ class UserController extends Controller
 
     public function gettotalmember()
     {
-        $total = User::count();
+        $total = User::where('user_activated_at', '!=', null)->count();
         return response()->json([
             'total' => $total
         ]);
@@ -96,7 +96,9 @@ class UserController extends Controller
 
     public function gettotalexpiredmember()
     {
-        $total = User::where('expired_at', '<', Carbon::today())->count();
+        $total = User::where('expired_at', '!=', null)
+            ->where('expired_at', '<', Carbon::today())
+            ->count();
         return response()->json([
             'total' => $total
         ]);
