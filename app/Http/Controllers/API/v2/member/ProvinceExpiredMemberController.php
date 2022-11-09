@@ -20,7 +20,7 @@ class ProvinceExpiredMemberController extends Controller
         $province = Province::withCount(['users' => function ($query) {
             //ambil user yang expired at lebih kecil dari tanggal sekarang
             $query->whereDate('user_activated_at', '<', \Carbon\Carbon::now()->subMonths(6)->format('Y-m-d'))
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+                ->whereIn('role_id', [2, 7, 9, 10, 11]);
         }])->paginate();
 
         return response()->json($province);
@@ -74,8 +74,8 @@ class ProvinceExpiredMemberController extends Controller
     {
         $province = Province::where('name', 'like', '%' . $keyword . '%')
             ->withCount(['users' => function ($query) {
-            $query->whereDate('user_activated_at', '<', \Carbon\Carbon::now()->subMonths(6)->format('Y-m-d'))
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+                $query->whereDate('user_activated_at', '<', \Carbon\Carbon::now()->subMonths(6)->format('Y-m-d'))
+                    ->whereIn('role_id', [2, 7, 9, 10, 11]);
             }])
             ->paginate();
         return response()->json($province);

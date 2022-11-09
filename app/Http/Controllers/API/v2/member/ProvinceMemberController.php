@@ -18,7 +18,7 @@ class ProvinceMemberController extends Controller
         //
         $provinces = Province::withCount(['users' => function($query){
             $query->where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereIn('role_id', [2, 7, 9, 10, 11]);
         }])->paginate();
         return response()->json($provinces);
     }
@@ -72,7 +72,7 @@ class ProvinceMemberController extends Controller
         $provinces = Province::where('name', 'like', '%'.$keyword.'%')
        ->withCount(['users' => function($query){
             $query->where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereIn('role_id', [2, 7, 9, 10, 11]);
         }])->paginate();
         return response()->json($provinces);
     }
