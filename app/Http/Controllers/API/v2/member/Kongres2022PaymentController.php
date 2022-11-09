@@ -103,7 +103,7 @@ class Kongres2022PaymentController extends Controller
             ->where('payment_type', 'App\Models\Event')
             ->whereIn('payment_id', [3642, 3643, 3644])
             ->where('status', 'success')
-            ->where('users.name', 'like', '%' . $keyword . '%')
+            ->where('provinces.name', 'like', '%' . $keyword . '%')
             ->select(
                 'provinces.id as id',
                 DB::raw('count(payments.id) as total_payment'),
