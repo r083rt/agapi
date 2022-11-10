@@ -85,8 +85,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('/province/{provinceId}/city-member/search/{keyword}', 'ProvinceCityMemberController@search');
     Route::get('/province/{provinceId}/city-pns-member/search/{keyword}', 'ProvinceCityPnsMemberController@search');
-    Route:;
-    get('/province/{provinceId}/city-non-pns-member/search/{keyword}', 'ProvinceCityNonPnsMemberController@search');
+    Route::get('/province/{provinceId}/city-non-pns-member/search/{keyword}', 'ProvinceCityNonPnsMemberController@search');
     //end search province with total member
 
     //total member
