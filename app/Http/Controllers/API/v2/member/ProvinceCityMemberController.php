@@ -17,15 +17,15 @@ class ProvinceCityMemberController extends Controller
     public function index($provinceId)
     {
         //
-        //find all city in province with total member
-        $city = DB::table('city')
-            ->select('city.id', 'city.name', 'city.province_id', DB::raw('count(member.id) as total_member'))
-            ->join('member', 'member.city_id', '=', 'city.id')
-            ->where('city.province_id', $provinceId)
-            ->groupBy('city.id')
+        //find all cities in province with total member
+        $cities = DB::table('cities')
+            ->select('cities.id', 'cities.name', 'cities.province_id', DB::raw('count(member.id) as total_member'))
+            ->join('member', 'member.cities_id', '=', 'cities.id')
+            ->where('cities.province_id', $provinceId)
+            ->groupBy('cities.id')
             ->paginate();
 
-        return response()->json($city);
+        return response()->json($cities);
     }
 
     /**
@@ -75,14 +75,14 @@ class ProvinceCityMemberController extends Controller
 
     public function search($provinceId, $keyword)
     {
-        $city = DB::table('city')
-            ->select('city.id', 'city.name', 'city.province_id', DB::raw('count(member.id) as total_member'))
-            ->join('member', 'member.city_id', '=', 'city.id')
-            ->where('city.province_id', $provinceId)
-            ->where('city.name', 'like', '%' . $keyword . '%')
-            ->groupBy('city.id')
+        $cities = DB::table('cities')
+            ->select('cities.id', 'cities.name', 'cities.province_id', DB::raw('count(member.id) as total_member'))
+            ->join('member', 'member.cities_id', '=', 'cities.id')
+            ->where('cities.province_id', $provinceId)
+            ->where('cities.name', 'like', '%' . $keyword . '%')
+            ->groupBy('cities.id')
             ->paginate();
 
-        return response()->json($city);
+        return response()->json($cities);
     }
 }
