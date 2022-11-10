@@ -59,6 +59,10 @@ Route::group(['middleware' => 'auth:api'], function () {
         'province.city-extend-member' => 'ProvinceCityExtendMemberController', // untuk mengambil anggota yang sudah extend berdasarkan provinsi dan kota
         'city' => 'CityController', // untuk mengambil kota
         'city.district' => 'CityDistrictController', // untuk mengambil kecamatan
+        'city.district-member' => 'CityDistrictMemberController', // untuk mengambil member berdasarkan kota dan kecamatan
+        'city.district-pns-member' => 'CityDistrictPnsMemberController', // untuk mengambil anggota pns berdasarkan kota dan kecamatan
+        'city.district-non-pns-member' => 'CityDistrictNonPnsMemberController', // untuk mengambil anggota non pns berdasarkan kota dan kecamatan
+        'city.district-extend-member' => 'CityDistrictExpiredMemberController', // untuk mengambil anggota yang sudah expired berdasarkan kota dan kecamatan
         'district' => 'DistrictController', // untuk mengambil kecamatan
         'kta' => 'KtaController', // untuk generate kartu tanda anggota
         'educational-level' => 'EducationalLevelController', //untuk mendapatkan data jenjang ajar
@@ -91,6 +95,13 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/province/{provinceId}/city-expired-member/search/{keyword}', 'ProvinceCityExpiredMemberController@search');
     Route::get('/province/{provinceId}/city-extend-member/search/{keyword}', 'ProvinceCityExtendMemberController@search');
     //end search province with total member
+
+    //search city with total member
+    Route::get('/city/{cityId}/district-member/search/{keyword}', 'CityDistrictMemberController@search');
+    Route::get('/city/{cityId}/district-pns-member/search/{keyword}', 'CityDistrictPnsMemberController@search');
+    Route::get('/city/{cityId}/district-non-pns-member/search/{keyword}', 'CityDistrictNonPnsMemberController@search');
+    Route::get('/city/{cityId}/district-extend-member/search/{keyword}', 'CityDistrictExpiredMemberController@search');
+    //end search city with total member
 
     //total member
     Route::get('/users/total-member', 'UserController@gettotalmember');
