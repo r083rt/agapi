@@ -22,7 +22,7 @@ class ProvinceCityPnsMemberController extends Controller
                 ->whereHas('pns_status', function ($query2) {
                     $query2->where('is_pns', 1);
                 });
-        }])->get();
+        }])->paginate();
 
         return response()->json($cities);
     }
