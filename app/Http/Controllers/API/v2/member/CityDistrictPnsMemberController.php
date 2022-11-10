@@ -22,6 +22,7 @@ class CityDistrictPnsMemberController extends Controller
                     $query2->where('is_pns', 1);
                 });
         }])->paginate();
+        return response()->json($districts);
     }
 
     /**
