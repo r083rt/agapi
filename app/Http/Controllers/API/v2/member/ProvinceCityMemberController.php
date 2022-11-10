@@ -18,12 +18,10 @@ class ProvinceCityMemberController extends Controller
     {
         //
         //find all cities in province with total member
-        $cities = DB::table('cities')
-            ->select('cities.id', 'cities.name', 'cities.province_id', DB::raw('count(member.id) as total_member'))
-            ->join('member', 'member.cities_id', '=', 'cities.id')
-            ->where('cities.province_id', $provinceId)
-            ->groupBy('cities.id')
-            ->paginate();
+        $cities = City::where('province_id', $provinceId)->withCount(['users' => function ($query) {
+            $query->where('user_activated_at', '!=', null)
+                ->whereIn('role_id', [2, 7, 9, 10, 11]);
+        }])->paginate();
 
         return response()->json($cities);
     }
@@ -75,12 +73,12 @@ class ProvinceCityMemberController extends Controller
 
     public function search($provinceId, $keyword)
     {
-        $cities = DB::table('cities')
-            ->select('cities.id', 'cities.name', 'cities.province_id', DB::raw('count(member.id) as total_member'))
-            ->join('member', 'member.cities_id', '=', 'cities.id')
-            ->where('cities.province_id', $provinceId)
-            ->where('cities.name', 'like', '%' . $keyword . '%')
-            ->groupBy('cities.id')
+        $cities
+            = City::where('province_id', $provinceId)->withCount(['users' => function ($query) {
+                $query->where('user_activated_at', '!=', null)
+                    ->whereIn('role_id', [2, 7, 9, 10, 11]);
+            }])
+            ->where('name', 'like', '%' . $keyword . '%')
             ->paginate();
 
         return response()->json($cities);
