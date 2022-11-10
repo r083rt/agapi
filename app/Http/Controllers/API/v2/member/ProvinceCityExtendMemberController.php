@@ -18,7 +18,7 @@ class ProvinceCityExtendMemberController extends Controller
         //ambil cities berdasarkan province_id beserta total payment yang value 65000 dan success
         $cities = City::where('province_id', $provinceId)
             ->withCount([
-                'users', function ($query) {
+                'users' => function ($query) {
                     $query->whereHas('payments', function ($query) {
                         $query->where('status', 'success')
                             ->where('value', 65000);
@@ -79,7 +79,7 @@ class ProvinceCityExtendMemberController extends Controller
         $cities = City::where('province_id', $provinceId)
             ->where('name', 'like', '%' . $keyword . '%')
             ->withCount([
-                'users', function ($query) {
+                'users' => function ($query) {
                     $query->whereHas('payments', function ($query) {
                         $query->where('status', 'success')
                             ->where('value', 65000);
