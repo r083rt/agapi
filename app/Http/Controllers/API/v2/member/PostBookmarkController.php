@@ -4,10 +4,9 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Bookmark;
+use App\Models\Post;
 
-class UserBookmarkController extends Controller
+class PostBookmarkController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,9 +16,6 @@ class UserBookmarkController extends Controller
     public function index()
     {
         //
-        $bookmarks = Bookmark::with('post')->where('user_id', auth()->user()->id)->paginate();
-
-        return response()->json($bookmarks);
     }
 
     /**
@@ -30,7 +26,10 @@ class UserBookmarkController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //save to table bookmark with user_id and post_id
+        $post = Post::find($request->postId);
+        $request->user()->bookmark_posts()->sync($post->id, false);
+        return response()->json($post->load(['bookmarks', 'bookmarked']));
     }
 
     /**
@@ -62,8 +61,11 @@ class UserBookmarkController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         //
+        $post = Post::find($id);
+        $request->user()->bookmark_posts()->detach($post->id);
+        return response()->json($post->load(['bookmarks', 'bookmarked']));
     }
 }
