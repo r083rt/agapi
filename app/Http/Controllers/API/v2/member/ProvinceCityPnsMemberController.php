@@ -20,7 +20,7 @@ class ProvinceCityPnsMemberController extends Controller
             $query->where('user_activated_at', '!=', null)
                 ->whereIn('role_id', [2, 7, 9, 10, 11])
                 ->whereHas('pns_status', function ($query2) {
-                    $query2->where('pns_status_id', 1);
+                    $query2->where('is_pns', 1);
                 });
         }])->get();
 
@@ -79,7 +79,7 @@ class ProvinceCityPnsMemberController extends Controller
                 $query->where('user_activated_at', '!=', null)
                     ->whereIn('role_id', [2, 7, 9, 10, 11])
                     ->whereHas('pns_status', function ($query2) {
-                        $query2->where('pns_status_id', 1);
+                        $query2->where('is_pns', 1);
                     });
             }])
             ->where('name', 'like', '%' . $keyword . '%')
