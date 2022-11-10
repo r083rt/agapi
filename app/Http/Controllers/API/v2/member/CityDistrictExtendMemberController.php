@@ -15,10 +15,10 @@ class CityDistrictExtendMemberController extends Controller
      */
     public function index($cityId)
     {
-        //ambil district berdasarkan city id dengan total users yang memiliki paymets key 'perpanjangan anggota' dan status  'success
+        //ambil district berdasarkan city id dengan total users yang memiliki paymets key 'perpanjangan_anggota' dan status  'success
         $districts = District::where('city_id', $cityId)->withCount(['users' => function ($query) {
             $query->whereHas('payments', function ($query2) {
-                $query2->where('key', 'perpanjangan anggota')
+                $query2->where('key', 'perpanjangan_anggota')
                     ->where('status', 'success');
             });
         }])->paginate();
@@ -75,7 +75,7 @@ class CityDistrictExtendMemberController extends Controller
     {
         $districts = District::where('city_id', $cityId)->where('name', 'like', '%' . $keyword . '%')->withCount(['users' => function ($query) {
             $query->whereHas('payments', function ($query2) {
-                $query2->where('key', 'perpanjangan anggota')
+                $query2->where('key', 'perpanjangan_anggota')
                     ->where('status', 'success');
             });
         }])->paginate();
