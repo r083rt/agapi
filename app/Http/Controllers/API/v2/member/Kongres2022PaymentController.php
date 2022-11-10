@@ -155,12 +155,13 @@ class Kongres2022PaymentController extends Controller
         return response()->json($payments);
     }
 
-    public function getPaymentUsersByCity()
+    public function getPaymentUsersByCity($cityId)
     {
         $payments = Payment::join('users', 'users.id', '=', 'payments.user_id')
             ->join('profiles', 'profiles.user_id', '=', 'users.id')
             ->join('districts', 'districts.id', '=', 'profiles.district_id')
             ->with('user')
+            ->where('districts.city_id', $cityId)
             ->where('payment_type', 'App\Models\Event')
             ->whereIn('payment_id', [3642, 3643, 3644])
             ->where('status', 'success')
