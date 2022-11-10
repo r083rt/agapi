@@ -154,4 +154,44 @@ class Kongres2022PaymentController extends Controller
             ->paginate();
         return response()->json($payments);
     }
+
+    public function getPaymentUsersByCity()
+    {
+        $payments = Payment::join('users', 'users.id', '=', 'payments.user_id')
+            ->join('profiles', 'profiles.user_id', '=', 'users.id')
+            ->join('districts', 'districts.id', '=', 'profiles.district_id')
+            ->with('user')
+            ->where('payment_type', 'App\Models\Event')
+            ->whereIn('payment_id', [3642, 3643, 3644])
+            ->where('status', 'success')
+            ->select(
+                'districts.id as id',
+                DB::raw('count(payments.id) as users_count'),
+                'districts.name as name'
+            )
+            ->groupBy('name')
+            ->paginate();
+        return response()->json($payments);
+    }
+
+    public function searchByCity($cityId, $keyword)
+    {
+        $payments = Payment::join('users', 'users.id', '=', 'payments.user_id')
+            ->join('profiles', 'profiles.user_id', '=', 'users.id')
+            ->join('districts', 'districts.id', '=', 'profiles.district_id')
+            ->with('user')
+            ->where('districts.city_id', $cityId)
+            ->where('payment_type', 'App\Models\Event')
+            ->whereIn('payment_id', [3642, 3643, 3644])
+            ->where('status', 'success')
+            ->where('districts.name', 'like', '%' . $keyword . '%')
+            ->select(
+                'districts.id as id',
+                DB::raw('count(payments.id) as users_count'),
+                'districts.name as name'
+            )
+            ->groupBy('name')
+            ->paginate();
+        return response()->json($payments);
+    }
 }
