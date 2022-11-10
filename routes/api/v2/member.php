@@ -54,6 +54,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'province-extend-member' => 'ProvinceExtendMemberController', // untuk mengambil anggota yang sudah extend berdasarkan provinsi
         'province.city-member' => 'ProvinceCityMemberController', // untuk mengambil member berdasarkan provinsi dan kota
         'province.city-pns-member' => 'ProvinceCityPnsMemberController', // untuk mengambil anggota pns berdasarkan provinsi dan kota
+        'province.city-non-pns-member' => 'ProvinceCityNonPnsMemberController', // untuk mengambil anggota non pns berdasarkan provinsi dan kota
         'city' => 'CityController', // untuk mengambil kota
         'city.district' => 'CityDistrictController', // untuk mengambil kecamatan
         'district' => 'DistrictController', // untuk mengambil kecamatan
@@ -84,6 +85,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('/province/{provinceId}/city-member/search/{keyword}', 'ProvinceCityMemberController@search');
     Route::get('/province/{provinceId}/city-pns-member/search/{keyword}', 'ProvinceCityPnsMemberController@search');
+    Route:;
+    get('/province/{provinceId}/city-non-pns-member/search/{keyword}', 'ProvinceCityNonPnsMemberController@search');
     //end search province with total member
 
     //total member
