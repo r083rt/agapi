@@ -126,7 +126,7 @@ class Kongres2022PaymentController extends Controller
             ->where('status', 'success')
             ->select(
                 'cities.id as id',
-                DB::raw('count(payments.id) as total_payment'),
+                DB::raw('count(payments.id) as users_count'),
                 'cities.name as name'
             )
             ->groupBy('name')
@@ -147,7 +147,7 @@ class Kongres2022PaymentController extends Controller
             ->where('cities.name', 'like', '%' . $keyword . '%')
             ->select(
                 'cities.id as id',
-                DB::raw('count(payments.id) as total_payment'),
+                DB::raw('count(payments.id) as users_count'),
                 'cities.name as name'
             )
             ->groupBy('name')
