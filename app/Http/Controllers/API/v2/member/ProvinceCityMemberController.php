@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\City;
+use Illuminate\Support\Facades\DB;
 
 class ProvinceCityMemberController extends Controller
 {
