@@ -70,6 +70,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         'educational-level' => 'EducationalLevelController', //untuk mendapatkan data jenjang ajar
         'grade' => 'GradeController', //untuk mendapatkan data kelas yang diajar
         'setting' => 'SettingController', //untuk mendapatkan data dari table setting
+        'book' => 'BookController', //untuk mendapatkan data buku
+        'book-category' => 'BookCategoryController', //untuk mendapatkan data kategori buku
     ]);
 
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
