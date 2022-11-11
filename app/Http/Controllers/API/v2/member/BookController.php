@@ -16,7 +16,7 @@ class BookController extends Controller
     public function index()
     {
         //
-        $books = Book::with('user', 'book_category')->orderBy('created_at', 'desc')->get();
+        $books = Book::with('user', 'book_category')->orderBy('created_at', 'desc')->paginate();
         return response()->json($books);
     }
 
