@@ -69,16 +69,16 @@ class AuthController extends Controller
         $user = $request->user();
         return response()->json(
             $user->load(
-                    'profile.province',
-                    'role',
-                    'profile.city',
-                    'profile.district',
-                    'banner'
-                )
+                'profile.province',
+                'role',
+                'profile.city',
+                'profile.district',
+                'banner'
+            )
                 ->loadCount(
                     'posts',
                     'events',
-                    'book'
+                    'books'
                 )
         );
     }
