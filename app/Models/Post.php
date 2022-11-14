@@ -15,7 +15,7 @@ class Post extends Model
     // protected $guarded = ["id"];
     protected $fillable = ['author_id', 'category_id', 'title', 'seo_title', 'excerpt', 'body', 'image', 'slug', 'meta_description', 'meta_keywords', 'status', 'featured', 'is_public'];
 
-    protected $appends = ['is_liked', 'is_bookmarked', 'likes_count', 'comments_count'];
+    protected $appends = ['is_liked', 'is_bookmarked', 'likes_count', 'comments_count', 'read_count'];
 
     public function authorId()
     {
@@ -76,6 +76,12 @@ class Post extends Model
     public function readers()
     {
         return $this->morphToMany('App\Models\User', 'read');
+    }
+
+    //count readers post
+    public function getReadCountAttribute()
+    {
+        return $this->readers()->count();
     }
 
     public function auth_read()
@@ -187,5 +193,4 @@ class Post extends Model
     {
         return $this->comments()->count();
     }
-
 }
