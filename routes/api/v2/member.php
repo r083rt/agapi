@@ -28,6 +28,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'user.album' => 'UserAlbumController', // untuk album
         'user.personal-conversation' => 'UserPersonalConversationController', // untuk mengambil conversation chat dari user
         'user.avatar' => 'UserAvatarController',
+        'user.banner' => 'UserBannerController',
         'user.push-token' => 'UserPushTokenController', // untuk menyimpan expo push token ke database
         'user.member-card' => 'UserMemberCardController', // untuk generate kartu tanda anggota
         'user.payment' => 'UserPaymentController', // untuk pembayaran
