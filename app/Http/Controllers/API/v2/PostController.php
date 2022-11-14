@@ -16,8 +16,8 @@ class PostController extends Controller
     public function index()
     {
         //
-        $posts = Post::with('images', 'videos', 'author.profile', 'likes')
-        // ->where('key', '!=', 'ad')
+        $posts = Post::with('images', 'videos', 'author.profile', 'likes', 'readers.user')
+            // ->where('key', '!=', 'ad')
             ->paginate();
         return response()->json($posts);
     }
