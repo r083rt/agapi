@@ -33,7 +33,7 @@ class UserBannerController extends Controller
         $compressedImage = \Image::make($request->file('banner'))->resize(1080, null, function ($constraint) {
             $constraint->aspectRatio();
         })->encode('jpg', 60);
-        $folderPath = "avatar";
+        $folderPath = "banner";
         $path = "{$folderPath}/{$fileName}";
         // simpan gambar
         Storage::disk(env('FILESYSTEM_DRIVER', 'public'))->put($path, $compressedImage);
