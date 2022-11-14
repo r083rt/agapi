@@ -33,8 +33,8 @@ class PostReadController extends Controller
     {
         //validasi jika user sudah pernah membaca post ini maka tidak bisa membaca lagi
         $request->validate([
-            'post_id' => 'required|exists:posts,id',
-            'user_id' => 'required|exists:users,id',
+            'postId' => 'required|exists:posts,id',
+            'userId' => 'required|exists:users,id',
         ]);
 
         //
