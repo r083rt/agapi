@@ -27,7 +27,7 @@ class UserBannerController extends Controller
     public function store(Request $request)
     {
         //find user by id and input banner morph to files table and save
-        $user = User::findOr(auth('api')->user()->id);
+        $user = User::findOrFail(auth('api')->user()->id);
         $user->banner()->create([
             'src' => $request->banner['uri'],
             'type' => $request->banner['type'],
