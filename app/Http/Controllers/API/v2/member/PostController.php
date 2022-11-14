@@ -26,6 +26,7 @@ class PostController extends Controller
             'author.role',
             'last_like.user',
             'last_comment.user',
+            'readers.user',
         ])
             ->withCount(['comments', 'likes'])
             ->whereHas('author', function ($query) {
