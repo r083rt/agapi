@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Models\Read;
 use Illuminate\Http\Request;
 
 class PostReadController extends Controller
@@ -55,9 +56,11 @@ class PostReadController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function show(Post $post)
+    public function show($id)
     {
-        //
+        //get readers when post id like $id
+        $readers = Read::with('user')->where('read_id', $id)->paginate();
+        return response()->json($readers);
     }
 
     /**
