@@ -4,34 +4,18 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
-use Spatie\Browsershot\Browsershot;
+use App\Models\User;
 
-class UserMemberCardController extends Controller
+class UserBannerController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($userId)
+    public function index()
     {
         //
-        $url = env('APP_URL', 'localhost:8000');
-
-        $file = Browsershot::url("$url/user/$userId/member-card")
-            ->noSandbox()
-            ->windowSize(586, 1070)
-            ->fullPage()
-            ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
-            ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
-            ->setChromePath(env('CHROME_BINARY_PATH', '/usr/lib/node_modules/chromium'))
-            ->base64Screenshot();
-
-        return response()->json([
-            'data' => "data:image/png;base64,$file",
-            'message' => 'Kartu Tanda Anggota Ter generate',
-        ]);
     }
 
     /**
@@ -42,7 +26,18 @@ class UserMemberCardController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //find user by id and input banner morph to files table and save
+        $user = User::find($request->user_id);
+        $user->banner()->create([
+            'src' => $request->banner['uri'],
+            'type' => $request->banner['type'],
+            'name' => $request->banner['name'],
+        ]);
+
+        return response()->json([
+            'message' => 'Banner uploaded successfully',
+            'data' => $user->banner
+        ], 200);
     }
 
     /**
