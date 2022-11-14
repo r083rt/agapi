@@ -29,14 +29,19 @@ class PostReadController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, $postId)
+    public function store(Request $request)
     {
+        //validasi jika user sudah pernah membaca post ini maka tidak bisa membaca lagi
+        $request->validate([
+            'post_id' => 'required|exists:posts,id',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
         //
-        // read post
-        $post = Post::findOrFail($postId);
-        // $post->readers()->syncWithoutDetaching(auth('api')->user()->id);
-        // user hanya bisa read post sekali saja morphMany
-        $post->readers()->syncWithoutDetaching(auth('api')->user()->id);
+        $post = Post::findOrFail($request->postId);
+
+        //input to read table with post_id and user_id just can read once
+        $post->readers()->syncWithoutDetaching(auth()->user()->id);
 
         return response()->json([
             'message' => 'Berhasil read post',
