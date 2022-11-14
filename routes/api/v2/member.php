@@ -74,6 +74,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         'book' => 'BookController', //untuk mendapatkan data buku
         'book-category' => 'BookCategoryController', //untuk mendapatkan data kategori buku
         'book-category.book' => 'CategoryBookController', //untuk mendapatkan data buku berdasarkan kategori
+        'department' => 'DepartmentController', //untuk mendapatkan data departemen
+        'dpp-department' => 'DppDepartmentController', //untuk mendapatkan data departemen dpp
     ]);
 
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
