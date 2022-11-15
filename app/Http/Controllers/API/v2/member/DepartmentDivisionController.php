@@ -4,10 +4,10 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\DepartmentDivision;
 use App\Models\Department;
-use Illuminate\Support\Facades\DB;
 
-class DppDepartmentController extends Controller
+class DepartmentDivisionController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,15 +17,9 @@ class DppDepartmentController extends Controller
     public function index()
     {
         //
-        $dpp = Department::where('parent_id', null)
-            ->whereHas('division', function ($q) {
-                $q->where('title', 'DPP');
-            })->with('user', 'division')->get();
+        $divisions = DepartmentDivision::get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $dpp
-        ], 200);
+        return response()->json($divisions);
     }
 
     /**
@@ -48,6 +42,10 @@ class DppDepartmentController extends Controller
     public function show($id)
     {
         //
+        $dpp = Department::where('division_id', $id)
+            ->where('parent_id', null)
+            ->with('children.user', 'division', 'user')->get();
+        return response()->json($dpp);
     }
 
     /**
@@ -57,18 +55,9 @@ class DppDepartmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         //
-        $request->validate([
-            'user_id' => 'required|unique:departments,user_id',
-        ]);
-
-        $dpp = Department::findOrFail($request->department_id);
-        $dpp->user_id = $request->user_id;
-        $dpp->save();
-
-        return response()->json($dpp);
     }
 
     /**
@@ -80,15 +69,5 @@ class DppDepartmentController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    public function childrens($parentId)
-    {
-        $children = Department::where('parent_id', $parentId)
-            ->whereHas('division', function ($q) {
-                $q->where('title', 'DPP');
-            })->with('user', 'division')->get();
-
-        return response()->json($children);
     }
 }

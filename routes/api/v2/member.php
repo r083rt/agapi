@@ -75,10 +75,23 @@ Route::group(['middleware' => 'auth:api'], function () {
         'book-category' => 'BookCategoryController', //untuk mendapatkan data kategori buku
         'book-category.book' => 'CategoryBookController', //untuk mendapatkan data buku berdasarkan kategori
         'department' => 'DepartmentController', //untuk mendapatkan data departemen
+        'department-division' => 'DepartmentDivisionController', //untuk mendapatkan data divisi departemen
         'dpp-department' => 'DppDepartmentController', //untuk mendapatkan data departemen dpp
+        'dpw-department' => 'DpwDepartmentController', //untuk mendapatkan data departemen dpw
+        'dpd-department' => 'DpdDepartmentController', //untuk mendapatkan data departemen dpd
+        'dpc-department' => 'DpcDepartmentController', //untuk mendapatkan data departemen dpc
     ]);
 
+    //department children
+    Route::get('/dpp-departments/{parentId}/childrens', 'DppDepartmentController@childrens');
+    Route::get('/dpw-departments/{parentId}/childrens', 'DpwDepartmentController@childrens');
+    Route::get('/dpd-departments/{parentId}/childrens', 'DpdDepartmentController@childrens');
+    Route::get('/dpc-departments/{parentId}/childrens', 'DpcDepartmentController@childrens');
+    //end department children
+
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
+
+    Route::get('/users/search/{keyword}', 'UserController@search');
 
     Route::get('/event/{event_id}/participant/search/{search}', 'EventParticipantController@search');
 

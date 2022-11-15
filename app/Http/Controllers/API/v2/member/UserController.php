@@ -17,6 +17,12 @@ class UserController extends Controller
     public function index()
     {
         //
+        $users = User::where('user_activated_at', '!=', null)
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->with('profile')
+            ->paginate();
+
+        return response()->json($users);
     }
 
     /**
@@ -105,5 +111,18 @@ class UserController extends Controller
         return response()->json([
             'total' => $total
         ]);
+    }
+
+    public function search($keyword)
+    {
+        $users = User::where('user_activated_at', '!=', null)
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->where('name', 'like', '%' . $keyword . '%')
+            ->orWhere('email', 'like', '%' . $keyword . '%')
+            ->orWhere('kta_id', 'like', '%' . $keyword . '%')
+            ->with('profile')
+            ->paginate();
+
+        return response()->json($users);
     }
 }

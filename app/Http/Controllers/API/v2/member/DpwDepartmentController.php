@@ -5,9 +5,8 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Department;
-use Illuminate\Support\Facades\DB;
 
-class DppDepartmentController extends Controller
+class DpwDepartmentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,14 +16,14 @@ class DppDepartmentController extends Controller
     public function index()
     {
         //
-        $dpp = Department::where('parent_id', null)
+        $dpw = Department::where('parent_id', null)
             ->whereHas('division', function ($q) {
-                $q->where('title', 'DPP');
+                $q->where('title', 'DPW');
             })->with('user', 'division')->get();
 
         return response()->json([
             'status' => 'success',
-            'data' => $dpp
+            'data' => $dpw
         ], 200);
     }
 
@@ -48,6 +47,7 @@ class DppDepartmentController extends Controller
     public function show($id)
     {
         //
+
     }
 
     /**
@@ -64,11 +64,12 @@ class DppDepartmentController extends Controller
             'user_id' => 'required|unique:departments,user_id',
         ]);
 
-        $dpp = Department::findOrFail($request->department_id);
-        $dpp->user_id = $request->user_id;
-        $dpp->save();
+        $dpw = Department::findOrfail($request->department_id);
+        $dpw->update([
+            'user_id' => $request->user_id,
+        ]);
 
-        return response()->json($dpp);
+        return response()->json($dpw);
     }
 
     /**
@@ -86,7 +87,7 @@ class DppDepartmentController extends Controller
     {
         $children = Department::where('parent_id', $parentId)
             ->whereHas('division', function ($q) {
-                $q->where('title', 'DPP');
+                $q->where('title', 'DPW');
             })->with('user', 'division')->get();
 
         return response()->json($children);

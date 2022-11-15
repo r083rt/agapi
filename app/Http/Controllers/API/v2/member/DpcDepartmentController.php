@@ -5,9 +5,8 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Department;
-use Illuminate\Support\Facades\DB;
 
-class DppDepartmentController extends Controller
+class DpcDepartmentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,14 +16,14 @@ class DppDepartmentController extends Controller
     public function index()
     {
         //
-        $dpp = Department::where('parent_id', null)
+        $dpc = Department::where('parent_id', null)
             ->whereHas('division', function ($q) {
-                $q->where('title', 'DPP');
+                $q->where('title', 'DPC');
             })->with('user', 'division')->get();
 
         return response()->json([
             'status' => 'success',
-            'data' => $dpp
+            'data' => $dpc
         ], 200);
     }
 
@@ -59,16 +58,17 @@ class DppDepartmentController extends Controller
      */
     public function update(Request $request)
     {
-        //
+        //validasi jika user id sudah ada di table department maka tidak bisa di tambahkan lagi
         $request->validate([
             'user_id' => 'required|unique:departments,user_id',
         ]);
 
-        $dpp = Department::findOrFail($request->department_id);
-        $dpp->user_id = $request->user_id;
-        $dpp->save();
+        $dpc = Department::findOrFail($request->department_id);
+        $dpc->update([
+            'user_id' => $request->user_id,
+        ]);
 
-        return response()->json($dpp);
+        return response()->json($dpc);
     }
 
     /**
@@ -86,7 +86,7 @@ class DppDepartmentController extends Controller
     {
         $children = Department::where('parent_id', $parentId)
             ->whereHas('division', function ($q) {
-                $q->where('title', 'DPP');
+                $q->where('title', 'DPC');
             })->with('user', 'division')->get();
 
         return response()->json($children);
