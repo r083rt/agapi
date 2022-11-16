@@ -82,6 +82,12 @@ Route::group(['middleware' => 'auth:api'], function () {
         'dpc-department' => 'DpcDepartmentController', //untuk mendapatkan data departemen dpc
     ]);
 
+    //department filter
+    Route::get('/dpw-departments/province/{province_id}', 'DpwDepartmentController@getByProvince');
+    Route::get('/dpd-departments/city/{city_id}', 'DpdDepartmentController@getByCity');
+    Route::get('/dpc-departments/district/{district_id}', 'DpcDepartmentController@getByDistrict');
+    //end department filter
+
     //department children
     Route::get('/dpp-departments/{parentId}/childrens', 'DppDepartmentController@childrens');
     Route::get('/dpw-departments/{parentId}/childrens', 'DpwDepartmentController@childrens');

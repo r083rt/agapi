@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Department;
+use App\Models\User;
 
 class DpdDepartmentController extends Controller
 {
@@ -16,7 +17,10 @@ class DpdDepartmentController extends Controller
     public function index()
     {
         //
+        $user = User::with('profile')->findOrFail(auth()->user()->id);
         $dpd = Department::where('parent_id', null)
+            ->where('departmentable_id', $user->profile->city_id)
+            ->where('departmentable_type', 'App\Models\City')
             ->whereHas('division', function ($q) {
                 $q->where('title', 'DPD');
             })->with('user', 'division')->get();
@@ -90,5 +94,20 @@ class DpdDepartmentController extends Controller
             })->with('user', 'division')->get();
 
         return response()->json($children);
+    }
+
+    public function getByCity($cityId)
+    {
+        $dpd = Department::where('parent_id', null)
+            ->where('departmentable_id', $cityId)
+            ->where('departmentable_type', 'App\Models\City')
+            ->whereHas('division', function ($q) {
+                $q->where('title', 'DPD');
+            })->with('user', 'division')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $dpd
+        ], 200);
     }
 }
