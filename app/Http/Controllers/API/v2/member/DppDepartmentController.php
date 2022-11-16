@@ -20,7 +20,10 @@ class DppDepartmentController extends Controller
         $dpp = Department::where('parent_id', null)
             ->whereHas('division', function ($q) {
                 $q->where('title', 'DPP');
-            })->with('user', 'division')->get();
+            })
+            ->with('user', 'division')
+            ->withCount('children')
+            ->get();
 
         return response()->json([
             'status' => 'success',

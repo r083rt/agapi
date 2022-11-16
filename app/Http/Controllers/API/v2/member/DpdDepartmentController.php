@@ -103,7 +103,9 @@ class DpdDepartmentController extends Controller
             ->where('departmentable_type', 'App\Models\City')
             ->whereHas('division', function ($q) {
                 $q->where('title', 'DPD');
-            })->with('user', 'division')->get();
+            })
+            ->withCount('children')
+            ->with('user', 'division')->get();
 
         return response()->json([
             'status' => 'success',

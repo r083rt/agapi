@@ -54,4 +54,9 @@ class Department extends Model
     {
         return $this->belongsTo(District::class, 'id', 'departmentable_id')->where('departmentable_type', 'App\Models\District');
     }
+
+    public function department_users()
+    {
+        return $this->hasMany(DepartmentUser::class);
+    }
 }

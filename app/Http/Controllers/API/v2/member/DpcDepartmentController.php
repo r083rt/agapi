@@ -23,7 +23,8 @@ class DpcDepartmentController extends Controller
             ->where('departmentable_type', 'App\Models\District')
             ->whereHas('division', function ($q) {
                 $q->where('title', 'DPC');
-            })->with('user', 'division')->get();
+            })
+            ->with('user', 'division')->get();
 
         return response()->json([
             'status' => 'success',
@@ -103,7 +104,9 @@ class DpcDepartmentController extends Controller
             ->where('departmentable_type', 'App\Models\District')
             ->whereHas('division', function ($q) {
                 $q->where('title', 'DPC');
-            })->with('user', 'division')->get();
+            })
+            ->withCount('children')
+            ->with('user', 'division')->get();
 
         return response()->json([
             'status' => 'success',

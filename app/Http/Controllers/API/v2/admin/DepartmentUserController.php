@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\v2\admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\DepartmentUser;
 
 class DepartmentUserController extends Controller
 {
@@ -12,9 +13,18 @@ class DepartmentUserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
+        $departmentUser = DepartmentUser::with('department', 'user')->orderBy('id', 'desc');
+
+        if ($request->filter) {
+            $departmentUser->where('title', 'like', '%' . $request->filter . '%');
+        }
+
+        $departmentUser = $departmentUser->paginate();
+
+        return response()->json($departmentUser);
     }
 
     /**
@@ -26,6 +36,10 @@ class DepartmentUserController extends Controller
     public function store(Request $request)
     {
         //
+        $department_user = new DepartmentUser($request->all());
+        $department_user->save();
+
+        return response()->json($department_user);
     }
 
     /**
