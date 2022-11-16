@@ -23,7 +23,9 @@ Route::group(['as' => 'api.v2.admin.'], function () {
         'excel/province.user' => 'Excel\ProvinceUserController',
         'ads' => 'AdsController',
         'post' => 'PostController',
-        'province' => 'ProvinceController'
+        'province' => 'ProvinceController',
+        'province.city' => 'ProvinceCityController',
+        'city.district' => 'CityDistrictController',
     ]);
 });
 

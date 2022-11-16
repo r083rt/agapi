@@ -39,4 +39,19 @@ class Department extends Model
     {
         return $this->sub_departments()->with('children');
     }
+
+    public function province()
+    {
+        return $this->belongsTo(Province::class, 'id', 'departmentable_id')->where('departmentable_type', 'App\Models\Province');
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class, 'id', 'departmentable_id')->where('departmentable_type', 'App\Models\City');
+    }
+
+    public function district()
+    {
+        return $this->belongsTo(District::class, 'id', 'departmentable_id')->where('departmentable_type', 'App\Models\District');
+    }
 }
