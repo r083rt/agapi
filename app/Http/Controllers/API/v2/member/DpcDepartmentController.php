@@ -24,6 +24,7 @@ class DpcDepartmentController extends Controller
             ->whereHas('division', function ($q) {
                 $q->where('title', 'DPC');
             })
+            ->withCount('department_users')
             ->with('user', 'division')->get();
 
         return response()->json([
@@ -105,7 +106,7 @@ class DpcDepartmentController extends Controller
             ->whereHas('division', function ($q) {
                 $q->where('title', 'DPC');
             })
-            ->withCount('children')
+            ->withCount('department_users')
             ->with('user', 'division')->get();
 
         return response()->json([

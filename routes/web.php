@@ -1,6 +1,6 @@
 <?php
 
-use App\Helper\Firestore;
+use App\Models\Department;
 use App\Http\Controllers\API\v2\member\EventParticipantController;
 // use DB
 use Illuminate\Support\Facades\DB;
@@ -41,18 +41,18 @@ Route::get('event/{eventId}/participant/{userId}', 'EventParticipantController@s
 Route::get('test', function () {
     $images = App\Models\File::where('type', 'like', 'imagPe%')->limit(10)->orderBy('created_at', 'desc')->count();
     $res = DB::table('users')
-            // ->where('user_activated_at', '!=', null)
-            // ->join('payments', 'users.id', '=', 'payments.payment_id')
-            // ->where('payments.payment_type', '=', 'App\Models\User')
-            ->join('payments','users.id','=','payments.user_id')
-            ->select(
-                DB::raw("count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total"),
-                DB::raw('YEAR(payments.created_at) as year'),
-                DB::raw('MONTHNAME(payments.created_at) as month')
-            )
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'asc')
-            ->get();
+        // ->where('user_activated_at', '!=', null)
+        // ->join('payments', 'users.id', '=', 'payments.payment_id')
+        // ->where('payments.payment_type', '=', 'App\Models\User')
+        ->join('payments', 'users.id', '=', 'payments.user_id')
+        ->select(
+            DB::raw("count(distinct users.id,DATE_FORMAT(payments.created_at,'%Y-%m')) as total"),
+            DB::raw('YEAR(payments.created_at) as year'),
+            DB::raw('MONTHNAME(payments.created_at) as month')
+        )
+        ->groupBy('year', 'month')
+        ->orderBy('year', 'asc')
+        ->get();
     return [
         "status" => "success",
         "FILE DRIVER" => env('FILESYSTEM_DRIVER'),
@@ -60,7 +60,7 @@ Route::get('test', function () {
         "NODE PATH" => env('NODE_BINARY_PATH'),
         "CHROME PATH" => env('CHROME_BINARY_PATH'),
         "TOTAL GAMBAR" => $images,
-        "payment"=> $res
+        "payment" => $res
     ];
 });
 
@@ -484,21 +484,19 @@ Route::get('/getcontactnumber', function () {
 // });
 
 Route::get('/tes', function () {
-    $firestore = new Firestore;
+    $orders = [3, 4, 5];
+    $titles = ['Ketua Umum', 'Sekertaris Jendral', 'Bendahara Umum'];
 
-    $data = [
-        'user_id' => 1,
-        'candidate_id' => 2,
-    ];
-
-    $store = $firestore->storeVote($data);
-
-    $firestore = $firestore->getDb()->collection('candidates');
-    // return response()->json($firestore);
-    $documents = $firestore->documents();
-    $data = [];
-    foreach ($documents as $document) {
-        $data[] = $document->data();
+    foreach ($orders as $key => $value) {
+        $department = new Department();
+        $department->title = $titles[$key];
+        $department->order = $value;
+        $department->start_date = \Carbon\Carbon::now();
+        $department->end_date = \Carbon\Carbon::now()->addDays(30);
+        $department->departmentable_type = 'App\Models\District';
+        $department->departmentable_id = 3374090;
+        $department->division_id = 4;
+        $department->save();
     }
-    return response()->json($data);
+    return "success";
 });

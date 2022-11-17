@@ -57,6 +57,6 @@ class Department extends Model
 
     public function department_users()
     {
-        return $this->hasMany(DepartmentUser::class);
+        return $this->belongsToMany(User::class, 'department_users');
     }
 }

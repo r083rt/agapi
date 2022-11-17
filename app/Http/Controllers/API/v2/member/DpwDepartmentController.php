@@ -23,7 +23,9 @@ class DpwDepartmentController extends Controller
             ->where('departmentable_type', 'App\Models\Province')
             ->whereHas('division', function ($q) {
                 $q->where('title', 'DPW');
-            })->with('user', 'division')->get();
+            })
+            ->withCount('department_users')
+            ->with('user', 'division')->get();
 
         return response()->json([
             'status' => 'success',
@@ -106,7 +108,7 @@ class DpwDepartmentController extends Controller
                 $q->where('title', 'DPW');
             })
             ->with('user', 'division')
-            ->withCount('children')
+            ->withCount('department_users')
             ->get();
 
         return response()->json([

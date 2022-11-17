@@ -16,7 +16,7 @@ class DepartmentController extends Controller
     public function index()
     {
         //
-        $res = Department::with('children', 'user')
+        $res = Department::with('children', 'user', 'department_users')
             ->where('parent_id', null)
             ->get();
         return response()->json($res);

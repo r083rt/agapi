@@ -120,6 +120,7 @@ class UserController extends Controller
             ->where('name', 'like', '%' . $keyword . '%')
             ->orWhere('email', 'like', '%' . $keyword . '%')
             ->orWhere('kta_id', 'like', '%' . $keyword . '%')
+            ->has('profile')
             ->with('profile')
             ->paginate();
 

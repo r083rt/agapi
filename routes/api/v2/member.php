@@ -76,6 +76,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'book-category.book' => 'CategoryBookController', //untuk mendapatkan data buku berdasarkan kategori
         'department' => 'DepartmentController', //untuk mendapatkan data departemen
         'department-division' => 'DepartmentDivisionController', //untuk mendapatkan data divisi departemen
+        'department.department-user' => 'DepartmentUserController', //untuk mendapatkan data user berdasarkan departemen
         'dpp-department' => 'DppDepartmentController', //untuk mendapatkan data departemen dpp
         'dpw-department' => 'DpwDepartmentController', //untuk mendapatkan data departemen dpw
         'dpd-department' => 'DpdDepartmentController', //untuk mendapatkan data departemen dpd

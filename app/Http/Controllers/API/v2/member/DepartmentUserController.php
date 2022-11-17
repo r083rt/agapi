@@ -4,32 +4,23 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Department;
 use App\Models\DepartmentUser;
-use Illuminate\Support\Facades\DB;
 
-class DppDepartmentController extends Controller
+class DepartmentUserController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($departmentId)
     {
         //
-        $dpp = Department::where('parent_id', null)
-            ->whereHas('division', function ($q) {
-                $q->where('title', 'DPP');
-            })
-            ->with('user', 'division', 'children.department_users')
-            ->withCount('department_users')
-            ->get();
+        $department_users = DepartmentUser::where('department_id', $departmentId)
+            ->with('department.division', 'user')
+            ->paginate();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $dpp
-        ], 200);
+        return response()->json($department_users);
     }
 
     /**
@@ -65,18 +56,16 @@ class DppDepartmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         //
-        $request->validate([
-            'user_id' => 'required|unique:departments,user_id',
-        ]);
+        $department_user = DepartmentUser::where('department_id', $request->department_id)
+            ->first();
 
-        $dpp = Department::findOrFail($request->department_id);
-        $dpp->user_id = $request->user_id;
-        $dpp->save();
+        $department_user->user_id = $request->user_id;
+        $department_user->save();
 
-        return response()->json($dpp);
+        return response()->json($department_user);
     }
 
     /**
@@ -88,15 +77,5 @@ class DppDepartmentController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    public function childrens($parentId)
-    {
-        $children = Department::where('parent_id', $parentId)
-            ->whereHas('division', function ($q) {
-                $q->where('title', 'DPP');
-            })->with('user', 'division')->get();
-
-        return response()->json($children);
     }
 }
