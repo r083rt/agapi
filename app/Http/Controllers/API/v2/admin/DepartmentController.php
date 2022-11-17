@@ -74,7 +74,6 @@ class DepartmentController extends Controller
         $department->update($request->all());
 
         return response()->json($department);
-
     }
 
     /**
@@ -97,6 +96,7 @@ class DepartmentController extends Controller
     {
         $departments = Department::where('title', 'like', '%' . $keyword . '%')
             ->orWhereDate('start_date', 'like', '%' . $keyword . '%')
+            ->with('division')
             ->paginate();
 
         return response()->json($departments);
