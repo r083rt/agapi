@@ -16,13 +16,7 @@ class DepartmentUserController extends Controller
     public function index(Request $request)
     {
         //
-        $departmentUser = DepartmentUser::with('department', 'user')->orderBy('id', 'desc');
-
-        if ($request->filter) {
-            $departmentUser->where('title', 'like', '%' . $request->filter . '%');
-        }
-
-        $departmentUser = $departmentUser->paginate();
+        $departmentUser = DepartmentUser::with('department', 'user')->orderBy('id', 'desc')->get();
 
         return response()->json($departmentUser);
     }
