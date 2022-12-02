@@ -81,6 +81,10 @@ Route::group(['middleware' => 'auth:api'], function () {
         'dpw-department' => 'DpwDepartmentController', //untuk mendapatkan data departemen dpw
         'dpd-department' => 'DpdDepartmentController', //untuk mendapatkan data departemen dpd
         'dpc-department' => 'DpcDepartmentController', //untuk mendapatkan data departemen dpc
+        'question-list' => 'QuestionListController', //untuk mendapatkan data pertanyaan
+        'assignment' => 'AssignmentController', //untuk mendapatkan data tugas
+        'user.question-list' => 'UserQuestionListController', //untuk mendapatkan data pert
+        'user.assignment' => 'UserAssignmentController', //untuk mendapatkan data tugas
     ]);
 
     //department filter
