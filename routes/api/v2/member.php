@@ -82,10 +82,14 @@ Route::group(['middleware' => 'auth:api'], function () {
         'dpd-department' => 'DpdDepartmentController', //untuk mendapatkan data departemen dpd
         'dpc-department' => 'DpcDepartmentController', //untuk mendapatkan data departemen dpc
         'question-list' => 'QuestionListController', //untuk mendapatkan data pertanyaan
+        'assignment-category' => 'AssignmentCategoryController', //untuk mendapatkan data kategori tugas
         'assignment' => 'AssignmentController', //untuk mendapatkan data tugas
         'user.question-list' => 'UserQuestionListController', //untuk mendapatkan data pert
         'user.assignment' => 'UserAssignmentController', //untuk mendapatkan data tugas
     ]);
+
+    //input question list
+    Route::post('/assignment/store/question-lists', 'AssignmentController@storequestionlist');
 
     //department filter
     Route::get('/dpw-departments/province/{province_id}', 'DpwDepartmentController@getByProvince');
