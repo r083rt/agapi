@@ -92,6 +92,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     //input question list
     Route::post('/assignment/store/question-lists', 'AssignmentController@storequestionlist');
 
+    //search question list
+    Route::get('/assignment/search/{keyword}/question-lists', 'QuestionListController@search');
+
     //department filter
     Route::get('/dpw-departments/province/{province_id}', 'DpwDepartmentController@getByProvince');
     Route::get('/dpd-departments/city/{city_id}', 'DpdDepartmentController@getByCity');

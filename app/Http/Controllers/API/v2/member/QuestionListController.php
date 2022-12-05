@@ -70,4 +70,23 @@ class QuestionListController extends Controller
     {
         //
     }
+
+    public function search($keyword)
+    {
+        $questionlists = Assigment::where('is_publish', 0)
+            ->whereNotNull('user_id')
+            ->with('assigment_category', 'grade', 'question_lists', 'user')
+            ->where(function ($query) use ($keyword) {
+                $query->where('topic', 'like', "%$keyword%")
+                    ->orWhereHas('assigment_category', function ($query) use ($keyword) {
+                        $query->where('name', 'like', "%$keyword%");
+                    })
+                    ->orWhereHas('user', function ($query) use ($keyword) {
+                        $query->where('name', 'like', "%$keyword%");
+                    });
+            })
+            ->orderBy('id', 'desc')
+            ->paginate();
+        return response()->json($questionlists);
+    }
 }
