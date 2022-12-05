@@ -109,9 +109,11 @@ class AssignmentController extends Controller
                     $question_list->audio()->save($file);
                 }
             }
+
             //save answer list
             foreach ($question_list['answer_lists'] as $al => $answer_list) {
-                $question_list->answer_lists()->create($answer_list);
+                $item_answer_list = new AnswerList($answer_list);
+                $item_question_list->answer_lists()->save($item_answer_list);
 
                 //check if answer_list has image and save it
                 if (isset($answer_list['image'])) {
