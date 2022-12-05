@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\QuestionList;
+use App\Models\Assigment;
 
 class UserQuestionListController extends Controller
 {
@@ -16,12 +16,11 @@ class UserQuestionListController extends Controller
     public function index($userId)
     {
         //
-        $questionList = QuestionList::whereHas('assigment_question_list', function ($q) use ($userId) {
-            $q->where('user_id', $userId);
-        })->with('assigment_question_list.creator', 'assigment_question_list.assigment_type')
+        $questionList = Assigment::where('is_publish', 0)
+            ->where('user_id', $userId)
+            ->with('assigment_category', 'grade', 'question_lists', 'user')
             ->orderBy('id', 'desc')
             ->paginate();
-
         return response()->json($questionList);
     }
 

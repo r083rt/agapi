@@ -4,26 +4,20 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\QuestionList;
-use App\Models\AssigmentQuestionList;
-use App\Models\Assigment;
+use App\Models\AssigmentType;
 
-class QuestionListController extends Controller
+class AssignmentCategoryTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($cateogryId)
     {
         //
-        $questionlists = Assigment::where('is_publish', 0)
-            ->whereNotNull('user_id')
-            ->with('assigment_category', 'grade', 'question_lists', 'user')
-            ->orderBy('id', 'desc')
-            ->paginate();
-        return response()->json($questionlists);
+        $types = AssigmentType::where('assigment_category_id', $cateogryId)->get();
+        return response()->json($types);
     }
 
     /**

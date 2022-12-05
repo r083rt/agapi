@@ -83,6 +83,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'dpc-department' => 'DpcDepartmentController', //untuk mendapatkan data departemen dpc
         'question-list' => 'QuestionListController', //untuk mendapatkan data pertanyaan
         'assignment-category' => 'AssignmentCategoryController', //untuk mendapatkan data kategori tugas
+        'assignment-category.type' => 'AssignmentCategoryTypeController', //untuk mendapatkan data tipe tugas berdasarkan kategori
         'assignment' => 'AssignmentController', //untuk mendapatkan data tugas
         'user.question-list' => 'UserQuestionListController', //untuk mendapatkan data pert
         'user.assignment' => 'UserAssignmentController', //untuk mendapatkan data tugas
