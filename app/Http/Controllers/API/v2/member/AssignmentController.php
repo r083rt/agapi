@@ -73,13 +73,15 @@ class AssignmentController extends Controller
 
     public function storequestionlist(Request $request)
     {
+        // $question_lists = json_decode($request->question_lists);
         // return response()->json($request->all());
         $assignment = new Assigment($request->all());
         $assignment->code = base_convert($request->user()->id . time(), 10, 36);
         // $assignment->fill($request->all());
         $request->user()->assigments()->save($assignment);
 
-        foreach ($request->question_lists as $ql => $question_list) {
+        foreach ($request->question_lists as $question_list) {
+            // return response()->json($question_list);
             $item_question_list = new QuestionList($question_list);
             $assignment->question_lists()->save($item_question_list);
             $assignment->question_lists()->attach([$item_question_list->id => [
@@ -89,7 +91,7 @@ class AssignmentController extends Controller
             ]]);
             //check if question_list has image and save it
             if (isset($question_list['image'])) {
-                $image = $request->question_lists[$ql]['image'];
+                $image = $question_list['image'];
 
                 $file = new File();
                 $file->type = 'image/jpeg';
@@ -104,7 +106,7 @@ class AssignmentController extends Controller
             if (isset($question_list['audio'])) {
                 $file = new File();
                 $file->type = 'audio/m4a';
-                $path = $request->question_lists[$ql]['audio']->store('files', 'wasabi');
+                $path = $question_list['audio']->store('files', 'wasabi');
                 if ($path) {
                     $file->src = $path;
                     $question_list->audio()->save($file);

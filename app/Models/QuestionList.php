@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class QuestionList extends Model
 {
     //
-    protected $fillable = ['name','description','ref_id'];
+    // protected $fillable = ['name','description','ref_id'];
+    protected $guarded = ["id"];
 
     public function answer_lists(){
         return $this->hasMany('App\Models\AnswerList');
@@ -42,8 +43,8 @@ class QuestionList extends Model
     public function questions(){
         return $this->hasMany('App\Models\Question','question_list_id');
     }
-   
-    
+
+
     public function ref_question_list(){
         return $this->belongsTo(QuestionList::class, 'ref_id');
     }
