@@ -150,6 +150,12 @@ class AssignmentController extends Controller
         return response()->json($assignment->load('question_lists', 'question_lists.answer_lists'));
     }
 
+    public function showquestionlist($id)
+    {
+        $assignment = Assigment::with('question_lists.files', 'question_lists.answer_lists', 'grade')->find($id);
+        return response()->json($assignment);
+    }
+
     public function search($keyword)
     {
         $assignment = Assigment::with('grade', 'user', 'teacher', 'assigment_category', 'comments', 'likes', 'liked', 'ratings', 'reviews')

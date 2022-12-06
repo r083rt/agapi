@@ -91,6 +91,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     //input question list
     Route::post('/assignment/store/question-lists', 'AssignmentController@storequestionlist');
+    Route::get('/assignment/{id}/question-lists', 'AssignmentController@showquestionlist');
 
     //search question list
     Route::get('/assignment/search/{keyword}/question-lists', 'QuestionListController@search');
