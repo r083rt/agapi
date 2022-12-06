@@ -95,6 +95,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     //search question list
     Route::get('/assignment/search/{keyword}/question-lists', 'QuestionListController@search');
 
+    //search assignment
+    Route::get('/assignment/search/{keyword}', 'AssignmentController@search');
+
     //department filter
     Route::get('/dpw-departments/province/{province_id}', 'DpwDepartmentController@getByProvince');
     Route::get('/dpd-departments/city/{city_id}', 'DpdDepartmentController@getByCity');

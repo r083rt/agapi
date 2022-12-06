@@ -20,6 +20,7 @@ class AssignmentController extends Controller
     {
         //
         $assignment = Assigment::with('grade', 'user', 'teacher', 'assigment_category', 'comments', 'likes', 'liked', 'ratings', 'reviews')
+            ->where('is_publish', 1)
             ->orderBy('id', 'desc')
             ->paginate();
         return response()->json($assignment);
@@ -145,5 +146,25 @@ class AssignmentController extends Controller
 
 
         return response()->json($assignment->load('question_lists', 'question_lists.answer_lists'));
+    }
+
+    public function search($keyword)
+    {
+        $assignment = Assigment::with('grade', 'user', 'teacher', 'assigment_category', 'comments', 'likes', 'liked', 'ratings', 'reviews')
+            ->where('name', 'like', '%' . $keyword . '%')
+            ->orWhere(function ($query) use ($keyword) {
+                $query->whereHas('grade', function ($query) use ($keyword) {
+                    $query->where('name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhereHas('assigment_category', function ($query) use ($keyword) {
+                        $query->where('name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhereHas('user', function ($query) use ($keyword) {
+                        $query->where('name', 'like', '%' . $keyword . '%');
+                    });
+            })
+            ->orderBy('id', 'desc')
+            ->paginate();
+        return response()->json($assignment);
     }
 }
