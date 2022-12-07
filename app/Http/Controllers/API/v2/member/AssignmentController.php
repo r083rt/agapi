@@ -36,6 +36,19 @@ class AssignmentController extends Controller
     public function store(Request $request)
     {
         //
+        // return response()->json('asd');
+        $assignment = new Assigment($request->all());
+        $assignment->code = base_convert($request->user()->id . time(), 10, 36);
+        $assignment->is_publish = 1;
+        $request->user()->assigments()->save($assignment);
+
+        foreach ($request->question_lists as $ql => $question_list) {
+            $assignment->question_lists()->attach([$question_list['id'] => [
+                'creator_id' => $question_list['pivot']['creator_id'],
+                'user_id' => $request->user()->id,
+                'assigment_type_id' => $question_list['pivot']['assigment_type_id'],
+            ]]);
+        }
     }
 
     /**

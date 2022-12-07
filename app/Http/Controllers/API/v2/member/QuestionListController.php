@@ -20,7 +20,7 @@ class QuestionListController extends Controller
         //
         $questionlists = Assigment::where('is_publish', 0)
             ->whereNotNull('user_id')
-            ->with('assigment_category', 'grade', 'question_lists.files', 'user')
+            ->with('assigment_category', 'grade', 'question_lists.images', 'user', 'question_lists.assigment_types', 'question_lists.answer_lists')
             ->orderBy('id', 'desc')
             ->paginate();
         return response()->json($questionlists);
@@ -35,6 +35,7 @@ class QuestionListController extends Controller
     public function store(Request $request)
     {
         //
+
     }
 
     /**
