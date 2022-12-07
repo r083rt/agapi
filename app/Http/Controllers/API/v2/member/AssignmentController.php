@@ -8,6 +8,7 @@ use App\Models\Assigment;
 use App\Models\File;
 use App\Models\AnswerList;
 use App\Models\QuestionList;
+use Illuminate\Support\Facades\Storage;
 
 class AssignmentController extends Controller
 {
@@ -83,7 +84,7 @@ class AssignmentController extends Controller
         foreach ($request->question_lists as $ql => $question_list) {
             // return response()->json($question_list);
             $item_question_list = new QuestionList($question_list);
-            $assignment->question_lists()->save($item_question_list);
+            $item_question_list->save();
             $assignment->question_lists()->attach([$item_question_list->id => [
                 'creator_id' => $request->user()->id,
                 'user_id' => $request->user()->id,
@@ -93,9 +94,19 @@ class AssignmentController extends Controller
             if (isset($question_list['image'])) {
                 $image = $request->question_lists[$ql]['image'];
 
+                //compress image
+                $fileName = time() . '.' . $image->extension();
+                $compressedImage = \Image::make($image)->resize(1080, null, function ($constraint) {
+                    $constraint->aspectRatio();
+                })->encode('jpg', 60);
+                $folderPath = "files";
+                $path = "{$folderPath}/{$fileName}";
+
+                Storage::disk(env('FILESYSTEM_DRIVER', 'wasabi'))->put($path, $compressedImage);
+                //end compress image
+
                 $file = new File();
                 $file->type = 'image/jpeg';
-                $path = $image->store('files', 'wasabi');
                 if ($path) {
                     $file->src = $path;
                     $item_question_list->images()->save($file);
@@ -152,7 +163,7 @@ class AssignmentController extends Controller
 
     public function showquestionlist($id)
     {
-        $assignment = Assigment::with('question_lists.images', 'question_lists.answer_lists', 'grade', 'assigment_category')->find($id);
+        $assignment = Assigment::with('question_lists.images', 'question_lists.answer_lists', 'grade', 'assigment_category', 'question_lists.assigment_types')->find($id);
         return response()->json($assignment);
     }
 
