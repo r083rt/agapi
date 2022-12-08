@@ -72,9 +72,9 @@ class AssignmentUsesController extends Controller
 
     public function assignmentnotyetrated($assigmentId)
     {
-        $assignments = AssigmentSession::where('assignment_id', $assigmentId)
+        $assignments = AssigmentSession::where('assigment_id', $assigmentId)
             ->where('total_score', null)
-            ->with('sessions.user')
+            ->with('session.user')
             ->paginate();
         return response()->json($assignments);
     }

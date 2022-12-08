@@ -91,7 +91,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     ]);
 
     //list student not graded
-    Route::get('/assignment/{assignmentId}/not-yet-rated', 'AssignmentUses@assignmentnotyetrated');
+    Route::get('/assignment/{assignmentId}/not-yet-rated', 'AssignmentUsesController@assignmentnotyetrated');
 
     //input question list
     Route::post('/assignment/store/question-lists', 'AssignmentController@storequestionlist');
