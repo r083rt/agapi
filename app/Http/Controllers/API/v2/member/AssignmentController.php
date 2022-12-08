@@ -8,6 +8,7 @@ use App\Models\Assigment;
 use App\Models\File;
 use App\Models\AnswerList;
 use App\Models\QuestionList;
+use Google\Cloud\BigQuery\Reservation\V1\Assignment;
 use Illuminate\Support\Facades\Storage;
 
 class AssignmentController extends Controller
@@ -60,6 +61,19 @@ class AssignmentController extends Controller
     public function show($id)
     {
         //
+        $assignment = Assigment::with(
+            'grade',
+            'question_lists.answer_lists',
+            'question_lists.assigment_question_list.creator',
+            'question_lists.images',
+            'comments.user',
+            'assigment_category',
+            'sessions.user',
+            'question_lists.assigment_question_list.assigment_type'
+        )
+            ->findOrFail($id);
+
+        return response()->json($assignment);
     }
 
     /**

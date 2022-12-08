@@ -76,7 +76,7 @@ class QuestionListController extends Controller
     {
         $questionlists = Assigment::where('is_publish', 0)
             ->whereNotNull('user_id')
-            ->with('assigment_category', 'grade', 'question_lists', 'user')
+            ->with('assigment_category', 'grade', 'question_lists.images', 'user', 'question_lists.assigment_types', 'question_lists.answer_lists')
             ->where(function ($query) use ($keyword) {
                 $query->where('topic', 'like', "%$keyword%")
                     ->orWhereHas('assigment_category', function ($query) use ($keyword) {
@@ -88,6 +88,20 @@ class QuestionListController extends Controller
             })
             ->orderBy('id', 'desc')
             ->paginate();
+        return response()->json($questionlists);
+    }
+
+    public function filterbygrade($gradeId)
+    {
+        $questionlists = Assigment::where('is_publish', 0)
+            ->whereNotNull('user_id')
+            ->with('assigment_category', 'grade', 'question_lists.images', 'user', 'question_lists.assigment_types', 'question_lists.answer_lists')
+            ->whereHas('grade', function ($query) use ($gradeId) {
+                $query->where('id', $gradeId);
+            })
+            ->orderBy('id', 'desc')
+            ->paginate();
+
         return response()->json($questionlists);
     }
 }

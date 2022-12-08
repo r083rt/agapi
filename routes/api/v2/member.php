@@ -96,6 +96,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     //search question list
     Route::get('/assignment/search/{keyword}/question-lists', 'QuestionListController@search');
 
+    //filter question list by grade
+    Route::get('/question-lists/filter/grade/{gradeId}', 'QuestionListController@filterbygrade');
+
     //search assignment
     Route::get('/assignment/search/{keyword}', 'AssignmentController@search');
 
