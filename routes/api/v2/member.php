@@ -86,9 +86,14 @@ Route::group(['middleware' => 'auth:api'], function () {
         'assignment-category.type' => 'AssignmentCategoryTypeController', //untuk mendapatkan data tipe tugas berdasarkan kategori
         'assignment' => 'AssignmentController', //untuk mendapatkan data tugas
         'assignment-uses' => 'AssignmentUsesController',//
+        'assignment-session' => 'AssignmentSessionController',//
         'user.question-list' => 'UserQuestionListController', //untuk mendapatkan data pert
         'user.assignment' => 'UserAssignmentController', //untuk mendapatkan data tugas
+
     ]);
+
+    //list student assignment session by assignment id
+    Route::get('/assignment/{assignmentId}/session', 'AssignmentSessionController@getsessionbyassignment');
 
     //list student not graded
     Route::get('/assignment/{assignmentId}/not-yet-rated', 'AssignmentUsesController@assignmentnotyetrated');
