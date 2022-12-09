@@ -36,6 +36,9 @@ Route::group(['middleware' => 'auth:api'], function () {
         'user.event' => 'UserEventController', //untuk acara user
         'user.event-attendance' => 'UserEventAttendanceController', // untuk mengambil data absensi user
         'user-bookmark' => 'UserBookmarkController', // untuk mengambil data bookmark user
+        'user.question-list' => 'UserQuestionListController', //untuk mendapatkan data pert
+        'user.assignment' => 'UserAssignmentController', //untuk mendapatkan data tugas
+        'user.room' => 'UserRoomController',
         'murottal' => 'MurottalController', // untuk murottal audio
         'daily-prayer' => 'DailyPrayerController', // untuk doa harian
         'membership-fee' => 'MembershipFeeController', // untuk membership
@@ -87,9 +90,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'assignment' => 'AssignmentController', //untuk mendapatkan data tugas
         'assignment-uses' => 'AssignmentUsesController',//
         'assignment-session' => 'AssignmentSessionController',//
-        'user.question-list' => 'UserQuestionListController', //untuk mendapatkan data pert
-        'user.assignment' => 'UserAssignmentController', //untuk mendapatkan data tugas
-
+        'room' => 'RoomController',//
     ]);
 
     //list student assignment session by assignment id
@@ -107,6 +108,9 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     //filter question list by grade
     Route::get('/question-lists/filter/grade/{gradeId}', 'QuestionListController@filterbygrade');
+
+    //search rooms
+    Route::get('/user/rooms/search/{keyword}', 'UserRoomController@search');
 
     //search assignment
     Route::get('/assignment/search/{keyword}', 'AssignmentController@search');
