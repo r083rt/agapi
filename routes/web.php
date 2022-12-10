@@ -500,3 +500,18 @@ Route::get('/tes', function () {
     }
     return "success";
 });
+
+Route::get('/cek-perpanjangan-kongres', function () {
+    // hitung users yang bayar kongres dan expired_at nya sudah lewat
+    $users = App\Models\User::where('user_activated_at', '!=', null)
+        ->where('expired_at', '<', \Carbon\Carbon::now())
+        ->wherehas('payments', function ($query) {
+            $query->where('key', 'pendaftaran_kongres_tahun_2022')
+                ->where('status', 'success');
+        })->count();
+
+    return response()->json([
+        'status' => 'success',
+        'data' => $users
+    ]);
+});
