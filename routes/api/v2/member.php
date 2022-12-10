@@ -93,6 +93,15 @@ Route::group(['middleware' => 'auth:api'], function () {
         'room' => 'RoomController',//
     ]);
 
+    //list ranking by room id
+    Route::get('/rooms/{id}/ranking', 'RoomController@ranking');
+
+    //search user assignment
+    Route::get('/user/assignment/search/{keyword}', 'UserAssignmentController@search');
+
+    //search user question list
+    Route::get('/user/question-lists/search/{keyword}', 'UserQuestionListController@search');
+
     //list student assignment session by assignment id
     Route::get('/assignment/{assignmentId}/session', 'AssignmentSessionController@getsessionbyassignment');
 

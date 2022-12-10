@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use App\Models\Room;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -46,6 +47,9 @@ class RoomController extends Controller
     public function show($id)
     {
         //
+        $room = Room::with('users.profile')->findOrFail($id);
+
+        return response()->json($room);
     }
 
     /**
@@ -69,5 +73,9 @@ class RoomController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function ranking($id){
+
     }
 }

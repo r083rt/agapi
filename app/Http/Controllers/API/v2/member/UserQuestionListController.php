@@ -68,4 +68,14 @@ class UserQuestionListController extends Controller
     {
         //
     }
+
+    public function search($keyword){
+        $questionList = Assigment::where('is_publish', 0)
+            ->where('user_id', auth('api')->user()->id)
+            ->where('topic', 'like', "%$keyword%")
+            ->with('assigment_category', 'grade', 'question_lists', 'user')
+            ->orderBy('id', 'desc')
+            ->paginate();
+        return response()->json($questionList);
+    }
 }

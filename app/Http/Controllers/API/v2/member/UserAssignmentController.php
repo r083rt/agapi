@@ -17,6 +17,7 @@ class UserAssignmentController extends Controller
     {
         //
         $assignment = Assigment::with('grade', 'user', 'teacher', 'assigment_category', 'comments', 'likes', 'liked', 'ratings', 'reviews')
+            ->where('is_publish', 1)
             ->where('user_id', $userId)
             ->orderBy('id', 'desc')
             ->paginate();
@@ -66,5 +67,19 @@ class UserAssignmentController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function search($keyword)
+    {
+        $assignment = Assigment::with('grade', 'user', 'teacher', 'assigment_category', 'comments', 'likes', 'liked', 'ratings', 'reviews')
+            ->where('is_publish', 1)
+            ->where('user_id', auth('api')->user()->id)
+            ->where(function ($query) use ($keyword) {
+                $query->where('topic', 'like', "%$keyword%")
+                    ->orWhere('subject', 'like', "%$keyword%");
+            })
+            ->orderBy('id', 'desc')
+            ->paginate();
+        return response()->json($assignment);
     }
 }
