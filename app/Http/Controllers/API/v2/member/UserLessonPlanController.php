@@ -37,6 +37,17 @@ class UserLessonPlanController extends Controller
     public function store(Request $request)
     {
         //
+        $lessonplan = new LessonPlan($request->all());
+        $lessonplan->creator_id = $request->user()->id;
+        $lessonplan->school = $request->user()->profile->school_place ?? 'Kosong';
+        $lessonplan->effort = 100;
+        $request->user()->lesson_plans()->save($lessonplan);
+
+        if ($request->has('contents')) {
+            $lessonplan->contents()->createMany($request->contents);
+        }
+
+        return response()->json($lessonplan);
     }
 
     /**
