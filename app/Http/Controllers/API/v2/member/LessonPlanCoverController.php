@@ -69,12 +69,12 @@ class LessonPlanCoverController extends Controller
     {
         $url = env('APP_URL', 'localhost:8000');
         $cover_length = LessonPlanCover::count();
-        $random_cover = LessonPlanCover::findOrFail(rand(1, $cover_length));
+        $random_cover = LessonPlanCover::take($cover_length)->get()->random(1);
 
         $data = [
             'image' => $random_cover->image,
             'topic' => $request->topic,
-            'grade' => $request->grade,
+            'grade' => $request->grade['label'],
             'creator' => $request->user()->name,
         ];
 
@@ -88,10 +88,9 @@ class LessonPlanCoverController extends Controller
             ->setChromePath(env('CHROME_BINARY_PATH', '/usr/lib/node_modules/chromium'))
             ->base64Screenshot();
 
-            return response()->json($file);
-        // return response()->json([
-        //     'data' => "data:image/png;base64,$file",
-        //     'message' => 'Kartu Tanda Anggota Ter generate',
-        // ]);
+        return response()->json([
+            'data' => "data:image/png;base64,$file",
+            'message' => 'Generate Cover RPP',
+        ]);
     }
 }
