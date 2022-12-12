@@ -16,26 +16,30 @@
 <body>
     <div
         style="
-            width: 50vw;
-            height: 100vh;
+            width: 500px;
+            height: 500px;
             background-image: url({{ $image }});
             background-size: cover;
             align-items: center
             display:flex;
             flex-direction:column">
-        <div style="display:flex; justify-content: center; padding-top: 20px;flex-direction:column;" >
-            <div style="flex: 9; display:flex; flex-direction:column; align-items: center">
-                <h1 style="font-size: 30px; font-weight: bold; ">Judul</h1>
+        <div
+            style="display: flex; flex: 3, justify-content: center; align-items: center; padding-top: 10%; flex-direction:column">
+            <div style="display: flex; flex-direction:column; align-items:center; width: 100%">
+                <div style="font-size: 40px">
+                    Ayo membayar zakat
+                </div>
             </div>
-            <div style="flex: 1;display:flex; flex-direction:column; align-items: center">
-                <div style="font-size: 20px; font-weight: bold; padding-bottom:10px">
-                    Mata Pelajaran
+            <div style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 15%">
+                <h2>Mata Pelajaran : Pendidikan Agama islam</h2>
+            </div>
+            <div
+                style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 30%; justify-content:center">
+                <div style="font-size: 25px; font-weight:bold">
+                    Kelas 6 SD
                 </div>
-                <div style="font-size: 20px; padding-bottom:10px">
-                    Kelas
-                </div>
-                <div style="font-size: 20px; padding-bottom:10px">
-                    Oleh : penulis
+                <div style="font-size: 30px; padding-top:3%; font-weight:bold">
+                    Oleh Nama
                 </div>
             </div>
         </div>

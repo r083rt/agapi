@@ -15,9 +15,7 @@ class LessonPlanCoverController extends Controller
     public function index()
     {
         //
-        $cover = LessonPlanCover::findOrFail(1);
-        $image = 'https://cdn-agpaiidigital.online'."/$cover->image";
-        return view('lessonplan.generatecover', compact('image'));
+
     }
 
     /**
@@ -84,5 +82,11 @@ class LessonPlanCoverController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function coverlessonplan(Request $request){
+        return response()->json($request->all());
+        $image = 'https://cdn-agpaiidigital.online' . "/$request->imaage";
+        return view('lessonplan.generatecover', compact('image'));
     }
 }
