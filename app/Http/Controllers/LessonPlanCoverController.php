@@ -85,7 +85,7 @@ class LessonPlanCoverController extends Controller
     }
 
     public function coverlessonplan(Request $request){
-        // return response()->json($request->all());
+        return response()->json($request->all());
         $image = 'https://cdn-agpaiidigital.online' . "/$request->image";
         return view('lessonplan.generatecover', compact('image'));
     }
