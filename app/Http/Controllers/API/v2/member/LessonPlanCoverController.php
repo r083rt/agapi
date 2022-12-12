@@ -72,7 +72,7 @@ class LessonPlanCoverController extends Controller
         $random_cover = LessonPlanCover::take($cover_length)->get()->random(1);
 
         $data = [
-            'image' => $random_cover->image,
+            'image' => $random_cover['image'],
             'topic' => $request->topic,
             'grade' => $request->grade['label'],
             'creator' => $request->user()->name,
