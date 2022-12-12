@@ -39,6 +39,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'user.question-list' => 'UserQuestionListController', //untuk mendapatkan data pert
         'user.assignment' => 'UserAssignmentController', //untuk mendapatkan data tugas
         'user.room' => 'UserRoomController',
+        'user.lesson-plan' => 'UserLessonPlanController',//
         'murottal' => 'MurottalController', // untuk murottal audio
         'daily-prayer' => 'DailyPrayerController', // untuk doa harian
         'membership-fee' => 'MembershipFeeController', // untuk membership
@@ -91,7 +92,11 @@ Route::group(['middleware' => 'auth:api'], function () {
         'assignment-uses' => 'AssignmentUsesController',//
         'assignment-session' => 'AssignmentSessionController',//
         'room' => 'RoomController',//
+        'lesson-plan' => 'LessonPlanController'//
     ]);
+
+    //search rpp user
+    Route::get('/user/lesson-plans/search/{keyword}', 'UserLessonPlanController@search');
 
     //list ranking by room id
     Route::get('/rooms/{id}/ranking', 'RoomController@ranking');
