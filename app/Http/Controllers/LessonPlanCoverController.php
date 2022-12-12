@@ -88,7 +88,7 @@ class LessonPlanCoverController extends Controller
         // return response()->json($request->all());
         $cover = LessonPlanCover::findOrFail(1);
 
-        $image = 'https://cdn-agpaiidigital.online' . "/$cover";
+        $image = 'https://cdn-agpaiidigital.online' . "/$cover->image";
         return view('lessonplan.generatecover', compact('image'));
     }
 }
