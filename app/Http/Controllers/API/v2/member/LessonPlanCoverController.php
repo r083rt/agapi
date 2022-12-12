@@ -79,7 +79,6 @@ class LessonPlanCoverController extends Controller
         ];
 
         $file = Browsershot::url("$url/lesson-plans/generate/cover")
-            ->post($data)
             ->noSandbox()
             ->windowSize(586, 1070)
             ->fullPage()
