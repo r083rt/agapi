@@ -38,6 +38,9 @@ Route::get('event/{eventId}/barcode', 'EventBarcodeController@index')->name('web
 Route::get('event/{eventId}/download', 'EventBarcodeController@download')->name('web.event.download');
 Route::get('event/{eventId}/participant/{userId}', 'EventParticipantController@show')->name('web.event.participant');
 
+//generate cover rpp
+Route::get('/lesson-plans/generate/cover', 'LessonPlanCoverController@index')->name('web.lesson-plan-cover');
+
 Route::get('test', function () {
     $images = App\Models\File::where('type', 'like', 'imagPe%')->limit(10)->orderBy('created_at', 'desc')->count();
     $res = DB::table('users')

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LessonPlanCover;
 use Illuminate\Http\Request;
 
 class LessonPlanCoverController extends Controller
@@ -14,6 +15,9 @@ class LessonPlanCoverController extends Controller
     public function index()
     {
         //
+        $cover = LessonPlanCover::findOrFail(1);
+        $image = 'https://cdn-agpaiidigital.online'."/$cover->image";
+        return view('lessonplan.generatecover', compact('image'));
     }
 
     /**
