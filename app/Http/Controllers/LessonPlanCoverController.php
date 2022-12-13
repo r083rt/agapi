@@ -85,7 +85,7 @@ class LessonPlanCoverController extends Controller
         //
     }
 
-    public function coverlessonplan($creator_id, $topic, $grade, $cover_id){
+    public function coverlessonplan($creator_id, $topic,$subject, $grade, $cover_id){
         // return response()->json($request->all());
         $cover = LessonPlanCover::findOrFail($cover_id);
         $creator = User::findOrFail($creator_id);
@@ -94,7 +94,8 @@ class LessonPlanCoverController extends Controller
             'image' => 'https://cdn-agpaiidigital.online' . "/$cover->image",
             'creator' => $creator->name,
             'topic' => $topic,
-            'grade' => $grade
+            'grade' => $grade,
+            'subject' => $subject
         ];
 
         return view('lessonplan.generatecover', compact('data'));
