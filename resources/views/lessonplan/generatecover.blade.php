@@ -31,15 +31,15 @@
                 </div>
             </div>
             <div style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 15%">
-                <h2>Mata Pelajaran : Pendidikan Agama islam</h2>
+                <h2>Mata Pelajaran : {{ $data['subject'] }}</h2>
             </div>
             <div
                 style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 20%; justify-content:center">
                 <div style="font-size: 25px; font-weight:bold">
-                    Kelas 6 SD
+                    Kelas {{ $data['grade'] }}
                 </div>
                 <div style="font-size: 30px; padding-top:3%; font-weight:bold">
-                    Oleh Nama
+                    Oleh {{ $data['creator'] }}
                 </div>
             </div>
         </div>

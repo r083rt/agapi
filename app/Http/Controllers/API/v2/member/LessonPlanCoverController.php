@@ -77,14 +77,9 @@ class LessonPlanCoverController extends Controller
         $cover_id = $random_cover[0]->id;
         $topic = $request->topic;
         $grade = $request->grade['label'];
+        $subject = $request->subject;
 
-        // return response()->json([
-        //     'data' => $response->getBody(),
-        //     'message' => 'Generate Cover RPP',
-        // ]);
-
-
-        $file = Browsershot::url("https://agpaiidigital.org/lesson-plans/$creator_id/$topic/$grade/generate/cover/$cover_id")
+        $file = Browsershot::url("https://agpaiidigital.org/lesson-plans/$creator_id/$topic/$subject/$grade/generate/cover/$cover_id")
         ->noSandbox()
             ->windowSize(586, 1070)
             ->fullPage()
@@ -105,14 +100,9 @@ class LessonPlanCoverController extends Controller
         $cover_id = $request->coverId;
         $topic = $request->topic;
         $grade = $request->grade['label'];
+        $subject = $request->subject;
 
-        // return response()->json([
-        //     'data' => $response->getBody(),
-        //     'message' => 'Generate Cover RPP',
-        // ]);
-
-
-        $file = Browsershot::url("https://agpaiidigital.org/lesson-plans/$creator_id/$topic/$grade/generate/cover/$cover_id")
+        $file = Browsershot::url("https://agpaiidigital.org/lesson-plans/$creator_id/$topic/$subject/$grade/generate/cover/$cover_id")
         ->noSandbox()
             ->windowSize(586, 1070)
             ->fullPage()
