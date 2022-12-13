@@ -85,7 +85,7 @@ class LessonPlanCoverController extends Controller
         $file = Browsershot::url("https://agpaiidigital.org/lesson-plans/$creator_id/$topic/$grade/generate/cover/$cover_id")
         ->noSandbox()
             ->windowSize(586, 1070)
-            ->fullPage()
+            // ->fullPage()
             ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
             ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
             ->setChromePath(env('CHROME_BINARY_PATH', '/usr/lib/node_modules/chromium'))
