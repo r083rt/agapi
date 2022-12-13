@@ -82,7 +82,7 @@ class LessonPlanCoverController extends Controller
         // ]);
 
 
-        $file = Browsershot::url("$url/lesson-plans/$creator_id/$topic/$grade/generate/cover/$cover_id")
+        $file = Browsershot::url("https://agpaiidigital.org/lesson-plans/$creator_id/$topic/$grade/generate/cover/$cover_id")
         ->noSandbox()
             ->windowSize(586, 1070)
             ->fullPage()
