@@ -47,6 +47,14 @@ class LessonPlanController extends Controller
     public function show($id)
     {
         //
+        $lessonplans = LessonPlan::with([
+            'grade',
+            'likes',
+            'user',
+            'contents'
+        ])->withCount(['likes'])->findOrFail($id);
+
+        return response()->json($lessonplans);
     }
 
     /**
