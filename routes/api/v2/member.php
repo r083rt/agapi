@@ -103,6 +103,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     //generate cover lesson plan by cover id
     Route::post('/lesson-plans/generate/cover/selected', 'LessonPlanCoverController@generatecoverbycoverid');
 
+    //search rpp favorite
+    Route::get('/lesson-plans/favorite/search/{keyword}', 'LessonPlanLikedController@search');
 
     //search rpp user
     Route::get('/user/lesson-plans/search/{keyword}', 'UserLessonPlanController@search');

@@ -37,33 +37,28 @@ class UserLessonPlanController extends Controller
      */
     public function store(Request $request)
     {
-        //validasi request
-        $request->validate([
-            'topic' => 'required',
-            'grade_id' => 'required',
-            'contents' => 'required',
-            'contents.*.value' => 'required',
-            'cover' => 'required'
-        ]);
 
 
+        //cek type data request
+        if (is_string($request->contents)) {
+            $request->contents = json_decode($request->contents, true);
+        }
 
         $lessonplan = new LessonPlan($request->all());
         $lessonplan->creator_id = $request->user()->id;
         $lessonplan->school = $request->user()->profile->school_place ?? 'Kosong';
         $lessonplan->effort = 100;
 
-        if ($request->hasFile('cover')) {
-            $image = $request->file('cover');
-            $fileName = time() . '.' . $image->extension();
-            $compressedImage = \Image::make($image)->resize(1080, null, function ($constraint) {
-                $constraint->aspectRatio();
-            })->encode('jpg', 60);
-            $folderPath = "cover";
-            $path = "{$folderPath}/{$fileName}";
-            Storage::disk(env('FILESYSTEM_DRIVER', 'wasabi'))->put($path, $compressedImage);
-            $lessonplan->cover = $path;
-        }
+        // $image = json_decode($request->cover);
+        // // return response()->json($request->hasFile('cover'));
+        // $fileName = time() . '.' . 'png';
+        // $compressedImage = \Image::make($image)->resize(1080, null, function ($constraint) {
+        //     $constraint->aspectRatio();
+        // })->encode('jpg', 60);
+        // $folderPath = "cover";
+        // $path = "{$folderPath}/{$fileName}";
+        // Storage::disk(env('FILESYSTEM_DRIVER', 'wasabi'))->put($path, $compressedImage);
+        // $lessonplan->cover = $path;
 
         $request->user()->lesson_plans()->save($lessonplan);
 

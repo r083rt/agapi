@@ -21,12 +21,12 @@ class LessonPlanLikedController extends Controller
             'likes',
             'user',
         ])
-        ->withCount(['likes'])
-        ->whereHas('likes', function($query){
-            $query->where('user_id', auth('api')->user()->id);
-        })
-        ->orderBy('id', 'desc')
-        ->paginate();
+            ->withCount(['likes'])
+            ->whereHas('likes', function ($query) {
+                $query->where('user_id', auth('api')->user()->id);
+            })
+            ->orderBy('id', 'desc')
+            ->paginate();
 
         return response()->json($lessonplans);
     }
@@ -74,5 +74,23 @@ class LessonPlanLikedController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function search($keyword)
+    {
+        $lessonplans = LessonPlan::with([
+            'grade',
+            'likes',
+            'user',
+        ])
+            ->where('topic', 'like', "%$keyword%")
+            ->withCount(['likes'])
+            ->whereHas('likes', function ($query) {
+                $query->where('user_id', auth('api')->user()->id);
+            })
+            ->orderBy('id', 'desc')
+            ->paginate();
+
+        return response()->json($lessonplans);
     }
 }
