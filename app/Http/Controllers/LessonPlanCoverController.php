@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LessonPlanCover;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class LessonPlanCoverController extends Controller
@@ -84,11 +85,18 @@ class LessonPlanCoverController extends Controller
         //
     }
 
-    public function coverlessonplan(Request $request){
+    public function coverlessonplan($creator_id, $topic, $grade, $cover_id){
         // return response()->json($request->all());
-        $cover = LessonPlanCover::findOrFail(1);
+        $cover = LessonPlanCover::findOrFail($cover_id);
+        $creator = User::findOrFail($creator_id);
 
-        $image = 'https://cdn-agpaiidigital.online' . "/$cover->image";
-        return view('lessonplan.generatecover', compact('image'));
+        $data = [
+            'image' => 'https://cdn-agpaiidigital.online' . "/$cover->image",
+            'creator' => $creator->name,
+            'topic' => $topic,
+            'grade' => $grade
+        ];
+
+        return view('lessonplan.generatecover', compact('data'));
     }
 }

@@ -71,21 +71,26 @@ class LessonPlanCoverController extends Controller
         $cover_length = LessonPlanCover::count();
         $random_cover = LessonPlanCover::take($cover_length)->get()->random(1);
 
-        $data = [
-            'image' => $random_cover[0]->image,
-            'topic' => $request->topic,
-            'grade' => $request->grade['label'],
-            'creator' => $request->user()->name,
-        ];
+        $creator_id = $request->user()->id;
+        $cover_id = $random_cover[0]->id;
+        $topic = $request->topic;
+        $grade = $request->grade['label'];
 
-        $file = Browsershot::url("$url/lesson-plans/generate/cover")
-            ->noSandbox()
+        // return response()->json([
+        //     'data' => $response->getBody(),
+        //     'message' => 'Generate Cover RPP',
+        // ]);
+
+
+        $file = Browsershot::url("$url/lesson-plans/$creator_id/$topic/$grade/generate/cover/$cover_id")
+        ->noSandbox()
             ->windowSize(586, 1070)
             ->fullPage()
             ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
             ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
             ->setChromePath(env('CHROME_BINARY_PATH', '/usr/lib/node_modules/chromium'))
             ->base64Screenshot();
+
 
         return response()->json([
             'data' => "data:image/png;base64,$file",

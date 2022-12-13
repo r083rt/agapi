@@ -18,7 +18,7 @@
         style="
             width: 500px;
             height: 500px;
-            background-image: url({{ $image }});
+            background-image: url({{ $data->image }});
             background-size: cover;
             align-items: center
             display:flex;
