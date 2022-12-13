@@ -20,7 +20,11 @@ class LessonPlanLikedController extends Controller
             'grade',
             'likes',
             'user',
-        ])->withCount(['likes'])
+        ])
+        ->withCount(['likes'])
+        ->whereHas('likes', function($query){
+            $query->where('user_id', auth('api')->user()->id);
+        })
         ->orderBy('id', 'desc')
         ->paginate();
 

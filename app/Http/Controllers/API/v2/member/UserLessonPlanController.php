@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use App\Models\LessonPlan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class UserLessonPlanController extends Controller
 {
@@ -36,11 +37,34 @@ class UserLessonPlanController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //validasi request
+        $request->validate([
+            'topic' => 'required',
+            'grade_id' => 'required',
+            'contents' => 'required',
+            'contents.*.value' => 'required',
+            'cover' => 'required'
+        ]);
+
+
+
         $lessonplan = new LessonPlan($request->all());
         $lessonplan->creator_id = $request->user()->id;
         $lessonplan->school = $request->user()->profile->school_place ?? 'Kosong';
         $lessonplan->effort = 100;
+
+        if ($request->hasFile('cover')) {
+            $image = $request->file('cover');
+            $fileName = time() . '.' . $image->extension();
+            $compressedImage = \Image::make($image)->resize(1080, null, function ($constraint) {
+                $constraint->aspectRatio();
+            })->encode('jpg', 60);
+            $folderPath = "cover";
+            $path = "{$folderPath}/{$fileName}";
+            Storage::disk(env('FILESYSTEM_DRIVER', 'wasabi'))->put($path, $compressedImage);
+            $lessonplan->cover = $path;
+        }
+
         $request->user()->lesson_plans()->save($lessonplan);
 
         if ($request->has('contents')) {
