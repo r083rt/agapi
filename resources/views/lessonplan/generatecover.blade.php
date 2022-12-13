@@ -34,7 +34,7 @@
                 <h2>Mata Pelajaran : Pendidikan Agama islam</h2>
             </div>
             <div
-                style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 30%; justify-content:center">
+                style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 20%; justify-content:center">
                 <div style="font-size: 25px; font-weight:bold">
                     Kelas 6 SD
                 </div>
