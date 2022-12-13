@@ -18,6 +18,8 @@ class LessonPlanCoverController extends Controller
     public function index()
     {
         //
+        $covers = LessonPlanCover::get();
+        return response()->json($covers);
     }
 
     /**
