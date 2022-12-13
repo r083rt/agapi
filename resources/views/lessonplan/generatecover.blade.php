@@ -16,8 +16,8 @@
 <body>
     <div
         style="
-            width: 50vw;
-            height: 50vw;
+            width: 50vh;
+            height: 50vh;
             background-image: url({{ $data['image'] }});
             background-size: cover;
             align-items: center
@@ -26,19 +26,19 @@
         <div
             style="display: flex; flex: 3, justify-content: center; align-items: center; padding-top: 10%; flex-direction:column">
             <div style="display: flex; flex-direction:column; align-items:center; width: 100%">
-                <div style="font-size: 40px">
+                <div style="font-size: 30px">
                     {{ $data['topic'] }}
                 </div>
             </div>
-            <div style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 15%">
-                <h2>Mata Pelajaran : Pendidikan Agama islam</h2>
+            <div style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 5%">
+                <h5>Mata Pelajaran : Pendidikan Agama islam</h5>
             </div>
             <div
-                style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 30%; justify-content:center">
-                <div style="font-size: 25px; font-weight:bold">
+                style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 10%; justify-content:center">
+                <div style="font-size: 15px; font-weight:bold">
                     Kelas 6 SD
                 </div>
-                <div style="font-size: 30px; padding-top:3%; font-weight:bold">
+                <div style="font-size: 15px; padding-top:3%; font-weight:bold">
                     Oleh Nama
                 </div>
             </div>
