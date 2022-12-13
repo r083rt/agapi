@@ -26,19 +26,19 @@
         <div
             style="display: flex; flex: 3, justify-content: center; align-items: center; padding-top: 10%; flex-direction:column">
             <div style="display: flex; flex-direction:column; align-items:center; width: 100%">
-                <div style="font-size: 40px; color:white">
+                <div style="font-size: 40px; color:darkgreen">
                     {{ $data['topic'] }}
                 </div>
             </div>
             <div style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 15%;">
-                <h2 style="color:white">Mata Pelajaran : Pendidikan Agama islam</h2>
+                <h2 style="color:darkgreen">Mata Pelajaran : Pendidikan Agama islam</h2>
             </div>
             <div
                 style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 20%; justify-content:center">
-                <div style="font-size: 25px; font-weight:bold;color:white">
+                <div style="font-size: 25px; font-weight:bold;color:darkgreen">
                     Kelas 6 SD
                 </div>
-                <div style="font-size: 30px; padding-top:3%; font-weight:bold; color:white">
+                <div style="font-size: 30px; padding-top:3%; font-weight:bold; color:darkgreen">
                     Oleh Nama
                 </div>
             </div>
