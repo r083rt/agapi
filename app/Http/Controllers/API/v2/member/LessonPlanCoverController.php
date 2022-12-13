@@ -67,7 +67,7 @@ class LessonPlanCoverController extends Controller
 
     public function generatecover(Request $request)
     {
-        $url = env('APP_URL', 'localhost:8000');
+        $url = env('https://agpaiidigital.org', 'localhost:8000');
         $cover_length = LessonPlanCover::count();
         $random_cover = LessonPlanCover::take($cover_length)->get()->random(1);
 
