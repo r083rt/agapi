@@ -16,8 +16,8 @@
 <body>
     <div
         style="
-            width: 80vh;
-            height: 80vh;
+            width: 60vh;
+            height: 60vh;
             background-image: url({{ $data['image'] }});
             background-size: cover;
             align-items: center
