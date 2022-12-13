@@ -93,7 +93,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'assignment-session' => 'AssignmentSessionController',//
         'room' => 'RoomController',//
         'lesson-plan' => 'LessonPlanController',//
-        'lesson-plan-cover' => 'LessonPlanCover',//
+        'lesson-plan-cover' => 'LessonPlanCoverController',//
     ]);
 
     //generate cover lesson plan
