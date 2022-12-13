@@ -18,7 +18,7 @@
         style="
             width: 500px;
             height: 500px;
-            background-image: url({{ $data->image }});
+            background-image: url({{ $data['image'] }});
             background-size: cover;
             align-items: center
             display:flex;
@@ -27,7 +27,7 @@
             style="display: flex; flex: 3, justify-content: center; align-items: center; padding-top: 10%; flex-direction:column">
             <div style="display: flex; flex-direction:column; align-items:center; width: 100%">
                 <div style="font-size: 40px">
-                    {{ $data->topic }}
+                    {{ $data['topic'] }}
                 </div>
             </div>
             <div style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 15%">
