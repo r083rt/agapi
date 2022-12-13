@@ -94,6 +94,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'room' => 'RoomController',//
         'lesson-plan' => 'LessonPlanController',//
         'lesson-plan-cover' => 'LessonPlanCoverController',//
+        'lesson-plan-liked' => 'LessonPlanLikedController',//
     ]);
 
     //generate cover lesson plan
