@@ -39,30 +39,24 @@ class UserLessonPlanController extends Controller
     public function store(Request $request)
     {
 
-
-        //cek type data request
-        if (is_string($request->contents)) {
-            $request->contents = json_decode($request->contents, true);
-        }
-
         //convert $request->cover to file
-        $cover = json_decode($request->cover);
+        $cover = $request->cover;
         $cover = str_replace('data:image/png;base64,', '', $cover);
         $cover = str_replace(' ', '+', $cover);
         $cover = base64_decode($cover);
-        // return $cover;
-        //convert $cover to file
 
-        //decode $request->all()
-        $request->merge(json_decode($request->all(), true));
 
         $lessonplan = new LessonPlan();
+        $lessonplan->topic = json_decode($request->topic);
+        $lessonplan->description = json_decode($request->description);
+        $lessonplan->grade_id = $request->grade_id;
+        $lessonplan->subject = json_decode($request->subject);
+        $lessonplan->duration = json_decode($request->duration);
         $lessonplan->creator_id = $request->user()->id;
         $lessonplan->school = $request->user()->profile->school_place ?? 'Kosong';
         $lessonplan->effort = 100;
 
-        $image = json_decode($request->cover);
-        // return response()->json($request->hasFile('cover'));
+        //upload cover
         $fileName = time() . '.' . 'png';
         $compressedImage = \Image::make($cover)->resize(1080, null, function ($constraint) {
             $constraint->aspectRatio();

@@ -20,6 +20,7 @@ class LessonPlanController extends Controller
             'grade',
             'likes',
             'user',
+            'liked',
         ])->withCount(['likes'])
         ->orderBy('id', 'desc')
         ->paginate();

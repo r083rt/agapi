@@ -40,6 +40,20 @@ class LessonPlanLikedController extends Controller
     public function store(Request $request)
     {
         //
+
+        $liked = LessonPlan::findOrfail($request->lessonPlanId)->likes()->create([
+            'user_id' => auth('api')->user()->id,
+        ]);
+        if ($liked) {
+            $lessonplan = LessonPlan::with([
+                'grade',
+                'likes',
+                'user',
+                'liked'
+            ])->withCount(['likes'])->findOrFail($request->lessonPlanId);
+        }
+
+        return response()->json($lessonplan);
     }
 
     /**
@@ -71,9 +85,21 @@ class LessonPlanLikedController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
         //
+        $liked = LessonPlan::findOrfail($request->lessonPlanId)->likes()->where('user_id', auth('api')->user()->id)->delete();
+
+        if ($liked) {
+            $lessonplan = LessonPlan::with([
+                'grade',
+                'likes',
+                'user',
+                'liked'
+            ])->withCount(['likes'])->findOrFail($request->lessonPlanId);
+        }
+
+        return response()->json($lessonplan);
     }
 
     public function search($keyword)
