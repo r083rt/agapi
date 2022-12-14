@@ -16,8 +16,8 @@
 <body>
     <div
         style="
-            width: 60vh;
-            height: 60vh;
+            width: 100vh;
+            height: 100vh;
             background-image: url({{ $data['image'] }});
             background-size: cover;
             align-items: center
@@ -26,19 +26,19 @@
         <div
             style="display: flex; flex: 3, justify-content: center; align-items: center; padding-top: 10%; flex-direction:column">
             <div style="display: flex; flex-direction:column; align-items:center; width: 100%">
-                <div style="font-size: 40px">
+                <div style="font-size: 70px">
                     {{ $data['topic'] }}
                 </div>
             </div>
             <div style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 15%">
-                <h2>Mata Pelajaran : {{ $data['subject'] }}</h2>
+                <div style="font-size: 40px">Mata Pelajaran : {{ $data['subject'] }}</div>
             </div>
             <div
                 style="display: flex; flex-direction:column; align-items:center; width: 100%; padding-top: 20%; justify-content:center">
-                <div style="font-size: 25px; font-weight:bold">
+                <div style="font-size: 35px; font-weight:bold">
                     Kelas {{ $data['grade'] }}
                 </div>
-                <div style="font-size: 30px; padding-top:3%; font-weight:bold">
+                <div style="font-size: 35px; padding-top:3%; font-weight:bold">
                     Oleh {{ $data['creator'] }}
                 </div>
             </div>

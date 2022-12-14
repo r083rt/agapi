@@ -7,6 +7,7 @@ use App\Models\LessonPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+
 class UserLessonPlanController extends Controller
 {
     /**
@@ -44,21 +45,32 @@ class UserLessonPlanController extends Controller
             $request->contents = json_decode($request->contents, true);
         }
 
-        $lessonplan = new LessonPlan($request->all());
+        //convert $request->cover to file
+        $cover = json_decode($request->cover);
+        $cover = str_replace('data:image/png;base64,', '', $cover);
+        $cover = str_replace(' ', '+', $cover);
+        $cover = base64_decode($cover);
+        // return $cover;
+        //convert $cover to file
+
+        //decode $request->all()
+        $request->merge(json_decode($request->all(), true));
+
+        $lessonplan = new LessonPlan();
         $lessonplan->creator_id = $request->user()->id;
         $lessonplan->school = $request->user()->profile->school_place ?? 'Kosong';
         $lessonplan->effort = 100;
 
-        // $image = json_decode($request->cover);
-        // // return response()->json($request->hasFile('cover'));
-        // $fileName = time() . '.' . 'png';
-        // $compressedImage = \Image::make($image)->resize(1080, null, function ($constraint) {
-        //     $constraint->aspectRatio();
-        // })->encode('jpg', 60);
-        // $folderPath = "cover";
-        // $path = "{$folderPath}/{$fileName}";
-        // Storage::disk(env('FILESYSTEM_DRIVER', 'wasabi'))->put($path, $compressedImage);
-        // $lessonplan->cover = $path;
+        $image = json_decode($request->cover);
+        // return response()->json($request->hasFile('cover'));
+        $fileName = time() . '.' . 'png';
+        $compressedImage = \Image::make($cover)->resize(1080, null, function ($constraint) {
+            $constraint->aspectRatio();
+        })->encode('jpg', 60);
+        $folderPath = "cover";
+        $path = "{$folderPath}/{$fileName}";
+        Storage::disk(env('FILESYSTEM_DRIVER', 'wasabi'))->put($path, $compressedImage);
+        $lessonplan->image = $path;
 
         $request->user()->lesson_plans()->save($lessonplan);
 
