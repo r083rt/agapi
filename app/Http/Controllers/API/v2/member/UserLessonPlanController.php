@@ -144,9 +144,13 @@ class UserLessonPlanController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
         //
+        $lessonPlan = LessonPlan::findOrFail($request->lessonPlanId);
+        $lessonPlan->delete();
+
+        return response()->json($lessonPlan);
     }
 
     public function search($keyword)
