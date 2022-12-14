@@ -85,7 +85,6 @@ class UserLessonPlanController extends Controller
     {
         //
         $lessonplans = LessonPlan::with([
-            'grade',
             'contents'
         ])->findOrFail($lessonPlanId);
 
