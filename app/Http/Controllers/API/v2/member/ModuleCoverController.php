@@ -12,14 +12,14 @@ class ModuleCoverController extends Controller
     //
 
     public function index(){
-        $templates = Template::get();
+        $templates = Template::where('creator_id', 1)->get();
 
         return response()->json($templates);
     }
 
     public function generatecover(Request $request)
     {
-        $cover_length = Template::count();
+        $cover_length = Template::where('creator_id', 1)->count();
         $random_cover = Template::take($cover_length)->get()->random(1);
 
         $user_id = $request->user()->id;
