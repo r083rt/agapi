@@ -99,6 +99,9 @@ Route::group(['middleware' => 'auth:api'], function () {
         'module' => 'ModuleController',//
     ]);
 
+    //search module
+    Route::get('/module/search/{keyword}', 'ModuleController@search');
+
     //generate cover lesson plan
     Route::post('/lesson-plans/generate/cover', 'LessonPlanCoverController@generatecover');
 

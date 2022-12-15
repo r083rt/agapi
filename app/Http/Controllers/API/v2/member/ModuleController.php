@@ -71,4 +71,15 @@ class ModuleController extends Controller
     {
         //
     }
+
+    public function search($keyword)
+    {
+        $modules = Module::with('user', 'grade', 'template')
+            ->where('is_publish', true)
+            ->where('name', 'like', "%$keyword%")
+            ->orderBy('id', 'desc')
+            ->paginate();
+
+        return response()->json($modules);
+    }
 }
