@@ -44,7 +44,7 @@ class ModuleController extends Controller
     public function show($id)
     {
         //
-        $modules = Module::with('user', 'grade', 'template')->findOrFail($id);
+        $modules = Module::with('user', 'grade', 'template','liked')->findOrFail($id);
 
         return response()->json($modules);
     }
