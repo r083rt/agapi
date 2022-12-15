@@ -100,6 +100,9 @@ Route::group(['middleware' => 'auth:api'], function () {
         'module-like' => 'ModuleLikeController',//
     ]);
 
+    //get module by grade
+    Route::get('/module/grade/{gradeId}', 'ModuleController@getmodulebygrade');
+
     //search module
     Route::get('/module/search/{keyword}', 'ModuleController@search');
 

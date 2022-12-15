@@ -44,7 +44,7 @@ class ModuleController extends Controller
     public function show($id)
     {
         //
-        $modules = Module::with('user', 'grade', 'template','liked')->findOrFail($id);
+        $modules = Module::with('user', 'grade', 'template', 'liked')->findOrFail($id);
 
         return response()->json($modules);
     }
@@ -70,6 +70,19 @@ class ModuleController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getmodulebygrade($gradeId)
+    {
+        $modules = Module::with('user', 'grade', 'template')
+            ->where('is_publish', true)
+            ->whereHas('grade', function($query)use($gradeId){
+                $query->where('id', $gradeId);
+            })
+            ->orderBy('id', 'desc')
+            ->paginate();
+
+        return response()->json($modules);
     }
 
     public function search($keyword)
