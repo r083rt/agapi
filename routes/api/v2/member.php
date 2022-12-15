@@ -98,6 +98,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'lesson-plan-liked' => 'LessonPlanLikedController',//
         'module' => 'ModuleController',//
         'module-like' => 'ModuleLikeController',//
+        'module.content' => 'ModuleContentController',//
     ]);
 
     //get module by grade
