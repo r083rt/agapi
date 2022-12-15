@@ -118,7 +118,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/modules/generate/cover', 'ModuleCoverController@generatecover');
 
     //generate cover module by id
-    Route::post('/modules/generate/cover/selected', 'ModuleController@generatecoverbycoverid');
+    Route::post('/modules/generate/cover/selected', 'ModuleCoverController@generatecoverbycoverid');
 
 
     //generate cover lesson plan
