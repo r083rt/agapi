@@ -97,10 +97,14 @@ Route::group(['middleware' => 'auth:api'], function () {
         'lesson-plan-cover' => 'LessonPlanCoverController',//
         'lesson-plan-liked' => 'LessonPlanLikedController',//
         'module' => 'ModuleController',//
+        'module-like' => 'ModuleLikeController',//
     ]);
 
     //search module
     Route::get('/module/search/{keyword}', 'ModuleController@search');
+
+    //search moodule user
+    Route::get('/user/module/search/{keyword}', 'UserModuleController@search');
 
     //generate cover lesson plan
     Route::post('/lesson-plans/generate/cover', 'LessonPlanCoverController@generatecover');

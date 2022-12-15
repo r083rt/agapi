@@ -3,25 +3,18 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\Module;
 use Illuminate\Http\Request;
 
-class UserModuleController extends Controller
+class ModuleLikeController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($userId)
+    public function index()
     {
         //
-        $modules = Module::with('user', 'grade', 'template')
-            ->where('user_id', $userId)
-            ->orderBy('id', 'desc')
-            ->paginate();
-
-        return response()->json($modules);
     }
 
     /**
@@ -41,12 +34,9 @@ class UserModuleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($userId, $moduleId)
+    public function show($id)
     {
         //
-        $modules = Module::with('user', 'grade', 'template')->findOrFail($moduleId);
-
-        return response()->json($modules);
     }
 
     /**
@@ -70,16 +60,5 @@ class UserModuleController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    public function search($keyword)
-    {
-        $modules = Module::with('user', 'grade', 'template')
-            ->where('user_id', auth('api')->user()->id)
-            ->where('name', 'like', "%$keyword%")
-            ->orderBy('id', 'desc')
-            ->paginate();
-
-        return response()->json($modules);
     }
 }
