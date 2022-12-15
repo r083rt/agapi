@@ -106,6 +106,10 @@ Route::group(['middleware' => 'auth:api'], function () {
     //search moodule user
     Route::get('/user/module/search/{keyword}', 'UserModuleController@search');
 
+    //search module like
+    //search module
+    Route::get('/module-like/search/{keyword}', 'ModuleLikeController@search');
+
     //generate cover lesson plan
     Route::post('/lesson-plans/generate/cover', 'LessonPlanCoverController@generatecover');
 

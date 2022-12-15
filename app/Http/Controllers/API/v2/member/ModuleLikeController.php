@@ -102,4 +102,23 @@ class ModuleLikeController extends Controller
 
         return response()->json($module);
     }
+
+    public function search($keyword)
+    {
+        $modules = Module::whereHas('likes', function ($query) {
+            $query->where('user_id', auth('api')->user()->id);
+        })
+            ->where('name', 'like', "%$keyword%")
+            ->with([
+                'grade',
+                'likes',
+                'user',
+                'liked'
+            ])
+            ->withCount(['likes'])
+            ->orderBy('id', 'desc')
+            ->paginate();
+
+        return response()->json($modules);
+    }
 }
