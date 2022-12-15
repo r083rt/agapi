@@ -72,12 +72,12 @@ class ModuleController extends Controller
         //
     }
 
-    public function getmodulebygrade($gradeId)
+    public function getmodulebygrade($gradeLabel)
     {
         $modules = Module::with('user', 'grade', 'template')
             ->where('is_publish', true)
-            ->whereHas('grade', function($query)use($gradeId){
-                $query->where('id', $gradeId);
+            ->whereHas('grade', function($query)use($gradeLabel){
+                $query->where('description', 'like', "%$gradeLabel%");
             })
             ->orderBy('id', 'desc')
             ->paginate();
