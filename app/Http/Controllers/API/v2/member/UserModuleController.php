@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use App\Models\Module;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class UserModuleController extends Controller
 {
@@ -33,6 +34,17 @@ class UserModuleController extends Controller
     public function store(Request $request)
     {
         //
+        $cover = $request->cover;
+        //upload cover
+        $fileName = time() . '.' . 'png';
+        $compressedImage = \Image::make($cover)->resize(1080, null, function ($constraint) {
+            $constraint->aspectRatio();
+        })->encode('jpg', 60);
+        $folderPath = "cover";
+        $path = "{$folderPath}/{$fileName}";
+        Storage::disk(env('FILESYSTEM_DRIVER', 'wasabi'))->put($path, $compressedImage);
+
+        return $path;
     }
 
     /**
