@@ -40,6 +40,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'user.assignment' => 'UserAssignmentController', //untuk mendapatkan data tugas
         'user.room' => 'UserRoomController',
         'user.lesson-plan' => 'UserLessonPlanController',//
+        'user.module' => 'UserModuleController',//
         'murottal' => 'MurottalController', // untuk murottal audio
         'daily-prayer' => 'DailyPrayerController', // untuk doa harian
         'membership-fee' => 'MembershipFeeController', // untuk membership
@@ -95,6 +96,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'lesson-plan' => 'LessonPlanController',//
         'lesson-plan-cover' => 'LessonPlanCoverController',//
         'lesson-plan-liked' => 'LessonPlanLikedController',//
+        'module' => 'ModuleController',//
     ]);
 
     //generate cover lesson plan
