@@ -99,6 +99,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'module' => 'ModuleController',//
         'module-like' => 'ModuleLikeController',//
         'module.content' => 'ModuleContentController',//
+        'module-cover' => 'ModuleCoverController',//
     ]);
 
     //get module by grade
@@ -111,8 +112,14 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/user/module/search/{keyword}', 'UserModuleController@search');
 
     //search module like
-    //search module
     Route::get('/module-like/search/{keyword}', 'ModuleLikeController@search');
+
+    //generate cover module
+    Route::post('/modules/generate/cover', 'ModuleCoverController@generatecover');
+
+    //generate cover module by id
+    Route::post('/modules/generate/cover/selected', 'ModuleController@generatecoverbycoverid');
+
 
     //generate cover lesson plan
     Route::post('/lesson-plans/generate/cover', 'LessonPlanCoverController@generatecover');

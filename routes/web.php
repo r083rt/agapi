@@ -41,6 +41,9 @@ Route::get('event/{eventId}/participant/{userId}', 'EventParticipantController@s
 //generate cover rpp
 Route::get('/lesson-plans/{creator_id}/{topic}/{subject}/{grade}/generate/cover/{cover_id}', 'LessonPlanCoverController@coverlessonplan')->name('web.lesson-plan-cover');
 
+//generate cover module
+Route::get('/module/{user_id}/{name}/{subject}/{grade}/generate/cover/{cover_id}', 'ModuleCoverController@covermodule')->name('web.module-cover');
+
 Route::get('test', function () {
     $images = App\Models\File::where('type', 'like', 'imagPe%')->limit(10)->orderBy('created_at', 'desc')->count();
     $res = DB::table('users')

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Template;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ModuleCoverController extends Controller
@@ -59,5 +61,22 @@ class ModuleCoverController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function covermodule($user_id, $name, $subject, $grade, $cover_id)
+    {
+        // return response()->json('asd');
+        $cover = Template::findOrFail($cover_id);
+        $creator = User::findOrFail($user_id);
+
+        $data = [
+            'image' => 'https://cdn-agpaiidigital.online' . "/$cover->image",
+            'creator' => $creator->name,
+            'name' => $name,
+            'grade' => $grade,
+            'subject' => $subject
+        ];
+
+        return view('modul.generatecover', compact('data'));
     }
 }
