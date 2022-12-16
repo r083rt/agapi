@@ -33,8 +33,21 @@ class UserModuleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //convert $request->cover to file
         $cover = $request->cover;
+        $cover = str_replace('data:image/png;base64,', '', $cover);
+        $cover = str_replace(' ', '+', $cover);
+        $cover = base64_decode($cover);
+
+        $module = new Module();
+        $module->name = json_decode($request->name);
+        $module->user_id = auth('api')->user()->id;
+        $module->description = json_decode($request->description);
+        $module->is_publish = json_decode($request->is_publish);
+        $module->grade_id = json_decode($request->grade_id);
+        $module->subject = json_decode($request->subject);
+
+
         //upload cover
         $fileName = time() . '.' . 'png';
         $compressedImage = \Image::make($cover)->resize(1080, null, function ($constraint) {
