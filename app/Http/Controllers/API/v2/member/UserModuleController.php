@@ -78,7 +78,7 @@ class UserModuleController extends Controller
     public function show($userId, $moduleId)
     {
         //
-        $modules = Module::with('user', 'grade', 'template')->findOrFail($moduleId);
+        $modules = Module::with('user', 'grade', 'template', 'module_contents')->findOrFail($moduleId);
 
         return response()->json($modules);
     }
