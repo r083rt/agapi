@@ -62,8 +62,8 @@ class UserModuleController extends Controller
         $module->canvas_data = json_encode($canvas_data);
         $module->save();
 
-        if($request->has('contents')){
-            $module->module_contents()->createMany($request->contents);
+        if($request->has('module_contents')){
+            $module->module_contents()->createMany($request->module_contents);
         }
 
         return response()->json($module);
@@ -121,9 +121,9 @@ class UserModuleController extends Controller
         $module->canvas_data = json_encode($canvas_data);
         $module->save();
 
-        if ($request->has('contents')) {
+        if ($request->has('module_contents')) {
             $module->module_contents()->delete();
-            $module->module_contents()->createMany($request->contents);
+            $module->module_contents()->createMany($request->module_contents);
         }
 
         return response()->json($module);
