@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use App\Models\Module;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -46,8 +47,7 @@ class UserModuleController extends Controller
         $module->is_publish = json_decode($request->is_publish);
         $module->grade_id = json_decode($request->grade_id);
         $module->subject = json_decode($request->subject);
-
-
+        $module->year = Carbon::now()->format('Y');
         //upload cover
         $fileName = time() . '.' . 'png';
         $compressedImage = \Image::make($cover)->resize(1080, null, function ($constraint) {
@@ -56,8 +56,17 @@ class UserModuleController extends Controller
         $folderPath = "cover";
         $path = "{$folderPath}/{$fileName}";
         Storage::disk(env('FILESYSTEM_DRIVER', 'wasabi'))->put($path, $compressedImage);
+        $canvas_data = [
+            'image' => $path
+        ];
+        $module->canvas_data = json_encode($canvas_data);
+        $module->save();
 
-        return $path;
+        if($request->has('contents')){
+            $module->module_contents()->createMany($request->contents);
+        }
+
+        return response()->json($module);
     }
 
     /**
