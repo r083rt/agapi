@@ -41,6 +41,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'user.room' => 'UserRoomController',
         'user.lesson-plan' => 'UserLessonPlanController',//
         'user.module' => 'UserModuleController',//
+        'user.islamic-study' => 'UserIslamicStudyController',
         'murottal' => 'MurottalController', // untuk murottal audio
         'daily-prayer' => 'DailyPrayerController', // untuk doa harian
         'membership-fee' => 'MembershipFeeController', // untuk membership
@@ -100,6 +101,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'module-like' => 'ModuleLikeController',//
         'module.content' => 'ModuleContentController',//
         'module-cover' => 'ModuleCoverController',//
+        'islamic-study-category' => 'IslamicStudyCategoryController',//
     ]);
 
     //get notif module liked
