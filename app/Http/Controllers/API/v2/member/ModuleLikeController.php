@@ -41,19 +41,26 @@ class ModuleLikeController extends Controller
     public function store(Request $request)
     {
         //
-        $liked = Module::findOrfail($request->moduleId)->likes()->create([
-            'user_id' => auth('api')->user()->id,
-        ]);
+        // $liked = Module::findOrfail($request->moduleId)->likes()->create([
+        //     'user_id' => auth('api')->user()->id,
+        // ]);
+        $module = Module::with([
+            'grade',
+            'likes',
+            'user',
+            'liked'
+        ])->withCount(['likes'])->findOrFail($request->moduleId);
+        $module = $module->loadCount('liked');
+        if ($module->liked_count == 0) {
+            $like = new \App\Models\Like;
+            $like->user_id = auth('api')->user()->id;
+            $module->likes()->save($like);
 
-        if ($liked) {
-            $module = Module::with([
-                'grade',
-                'likes',
-                'user',
-                'liked'
-            ])->withCount(['likes'])->findOrFail($request->moduleId);
+            if ($like->likeable->user_id !== $like->user_id) {
+                $like->load('likeable', 'user');
+                \App\Events\LikedModuleEvent::dispatch($like);
+            }
         }
-
         return response()->json($module);
     }
 
