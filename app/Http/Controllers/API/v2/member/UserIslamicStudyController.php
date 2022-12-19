@@ -40,6 +40,15 @@ class UserIslamicStudyController extends Controller
         $islamic_study->user_id = auth('api')->user()->id;
         $islamic_study->save();
 
+        if ($request->hasFile('video')) {
+            $islamic_study->thumbnail()->create([
+                'name' => 'content',
+                'src' => $request->file('video')->store('files', 'wasabi'),
+                'type' => $request->file('thumbnail')->getExtension(),
+                'key' => 'content_islamic_study'
+            ]);
+        }
+
         if($request->hasFile('thumbnail')){
             //find user by id and input banner morph to files table and save
             $fileName = time() . '.' . $request->file('thumbnail')->extension();
@@ -55,7 +64,7 @@ class UserIslamicStudyController extends Controller
             $islamic_study->thumbnail()->create([
                 'name' => $fileName,
                 'src' => $path,
-                'type' => $request->file('thumbnail')->getExtension(),
+                'type' => 'image/jpeg',
                 'key' => 'thumbnail_islamic_study'
             ]);
         }
@@ -65,7 +74,7 @@ class UserIslamicStudyController extends Controller
                 'name' => 'content',
                 'src' => $request->file('video')->store('files', 'wasabi'),
                 'type' => $request->file('thumbnail')->getExtension(),
-                'key' => 'thumbnail_islamic_study'
+                'key' => 'content_islamic_study'
             ]);
         }
 
