@@ -68,4 +68,13 @@ class NotificationController extends Controller
     {
         //
     }
+
+    public function notifmodule(){
+        $notifications = Notification::with('notifiable')->where('notifiable_id', auth('api')->user()->id)
+            ->where('notifiable_type', 'App\Models\User')
+            ->where('type', 'App\Notifications\LikedModuleNotification')
+            ->orderBy('created_at', 'desc')
+            ->paginate();
+        return response()->json($notifications);
+    }
 }

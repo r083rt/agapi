@@ -102,6 +102,9 @@ Route::group(['middleware' => 'auth:api'], function () {
         'module-cover' => 'ModuleCoverController',//
     ]);
 
+    //get notif module liked
+    Route::get('/notification-module', 'NotificationController@notifmodule');
+
     //get module by grade
     Route::get('/module/grade/{gradeLabel}', 'ModuleController@getmodulebygrade');
 
