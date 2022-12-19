@@ -42,15 +42,19 @@ class PostLikeController extends Controller
             ], 200);
         }
 
-        $res = $post->likes()->save(new Like([
-            'user_id' => auth('api')->user()->id,
-        ]));
+        $like = new Like(['user_id' => $request->user()->id]);
+        $post->likes()->save($like);
+        // $post->likes()->sync($like, false);
+        // \App\Models\User::find($post->author_id)->notify(new LikedPostNotification($like));
+        if ($like->likeable->author_id !== $like->user_id) {
+            $like->load('likeable', 'user');
+            \App\Events\LikedPostEvent::dispatch($like);
+        }
 
         return response()->json([
             'message' => 'Berhasil like post',
-            'data' => $res,
+            'data' => $post,
         ], 200);
-
     }
 
     /**
