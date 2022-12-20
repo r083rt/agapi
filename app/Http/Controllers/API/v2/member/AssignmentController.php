@@ -22,6 +22,7 @@ class AssignmentController extends Controller
     {
         //
         $assignment = Assigment::with('grade', 'user', 'teacher', 'assigment_category', 'comments', 'likes', 'liked', 'ratings', 'reviews')
+            ->withCount('sessions')
             ->where('is_publish', 1)
             ->orderBy('id', 'desc')
             ->paginate();
