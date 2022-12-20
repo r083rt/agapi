@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\IslamicStudyCategory;
+use App\Models\IslamicStudy;
 use Illuminate\Http\Request;
 
-class IslamicStudyCategoryController extends Controller
+class IslamicStudyController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,8 +16,6 @@ class IslamicStudyCategoryController extends Controller
     public function index()
     {
         //
-        $category = IslamicStudyCategory::get();
-        return response()->json($category);
     }
 
     /**
@@ -40,6 +38,10 @@ class IslamicStudyCategoryController extends Controller
     public function show($id)
     {
         //
+
+        $islamic_study =  IslamicStudy::with('category', 'thumbnail', 'content', 'user')->findOrFail($id);
+
+        return response()->json($islamic_study);
     }
 
     /**
@@ -63,11 +65,5 @@ class IslamicStudyCategoryController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    public function getcategorywithislamicstudies(){
-        $categories = IslamicStudyCategory::with('islamic_studies.thumbnail')->get();
-
-        return response()->json($categories);
     }
 }

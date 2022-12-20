@@ -101,8 +101,13 @@ Route::group(['middleware' => 'auth:api'], function () {
         'module-like' => 'ModuleLikeController',//
         'module.content' => 'ModuleContentController',//
         'module-cover' => 'ModuleCoverController',//
+        'islamic-study' => 'IslamicStudyController',//
         'islamic-study-category' => 'IslamicStudyCategoryController',//
+        'category.islamic-study' => 'CategoryIslamicStudyController',//
     ]);
+
+    //get islamic study group by category
+    Route::get('/category/islamic-studies', 'IslamicStudyCategoryController@getcategorywithislamicstudies');
 
     //get notif module liked
     Route::get('/notification-module', 'NotificationController@notifmodule');

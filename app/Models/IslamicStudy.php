@@ -12,7 +12,7 @@ class IslamicStudy extends Model
     protected $guarded = ["id"];
 
     public function category(){
-        return $this->belongsTo(IslamicStudyCategory::class);
+        return $this->belongsTo(IslamicStudyCategory::class, 'islamic_study_category_id', 'id');
     }
 
     public function thumbnail(){
@@ -21,5 +21,9 @@ class IslamicStudy extends Model
 
     public function content(){
         return $this->morphOne(File::class, 'file')->where('key', 'content_islamic_study')->orderBy('id', 'desc');
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class);
     }
 }

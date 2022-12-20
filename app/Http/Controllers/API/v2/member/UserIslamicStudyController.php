@@ -18,7 +18,7 @@ class UserIslamicStudyController extends Controller
     public function index($userId)
     {
         //
-        $islamic_studies = IslamicStudy::with('category')
+        $islamic_studies = IslamicStudy::with('category', 'thumbnail')
         ->where('user_id', $userId)
         ->orderBy('id', 'desc')
         ->paginate();
@@ -59,7 +59,7 @@ class UserIslamicStudyController extends Controller
             $folderPath = "files";
             $path = "{$folderPath}/{$fileName}";
             // simpan gambar
-            Storage::disk(env('FILESYSTEM_DRIVER', 'public'))->put($path, $compressedImage);
+            Storage::disk('wasabi', null)->put($path, $compressedImage);
 
             $islamic_study->thumbnail()->create([
                 'name' => $fileName,
@@ -73,7 +73,7 @@ class UserIslamicStudyController extends Controller
             $islamic_study->thumbnail()->create([
                 'name' => 'content',
                 'src' => $request->file('video')->store('files', 'wasabi'),
-                'type' => $request->file('thumbnail')->getExtension(),
+                'type' => 'video/mp4',
                 'key' => 'content_islamic_study'
             ]);
         }

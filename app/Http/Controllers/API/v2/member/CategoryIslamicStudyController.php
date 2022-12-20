@@ -3,21 +3,25 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\IslamicStudyCategory;
+use App\Models\IslamicStudy;
 use Illuminate\Http\Request;
 
-class IslamicStudyCategoryController extends Controller
+class CategoryIslamicStudyController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($categoryId)
     {
         //
-        $category = IslamicStudyCategory::get();
-        return response()->json($category);
+
+        $islamic_studies = IslamicStudy::whereHas('category', function($query)use($categoryId){
+            $query->where('id', $categoryId);
+        })->paginate();
+
+        return response()->json($islamic_studies);
     }
 
     /**
@@ -63,11 +67,5 @@ class IslamicStudyCategoryController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    public function getcategorywithislamicstudies(){
-        $categories = IslamicStudyCategory::with('islamic_studies.thumbnail')->get();
-
-        return response()->json($categories);
     }
 }
