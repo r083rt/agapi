@@ -35,7 +35,6 @@ class UserIslamicStudyController extends Controller
     public function store(Request $request)
     {
         //
-
         $islamic_study = new IslamicStudy($request->all());
         $islamic_study->user_id = auth('api')->user()->id;
         $islamic_study->save();
@@ -113,5 +112,15 @@ class UserIslamicStudyController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function search($keyword){
+        $islamic_studies = IslamicStudy::with('category', 'thumbnail')
+        ->where('user_id', auth('api')->user()->id)
+        ->where('title', 'like', "%$keyword%")
+        ->orderBy('id', 'desc')
+        ->paginate();
+
+        return response()->json($islamic_studies);
     }
 }

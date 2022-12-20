@@ -3,26 +3,19 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
-use App\Models\IslamicStudy;
+use App\Models\Comment;
 use Illuminate\Http\Request;
 
-class CategoryIslamicStudyController extends Controller
+class IslamicStudyCommentController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($categoryId)
+    public function index()
     {
         //
-
-        $islamic_studies = IslamicStudy::with('thumbnail')
-        ->whereHas('category', function($query)use($categoryId){
-            $query->where('id', $categoryId);
-        })->paginate();
-
-        return response()->json($islamic_studies);
     }
 
     /**
@@ -31,9 +24,18 @@ class CategoryIslamicStudyController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $islamicStudyId)
     {
         //
+        $comment = new Comment();
+        $comment->comment_type = 'App\Models\IslamicStudy';
+        $comment->comment_id = $islamicStudyId;
+        $comment->user_id = $request->user()->id;
+        $comment->value = $request->comment;
+        $comment->save();
+
+
+        return response()->json($comment);
     }
 
     /**

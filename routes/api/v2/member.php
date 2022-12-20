@@ -102,9 +102,17 @@ Route::group(['middleware' => 'auth:api'], function () {
         'module.content' => 'ModuleContentController',//
         'module-cover' => 'ModuleCoverController',//
         'islamic-study' => 'IslamicStudyController',//
+        'islamic-study.like' => 'IslamicStudyLikeController',//
+        'islamic-study.comment' => 'IslamicStudyCommentController',//
         'islamic-study-category' => 'IslamicStudyCategoryController',//
         'category.islamic-study' => 'CategoryIslamicStudyController',//
     ]);
+
+    //search islamic study user
+    Route::get('/user/islamic-studies/search/{keyword}', 'UserIslamicStudyController@search');
+
+    //search islamic study
+    Route::get('/islamic-studies/search/{keyword}', 'IslamicStudyController@search');
 
     //get islamic study group by category
     Route::get('/category/islamic-studies', 'IslamicStudyCategoryController@getcategorywithislamicstudies');

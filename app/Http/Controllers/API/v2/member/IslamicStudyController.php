@@ -39,7 +39,16 @@ class IslamicStudyController extends Controller
     {
         //
 
-        $islamic_study =  IslamicStudy::with('category', 'thumbnail', 'content', 'user')->findOrFail($id);
+        $islamic_study =  IslamicStudy::with(
+            'category',
+            'thumbnail',
+            'content',
+            'user',
+            'liked',
+            'comments'
+        )
+            ->withCount('likes')
+            ->findOrFail($id);
 
         return response()->json($islamic_study);
     }
@@ -65,5 +74,15 @@ class IslamicStudyController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function search($keyword)
+    {
+        $islamic_studies = IslamicStudy::with('category', 'thumbnail')
+            ->where('title', 'like', "%$keyword%")
+            ->orderBy('id', 'desc')
+            ->paginate();
+
+        return response()->json($islamic_studies);
     }
 }

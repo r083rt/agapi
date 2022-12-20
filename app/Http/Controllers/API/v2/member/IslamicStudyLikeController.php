@@ -6,23 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\IslamicStudy;
 use Illuminate\Http\Request;
 
-class CategoryIslamicStudyController extends Controller
+class IslamicStudyLikeController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($categoryId)
+    public function index()
     {
         //
-
-        $islamic_studies = IslamicStudy::with('thumbnail')
-        ->whereHas('category', function($query)use($categoryId){
-            $query->where('id', $categoryId);
-        })->paginate();
-
-        return response()->json($islamic_studies);
     }
 
     /**
@@ -34,6 +27,22 @@ class CategoryIslamicStudyController extends Controller
     public function store(Request $request)
     {
         //
+
+        $islamic_study = IslamicStudy::findOrFail($request->islamicStudyId);
+
+        $islamic_study->loadCount('liked');
+
+        if ($islamic_study->liked_count == 0) {
+            $like = new \App\Models\Like;
+            $like->user_id = auth('api')->user()->id;
+            $islamic_study->likes()->save($like);
+
+            if ($like->likeable->user_id !== $like->user_id) {
+                $like->load('likeable', 'user');
+                \App\Events\LikedModuleEvent::dispatch($like);
+            }
+        }
+        return response()->json($islamic_study->load('liked'));
     }
 
     /**
@@ -65,8 +74,11 @@ class CategoryIslamicStudyController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
         //
+        $liked = IslamicStudy::findOrFail($request->islamicStudyId)->likes()->where('user_id', auth('api')->user()->id)->delete();
+
+        return response()->json($liked);
     }
 }
