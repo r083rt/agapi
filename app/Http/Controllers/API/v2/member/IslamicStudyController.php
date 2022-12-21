@@ -45,7 +45,7 @@ class IslamicStudyController extends Controller
             'content',
             'user',
             'liked',
-            'comments'
+            'comments.user'
         )
             ->withCount('likes')
             ->findOrFail($id);
