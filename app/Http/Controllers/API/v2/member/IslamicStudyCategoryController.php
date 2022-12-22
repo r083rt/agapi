@@ -66,7 +66,10 @@ class IslamicStudyCategoryController extends Controller
     }
 
     public function getcategorywithislamicstudies(){
-        $categories = IslamicStudyCategory::with('islamic_studies.thumbnail')->get();
+        $categories = IslamicStudyCategory::with(['islamic_studies' => function($query){
+            $query->with('thumbnail')
+                ->where('status', 'Published');
+        }])->get();
 
         return response()->json($categories);
     }
