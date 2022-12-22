@@ -106,6 +106,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         'islamic-study.comment' => 'IslamicStudyCommentController',//
         'islamic-study-category' => 'IslamicStudyCategoryController',//
         'category.islamic-study' => 'CategoryIslamicStudyController',//
+        'islamic-study.upvote' => 'IslamicStudyUpVoteController',//
+        'islamic-study.downvote' => 'IslamicStudyDownVoteController',//
     ]);
 
     //search islamic study user

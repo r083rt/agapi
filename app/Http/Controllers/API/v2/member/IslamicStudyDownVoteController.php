@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
+use App\Models\Downvote;
 use App\Models\IslamicStudy;
 use Illuminate\Http\Request;
 
-class IslamicStudyController extends Controller
+class IslamicStudyDownVoteController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,41 +28,40 @@ class IslamicStudyController extends Controller
     public function store(Request $request)
     {
         //
+        $islamic_study = IslamicStudy::withCount('upvoted')->findOrFail($request->islamicStudyId);
+
+        if ($islamic_study[0]->upvoted_count > 0) {
+            $islmaicStudy = IslamicStudy::findOrFail($request->islamicStudyId);
+            $islmaicStudy[0]->upvotes()->where('user_id', auth('api')->user()->id)->delete();
+        }
+
+        $downvote = new \App\Models\Downvote;
+        $downvote->user_id = auth('api')->user()->id;
+        $islamic_study[0]->downvotes()->save($downvote);
+
+
+        return response()->json($islamic_study[0]->load('upvoted', 'downvoted')->loadCount('upvotes', 'downvotes'));
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\Downvote  $downvote
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Downvote $downvote)
     {
         //
-
-        $islamic_study =  IslamicStudy::with(
-            'category',
-            'thumbnail',
-            'content',
-            'user',
-            'liked',
-            'upvoted',
-            'comments.user'
-        )
-            ->withCount('likes', 'upvotes', 'downvotes')
-            ->findOrFail($id);
-
-        return response()->json($islamic_study);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Models\Downvote  $downvote
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Downvote $downvote)
     {
         //
     }
@@ -69,21 +69,11 @@ class IslamicStudyController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\Downvote  $downvote
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Downvote $downvote)
     {
         //
-    }
-
-    public function search($keyword)
-    {
-        $islamic_studies = IslamicStudy::with('category', 'thumbnail')
-            ->where('title', 'like', "%$keyword%")
-            ->orderBy('id', 'desc')
-            ->paginate();
-
-        return response()->json($islamic_studies);
     }
 }

@@ -32,6 +32,27 @@ class IslamicStudy extends Model
     {
         return $this->morphMany('App\Models\Like', 'like');
     }
+
+    public function upvotes()
+    {
+        return $this->morphMany('App\Models\Upvote', 'upvoteable');
+    }
+
+    public function upvoted()
+    {
+        return $this->morphOne('App\Models\Upvote', 'upvoteable')->where('user_id', Auth::check() ? Auth::user()->id : 0);
+    }
+
+    public function downvotes()
+    {
+        return $this->morphMany('App\Models\Downvote', 'downvoteable');
+    }
+
+    public function downvoted()
+    {
+        return $this->morphOne('App\Models\Downvote', 'downvoteable')->where('user_id', Auth::check() ? Auth::user()->id : 0);
+    }
+
     public function liked()
     {
         return $this->morphOne('App\Models\Like', 'like')->where('user_id', Auth::check() ? Auth::user()->id : 0);
