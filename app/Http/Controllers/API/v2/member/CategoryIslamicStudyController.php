@@ -18,9 +18,10 @@ class CategoryIslamicStudyController extends Controller
         //
 
         $islamic_studies = IslamicStudy::with('thumbnail')
-        ->whereHas('category', function($query)use($categoryId){
-            $query->where('id', $categoryId);
-        })->paginate();
+            ->whereHas('category', function ($query) use ($categoryId) {
+                $query->where('id', $categoryId)
+                    ->where('status', 'Published');
+            })->paginate();
 
         return response()->json($islamic_studies);
     }

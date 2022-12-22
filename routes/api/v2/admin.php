@@ -27,9 +27,12 @@ Route::group(['as' => 'api.v2.admin.'], function () {
         'province' => 'ProvinceController',
         'province.city' => 'ProvinceCityController',
         'city.district' => 'CityDistrictController',
+        'islamic-study' => 'IslamicStudyController',
     ]);
 });
 
+Route::get('/islamic-study/{id}/approval', 'IslamicStudyController@approval');
+Route::get('/islamic-study/{id}/rejected', 'IslamicStudyController@rejected');
 
 Route::get('/user/search/{keyword}', 'UserController@search');
 Route::get('/departments/search/{keyword}', 'DepartmentController@search');
