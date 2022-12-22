@@ -19,6 +19,7 @@ class UserQuestionListController extends Controller
         $questionList = Assigment::where('is_publish', 0)
             ->where('user_id', $userId)
             ->with('assigment_category', 'grade', 'question_lists', 'user')
+            ->withCount('question_lists')
             ->orderBy('id', 'desc')
             ->paginate();
         return response()->json($questionList);
