@@ -35,7 +35,7 @@ class IslamicStudyCommentController extends Controller
         $comment->save();
 
 
-        return response()->json($comment);
+        return response()->json($comment->load('user'));
     }
 
     /**
