@@ -17,6 +17,7 @@ class UserAssignmentController extends Controller
     {
         //
         $assignment = Assigment::with('grade', 'user', 'teacher', 'assigment_category', 'comments', 'likes', 'liked', 'ratings', 'reviews')
+            ->withCount('question_lists')
             ->where('is_publish', 1)
             ->where('user_id', $userId)
             ->orderBy('id', 'desc')

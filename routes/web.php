@@ -2,6 +2,7 @@
 
 use App\Models\Department;
 use App\Http\Controllers\API\v2\member\EventParticipantController;
+use App\Models\IslamicStudy;
 // use DB
 use Illuminate\Support\Facades\DB;
 // use Thumbnail;
@@ -490,21 +491,12 @@ Route::get('/getcontactnumber', function () {
 // });
 
 Route::get('/tes', function () {
-    $orders = [3, 4, 5];
-    $titles = ['Ketua Umum', 'Sekertaris Jendral', 'Bendahara Umum'];
+    $islamic_studies = IslamicStudy::with('content')
+    ->withCount('upvotes')
+    ->orderBy('upvotes_count', 'desc')
+    ->get();
 
-    foreach ($orders as $key => $value) {
-        $department = new Department();
-        $department->title = $titles[$key];
-        $department->order = $value;
-        $department->start_date = \Carbon\Carbon::now();
-        $department->end_date = \Carbon\Carbon::now()->addDays(30);
-        $department->departmentable_type = 'App\Models\District';
-        $department->departmentable_id = 3374090;
-        $department->division_id = 4;
-        $department->save();
-    }
-    return "success";
+    return response()->json($islamic_studies);
 });
 
 Route::get('/cek-perpanjangan-kongres', function () {

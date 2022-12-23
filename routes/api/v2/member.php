@@ -110,6 +110,9 @@ Route::group(['middleware' => 'auth:api'], function () {
         'islamic-study.downvote' => 'IslamicStudyDownVoteController',//
     ]);
 
+    //get 3 thumbnail islamic study highest vote
+    Route::get('/islamic-studies/highest/vote', 'IslamicStudyController@gethighestvote');
+
     //search islamic study user
     Route::get('/user/islamic-studies/search/{keyword}', 'UserIslamicStudyController@search');
 

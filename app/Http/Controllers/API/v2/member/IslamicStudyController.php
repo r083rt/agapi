@@ -86,4 +86,14 @@ class IslamicStudyController extends Controller
 
         return response()->json($islamic_studies);
     }
+
+    public function gethighestvote(){
+        $islamic_studies = IslamicStudy::with('thumbnail')
+        ->where('status', 'Published')
+        ->withCount('upvotes')
+        ->orderBy('upvotes_count', 'desc')
+        ->limit(3)->get();
+
+        return response()->json($islamic_studies);
+    }
 }

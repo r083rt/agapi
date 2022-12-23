@@ -109,9 +109,13 @@ class UserIslamicStudyController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
         //
+         $islamic_study = IslamicStudy::findOrFail($request->IslamicStudyId);
+         $islamic_study->delete();
+
+         return response()->json($islamic_study);
     }
 
     public function search($keyword){
