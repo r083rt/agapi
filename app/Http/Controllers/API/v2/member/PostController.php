@@ -108,7 +108,7 @@ class PostController extends Controller
                     ->orderBy('created_at', 'asc');
             },
             'likes.user',
-        ])->withCount('comments', 'likes', 'liked')->find($id);
+        ])->withCount('comments', 'likes', 'liked')->findOrFail($id);
 
         return response()->json($post);
     }
