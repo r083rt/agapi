@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 // api untuk daftar guru ke aplikasi agpaii digital
 Route::post('/register', 'AuthController@register');
+Route::resource('otp-client', 'OtpClientController');
 
 Route::group(['middleware' => 'auth:api'], function () {
     // api untuk mendapatkan data user yang sedang login
@@ -39,8 +40,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         'user.question-list' => 'UserQuestionListController', //untuk mendapatkan data pert
         'user.assignment' => 'UserAssignmentController', //untuk mendapatkan data tugas
         'user.room' => 'UserRoomController',
-        'user.lesson-plan' => 'UserLessonPlanController',//
-        'user.module' => 'UserModuleController',//
+        'user.lesson-plan' => 'UserLessonPlanController', //
+        'user.module' => 'UserModuleController', //
         'user.islamic-study' => 'UserIslamicStudyController',
         'murottal' => 'MurottalController', // untuk murottal audio
         'daily-prayer' => 'DailyPrayerController', // untuk doa harian
@@ -91,23 +92,23 @@ Route::group(['middleware' => 'auth:api'], function () {
         'assignment-category' => 'AssignmentCategoryController', //untuk mendapatkan data kategori tugas
         'assignment-category.type' => 'AssignmentCategoryTypeController', //untuk mendapatkan data tipe tugas berdasarkan kategori
         'assignment' => 'AssignmentController', //untuk mendapatkan data tugas
-        'assignment-uses' => 'AssignmentUsesController',//
-        'assignment-session' => 'AssignmentSessionController',//
-        'room' => 'RoomController',//
-        'lesson-plan' => 'LessonPlanController',//
-        'lesson-plan-cover' => 'LessonPlanCoverController',//
-        'lesson-plan-liked' => 'LessonPlanLikedController',//
-        'module' => 'ModuleController',//
-        'module-like' => 'ModuleLikeController',//
-        'module.content' => 'ModuleContentController',//
-        'module-cover' => 'ModuleCoverController',//
-        'islamic-study' => 'IslamicStudyController',//
-        'islamic-study.like' => 'IslamicStudyLikeController',//
-        'islamic-study.comment' => 'IslamicStudyCommentController',//
-        'islamic-study-category' => 'IslamicStudyCategoryController',//
-        'category.islamic-study' => 'CategoryIslamicStudyController',//
-        'islamic-study.upvote' => 'IslamicStudyUpVoteController',//
-        'islamic-study.downvote' => 'IslamicStudyDownVoteController',//
+        'assignment-uses' => 'AssignmentUsesController', //
+        'assignment-session' => 'AssignmentSessionController', //
+        'room' => 'RoomController', //
+        'lesson-plan' => 'LessonPlanController', //
+        'lesson-plan-cover' => 'LessonPlanCoverController', //
+        'lesson-plan-liked' => 'LessonPlanLikedController', //
+        'module' => 'ModuleController', //
+        'module-like' => 'ModuleLikeController', //
+        'module.content' => 'ModuleContentController', //
+        'module-cover' => 'ModuleCoverController', //
+        'islamic-study' => 'IslamicStudyController', //
+        'islamic-study.like' => 'IslamicStudyLikeController', //
+        'islamic-study.comment' => 'IslamicStudyCommentController', //
+        'islamic-study-category' => 'IslamicStudyCategoryController', //
+        'category.islamic-study' => 'CategoryIslamicStudyController', //
+        'islamic-study.upvote' => 'IslamicStudyUpVoteController', //
+        'islamic-study.downvote' => 'IslamicStudyDownVoteController', //
     ]);
 
     //get 3 thumbnail islamic study highest vote
