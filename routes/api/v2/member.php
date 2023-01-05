@@ -4,7 +4,13 @@ use Illuminate\Support\Facades\Route;
 
 // api untuk daftar guru ke aplikasi agpaii digital
 Route::post('/register', 'AuthController@register');
-Route::resource('otp-client', 'OtpClientController');
+
+// api untuk forgot password via otp
+Route::get('/otp-client/user/search/{phone_number}', 'OtpClientController@searchUser');
+Route::resource('/otp-client', 'OtpClientController');
+Route::get('/otp-client/{user_id}/verify', 'OtpClientController@verify');
+Route::post('/otp-client/{user_id}/change-password', 'OtpClientController@changePassword');
+// end api forgot password
 
 Route::group(['middleware' => 'auth:api'], function () {
     // api untuk mendapatkan data user yang sedang login

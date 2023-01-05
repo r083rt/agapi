@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use App\Models\OtpClient;
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class OtpClientController extends Controller
 {
@@ -70,7 +71,7 @@ class OtpClientController extends Controller
                 'json' => [
                     'phone' => $request->phone_number,
                     'messageType' => 'otp',
-                    'body' => "OTP ({$otpClient->code}). Pesan otomatis dari AGPAII DIGITAL [Tidak dapat membalas pesan]. Harap jangan memberikan kode ini kepada siapapun.",
+                    'body' => "Kode OTP ({$otpClient->code}). Pesan otomatis dari AGPAII DIGITAL [Tidak dapat membalas pesan]. Harap jangan memberikan kode ini kepada siapapun.",
                 ]
             ]
         );
@@ -122,5 +123,74 @@ class OtpClientController extends Controller
     public function destroy(OtpClient $otpClient)
     {
         //
+    }
+
+    public function searchUser($phoneNumber)
+    {
+        $users = User::whereHas('profile', function ($query) use ($phoneNumber) {
+            $query->where('contact', $phoneNumber);
+        })->get();
+
+        return response()->json($users);
+    }
+
+    public function verify(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'code' => 'required|numeric',
+        ]);
+
+        $otpClient = OtpClient::where('user_id', $request->user_id)
+            ->where('code', $request->code)
+            ->where('expired_at', '>', now())
+            ->where('is_active', true)
+            ->first();
+
+        if (!$otpClient) {
+            return response()->json([
+                'message' => 'OTP code is invalid',
+                'status' => 'failed'
+            ], 400);
+        }
+
+        return response()->json([
+            'message' => 'OTP code is valid',
+            'status' => 'success'
+        ]);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'code' => 'required|numeric',
+            'password' => 'required|min:8',
+        ]);
+
+        $otpClient = OtpClient::where('user_id', $request->user_id)
+            ->where('code', $request->code)
+            ->where('expired_at', '>', now())
+            ->where('is_active', true)
+            ->first();
+
+        if (!$otpClient) {
+            return response()->json([
+                'message' => 'OTP code is invalid',
+                'status' => 'failed'
+            ], 400);
+        }
+
+        $otpClient->is_active = false;
+        $otpClient->save();
+
+        $user = User::find($request->user_id);
+        $user->password = bcrypt($request->password);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Password changed',
+            'status' => 'success'
+        ]);
     }
 }
