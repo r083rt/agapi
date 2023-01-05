@@ -8,8 +8,8 @@ Route::post('/register', 'AuthController@register');
 // api untuk forgot password via otp
 Route::get('/otp-client/user/search/{phone_number}', 'OtpClientController@searchUser');
 Route::resource('/otp-client', 'OtpClientController');
-Route::get('/otp-client/{user_id}/verify', 'OtpClientController@verify');
-Route::post('/otp-client/{user_id}/change-password', 'OtpClientController@changePassword');
+Route::post('/otp-client/verify', 'OtpClientController@verify');
+Route::post('/otp-client/change-password', 'OtpClientController@changePassword');
 // end api forgot password
 
 Route::group(['middleware' => 'auth:api'], function () {
