@@ -127,9 +127,11 @@ class OtpClientController extends Controller
 
     public function searchUser($phoneNumber)
     {
-        $users = User::whereHas('profile', function ($query) use ($phoneNumber) {
-            $query->where('contact', $phoneNumber);
-        })->get();
+        $users = User::with('profile')
+            ->where('expired_at', '!=', null)
+            ->whereHas('profile', function ($query) use ($phoneNumber) {
+                $query->where('contact', $phoneNumber);
+            })->get();
 
         return response()->json($users);
     }
