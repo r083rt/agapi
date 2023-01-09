@@ -21,11 +21,16 @@ class StoryController extends Controller
     {
         //
         $stories = User::with(['stories' => function ($query) {
-            $query->with('thumbnail')->where('type', '!=', null)->whereDate('created_at', date('Y-m-d'))
+            $query->with('thumbnail')->where('type', '!=', null)
+                // ->whereDate('created_at', date('Y-m-d'))
+                ->whereDate('created_at', '>=', date('Y-m-d', strtotime('-1 day')))
                 ->orderBy('created_at', 'asc');
         }])
             ->whereHas('stories', function ($query) {
-                $query->where('type', '!=', null)->whereDate('created_at', date('Y-m-d'));
+                $query->where('type', '!=', null)
+                    // ->whereDate('created_at', date('Y-m-d'));
+                    // ambil yang usia story nya kurang dari 24 jam setelah upload
+                    ->whereDate('created_at', '>=', date('Y-m-d', strtotime('-1 day')));
             })
             ->select(
                 DB::raw('id, name, avatar'),
@@ -78,7 +83,6 @@ class StoryController extends Controller
             Storage::disk(env('FILESYSTEM_DRIVER'))->put($path, $compressed);
             $file->src = $path;
             $file->save();
-
         }
 
         // jika video
@@ -99,7 +103,7 @@ class StoryController extends Controller
             // file type is video
             // set storage path to store the file (image generated for a given video)
             $thumbnail_path = public_path() . '/storage/thumbnails';
-//check if folder is exists
+            //check if folder is exists
             if (!Storage::disk('public')->exists('thumbnails')) {
                 Storage::disk('public')->makeDirectory('thumbnails', 0777, true); //creates directory
             }
@@ -107,13 +111,13 @@ class StoryController extends Controller
             // set thumbnail image name
             $timestamp = time();
             $thumbnail_image = $request->user()->id . "." . $timestamp . ".jpg";
-// get video length and process it
+            // get video length and process it
             // assign the value to time_to_image (which will get screenshot of video at that specified seconds)
             // $time_to_image    = floor(($data['video_length'])/2);
             $time_to_image = 0.1;
             Thumbnail::getThumbnail($request->file('file'), $thumbnail_path, $thumbnail_image, $time_to_image);
             $storagePublic = Storage::disk('wasabi')->put('thumbnails/' . $thumbnail_image, Storage::disk('public')->get('thumbnails/' . $thumbnail_image));
-// dd($storagePublic);
+            // dd($storagePublic);
             if ($storagePublic) {
                 Storage::disk('public')->delete('thumbnails/' . $thumbnail_image);
             }
@@ -126,11 +130,9 @@ class StoryController extends Controller
             $thumbnail->file_type = 'App\Models\File';
             $thumbnail->key = 'thumbnail';
             $thumbnail->save();
-
         }
 
         return response()->json($file);
-
     }
 
     /**

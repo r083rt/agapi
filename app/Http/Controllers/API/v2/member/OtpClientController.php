@@ -151,13 +151,13 @@ class OtpClientController extends Controller
 
         if (!$otpClient) {
             return response()->json([
-                'message' => 'OTP code is invalid',
+                'message' => 'Kode OTP tidak valid',
                 'status' => 'failed'
             ], 400);
         }
 
         return response()->json([
-            'message' => 'OTP code is valid',
+            'message' => 'Kode OTP valid',
             'status' => 'success'
         ]);
     }
@@ -178,7 +178,7 @@ class OtpClientController extends Controller
 
         if (!$otpClient) {
             return response()->json([
-                'message' => 'OTP code is invalid',
+                'message' => 'Kode OTP tidak valid',
                 'status' => 'failed'
             ], 400);
         }
@@ -191,7 +191,7 @@ class OtpClientController extends Controller
         $user->save();
 
         return response()->json([
-            'message' => 'Password changed',
+            'message' => 'Password telah diubah',
             'status' => 'success'
         ]);
     }
