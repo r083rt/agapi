@@ -6,6 +6,7 @@ use App\Helper\Firestore;
 use App\Helper\PushNotif;
 use App\Http\Controllers\Controller;
 use App\Models\Member\Conversation;
+use App\Models\Member\UserConversation;
 use App\Models\Member\User;
 use Illuminate\Http\Request;
 
@@ -51,9 +52,13 @@ class UserPersonalConversationController extends Controller
 
         $conversation = Conversation::where('type', 'personal')
             ->whereHas('users', function ($query) use ($request, $receiverId) {
-                return $query->where('user_id', $request->user()->id);
+                return $query
+                    ->withTrashed()
+                    ->where('user_id', $request->user()->id);
             })->whereHas('users', function ($query) use ($request, $receiverId) {
-                return $query->where('user_id', $receiverId);
+                return $query
+                    ->withTrashed()
+                    ->where('user_id', $receiverId);
             });
 
         // $exist = User::findOrFail($request->user()->id)->conversations()->where('user_id', $receiverId)->exists();
@@ -65,6 +70,7 @@ class UserPersonalConversationController extends Controller
             $conversation->users()->sync([$request->user()->id, $receiverId], false);
         } else {
             $conversation = $conversation->first();
+            $conversation->users()->restore();
         }
 
         $conversation->touch();
@@ -153,5 +159,25 @@ class UserPersonalConversationController extends Controller
     public function destroy($id)
     {
         //
+        $conversation = Conversation::findOrFail($id);
+
+        $delete = $conversation->users()->where('user_id', auth()->user()->id)->delete();
+
+        // buat deleted_by isi nya conversation yang mempunyai users yang dihapus di map id nya saja
+        $conversation->deleted_by = $conversation->users()->onTrashed()->get()->map(function ($user) {
+            return $user->id;
+        })->toArray();
+
+        // tambahkan array deleted_by nya saja
+        $dbFirestore = new Firestore();
+        $dbFirestore->getDb()->collection('conversations')->document($conversation->id)->update([
+            'deleted_by' => $conversation->deleted_by,
+        ]);
+
+        return response()->json([
+            "data" => $delete,
+            "message" => $delete ? "Conversation deleted" : "Conversation not found",
+            "status" => $delete ? 200 : 404,
+        ]);
     }
 }
