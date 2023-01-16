@@ -81,17 +81,20 @@ class PersonalConversationController extends Controller
         $delete = $userConversation->delete();
 
         // buat deleted_by isi nya conversation yang mempunyai users yang dihapus di map id nya saja
-        $conversation->member_ids = UserConversation::where('conversation_id', $conversation->id)->get()->map(function ($item) {
+        $member_ids = UserConversation::where('conversation_id', $conversation->id)->get()->map(function ($item) {
             return $item->user_id;
         })->unique()->toArray();
 
-        $conversation->members = User::whereIn('id', $conversation->member_ids)->get()->map(function ($user) {
+        $members = User::whereIn('id', $conversation->member_ids)->get()->map(function ($user) {
             return [
                 'id' => $user->id,
                 'name' => $user->name,
                 'avatar' => $user->avatar,
             ];
         })->toArray();
+
+        $conversation->member_ids = $member_ids;
+        $conversation->members = $members;
 
         // return response()->json($conversation->deleted_by);
 
@@ -101,6 +104,13 @@ class PersonalConversationController extends Controller
             ->update([
                 ['path' => 'member_ids', 'value' => $conversation->member_ids],
                 ['path' => 'members', 'value' => $conversation->members],
+            ]);
+
+        // mengupdate semua chat yang conversation_id nya sama dengan yang dihapus
+        $dbFirestore->getDb()->collection('chats')->where('conversation_id', '=', $conversation->id)
+            ->update([
+                ['path' => 'member_ids', 'value' => $member_ids],
+                ['path' => 'members', 'value' => $members],
             ]);
 
         return response()->json([
