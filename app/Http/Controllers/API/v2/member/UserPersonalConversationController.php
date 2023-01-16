@@ -53,11 +53,11 @@ class UserPersonalConversationController extends Controller
         $conversation = Conversation::where('type', 'personal')
             ->whereHas('users', function ($query) use ($request, $receiverId) {
                 return $query
-                    ->withTrashed()
+                    // ->withTrashed()
                     ->where('user_id', $request->user()->id);
             })->whereHas('users', function ($query) use ($request, $receiverId) {
                 return $query
-                    ->withTrashed()
+                    // ->withTrashed()
                     ->where('user_id', $receiverId);
             });
 
