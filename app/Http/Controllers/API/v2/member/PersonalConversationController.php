@@ -102,17 +102,20 @@ class PersonalConversationController extends Controller
         $dbFirestore = new Firestore();
         $dbFirestore->getDb()->collection('conversations')->document($conversation->id)
             ->update([
-                ['path' => 'member_ids', 'value' => $conversation->member_ids],
-                ['path' => 'members', 'value' => $conversation->members],
-            ]);
-
-        // mengupdate semua chat yang conversation_id nya sama dengan yang dihapus
-        $dbFirestore->getDb()->collection('chats')->where('conversation_id', '=', $conversation->id)
-            ->update([
                 ['path' => 'member_ids', 'value' => $member_ids],
                 ['path' => 'members', 'value' => $members],
             ]);
 
+        // mengupdate semua chat yang conversation_id nya sama dengan yang dihapus
+        $docRef = $dbFirestore->getDb()->collection('chats')->where('conversation_id', '=', $conversation->id);
+        $snapshot = $docRef->documents();
+        foreach ($snapshot as $document) {
+            $dbFirestore->getDb()->collection('chats')->document($document->id())
+                ->update([
+                    ['path' => 'member_ids', 'value' => $member_ids],
+                    ['path' => 'members', 'value' => $members],
+                ]);
+        }
         return response()->json([
             "data" => $delete,
             "message" => $delete ? "Conversation deleted" : "Conversation not found",
