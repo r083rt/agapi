@@ -96,17 +96,24 @@ class UserPersonalConversationController extends Controller
         // $conversation = $conversation->load(['last_chat']);
         $conversation->last_chat = $chat;
         // map users object to array of id
-        $conversation->member_ids = UserConversation::where('conversation_id', $conversation->id)->get()->map(function ($item) {
+        $member_ids = UserConversation::where('conversation_id', $conversation->id)->get()->map(function ($item) {
             return $item->user_id;
         })->unique()->toArray();
 
-        $conversation->members = User::whereIn('id', $conversation->member_ids)->get()->map(function ($user) {
+        $members = User::whereIn('id', $conversation->member_ids)->get()->map(function ($user) {
             return [
                 'id' => $user->id,
                 'name' => $user->name,
                 'avatar' => $user->avatar,
             ];
         })->toArray();
+
+        $conversation->member_ids = $member_ids;
+        $conversation->members = $members;
+
+        $chat['member_ids'] = $member_ids;
+        $chat['members'] = $members;
+
         // delete attribute users on conversation
         unset($conversation->users);
         $dbFirestore = new Firestore();
