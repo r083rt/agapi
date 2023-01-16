@@ -7,6 +7,7 @@ use App\Models\Member\User;
 use Illuminate\Http\Request;
 use App\Models\Member\Conversation;
 use App\Helper\Firestore;
+use App\Models\Member\UserConversation;
 
 class PersonalConversationController extends Controller
 {
@@ -74,7 +75,7 @@ class PersonalConversationController extends Controller
             $query->where('user_id', auth()->user()->id);
         })->findOrFail($id);
 
-        $delete = $conversation->users()->where('user_id', auth()->user()->id)->delete();
+        $delete = UserConversation::where('user_id', auth()->user()->id)->delete();
 
         // buat deleted_by isi nya conversation yang mempunyai users yang dihapus di map id nya saja
         $conversation->deleted_by = $conversation->users()->onTrashed()->get()->map(function ($user) {
