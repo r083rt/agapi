@@ -99,6 +99,12 @@ class UserPersonalConversationController extends Controller
         $conversation->member_ids = $conversation->users->map(function ($user) {
             return $user->id;
         })->toArray();
+        $conversation->deleted_by = UserConversation::where('conversation_id', $conversation->id)->onlyTrashed()->get()->map(function ($user) {
+            return $user->user_id;
+        })
+            // unique
+            ->unique()
+            ->toArray();
         $conversation->members = $conversation->users->map(function ($user) {
             return [
                 'id' => $user->id,
