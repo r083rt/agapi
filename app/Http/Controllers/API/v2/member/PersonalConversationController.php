@@ -81,7 +81,7 @@ class PersonalConversationController extends Controller
         $delete = $userConversation->delete();
 
         // buat deleted_by isi nya conversation yang mempunyai users yang dihapus di map id nya saja
-        $conversation->deleted_by = UserConversation::where('conversation_id', $conversation->id)->onTrashed()->get()->map(function ($user) {
+        $conversation->deleted_by = UserConversation::where('conversation_id', $conversation->id)->onlyTrashed()->get()->map(function ($user) {
             return $user->id;
         })->toArray();
 
