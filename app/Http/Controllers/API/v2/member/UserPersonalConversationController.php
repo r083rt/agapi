@@ -103,7 +103,7 @@ class UserPersonalConversationController extends Controller
             return $item->user_id;
         })->unique()->toArray();
 
-        $members = $conversation->users()->map(function ($user) {
+        $members = $conversation->users()->get()->map(function ($user) {
             return [
                 'id' => $user->id,
                 'name' => $user->name,
