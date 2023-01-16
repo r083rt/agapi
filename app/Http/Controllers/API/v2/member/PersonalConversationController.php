@@ -77,6 +77,7 @@ class PersonalConversationController extends Controller
 
         $userConversation = UserConversation::where('user_id', auth()->user()->id)->where('conversation_id', $conversation->id)->firstOrFail();
 
+        // hapus userConversation dengan soft Delete
         $delete = $userConversation->delete();
 
         // buat deleted_by isi nya conversation yang mempunyai users yang dihapus di map id nya saja
