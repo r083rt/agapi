@@ -82,14 +82,20 @@ class PersonalConversationController extends Controller
 
         // buat deleted_by isi nya conversation yang mempunyai users yang dihapus di map id nya saja
         $conversation->deleted_by = UserConversation::where('conversation_id', $conversation->id)->onlyTrashed()->get()->map(function ($user) {
-            return $user->id;
-        })->toArray();
+            return $user->user_id;
+        })
+            // unique
+            ->unique()
+            ->toArray();
+
+        // return response()->json($conversation->deleted_by);
 
         // tambahkan array deleted_by nya saja
         $dbFirestore = new Firestore();
-        $dbFirestore->getDb()->collection('conversations')->document($conversation->id)->update([
-            'deleted_by' => $conversation->deleted_by,
-        ]);
+        $dbFirestore->getDb()->collection('conversations')->document($conversation->id)
+            ->update([
+                ['path' => 'deleted_by', 'value' => $conversation->deleted_by],
+            ]);
 
         return response()->json([
             "data" => $delete,
