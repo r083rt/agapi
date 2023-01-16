@@ -158,26 +158,5 @@ class UserPersonalConversationController extends Controller
      */
     public function destroy($id)
     {
-        //
-        $conversation = Conversation::findOrFail($id);
-
-        $delete = $conversation->users()->where('user_id', auth()->user()->id)->delete();
-
-        // buat deleted_by isi nya conversation yang mempunyai users yang dihapus di map id nya saja
-        $conversation->deleted_by = $conversation->users()->onTrashed()->get()->map(function ($user) {
-            return $user->id;
-        })->toArray();
-
-        // tambahkan array deleted_by nya saja
-        $dbFirestore = new Firestore();
-        $dbFirestore->getDb()->collection('conversations')->document($conversation->id)->update([
-            'deleted_by' => $conversation->deleted_by,
-        ]);
-
-        return response()->json([
-            "data" => $delete,
-            "message" => $delete ? "Conversation deleted" : "Conversation not found",
-            "status" => $delete ? 200 : 404,
-        ]);
     }
 }
