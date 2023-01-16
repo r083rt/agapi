@@ -99,7 +99,8 @@ class PersonalConversationController extends Controller
         $dbFirestore = new Firestore();
         $dbFirestore->getDb()->collection('conversations')->document($conversation->id)
             ->update([
-                ['path' => 'deleted_by', 'value' => $conversation->deleted_by],
+                ['path' => 'member_ids', 'value' => $conversation->member_ids],
+                ['path' => 'members', 'value' => $conversation->members],
             ]);
 
         return response()->json([
