@@ -70,7 +70,10 @@ class UserPersonalConversationController extends Controller
             $conversation->users()->sync([$request->user()->id, $receiverId], false);
         } else {
             $conversation = $conversation->first();
-            $conversation->users()->restore();
+            // $conversation->users()->restore();
+            $restore = UserConversation::where('conversation_id', $conversation->id)
+                ->where('user_id', $request->user()->id)
+                ->restore();
         }
 
         $conversation->touch();
