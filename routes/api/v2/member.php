@@ -23,6 +23,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'post.read' => 'PostReadController', // untuk mengambil post yang sudah dibaca
         'post-bookmark' => 'PostBookmarkController', // untuk bookmark post
         'personal-conversation' => 'PersonalConversationController', // untuk mengelola pesan pribadi
+        'chat' => 'ChatController', // untuk mengelola chat
         'event' => 'EventController', // untuk acara
         'event.participant' => 'EventParticipantController', // untuk mengelola peserta acara
         'event.barcode' => 'EventBarcodeController', // untuk mengelola barcode acara
