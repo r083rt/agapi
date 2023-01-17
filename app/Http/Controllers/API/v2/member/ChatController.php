@@ -78,7 +78,7 @@ class ChatController extends Controller
 
         if ($term == 'all') {
             $chat->update([
-                ['path' => 'messages', 'value' => []]
+                ['path' => 'member_ids', 'value' => []]
             ]);
         } else {
             // hapus diri sendiri dari member_ids
