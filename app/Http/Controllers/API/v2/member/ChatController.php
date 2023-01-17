@@ -82,9 +82,12 @@ class ChatController extends Controller
             ]);
         } else {
             // hapus diri sendiri dari member_ids
-            $member_ids = array_diff($member_ids, [auth()->user()->id]);
+            // $member_ids = array_diff($member_ids, [auth()->user()->id]);
+            $newMemberIds = array_filter($member_ids, function ($member_id) {
+                return $member_id != auth()->user()->id;
+            });
             $chat->update([
-                ['path' => 'member_ids', 'value' => $member_ids]
+                ['path' => 'member_ids', 'value' => $newMemberIds]
             ]);
         }
 
