@@ -86,6 +86,10 @@ class ChatController extends Controller
             $newMemberIds = array_filter($member_ids, function ($member_id) {
                 return $member_id != auth()->user()->id;
             });
+
+            // reset key array
+            $newMemberIds = array_values($newMemberIds);
+
             $chat->update([
                 ['path' => 'member_ids', 'value' => $newMemberIds]
             ]);
