@@ -49,35 +49,34 @@ class PostController extends Controller
         $request->validate([
             'body' => "required",
         ]);
-        // return response()->json([$request->all(), $request->hasFile('images'), $request->file('images')[0]->getClientOriginalName()]);
+        // return response()->json([$request->hasFile('images')]);
         $post = new Post($request->all());
 
-        \DB::transaction(function () use ($request, $post) {
+        $post->slug = Str::random(8);
+        $request->user()->posts()->save($post);
 
-            $post->slug = Str::random(8);
-            $request->user()->posts()->save($post);
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $image = new File();
+                $fileName = time() . '.' . $request->file('images')[$index]->extension();
 
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $index => $image) {
-                    $image = new File();
-                    $fileName = time() . '.' . $request->file('images')[$index]->extension();
+                $compressedImage = \Image::make($request->file('images')[$index])
+                    // ->resize(1080, null, function ($constraint) {
+                    //     $constraint->aspectRatio("1:1");
+                    // })
+                    ->encode('jpg', 60);
 
-                    $compressedImage = \Image::make($request->file('images')[$index])->resize(1080, null, function ($constraint) {
-                        $constraint->aspectRatio("1:1");
-                    })->encode('jpg', 60);
+                $folderPath = "images";
+                $path = "{$folderPath}/{$fileName}";
 
-                    $folderPath = "images";
-                    $path = "{$folderPath}/{$fileName}";
+                // simpan gambar
+                Storage::disk(env('FILESYSTEM_DRIVER', 'public'))->put($path, $compressedImage);
 
-                    // simpan gambar
-                    Storage::disk(env('FILESYSTEM_DRIVER', 'public'))->put($path, $compressedImage);
-
-                    $image->src = $path;
-                    $image->type = $request->file('images')[$index]->getClientMimeType();
-                    $post->images()->save($image);
-                }
+                $image->src = $path;
+                $image->type = $request->file('images')[$index]->getClientMimeType();
+                $post->images()->save($image);
             }
-        });
+        }
         return response()->json($post->load([
             'images', 'videos',
             'author.profile',
