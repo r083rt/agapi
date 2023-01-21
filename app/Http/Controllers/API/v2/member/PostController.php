@@ -104,7 +104,7 @@ class PostController extends Controller
                 $query
                     ->with('likes.user', 'liked', 'author.profile', 'author.role')
                     ->withCount('likes', 'liked')
-                    ->orderBy('created_at', 'asc');
+                    ->orderBy('created_at', 'desc');
             },
             'likes.user',
         ])->withCount('comments', 'likes', 'liked')->findOrFail($id);
