@@ -34,7 +34,7 @@ class StoryReadController extends Controller
 
         return response()->json([
             'message' => 'Berhasil read story',
-            'data' => $story->withCount('readers'),
+            'data' => $story->loadCount('readers'),
         ], 200);
     }
 
