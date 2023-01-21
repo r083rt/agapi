@@ -21,7 +21,10 @@ class StoryController extends Controller
     {
         //
         $stories = User::with(['stories' => function ($query) {
-            $query->with('thumbnail')->where('type', '!=', null)
+            $query
+                ->with('thumbnail')
+                ->withCount('readers')
+                ->where('type', '!=', null)
                 // ->whereDate('created_at', date('Y-m-d'))
                 ->whereDate('created_at', '>=', date('Y-m-d', strtotime('-1 day')))
                 ->orderBy('created_at', 'asc');

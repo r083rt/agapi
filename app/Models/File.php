@@ -22,4 +22,10 @@ class File extends Model
     {
         return $this->morphOne('App\Models\File', 'file')->where('key', 'thumbnail');
     }
+
+    //siapa aja users yang membaca post
+    public function readers()
+    {
+        return $this->morphToMany('App\Models\User', 'read');
+    }
 }
