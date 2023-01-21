@@ -47,6 +47,14 @@ class StoryReadController extends Controller
     public function show($id)
     {
         //
+        $story = File::where('key', 'story')->findOrFail($id);
+        $readers = $story->readers()->paginate();
+        $readers_count = $story->readers()->count();
+        return response()->json([
+            'message' => 'success',
+            'data' => $readers,
+            'readers_count' => $readers_count,
+        ], 200);
     }
 
     /**
