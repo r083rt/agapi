@@ -28,6 +28,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'event.participant' => 'EventParticipantController', // untuk mengelola peserta acara
         'event.barcode' => 'EventBarcodeController', // untuk mengelola barcode acara
         'story' => 'StoryController', // untuk story
+        'story.read' => 'StoryReadController', // untuk mengambil story yang sudah dibaca
         'user' => 'UserController', // untuk anggota
         'user.story' => 'UserStoryController', // untuk user story
         'user.post' => 'UserPostController',

@@ -80,9 +80,11 @@ class StoryController extends Controller
             $file->type = 'image/' . $extension;
             $path = 'stories/' . $fileName;
 
-            $compressed = \Image::make($request->file('file'))->resize(1080, null, function ($constraint) {
-                $constraint->aspectRatio();
-            })->encode('jpg', 60);
+            $compressed = \Image::make($request->file('file'))
+                // ->resize(1080, null, function ($constraint) {
+                //     $constraint->aspectRatio();
+                // })
+                ->encode('jpg', 60);
             Storage::disk(env('FILESYSTEM_DRIVER'))->put($path, $compressed);
             $file->src = $path;
             $file->save();
