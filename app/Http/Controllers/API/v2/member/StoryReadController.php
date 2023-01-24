@@ -13,9 +13,17 @@ class StoryReadController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($storyId)
     {
         //
+        $story = File::where('key', 'story')->findOrFail($storyId);
+        $readers = $story->readers()->paginate();
+        $readers_count = $story->readers()->count();
+        return response()->json([
+            'message' => 'success',
+            'data' => $readers,
+            'readers_count' => $readers_count,
+        ], 200);
     }
 
     /**
