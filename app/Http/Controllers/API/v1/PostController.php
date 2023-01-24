@@ -47,7 +47,7 @@ class PostController extends Controller
                 $query
                     ->whereIn('role_id', $role_ids);
             })->orderBy('id', 'desc')
-        // ->where('key', '!=', 'ad')
+            // ->where('key', '!=', 'ad')
             ->paginate($request->show ?? 10);
         return $posts;
     }
@@ -88,7 +88,7 @@ class PostController extends Controller
 
                     $file = new File();
                     // $path = $request->allFiles()['files'][$f]->store('files', 'wasabi');
-                    $path = "files/" . time() . '.' . $request->allFiles()['files'][$f]->extension();
+                    $path = "files/" . $f . '-' . time() . '.' . $request->allFiles()['files'][$f]->extension();
 
                     $compressedImage = \Image::make($request->allFiles()['files'][$f])->resize(1080, null, function ($constraint) {
                         $constraint->aspectRatio("1:1");
@@ -275,8 +275,8 @@ class PostController extends Controller
                 //$query->where('role_id',\App\Models\Role::where('name','=','student')->first()->id);
                 $query->where('name', '=', 'student');
             })->whereHas('authorId.profile', function ($query) {
-            $query->where('educational_level_id', '=', auth('api')->user()->profile->educational_level_id);
-        })
+                $query->where('educational_level_id', '=', auth('api')->user()->profile->educational_level_id);
+            })
             ->orderBy('created_at', 'desc')
             ->paginate($request->show ?? 10); //$request->show ?? 10
         return response()->json($posts);

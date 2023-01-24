@@ -58,7 +58,7 @@ class PostController extends Controller
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
                 $image = new File();
-                $fileName = time() . '.' . $request->file('images')[$index]->extension();
+                $fileName = $index . '-' . time() . '.' . $request->file('images')[$index]->extension();
 
                 $compressedImage = \Image::make($request->file('images')[$index])
                     // ->resize(1080, null, function ($constraint) {
