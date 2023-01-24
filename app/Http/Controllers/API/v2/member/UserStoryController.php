@@ -26,6 +26,7 @@ class UserStoryController extends Controller
         $user = User::findOrFail($userId);
         $res = $user
             ->stories()
+            ->withCount('readers')
             ->whereDate('created_at', '>=', date('Y-m-d', strtotime('-1 day')))
             ->get();
         return response()->json($res);
