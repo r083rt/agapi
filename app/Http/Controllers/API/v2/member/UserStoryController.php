@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use App\Models\File;
-use App\Models\User;
+use App\Models\Member\User;
 use Illuminate\Http\Request;
 
 class UserStoryController extends Controller
