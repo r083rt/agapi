@@ -19,9 +19,9 @@ class UserStoryController extends Controller
         //
         $res = File::where('key', 'story')
             ->where('file_id', $userId)
-        // ambil yang hari ini
-            ->whereDate('created_at', date('Y-m-d'))
-            ->where('file_type', 'App\\\Models\\\User')
+            ->where('file_type', 'App\Models\User')
+            // ambil yang hari ini
+            ->whereDate('created_at', '>=', date('Y-m-d', strtotime('-1 day')))
             ->get();
         return response()->json($res);
     }
