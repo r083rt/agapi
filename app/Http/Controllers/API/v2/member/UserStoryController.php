@@ -17,10 +17,15 @@ class UserStoryController extends Controller
     public function index($userId)
     {
         //
-        $res = File::where('key', 'story')
-            ->where('file_id', $userId)
-            ->where('file_type', 'App\Models\User')
-            // ambil yang hari ini
+        // $res = File::where('key', 'story')
+        //     ->where('file_id', $userId)
+        //     ->where('file_type', 'App\Models\User')
+        //     // ambil yang hari ini
+        //     ->whereDate('created_at', '>=', date('Y-m-d', strtotime('-1 day')))
+        //     ->get();
+        $user = User::findOrFail($userId);
+        $res = $user
+            ->stories()
             ->whereDate('created_at', '>=', date('Y-m-d', strtotime('-1 day')))
             ->get();
         return response()->json($res);
