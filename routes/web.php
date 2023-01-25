@@ -32,6 +32,7 @@ Route::get('/watzap/guruPns/{total}', 'UserController@guruPns');
 Route::get('/watzap/guruNonPns/{total}', 'UserController@guruNonPns');
 Route::get('/watzap/province/{provinceId}/users/active/{total}', 'WatzapController@getActiveUserByProvince');
 Route::get('/watzap/info', 'WatzapController@info');
+Route::get('/watzap/info/{from}/{to}', 'WatzapController@infoByDate');
 Route::get('/watzap/fixExpiredAt', 'WatzapController@fixExpiredAt');
 
 // Route::get('/user/{userId}/generate-membercard', 'API\v2\member\UserMemberCardController@index');

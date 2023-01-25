@@ -149,4 +149,13 @@ class WatzapController extends Controller
         // update users set expired_at = DATE_ADD(user_activated_at, INTERVAL 6 MONTH) where expired_at is null;
         return response()->json($count);
     }
+
+    public function infoByDate($from, $to)
+    {
+        $expired = User::where('expired_at', '<', Carbon::now())->whereBetween('expired_at', [$from, $to])->count();
+
+        return response()->json([
+            'expired' => $expired,
+        ]);
+    }
 }
