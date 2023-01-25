@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Province;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class WatzapController extends Controller
 {
@@ -128,5 +129,14 @@ class WatzapController extends Controller
             'expired_null' => $expiredNull,
         ];
         return response()->json($data);
+    }
+
+    public function fixExpiredAt()
+    {
+        $users = User::whereNull('expired_at')->get();
+        // expired_at ditambah dari user_activated_at di tambah 6 bulan
+        $db = DB::table('users')->whereNull('expired_at');
+        $db->update(['expired_at' => DB::raw('DATE_ADD(user_activated_at, INTERVAL 6 MONTH)')]);
+        return response()->json($users);
     }
 }
