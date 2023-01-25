@@ -128,8 +128,8 @@ class WatzapController extends Controller
             'expired' => $expired,
             'active' => $active,
             'total' => $total,
-            'youngest' => $youngest,
-            'oldest' => $oldest,
+            'youngest' => $youngest->expired_at,
+            'oldest' => $oldest->expired_at,
             'expired_null' => $expiredNull,
         ];
         return response()->json($data);
