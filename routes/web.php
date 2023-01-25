@@ -31,6 +31,7 @@ Route::get('/watzap/perpanjang/ambil/{total}/dari/{start_date}/sampai/{end_date}
 Route::get('/watzap/guruPns/{total}', 'UserController@guruPns');
 Route::get('/watzap/guruNonPns/{total}', 'UserController@guruNonPns');
 Route::get('/watzap/province/{provinceId}/users/active/{total}', 'WatzapController@getActiveUserByProvince');
+Route::get('/watzap/perpanjang/info', 'WatzapController@info');
 
 // Route::get('/user/{userId}/generate-membercard', 'API\v2\member\UserMemberCardController@index');
 Route::apiResource('user.cetak-member-card', 'API\v2\member\UserMemberCardController')->names('web.user.cetak-member-card');
@@ -492,9 +493,9 @@ Route::get('/getcontactnumber', function () {
 
 Route::get('/tes', function () {
     $islamic_studies = IslamicStudy::with('content')
-    ->withCount('upvotes')
-    ->orderBy('upvotes_count', 'desc')
-    ->get();
+        ->withCount('upvotes')
+        ->orderBy('upvotes_count', 'desc')
+        ->get();
 
     return response()->json($islamic_studies);
 });

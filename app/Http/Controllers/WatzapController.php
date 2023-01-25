@@ -63,7 +63,6 @@ class WatzapController extends Controller
                 $content .= "$name,$contact,$user->email";
                 $content .= "\n";
             }
-
         }
 
         // file name that will be used in the download
@@ -76,7 +75,6 @@ class WatzapController extends Controller
         ];
         // make a response, with the content, a 200 response code and the headers
         return response()->make($content, 200, $headers);
-
     }
 
     public function getActiveUsers($total, $startDate, $toDate)
@@ -115,6 +113,18 @@ class WatzapController extends Controller
         ];
         // make a response, with the content, a 200 response code and the headers
         return response()->make($content, 200, $headers);
+    }
 
+    public function info()
+    {
+        $expired = User::where('expired_at', '>', Carbon::now())->count();
+        $active = User::where('expired_at', '<', Carbon::now())->count();
+        $total = User::count();
+        $data = [
+            'expired' => $expired,
+            'active' => $active,
+            'total' => $total,
+        ];
+        return response()->json($data);
     }
 }
