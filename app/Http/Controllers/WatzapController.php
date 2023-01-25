@@ -118,7 +118,7 @@ class WatzapController extends Controller
 
     public function info()
     {
-        $expiredNull = User::whereNull('expired_at')->count();
+        $expiredNull = User::where('user_activated_at', '!=', null)->whereNull('expired_at')->count();
         $expired = User::where('expired_at', '<', Carbon::now())->count();
         $active = User::where('expired_at', '>', Carbon::now())->count();
         $oldest = User::where('expired_at', '<', Carbon::now())->orderBy('expired_at', 'asc')->first();
@@ -137,8 +137,15 @@ class WatzapController extends Controller
 
     public function fixExpiredAt()
     {
+        // code sql update semua expired_at menjadi null di table users jika expired_at nya tidak null dan user_activated_at nya null
+        // update users set expired_at = null where expired_at is not null and user_activated_at is null;
+
         // expired_at ditambah dari user_activated_at di tambah 6 bulan
-        $db = User::whereNull('expired_at')->get();
+
+        $db = User::
+            // yang user_activated_at nya tidak null dan expired_at nya null
+            where('user_activated_at', '!=', null)
+            ->whereNull('expired_at')->get();
         foreach ($db as $d => $data) {
             $data->expired_at = Carbon::parse($data->user_activated_at)->addMonths(6);
             $data->save();

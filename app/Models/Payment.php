@@ -16,7 +16,6 @@ class Payment extends Model
     public function user()
     {
         return $this->belongsTo('App\Models\User', 'user_id', 'id');
-
     }
 
     public function buyer()
@@ -156,7 +155,6 @@ class Payment extends Model
                             if ($key !== 'user_id') {
                                 $new_payment[$key] = $user_id[$key];
                             }
-
                         }
                     }
                     $payments[] = $new_payment;
@@ -172,9 +170,7 @@ class Payment extends Model
                 }
                 $this->generateSharingPayments($payment_info['sharings'], $payments);
             }
-
         }
         return $payments;
     }
-
 }
