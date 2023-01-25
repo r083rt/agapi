@@ -136,7 +136,7 @@ class WatzapController extends Controller
         // expired_at ditambah dari user_activated_at di tambah 6 bulan
         $db = User::whereNull('expired_at')->get();
         foreach ($db as $d => $data) {
-            $data->expired_at = $data->user_activated_at->addMonths(6);
+            $data->expired_at = Carbon::parse($data->user_activated_at)->addMonths(6);
             $data->save();
         }
         $count = User::whereNull('expired_at')->count();
