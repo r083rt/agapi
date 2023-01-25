@@ -121,11 +121,15 @@ class WatzapController extends Controller
         $expiredNull = User::whereNull('expired_at')->count();
         $expired = User::where('expired_at', '>', Carbon::now())->count();
         $active = User::where('expired_at', '<', Carbon::now())->count();
+        $youngest = User::where('expired_at', '>', Carbon::now())->orderBy('expired_at', 'asc')->first();
+        $oldest = User::where('expired_at', '>', Carbon::now())->orderBy('expired_at', 'desc')->first();
         $total = User::count();
         $data = [
             'expired' => $expired,
             'active' => $active,
             'total' => $total,
+            'youngest' => $youngest,
+            'oldest' => $oldest,
             'expired_null' => $expiredNull,
         ];
         return response()->json($data);
@@ -140,6 +144,9 @@ class WatzapController extends Controller
             $data->save();
         }
         $count = User::whereNull('expired_at')->count();
+
+        // sql untuk mengisi expired_at yang null dengan tanggal user_expired_at ditambah 6 bulan di table users
+        // update users set expired_at = DATE_ADD(user_activated_at, INTERVAL 6 MONTH) where expired_at is null;
         return response()->json($count);
     }
 }
