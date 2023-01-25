@@ -36,6 +36,8 @@ class UserGalleryController extends Controller
                 'files.*',
                 'posts.id as post_id',
             )
+            // group multiple files with same post_id
+            ->groupBy('post_id')
             ->orderBy('files.created_at', 'desc')
             ->paginate();
         return response()->json($gallery);
