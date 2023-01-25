@@ -121,8 +121,8 @@ class WatzapController extends Controller
         $expiredNull = User::whereNull('expired_at')->count();
         $expired = User::where('expired_at', '<', Carbon::now())->count();
         $active = User::where('expired_at', '>', Carbon::now())->count();
-        $youngest = User::where('expired_at', '<', Carbon::now())->orderBy('expired_at', 'asc')->first();
-        $oldest = User::where('expired_at', '<', Carbon::now())->orderBy('expired_at', 'desc')->first();
+        $oldest = User::where('expired_at', '<', Carbon::now())->orderBy('expired_at', 'asc')->first();
+        $youngest = User::where('expired_at', '<', Carbon::now())->orderBy('expired_at', 'desc')->first();
         $total = User::count();
         $data = [
             'expired' => $expired,
