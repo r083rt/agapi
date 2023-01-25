@@ -134,8 +134,12 @@ class WatzapController extends Controller
     public function fixExpiredAt()
     {
         // expired_at ditambah dari user_activated_at di tambah 6 bulan
-        $db = User::whereNull('expired_at')->update(['expired_at' => DB::raw('DATE_ADD(user_activated_at, INTERVAL 6 MONTH)')]);
-        $users = User::whereNull('expired_at')->count();
-        return response()->json($users);
+        $db = User::whereNull('expired_at')->get();
+        foreach ($db as $d => $data) {
+            $data->expired_at = $data->user_activated_at->addMonths(6);
+            $data->save();
+        }
+        $count = User::whereNull('expired_at')->count();
+        return response()->json($count);
     }
 }
