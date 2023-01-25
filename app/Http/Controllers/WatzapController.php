@@ -117,6 +117,7 @@ class WatzapController extends Controller
 
     public function info()
     {
+        $expiredNull = User::whereNull('expired_at')->count();
         $expired = User::where('expired_at', '>', Carbon::now())->count();
         $active = User::where('expired_at', '<', Carbon::now())->count();
         $total = User::count();
@@ -124,6 +125,7 @@ class WatzapController extends Controller
             'expired' => $expired,
             'active' => $active,
             'total' => $total,
+            'expired_null' => $expiredNull,
         ];
         return response()->json($data);
     }
