@@ -17,8 +17,21 @@ class UserPostController extends Controller
     public function index($userId)
     {
         //
-        $posts = Post::where('author_id', $userId)
-            ->with('author.profile')
+        $posts = Post::with([
+            'images', 'videos',
+            'author.profile',
+            'author.role',
+            'last_like.user',
+            'last_comment.user',
+        ])
+            ->withCount(['comments', 'likes'])
+            ->whereHas('author', function ($query) use ($userId) {
+                $query
+                    ->where('id', $userId)
+                    ->where('role_id', '!=', 8);
+            })
+            // ->where('key', '!=', 'ad')
+            ->orderBy('created_at', 'desc')
             ->paginate();
         return response()->json($posts);
     }
