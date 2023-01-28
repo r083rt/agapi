@@ -18,7 +18,7 @@ class UserPostController extends Controller
     {
         //
         $posts = Post::with([
-            // 'images', 'videos',
+            'images', 'videos',
             'media.thumbnail',
             'author.profile',
             'author.role',

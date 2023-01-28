@@ -22,6 +22,7 @@ class PostController extends Controller
         //
         $posts = Post::with([
             'images', 'videos',
+            'media.thumbnail',
             'author.profile',
             'author.role',
             'last_like.user',
