@@ -209,7 +209,7 @@ class Post extends Model
             return $media->src;
         }
         if ($media->type == 'video/mp4' || $media->type == 'video/ogg' || $media->type == 'video/webm') {
-            return $media->thumbnail->src;
+            return $media->value;
         }
         return null;
     }
