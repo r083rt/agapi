@@ -15,7 +15,7 @@ class Post extends Model
     // protected $guarded = ["id"];
     protected $fillable = ['author_id', 'category_id', 'title', 'seo_title', 'excerpt', 'body', 'image', 'slug', 'meta_description', 'meta_keywords', 'status', 'featured', 'is_public'];
 
-    protected $appends = ['is_liked', 'is_bookmarked', 'likes_count', 'comments_count', 'read_count'];
+    protected $appends = ['is_liked', 'is_bookmarked', 'likes_count', 'comments_count', 'read_count', 'thumbnail'];
 
     public function authorId()
     {
@@ -171,6 +171,11 @@ class Post extends Model
         return $this->morphMany('App\Models\Ad', 'adable');
     }
 
+    public function media()
+    {
+        return $this->morphMany('App\Models\File', 'file')->whereIn('type', ['image/jpeg', 'image/png', 'image/gif', 'image/jpg', 'video/mp4', 'video/ogg', 'video/webm']);
+    }
+
     // accessor -----------------------------------------------------------------------------------------
     public function getIsLikedAttribute()
     {
@@ -192,5 +197,20 @@ class Post extends Model
     public function getCommentsCountAttribute()
     {
         return $this->comments()->count();
+    }
+
+    public function getThumbnailAttribute()
+    {
+        if ($this->media()->count() == 0) {
+            return null;
+        }
+        $media = $this->media()->first();
+        if ($media->type == 'image/jpeg' || $media->type == 'image/png' || $media->type == 'image/gif' || $media->type == 'image/jpg') {
+            return $media->src;
+        }
+        if ($media->type == 'video/mp4' || $media->type == 'video/ogg' || $media->type == 'video/webm') {
+            return $media->thumbnail->src;
+        }
+        return null;
     }
 }
