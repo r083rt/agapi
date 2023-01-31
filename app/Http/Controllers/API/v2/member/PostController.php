@@ -85,7 +85,7 @@ class PostController extends Controller
         if ($request->hasFile('videos')) {
             foreach ($request->file('videos') as $index => $video) {
                 $file = new File();
-                $path = $request->allFiles()['videos'][$f]->store('videos', 'wasabi');
+                $path = $request->allFiles()['videos'][$index]->store('videos', 'wasabi');
 
                 // file type is video
                 // set storage path to store the file (image generated for a given video)
@@ -102,14 +102,14 @@ class PostController extends Controller
                 // assign the value to time_to_image (which will get screenshot of video at that specified seconds)
                 // $time_to_image    = floor(($data['video_length'])/2);
                 $time_to_image = 0.1;
-                $thumbnail_status = Thumbnail::getThumbnail($request->allFiles()['videos'][$f], $thumbnail_path, $thumbnail_image, $time_to_image);
+                $thumbnail_status = Thumbnail::getThumbnail($request->allFiles()['videos'][$index], $thumbnail_path, $thumbnail_image, $time_to_image);
                 $storagePublic = Storage::disk('wasabi')->put('thumbnails/' . $thumbnail_image, Storage::disk('public')->get('thumbnails/' . $thumbnail_image));
                 // dd($storagePublic);
                 if ($storagePublic) {
                     Storage::disk('public')->delete('thumbnails/' . $thumbnail_image);
                 }
                 $file->src = $path;
-                $file->type = $request->allFiles()['videos'][$f]->getClientMimeType();
+                $file->type = $request->allFiles()['videos'][$index]->getClientMimeType();
                 $file->value = 'thumbnails/' . $thumbnail_image;
                 $post->files()->save($file);
             }
