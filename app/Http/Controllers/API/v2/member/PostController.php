@@ -60,8 +60,8 @@ class PostController extends Controller
         $request->user()->posts()->save($post);
 
         if ($request->hasFile('files')) {
-            foreach($request->file('files') as $index => $file){
-                if(strpos($request->allFiles()['files'][$index]->getClientMimeType(), 'image') !== false){
+            foreach ($request->file('files') as $index => $file) {
+                if (strpos($request->allFiles()['files'][$index]->getClientMimeType(), 'image') !== false) {
                     $image = new File();
                     $fileName = $user->id . '-' . $index . '-' . time() . '.' . $request->file('files')[$index]->extension();
 
@@ -81,7 +81,7 @@ class PostController extends Controller
                     $image->type = $request->file('files')[$index]->getClientMimeType();
                     $post->images()->save($image);
                 }
-                if(strpos($request->allFiles()['files'][$index]->getClientMimeType(), 'video') !== false){
+                if (strpos($request->allFiles()['files'][$index]->getClientMimeType(), 'video') !== false) {
                     $file = new File();
                     $path = $request->allFiles()['files'][$index]->store('videos', 'wasabi');
 
@@ -112,6 +112,7 @@ class PostController extends Controller
                     $post->files()->save($file);
                 }
             }
+        }
         //     foreach ($request->file('images') as $index => $image) {
         //         $image = new File();
         //         $fileName = $user->id . '-' . $index . '-' . time() . '.' . $request->file('images')[$index]->extension();
