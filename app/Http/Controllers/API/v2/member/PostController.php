@@ -117,6 +117,7 @@ class PostController extends Controller
 
         return response()->json($post->load([
             'images', 'videos',
+            'media.thumbnail',
             'author.profile',
             'author.role',
             'last_like.user',
