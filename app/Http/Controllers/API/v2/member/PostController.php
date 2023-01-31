@@ -61,7 +61,7 @@ class PostController extends Controller
 
         if ($request->hasFile('files')) {
             foreach($request->file('files') as $index => $file){
-                if(strpos($file->getClientMimeType(), 'image')){
+                if(strpos($file->getClientMimeType(), 'image') !== false){
                     $image = new File();
                     $fileName = $user->id . '-' . $index . '-' . time() . '.' . $request->file('files')[$index]->extension();
 
@@ -81,7 +81,7 @@ class PostController extends Controller
                     $image->type = $request->file('files')[$index]->getClientMimeType();
                     $post->images()->save($image);
                 }
-                if(strpos($file->getClientMimeType(), 'video')){
+                if(strpos($file->getClientMimeType(), 'video') !== false){
                     $file = new File();
                     $path = $request->allFiles()['files'][$index]->store('videos', 'wasabi');
 
