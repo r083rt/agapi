@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\QuestionList;
 use App\Models\AssigmentQuestionList;
 use App\Models\Assigment;
+use App\Models\User;
 
 class QuestionListController extends Controller
 {
@@ -70,9 +71,12 @@ class QuestionListController extends Controller
     public function destroy($id)
     {
         //
-        $delete = Assigment::findOrFail($id);
-        $delete->delete();
-        return response()->json(['message' => 'success']);
+        $user = User::findOrFail(auth()->user()->id);
+        $delete = $user->unpublish_assigments()->findOrFail($id)->delete();
+        return response()->json([
+            'message' => 'success',
+            'status' => $delete
+        ]);
     }
 
     public function search($keyword)
