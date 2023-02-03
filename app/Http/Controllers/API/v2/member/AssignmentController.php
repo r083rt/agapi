@@ -10,6 +10,7 @@ use App\Models\AnswerList;
 use App\Models\QuestionList;
 use Google\Cloud\BigQuery\Reservation\V1\Assignment;
 use Illuminate\Support\Facades\Storage;
+use App\Models\User;
 
 class AssignmentController extends Controller
 {
@@ -98,6 +99,12 @@ class AssignmentController extends Controller
     public function destroy($id)
     {
         //
+        $user = User::findOrFail(auth()->user()->id);
+        $delete = $user->publish_assigments()->findOrFail($id)->delete();
+        return response()->json([
+            'message' => 'success',
+            'data' => $delete
+        ]);
     }
 
     public function storequestionlist(Request $request)
