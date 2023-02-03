@@ -70,6 +70,9 @@ class QuestionListController extends Controller
     public function destroy($id)
     {
         //
+        $delete = Assigment::findOrFail($id);
+        $delete->delete();
+        return response()->json(['message' => 'success']);
     }
 
     public function search($keyword)
