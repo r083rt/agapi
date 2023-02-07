@@ -37,7 +37,8 @@ class ClassRoomTaskController extends Controller
             'description' => 'nullable|string',
             // 'status' => 'nullable|string',
             // 'priority' => 'nullable|string',
-            'type' => 'nullable|string',
+            // opsi: document, quiz
+            'type' => 'nullable|string|in:document,quiz',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
         ]);
