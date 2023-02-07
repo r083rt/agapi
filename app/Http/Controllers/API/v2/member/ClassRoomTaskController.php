@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Room;
+use App\Models\Task;
+use Illuminate\Support\Str;
 
 class ClassRoomTaskController extends Controller
 {
@@ -27,9 +29,29 @@ class ClassRoomTaskController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store($roomId, Request $request)
     {
         //
+        $request->validate([
+            'title' => 'required|string',
+            'description' => 'nullable|string',
+            // 'status' => 'nullable|string',
+            // 'priority' => 'nullable|string',
+            'type' => 'nullable|string',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+        ]);
+
+        $room = Room::where('type', 'class')->findOrFail($roomId);
+        $task = new Task();
+        $task->uuid = Str::uuid();
+        $task->fill($request->all());
+        $room->tasks()->save($task);
+
+        return response()->json([
+            'message' => 'Task created successfully',
+            'task' => $task
+        ]);
     }
 
     /**
