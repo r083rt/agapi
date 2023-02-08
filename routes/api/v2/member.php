@@ -117,6 +117,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'category.islamic-study' => 'CategoryIslamicStudyController', //
         'islamic-study.upvote' => 'IslamicStudyUpVoteController', //
         'islamic-study.downvote' => 'IslamicStudyDownVoteController', //
+        'classroom' => 'ClassRoomController', //
         'classroom.task' => 'ClassRoomTaskController', //
         'task.result' => 'TaskResultController', //
     ]);
