@@ -20,6 +20,10 @@ class ClassRoomController extends Controller
         $userId = auth()->user()->id;
         $user = User::findOrFail($userId);
         $rooms = $user->rooms()
+            ->with(['users' => function ($query) {
+                $query->limit(3);
+            }])
+            ->withCount('users')
             ->where('type', 'class')
             ->paginate();
         return response()->json($rooms);
