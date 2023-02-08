@@ -122,6 +122,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         'task.result' => 'TaskResultController', //
     ]);
 
+    Route::get('/classroom/search/{keyword}', 'ClassRoomController@search');
+
     //get 3 thumbnail islamic study highest vote
     Route::get('/islamic-studies/highest/vote', 'IslamicStudyController@gethighestvote');
 

@@ -73,4 +73,19 @@ class ClassRoomController extends Controller
     {
         //
     }
+
+    public function search($key)
+    {
+        $userId = auth()->user()->id;
+        $user = User::findOrFail($userId);
+        $rooms = $user->rooms()
+            ->with(['users' => function ($query) {
+                $query->limit(3);
+            }])
+            ->withCount('users')
+            ->where('type', 'class')
+            ->where('name', 'like', '%' . $key . '%')
+            ->paginate();
+        return response()->json($rooms);
+    }
 }
