@@ -19,7 +19,9 @@ class ClassRoomTaskController extends Controller
     {
         //
         $room = Room::where('type', 'class')->findOrFail($roomId);
-        $tasks = $room->tasks()->paginate();
+        $tasks = $room->tasks()
+            ->orderBy('created_at', 'desc')
+            ->paginate();
         return response()->json($tasks);
     }
 
