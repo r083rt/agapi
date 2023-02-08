@@ -118,6 +118,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'islamic-study.upvote' => 'IslamicStudyUpVoteController', //
         'islamic-study.downvote' => 'IslamicStudyDownVoteController', //
         'classroom.task' => 'ClassRoomTaskController', //
+        'task.result' => 'TaskResultController', //
     ]);
 
     //get 3 thumbnail islamic study highest vote

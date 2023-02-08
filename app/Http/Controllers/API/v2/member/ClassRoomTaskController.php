@@ -61,9 +61,12 @@ class ClassRoomTaskController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($roomId, $taskId)
     {
         //
+        $room = Room::where('type', 'class')->findOrFail($roomId);
+        $task = $room->tasks()->findOrFail($taskId);
+        return response()->json($task);
     }
 
     /**
