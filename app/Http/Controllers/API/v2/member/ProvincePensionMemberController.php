@@ -23,6 +23,7 @@ class ProvincePensionMemberController extends Controller
             });
         }])
             ->paginate();
+        return response()->json($provinces);
     }
 
     /**

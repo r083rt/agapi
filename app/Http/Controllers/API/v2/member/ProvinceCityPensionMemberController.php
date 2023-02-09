@@ -24,6 +24,7 @@ class ProvinceCityPensionMemberController extends Controller
         }])
             ->where('province_id', $provinceId)
             ->paginate();
+        return response()->json($cities);
     }
 
     /**
@@ -81,5 +82,6 @@ class ProvinceCityPensionMemberController extends Controller
             ->where('province_id', $provinceId)
             ->where('name', 'like', '%' . $keyword . '%')
             ->paginate();
+        return response()->json($cities);
     }
 }

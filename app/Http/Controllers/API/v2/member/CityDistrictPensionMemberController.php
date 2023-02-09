@@ -82,5 +82,6 @@ class CityDistrictPensionMemberController extends Controller
             ->where('city_id', $cityId)
             ->where('name', 'like', '%' . $keyword . '%')
             ->paginate();
+        return response()->json($districts);
     }
 }
