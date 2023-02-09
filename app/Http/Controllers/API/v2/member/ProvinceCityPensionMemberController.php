@@ -4,27 +4,26 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\District;
+use App\Models\City;
 use Illuminate\Http\Request;
 
-class CityDistrictPensionUserController extends Controller
+class ProvinceCityPensionMemberController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($cityId)
+    public function index($provinceId)
     {
-        //
-        $districts = District::withCount(['users' => function ($query) {
+        // ambil city beserta user->profile->birthdate lalu ambil yang umum nya sudah lebih dari 60 tahun where province_id = $provinceId lalu tiap city hitung total users nya tanpa whereHas
+        $cities = City::withCount(['users' => function ($query) {
             $query->whereHas('profile', function ($query) {
                 $query->where('birthdate', '<=', now()->subYears(60));
             });
         }])
-            ->where('city_id', $cityId)
+            ->where('province_id', $provinceId)
             ->paginate();
-        return response()->json($districts);
     }
 
     /**
@@ -72,14 +71,14 @@ class CityDistrictPensionUserController extends Controller
         //
     }
 
-    public function search($cityId, $keyword)
+    public function search($provinceId, $keyword)
     {
-        $districts = District::withCount(['users' => function ($query) {
+        $cities = City::withCount(['users' => function ($query) {
             $query->whereHas('profile', function ($query) {
                 $query->where('birthdate', '<=', now()->subYears(60));
             });
         }])
-            ->where('city_id', $cityId)
+            ->where('province_id', $provinceId)
             ->where('name', 'like', '%' . $keyword . '%')
             ->paginate();
     }
