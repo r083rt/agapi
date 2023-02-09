@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\City;
 use Illuminate\Http\Request;
 
-class CityPensionUserController extends Controller
+class ProvinceCityPensionUserController extends Controller
 {
     /**
      * Display a listing of the resource.
