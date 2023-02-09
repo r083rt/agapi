@@ -257,6 +257,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/users/total-pns-member', 'UserController@gettotalpnsmember');
     Route::get('/users/total-non-pns-member', 'UserController@gettotalnonpnsmember');
     Route::get('/users/total-expired-member', 'UserController@gettotalexpiredmember');
+    Route::get('/users/total-pension-member', 'UserController@gettotalpensionmember');
     Route::get('/payment/extended-total', 'PaymentController@gettotalextendmember');
     //end total member
 

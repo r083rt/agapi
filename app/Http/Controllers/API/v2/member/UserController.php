@@ -113,6 +113,17 @@ class UserController extends Controller
         ]);
     }
 
+    public function gettotalpensionmember()
+    {
+        // total member yang sudah pensiun yang umur nya sudah lebih dari 60 tahun
+        $total = User::whereHas('profile', function ($query) {
+            $query->where('birth_date', '<', \Carbon\Carbon::now()->subYears(60)->format('Y-m-d'));
+        })->count();
+        return response()->json([
+            'total' => $total
+        ]);
+    }
+
     public function search($keyword)
     {
         $users = User::where('user_activated_at', '!=', null)
