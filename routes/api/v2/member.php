@@ -253,6 +253,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/city/{cityId}/district-non-pns-member/search/{keyword}', 'CityDistrictNonPnsMemberController@search');
     Route::get('/city/{cityId}/district-extend-member/search/{keyword}', 'CityDistrictExtendMemberController@search');
     Route::get('/city/{cityId}/district-expired-member/search/{keyword}', 'CityDistrictExpiredMemberController@search');
+    Route::get('/city/{cityId}/district-pension-member/search/{keyword}', 'CityDistrictPensionMemberController@search');
     //end search city with total member
 
     //total member
