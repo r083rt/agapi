@@ -20,7 +20,7 @@ class CityDistrictPensionMemberController extends Controller
         $districts = District::withCount(['users' => function ($query) {
             $query->whereHas('profile', function ($query) {
                 $query->where('birthdate', '<=', now()->subYears(60));
-            });
+            })->where('user_activated_at', '!=', 'null');
         }])
             ->where('city_id', $cityId)
             ->paginate();
@@ -77,7 +77,7 @@ class CityDistrictPensionMemberController extends Controller
         $districts = District::withCount(['users' => function ($query) {
             $query->whereHas('profile', function ($query) {
                 $query->where('birthdate', '<=', now()->subYears(60));
-            });
+            })->where('user_activated_at', '!=', 'null');
         }])
             ->where('city_id', $cityId)
             ->where('name', 'like', '%' . $keyword . '%')

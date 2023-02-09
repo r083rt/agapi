@@ -20,7 +20,7 @@ class ProvincePensionMemberController extends Controller
         $provinces = Province::withCount(['users' => function ($query) {
             $query->whereHas('profile', function ($query) {
                 $query->where('birthdate', '<=', now()->subYears(60));
-            });
+            })->where('user_activated_at', '!=', 'null');
         }])
             ->paginate();
         return response()->json($provinces);
@@ -76,7 +76,7 @@ class ProvincePensionMemberController extends Controller
         $provinces = Province::withCount(['users' => function ($query) {
             $query->whereHas('profile', function ($query) {
                 $query->where('birthdate', '<=', now()->subYears(60));
-            });
+            })->where('user_activated_at', '!=', 'null');
         }])
             ->where('name', 'like', '%' . $keyword . '%')
             ->paginate();

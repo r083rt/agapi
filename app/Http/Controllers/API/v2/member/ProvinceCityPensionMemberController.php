@@ -20,7 +20,7 @@ class ProvinceCityPensionMemberController extends Controller
         $cities = City::withCount(['users' => function ($query) {
             $query->whereHas('profile', function ($query) {
                 $query->where('birthdate', '<=', now()->subYears(60));
-            });
+            })->where('user_activated_at', '!=', 'null');
         }])
             ->where('province_id', $provinceId)
             ->paginate();
@@ -77,7 +77,7 @@ class ProvinceCityPensionMemberController extends Controller
         $cities = City::withCount(['users' => function ($query) {
             $query->whereHas('profile', function ($query) {
                 $query->where('birthdate', '<=', now()->subYears(60));
-            });
+            })->where('user_activated_at', '!=', 'null');
         }])
             ->where('province_id', $provinceId)
             ->where('name', 'like', '%' . $keyword . '%')
