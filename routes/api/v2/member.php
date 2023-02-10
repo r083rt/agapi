@@ -123,6 +123,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'classroom' => 'ClassRoomController', //
         'classroom.task' => 'ClassRoomTaskController', //
         'task.result' => 'TaskResultController', //
+        'file' => 'FileController', //
     ]);
 
     Route::get('/classroom/search/{keyword}', 'ClassRoomController@search');
