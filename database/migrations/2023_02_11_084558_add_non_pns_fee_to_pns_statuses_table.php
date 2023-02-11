@@ -15,6 +15,7 @@ class AddNonPnsFeeToPnsStatusesTable extends Migration
     {
         Schema::table('pns_statuses', function (Blueprint $table) {
             //
+            $table->bigInteger('non_pns_fee')->default(0);
         });
     }
 
@@ -27,6 +28,7 @@ class AddNonPnsFeeToPnsStatusesTable extends Migration
     {
         Schema::table('pns_statuses', function (Blueprint $table) {
             //
+            $table->dropColumn('non_pns_fee');
         });
     }
 }
