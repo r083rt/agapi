@@ -61,8 +61,14 @@ class UserPnsStatusController extends Controller
     {
         //
         // return response()->json($request->is_pns == false);
-        $pns_status = PnsStatus::where('user_id', $userId)->first();
+        // $pns_status = PnsStatus::where('user_id', $userId)->first();
+        // $pns_status->is_pns = $request->is_pns;
+        // $pns_status->save();
+        $pns_status = PnsStatus::firstOrNew(['user_id' => $userId]);
         $pns_status->is_pns = $request->is_pns;
+        if ($request->has('non_pns_fee')) {
+            $pns_status->non_pns_fee = $request->non_pns_fee;
+        }
         $pns_status->save();
 
         return response()->json($pns_status);
