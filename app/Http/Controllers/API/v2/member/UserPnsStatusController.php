@@ -57,7 +57,7 @@ class UserPnsStatusController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $userId)
+    public function update($userId, Request $request)
     {
         //
         // return response()->json($request->is_pns == false);
