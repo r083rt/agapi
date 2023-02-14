@@ -12,7 +12,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::where('user_activated_at', '!=', null)
-            ->whereHas('roles', function ($query) {
+            ->whereHas('role', function ($query) {
                 $query->whereIn('name', ['user']);
             })
             ->paginate();
