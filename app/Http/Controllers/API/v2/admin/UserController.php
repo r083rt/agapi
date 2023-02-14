@@ -9,6 +9,17 @@ class UserController extends Controller
 {
     //
 
+    public function index()
+    {
+        $users = User::where('user_activated_at', '!=', null)
+            ->whereHas('roles', function ($query) {
+                $query->whereIn('name', ['user']);
+            })
+            ->paginate();
+
+        return response()->json($users);
+    }
+
     public function search($keyword)
     {
         $users = User::where('name', 'like', '%' . $keyword . '%')
