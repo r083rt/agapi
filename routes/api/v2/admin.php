@@ -28,6 +28,7 @@ Route::group(['as' => 'api.v2.admin.'], function () {
         'province.city' => 'ProvinceCityController',
         'city.district' => 'CityDistrictController',
         'islamic-study' => 'IslamicStudyController',
+        'user' => 'UserController',
     ]);
 });
 
