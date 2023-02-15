@@ -18,7 +18,7 @@ class FileController extends Controller
     {
         //
         $user = User::findOrFail(auth()->user()->id);
-        $files = $user->files()->paginate();
+        $files = $user->files()->orderBy('created_at','desc')->paginate();
         return response()->json($files);
     }
 
