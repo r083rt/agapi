@@ -15,6 +15,7 @@ class UserController extends Controller
             ->whereHas('role', function ($query) {
                 $query->whereIn('name', ['user']);
             })
+            ->with('role')
             ->paginate();
 
         return response()->json($users);
@@ -25,6 +26,7 @@ class UserController extends Controller
         $users = User::where('name', 'like', '%' . $keyword . '%')
             ->orWhere('email', 'like', '%' . $keyword . '%')
             ->orWhere('kta_id', 'like', '%' . $keyword . '%')
+            ->with('role')
             ->paginate();
 
         return response()->json($users);
