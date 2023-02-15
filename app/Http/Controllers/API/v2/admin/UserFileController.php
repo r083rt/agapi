@@ -28,14 +28,13 @@ class UserFileController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store($userId, Request $request)
     {
         //
         $request->validate([
-            'user_id' => 'required|exists:users,id',
             'file' => 'required|file',
         ]);
-        $user = User::findOrFail($request->user_id);
+        $user = User::findOrFail($userId);
 
         $path = $request->file('file')->store('files');
         $file = new File;
