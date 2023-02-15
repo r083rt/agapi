@@ -3,12 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class File extends Model
 {
     //
     protected $guarded = ['id'];
-    protected $appends = ['size'];
 
     public function type()
     {
@@ -30,15 +30,24 @@ class File extends Model
         return $this->morphToMany('App\Models\User', 'read');
     }
 
-    // replace size attribute with human readable size
-    public function getSizeAttribute($value)
-    {
-        $value = (int) $value;
-        $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
-        for ($i = 0; $value > 1024; $i++) {
-            $value /= 1024;
-        }
 
-        return round($value, 2) . ' ' . $units[$i];
+    public function humanFileSize($size, $precision = 2)
+    {
+        for ($i = 0; ($size / 1024) > 0.9; $i++, $size /= 1024) {
+        }
+        return round($size, $precision) . ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'][$i];
+    }
+
+    // replace size attribute with human readable size
+    protected function size(): Attribute
+    {
+        return new Attribute(
+            function ($value) {
+                return $this->humanFileSize($value);
+            },
+            function ($value) {
+                return $value;
+            }
+        );
     }
 }
