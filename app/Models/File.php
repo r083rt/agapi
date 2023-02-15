@@ -37,6 +37,7 @@ class File extends Model
         for ($i = 0; $value > 1024; $i++) {
             $value /= 1024;
         }
+
         return round($value, 2) . ' ' . $units[$i];
     }
 }
