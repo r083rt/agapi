@@ -29,6 +29,7 @@ Route::group(['as' => 'api.v2.admin.'], function () {
         'city.district' => 'CityDistrictController',
         'islamic-study' => 'IslamicStudyController',
         'user' => 'UserController',
+        'user.file' => 'UserFileController',
     ]);
 });
 
