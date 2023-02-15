@@ -16,7 +16,7 @@ class UserController extends Controller
                 $query->whereIn('name', ['user']);
             })
             ->with('role')
-            ->paginate();
+            ->paginate(request()->query('per_page'));
 
         return response()->json($users);
     }
