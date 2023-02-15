@@ -33,6 +33,7 @@ class File extends Model
     // replace size attribute with human readable size
     public function getSizeAttribute($value)
     {
+        $value = (int) $value;
         $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
         for ($i = 0; $value > 1024; $i++) {
             $value /= 1024;
