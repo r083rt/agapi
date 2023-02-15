@@ -31,6 +31,21 @@ class UserFileController extends Controller
     public function store(Request $request)
     {
         //
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'file' => 'required|file',
+        ]);
+        $user = User::findOrFail($request->user_id);
+
+        $path = $request->file('file')->store('files');
+        $file = new File;
+        $file->name = $request->file('file')->getClientOriginalName();
+        $file->type = $request->file('file')->getMimeType();
+        $file->size = $request->file('file')->getSize();
+        $file->src = $path;
+
+        $user->files()->save($file);
+        return response()->json($file);
     }
 
     /**
