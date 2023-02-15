@@ -26,8 +26,11 @@ class UserController extends Controller
         $users = User::where('name', 'like', '%' . $keyword . '%')
             ->orWhere('email', 'like', '%' . $keyword . '%')
             ->orWhere('kta_id', 'like', '%' . $keyword . '%')
+            ->whereHas('role', function ($query) {
+                $query->whereIn('name', ['user']);
+            })
             ->with('role')
-            ->paginate();
+            ->paginate(request()->query('per_page'));
 
         return response()->json($users);
     }
