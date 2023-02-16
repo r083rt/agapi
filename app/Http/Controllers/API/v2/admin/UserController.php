@@ -41,8 +41,8 @@ class UserController extends Controller
             ->whereHas('role', function ($query) {
                 $query->whereIn('name', ['user']);
             })
-            ->whereMonth('user_activated_at', '<', date('m') - 2)
-            ->whereYear('user_activated_at', date('Y'))
+            ->whereMonth('created_at', '<', date('m') - 2)
+            ->whereYear('created_at', date('Y'))
             ->count();
 
         // ambil count users dari awal sampai bulan lalu
@@ -50,16 +50,16 @@ class UserController extends Controller
             ->whereHas('role', function ($query) {
                 $query->whereIn('name', ['user']);
             })
-            ->whereMonth('user_activated_at', '<', date('m'))
-            ->whereYear('user_activated_at', date('Y'))
+            ->whereMonth('created_at', '<', date('m'))
+            ->whereYear('created_at', date('Y'))
             ->count();
         // ambil count users dari awal sampai bulan ini
         $usersNow = User::where('user_activated_at', '!=', null)
             ->whereHas('role', function ($query) {
                 $query->whereIn('name', ['user']);
             })
-            ->whereMonth('user_activated_at', '<=', date('m'))
-            ->whereYear('user_activated_at', date('Y'))
+            ->whereMonth('created_at', '<=', date('m'))
+            ->whereYear('created_at', date('Y'))
             ->count();
 
         return response()->json([
