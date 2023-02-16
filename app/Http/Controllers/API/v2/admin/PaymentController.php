@@ -184,19 +184,23 @@ class PaymentController extends Controller
             ->count();
 
         foreach ($payments as $payment) {
-            $status = Midtrans::status($payment->midtrans_id);
-            // return response()->json($status);
-            if ($status->transaction_status == 'settlement') {
-                $date = $payment->created_at;
-                $payment->status = 'success';
-                $payment->save();
-                $user = User::find($payment->user_id);
-                if($user->user_activated_at == null) {
-                    $user->update([
-                        'user_activated_at' => date('Y-m-d H:i:s', strtotime($date)),
-                        'expired_at' => date('Y-m-d H:i:s', strtotime($date . ' + 6 months')),
-                    ]);
+            try{
+                $status = Midtrans::status($payment->midtrans_id);
+                // return response()->json($status);
+                if ($status->transaction_status == 'settlement') {
+                    $date = $payment->created_at;
+                    $payment->status = 'success';
+                    $payment->save();
+                    $user = User::find($payment->user_id);
+                    if ($user->user_activated_at == null) {
+                        $user->update([
+                            'user_activated_at' => date('Y-m-d H:i:s', strtotime($date)),
+                            'expired_at' => date('Y-m-d H:i:s', strtotime($date . ' + 6 months')),
+                        ]);
+                    }
                 }
+            } catch(\Exception $e){
+                // return response()->json($e->getMessage());
             }
         }
 
