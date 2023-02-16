@@ -128,7 +128,8 @@ class PaymentController extends Controller
             ->get();
 
         $etcs = Payment::where('status', 'success')
-            ->whereIn('key', '!=', ['perpanjangan_anggota', 'pendaftaran'])
+            // where key nya bukan pendaftaran dan perpanjangan_anggota
+            ->whereNotIn('key', ['pendaftaran', 'perpanjangan_anggota'])
             ->whereYear('updated_at', $year)
             ->whereMonth('updated_at', $month)
             ->selectRaw('sum(value) as value, DATE(created_at) as date')
