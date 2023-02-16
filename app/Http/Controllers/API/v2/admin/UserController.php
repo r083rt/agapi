@@ -74,8 +74,8 @@ class UserController extends Controller
             'usersNow' => $usersNow,
             'usersGrowthTillLastMonth' => $usersGrowthTillLastMonth,
             'usersGrowthTillNow' => $usersGrowthTillNow,
-            'usersGrowthPercentageTillLastMonth' => $usersGrowthPercentageTillLastMonth,
-            'usersGrowthPercentageTillNow' => $usersGrowthPercentageTillNow,
+            'usersGrowthPercentageTillLastMonth' => round($usersGrowthPercentageTillLastMonth, 2),
+            'usersGrowthPercentageTillNow' => round($usersGrowthPercentageTillNow, 2),
         ]);
     }
 }
