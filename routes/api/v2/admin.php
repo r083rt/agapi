@@ -33,7 +33,7 @@ Route::group(['as' => 'api.v2.admin.'], function () {
     ]);
 });
 
-Route::get('/user/growth', 'UserController@memberGrowth');
+Route::get('/user/analytic/growth', 'UserController@memberGrowth');
 
 Route::get('/islamic-study/{id}/approval', 'IslamicStudyController@approval');
 Route::get('/islamic-study/{id}/rejected', 'IslamicStudyController@rejected');
