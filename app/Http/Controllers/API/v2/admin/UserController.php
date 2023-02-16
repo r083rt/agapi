@@ -59,10 +59,20 @@ class UserController extends Controller
             ->whereDate('created_at', '<', date('Y-m-d'))
             ->count();
 
+        // selisih kenaikan user 2 bulan lalu dengan bulan lalu
+        $usersGrowthTillLastMonth = $usersTillLastMonth - $usersTill2MonthAgo;
+        // selisih kenaikan user bulan lalu dengan bulan ini
+        $usersGrowthTillNow = $usersNow - $usersTillLastMonth;
+        // persentase kenaikan user 2 bulan lalu dengan bulan lalu
+        $usersGrowthPercentageTillLastMonth = $usersGrowthTillLastMonth / $usersTill2MonthAgo * 100;
+
         return response()->json([
             'usersTill2MonthAgo' => $usersTill2MonthAgo,
             'usersTillLastMonth' => $usersTillLastMonth,
             'usersNow' => $usersNow,
+            'usersGrowthTillLastMonth' => $usersGrowthTillLastMonth,
+            'usersGrowthTillNow' => $usersGrowthTillNow,
+            'usersGrowthPercentageTillLastMonth' => $usersGrowthPercentageTillLastMonth,
         ]);
     }
 }
