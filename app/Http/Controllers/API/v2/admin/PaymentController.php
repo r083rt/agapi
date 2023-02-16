@@ -114,7 +114,7 @@ class PaymentController extends Controller
             ->where('key', 'pendaftaran')
             ->whereYear('updated_at', $year)
             ->whereMonth('updated_at', $month)
-            ->selectRaw('sum(value) as value, DATE(created_at) as date')
+            ->selectRaw('sum(value) as value, DATE(updated_at) as date')
             ->groupBy('date')
             ->get();
 
@@ -123,7 +123,7 @@ class PaymentController extends Controller
             ->where('key', 'perpanjangan_anggota')
             ->whereYear('updated_at', $year)
             ->whereMonth('updated_at', $month)
-            ->selectRaw('sum(value) as value, DATE(created_at) as date')
+            ->selectRaw('sum(value) as value, DATE(updated_at) as date')
             ->groupBy('date')
             ->get();
 
@@ -132,7 +132,7 @@ class PaymentController extends Controller
             ->whereNotIn('key', ['pendaftaran', 'perpanjangan_anggota'])
             ->whereYear('updated_at', $year)
             ->whereMonth('updated_at', $month)
-            ->selectRaw('sum(value) as value, DATE(created_at) as date')
+            ->selectRaw('sum(value) as value, DATE(updated_at) as date')
             ->groupBy('date')
             ->get();
 
