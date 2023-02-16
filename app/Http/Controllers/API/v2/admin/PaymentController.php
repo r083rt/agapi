@@ -63,7 +63,8 @@ class PaymentController extends Controller
         //
     }
 
-    public function paymentGrowth(){
+    public function paymentGrowth()
+    {
         // ambil count payment dari awal sampai 2 bulan lalu
         $paymentsTill2MonthAgo = Payment::whereDate('created_at', '<', date('Y-m-d', strtotime('-2 month')))
             ->where('status', 'success')
@@ -95,16 +96,16 @@ class PaymentController extends Controller
             'paymentsNow' => $paymentsNow,
             'paymentsGrowthTillLastMonth' => $paymentsGrowthTillLastMonth,
             'paymentsGrowthNow' => $paymentsGrowthNow,
-            'paymentsGrowthPercentageTillLastMonth' => round($paymentsGrowthPercentageTillLastMonth, 2  ),
+            'paymentsGrowthPercentageTillLastMonth' => round($paymentsGrowthPercentageTillLastMonth, 2),
             'paymentsGrowthPercentageNow' => round($paymentsGrowthPercentageNow, 2),
         ]);
-
     }
 
-    public function statistic($year, $month){
+    public function statistic($year, $month)
+    {
         // buat array tanggal pada bulan ini
         $dates = [];
-        for($i = 1; $i <= date('t'); $i++){
+        for ($i = 1; $i <= date('t'); $i++) {
             $dates[] = date('Y-m-') . $i;
         }
 
@@ -117,22 +118,50 @@ class PaymentController extends Controller
             ->groupBy('date')
             ->get();
 
+        // ambil sum value payments yang key nya perpanjangan_anggota lalu di group berdasarkan tanggal
+        $subscribe = Payment::where('status', 'success')
+            ->where('key', 'perpanjangan_anggota')
+            ->whereYear('updated_at', $year)
+            ->whereMonth('updated_at', $month)
+            ->selectRaw('sum(value) as value, DATE(created_at) as date')
+            ->groupBy('date')
+            ->get();
+
+        $etcs = Payment::where('status', 'success')
+            ->whereIn('key', '!=', ['perpanjangan_anggota', 'pendaftaran'])
+            ->whereYear('updated_at', $year)
+            ->whereMonth('updated_at', $month)
+            ->selectRaw('sum(value) as value, DATE(created_at) as date')
+            ->groupBy('date')
+            ->get();
+
         // masukan data payments ke array dates dengan object pendaftaran
-        foreach($dates as $key => $date){
+        foreach ($dates as $key => $date) {
             $dates[$key] = [
                 'date' => $date,
                 'pendaftaran' => 0,
                 'perpanjangan' => 0,
                 'etc' => 0
             ];
-            foreach($registerPayments as $registerPayment){
-                if($registerPayment->date == $date){
+            foreach ($registerPayments as $registerPayment) {
+                if ($registerPayment->date == $date) {
                     $dates[$key]['pendaftaran'] = $registerPayment->value;
+                }
+            }
+
+            foreach ($subscribe as $sub) {
+                if ($sub->date == $date) {
+                    $dates[$key]['perpanjangan'] = $sub->value;
+                }
+            }
+
+            foreach ($etcs as $etc) {
+                if ($etc->date == $date) {
+                    $dates[$key]['etc'] = $etc->value;
                 }
             }
         }
 
         return response()->json($dates);
-
     }
 }
