@@ -95,8 +95,8 @@ class PaymentController extends Controller
             'paymentsNow' => $paymentsNow,
             'paymentsGrowthTillLastMonth' => $paymentsGrowthTillLastMonth,
             'paymentsGrowthNow' => $paymentsGrowthNow,
-            'paymentsGrowthPercentageTillLastMonth' => $paymentsGrowthPercentageTillLastMonth,
-            'paymentsGrowthPercentageNow' => $paymentsGrowthPercentageNow,
+            'paymentsGrowthPercentageTillLastMonth' => round($paymentsGrowthPercentageTillLastMonth, 2  ),
+            'paymentsGrowthPercentageNow' => round($paymentsGrowthPercentageNow, 2),
         ]);
 
     }
