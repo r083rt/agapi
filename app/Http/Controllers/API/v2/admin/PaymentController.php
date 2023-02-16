@@ -123,6 +123,7 @@ class PaymentController extends Controller
                 'date' => $date,
                 'pendaftaran' => 0,
                 'pembayaran' => 0,
+                'etc' => 0
             ];
             foreach($registerPayments as $registerPayment){
                 if($registerPayment->date == $date){
