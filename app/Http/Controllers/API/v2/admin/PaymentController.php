@@ -122,7 +122,7 @@ class PaymentController extends Controller
             $dates[$key] = [
                 'date' => $date,
                 'pendaftaran' => 0,
-                'pembayaran' => 0,
+                'perpanjangan' => 0,
                 'etc' => 0
             ];
             foreach($registerPayments as $registerPayment){
