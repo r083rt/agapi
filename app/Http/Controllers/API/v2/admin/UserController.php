@@ -65,6 +65,8 @@ class UserController extends Controller
         $usersGrowthTillNow = $usersNow - $usersTillLastMonth;
         // persentase kenaikan user 2 bulan lalu dengan bulan lalu
         $usersGrowthPercentageTillLastMonth = $usersGrowthTillLastMonth / $usersTill2MonthAgo * 100;
+        // persentase kenaikan user bulan lalu dengan bulan ini
+        $usersGrowthPercentageTillNow = $usersGrowthTillNow / $usersTillLastMonth * 100;
 
         return response()->json([
             'usersTill2MonthAgo' => $usersTill2MonthAgo,
@@ -73,6 +75,7 @@ class UserController extends Controller
             'usersGrowthTillLastMonth' => $usersGrowthTillLastMonth,
             'usersGrowthTillNow' => $usersGrowthTillNow,
             'usersGrowthPercentageTillLastMonth' => $usersGrowthPercentageTillLastMonth,
+            'usersGrowthPercentageTillNow' => $usersGrowthPercentageTillNow,
         ]);
     }
 }
