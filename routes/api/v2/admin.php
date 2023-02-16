@@ -39,6 +39,8 @@ Route::get('/payment/analytic/growth','PaymentController@paymentGrowth');
 
 Route::get('/payment/statistic/year/{year}/month/{month}', 'PaymentController@statistic');
 
+Route::get('/payment/statistic/sync/year/{year}/month/{month}', 'PaymentController@syncStatistic');
+
 Route::get('/islamic-study/{id}/approval', 'IslamicStudyController@approval');
 Route::get('/islamic-study/{id}/rejected', 'IslamicStudyController@rejected');
 

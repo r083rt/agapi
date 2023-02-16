@@ -5,7 +5,8 @@ namespace App\Http\Controllers\API\v2\admin;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
-
+use App\Helper\Midtrans;
+use App\Models\User;
 class PaymentController extends Controller
 {
     /**
@@ -164,5 +165,49 @@ class PaymentController extends Controller
         }
 
         return response()->json($dates);
+    }
+
+    public function syncStatistic($year, $month)
+    {
+        $payments = Payment::where('status', 'pending')
+            ->where('key', 'pendaftaran')
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->get();
+
+        $firstCount = Payment::where('status', 'pending')
+            ->where('key', 'pendaftaran')
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->count();
+
+        foreach ($payments as $payment) {
+            $status = Midtrans::status($payment->midtrans_id);
+            // return response()->json($status);
+            if ($status->transaction_status == 'settlement') {
+                $date = $payment->created_at;
+                $payment->status = 'success';
+                $payment->save();
+                $user = User::find($payment->user_id);
+                if($user->user_activated_at == null) {
+                    $user->update([
+                        'user_activated_at' => date('Y-m-d H:i:s', strtotime($date)),
+                        'expired_at' => date('Y-m-d H:i:s', strtotime($date . ' + 6 months')),
+                    ]);
+                }
+                break;
+            }
+        }
+
+        $lastCount = Payment::where('status', '!=', 'success')
+            ->where('key', 'pendaftaran')
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->get();
+
+        return response()->json([
+            'message' => 'success',
+            'updated' => $firstCount - $lastCount
+        ]);
     }
 }
