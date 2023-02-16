@@ -209,7 +209,7 @@ class PaymentController extends Controller
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->orderBy('id', 'DESC')
-            ->get();
+            ->count();
 
         return response()->json([
             'message' => 'success',
