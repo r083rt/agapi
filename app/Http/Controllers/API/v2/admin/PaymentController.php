@@ -173,12 +173,14 @@ class PaymentController extends Controller
             ->where('key', 'pendaftaran')
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
+            ->orderBy('id', 'DESC')
             ->get();
 
         $firstCount = Payment::where('status', 'pending')
             ->where('key', 'pendaftaran')
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
+            ->orderBy('id', 'DESC')
             ->count();
 
         foreach ($payments as $payment) {
@@ -195,7 +197,6 @@ class PaymentController extends Controller
                         'expired_at' => date('Y-m-d H:i:s', strtotime($date . ' + 6 months')),
                     ]);
                 }
-                break;
             }
         }
 
@@ -203,6 +204,7 @@ class PaymentController extends Controller
             ->where('key', 'pendaftaran')
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
+            ->orderBy('id', 'DESC')
             ->get();
 
         return response()->json([
