@@ -63,7 +63,7 @@ class PaymentController extends Controller
         //
     }
 
-    public function transactionGrowth(){
+    public function paymentGrowth(){
         // ambil count payment dari awal sampai 2 bulan lalu
         $paymentsTill2MonthAgo = Payment::whereDate('created_at', '<', date('Y-m-d', strtotime('-2 month')))
             ->where('status', 'success')
