@@ -100,4 +100,38 @@ class PaymentController extends Controller
         ]);
 
     }
+
+    public function statistic($year, $month){
+        // buat array tanggal pada bulan ini
+        $dates = [];
+        for($i = 1; $i <= date('t'); $i++){
+            $dates[] = date('Y-m-') . $i;
+        }
+
+        // ambil sum value payments yang key nya pendaftaran lalu di group berdasarkan tanggal
+        $registerPayments = Payment::where('status', 'success')
+            ->where('key', 'pendaftaran')
+            ->whereYear('updated_at', $year)
+            ->whereMonth('updated_at', $month)
+            ->selectRaw('sum(value) as value, DATE(created_at) as date')
+            ->groupBy('date')
+            ->get();
+
+        // masukan data payments ke array dates dengan object pendaftaran
+        foreach($dates as $key => $date){
+            $dates[$key] = [
+                'date' => $date,
+                'pendaftaran' => 0,
+                'pembayaran' => 0,
+            ];
+            foreach($registerPayments as $registerPayment){
+                if($registerPayment->date == $date){
+                    $dates[$key]['pendaftaran'] = $registerPayment->value;
+                }
+            }
+        }
+
+        return response()->json($dates);
+
+    }
 }
