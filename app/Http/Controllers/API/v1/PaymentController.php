@@ -9,7 +9,7 @@ use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Veritrans_Notification;
+use \Midtrans\Notification;
 
 class PaymentController extends Controller
 {
@@ -256,7 +256,11 @@ class PaymentController extends Controller
 
     public function notificationHandler(Request $request)
     {
-        $notif = new Veritrans_Notification();
+        try {
+            $notif = Midtrans::notification();
+        } catch (\Exception $e) {
+            exit($e->getMessage());
+        }
 
         $transaction = $notif->transaction_status;
         $type = $notif->payment_type;

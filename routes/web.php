@@ -18,11 +18,36 @@ use Illuminate\Support\Facades\DB;
  */
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
+use App\Helper\Midtrans;
 
 Route::get('/', function () {
     // return abort(403,'Untuk pendaftaran KTA DIGITAL silahkan menggunakan aplikasi yang bisa didownload di playstore');
     return Redirect::to('https://web.agpaiidigital.org');
 });
+
+// Route::get('/midtrans',function(){
+//     $test = Midtrans::createTransaction([
+//         'transaction_details' => [
+//             'order_id' => rand(),
+//             'gross_amount' => 10000,
+//         ],
+//         'customer_details' => [
+//             'first_name' => 'budi',
+//             'last_name' => 'pratama',
+//             'email' => 'ardata.indonesia@gmail.com',
+//             'phone' => '08111222333',
+//         ],
+//         'item_details' => [
+//             [
+//                 'id' => 'a1',
+//                 'price' => 10000,
+//                 'quantity' => 1,
+//                 'name' => 'Adidas f50'
+//             ]
+//         ]
+//     ]);
+//     return $test;
+// });
 
 Route::get('/perpanjangcepat', 'PaymentController@perpanjangcepat');
 Route::get('/watzap/user/active/{total}/from/{startDate}/to/{toDate}', 'WatzapController@getActiveUsers');
