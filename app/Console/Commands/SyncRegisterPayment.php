@@ -83,7 +83,7 @@ class SyncRegisterPayment extends Command
                     $statusCode = $e->getCode();
                     if($statusCode == 404){
                         $payment->delete();
-                        $this->info("{$percentage}% {$user->email} => orderId => {$payment->midtrans_id} => Pembayaran tanggal {$payment->created_at} => tidak ditemukan dan dihapus => {$statusCode}");
+                        $this->info("{$percentage}% ({$u}/{$usersCount}){$user->email} => orderId => {$payment->midtrans_id} => Pembayaran tanggal {$payment->created_at} => tidak ditemukan dan dihapus => {$statusCode}");
                     }
                 }
             }
