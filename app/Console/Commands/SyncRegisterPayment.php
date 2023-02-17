@@ -64,8 +64,6 @@ class SyncRegisterPayment extends Command
                 try {
                     $status = $midtrans->status($payment->midtrans_id);
 
-                    $this->info("{$p}/{$paymentsCount} => Pembayaran berstatus {$status->transaction_status}");
-
                     if ($status->transaction_status == 'settlement') {
                         $result = $payment->setSuccess();
 
@@ -76,6 +74,8 @@ class SyncRegisterPayment extends Command
                         $result = $payment->setExpired();
 
                         $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di hapus karena expired");
+                    } else {
+                        $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran berstatus {$status->transaction_status}");
                     }
 
                 } catch (\Exception $e) {
