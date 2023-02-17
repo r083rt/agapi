@@ -50,7 +50,6 @@ class SyncRegisterPayment extends Command
                 ->where('status', '!=', 'success')
                 ->where('midtrans_id', '!=', null);
             }])
-            ->orderBy('id', 'desc')
             ->get();
 
         $usersCount = $users->count();
