@@ -67,7 +67,7 @@ class SyncRegisterPayment extends Command
                         $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di konfirmasi");
                     }
                 } catch (\Exception $e) {
-                    $this->info("{$percentage}% {$user->email} => {$e->getMessage()}");
+                    $this->info("{$percentage}% {$user->email} => orderId => {$payment->midtrans_id} Pembayaran gagal atau tidak ditemukan");
                 }
             }
         }
