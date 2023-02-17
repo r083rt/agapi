@@ -58,9 +58,8 @@ class FixFileSizeInformation extends Command
                 $size = Storage::disk('wasabi')->size($file->src);
                 // $this->info("{$file->src} => {$size}");
                 // update the file size
-                $file->update([
-                    'size' => $size
-                ]);
+                $file->size = $size;
+                $file->save();
                 $percentage = round(($index / $count) * 100, 2);
                 $this->info("{$percentage}% => {$file->src} => {$size} => success => {$index}/{$count}");
             } catch (\Exception $e) {
