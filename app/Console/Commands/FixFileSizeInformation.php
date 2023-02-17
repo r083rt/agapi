@@ -61,7 +61,7 @@ class FixFileSizeInformation extends Command
                 $file->size = $size;
                 $file->save();
                 $percentage = round(($index / $count) * 100, 2);
-                $this->info("{$percentage}% => {$file->src} => {$size} => success => {$index}/{$count}");
+                $this->info("{$percentage}% ({$index}/{$count}) => {$file->src} => {$size} => success");
             } catch (\Exception $e) {
                 $this->info("{$file->name} => failed");
             }
