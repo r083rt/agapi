@@ -66,6 +66,12 @@ class SyncRegisterPayment extends Command
 
                         $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di konfirmasi");
                     }
+
+                    if($status->transaction_status == 'expire'){
+                        $result = $payment->setExpired();
+
+                        $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di hapus karena expired");
+                    }
                 } catch (\Exception $e) {
                     $this->info("{$percentage}% {$user->email} => orderId => {$payment->midtrans_id} Pembayaran gagal atau tidak ditemukan");
                 }
