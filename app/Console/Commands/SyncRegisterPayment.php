@@ -41,11 +41,17 @@ class SyncRegisterPayment extends Command
     {
         $users = User::where('user_activated_at', null)
             ->whereHas('payments', function ($query) {
-                return $query->where('value', 35000)->where('midtrans_id', '!=', null);
+                return $query->where('value', 35000)
+                ->where('status','!=', 'success')
+                ->where('midtrans_id', '!=', null);
             })
             ->with(['payments' => function ($query) {
-                return $query->where('value', 35000)->where('midtrans_id', '!=', null);
-            }])->get();
+                return $query->where('value', 35000)
+                ->where('status', '!=', 'success')
+                ->where('midtrans_id', '!=', null);
+            }])
+            ->orderBy('id', 'desc')
+            ->get();
 
         $usersCount = $users->count();
 
@@ -67,13 +73,15 @@ class SyncRegisterPayment extends Command
                         $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di konfirmasi");
                     }
 
-                    if($status->transaction_status == 'expire'){
+                    if ($status->transaction_status == 'expire') {
                         $result = $payment->setExpired();
 
                         $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di hapus karena expired");
                     }
+
                 } catch (\Exception $e) {
-                    $this->info("{$percentage}% {$user->email} => orderId => {$payment->midtrans_id} Pembayaran gagal atau tidak ditemukan");
+                    // $payment->delete();
+                    $this->info("{$percentage}% {$user->email} => orderId => {$payment->midtrans_id} tidak ditemukan");
                 }
             }
         }
