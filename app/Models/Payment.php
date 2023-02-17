@@ -46,11 +46,11 @@ class Payment extends Model
      *
      * @return void
      */
-    public function setSuccess($unix_timestamp)
+    public function setSuccess()
     {
 
         $this->attributes['status'] = 'success';
-        $date = date('Y-m-d H:i:s', $unix_timestamp);
+        $date = date('Y-m-d H:i:s');
         $user = $this->user()->update([
             'user_activated_at' => $date,
             'expired_at' => date('Y-m-d H:i:s', strtotime($date . ' +6 months')),
