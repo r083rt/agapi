@@ -42,9 +42,10 @@ class FixFileSizeInformation extends Command
     {
         // get all files where size is null
         $files = File::whereNull('size')->get();
+        $count = $files->count();
 
         // loop through each file
-        foreach ($files as $file) {
+        foreach ($files as $index => $file) {
             // get the file size
             // jika file->src adalah struktur json maka skip
             if (json_decode($file->src)) {
@@ -60,7 +61,8 @@ class FixFileSizeInformation extends Command
                 $file->update([
                     'size' => $size
                 ]);
-                $this->info("{$file->src} => {$size} => updated");
+                $percentage = round(($index / $count) * 100, 2);
+                $this->info("{$percentage}% => {$file->src} => {$size} => success");
             } catch (\Exception $e) {
                 $this->info("{$file->src} => {$size} => failed");
             }
