@@ -13,7 +13,7 @@ class SubscribeReminder extends Command
      *
      * @var string
      */
-    protected $signature = 'command:name';
+    protected $signature = 'taptalk:send-subscribe-reminder';
 
     /**
      * The console command description.
