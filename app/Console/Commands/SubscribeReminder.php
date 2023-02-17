@@ -40,7 +40,9 @@ class SubscribeReminder extends Command
     public function handle()
     {
         // users yang masa expired_at nya tinggal 7 hari lagi
-        $users = User::has('profile')
+        $users = User::whereHas('profile', function ($query) {
+                $query->where('contact', '!=', null);
+            })
             ->with('profile')
             ->where('expired_at', '>', now())
             ->where('expired_at', '<', now()->addDays(7))
