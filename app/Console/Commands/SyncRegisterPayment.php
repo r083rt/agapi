@@ -41,10 +41,10 @@ class SyncRegisterPayment extends Command
     {
         $users = User::where('user_activated_at', null)
             ->whereHas('payments', function ($query) {
-                return $query->where('value', 35000);
+                return $query->where('value', 35000)->where('midtrans_id', '!=', null);
             })
             ->with(['payments' => function ($query) {
-                return $query->where('value', 35000);
+                return $query->where('value', 35000)->where('midtrans_id', '!=', null);
             }])->get();
 
         $usersCount = $users->count();
