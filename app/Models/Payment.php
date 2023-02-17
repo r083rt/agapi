@@ -56,6 +56,7 @@ class Payment extends Model
             'expired_at' => date('Y-m-d H:i:s', strtotime($date . ' +6 months')),
         ]);
         self::save();
+        return $this;
     }
 
     /**
@@ -69,6 +70,7 @@ class Payment extends Model
             $this->attributes['status'] = 'failed';
             self::save();
         }
+        return $this;
     }
 
     /**
@@ -82,6 +84,7 @@ class Payment extends Model
             $this->attributes['status'] = 'expired';
             self::delete();
         }
+        return $this;
     }
 
     public function necessary()

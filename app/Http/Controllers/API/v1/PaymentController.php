@@ -311,7 +311,12 @@ class PaymentController extends Controller
             // $payment->addUpdate("Payment using " . $type . " for transaction order_id: " . $orderId . " is canceled.");
             $payment->setFailed();
         }
-        return;
+        return response()->json([
+            "status" => "success",
+            'message' => 'Notification Handler',
+            'fraud' => $transaction,
+            'data' => $payment,
+        ]);
     }
 
     public function notificationQueueHandler(Request $request)
