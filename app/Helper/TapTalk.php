@@ -22,7 +22,7 @@ class TapTalk {
                 'json' => [
                     'phone' => $phone_number,
                     'messageType' => 'otp',
-                    'message' => $message,
+                    'body' => $message,
                 ]
             ]
         );

@@ -46,18 +46,32 @@ class SubscribeReminder extends Command
             ->where('expired_at', '<', now()->addDays(7))
             ->get();
 
+        return $this->info("{$users[0]->name} {$users[0]->expired_at}");
+        // $users = User::has('profile')
+        //     ->with('profile')
+        //     ->where('email', 'zulham724@students.unnes.ac.id')
+        //     ->get();
+
         $count = $users->count();
 
         foreach ($users as $u => $user) {
             $percentage = round(($u + 1) / $count * 100, 2);
 
-            try{
+            try {
                 // kirim message whatsapp via taptalk
                 $taptalk = new TapTalk();
-                $taptalk->sendMessage($user->profile->contact, "Halo {$user->name}, masa berlangganan kamu tinggal 7 hari lagi. Silahkan perpanjang berlangganan kamu melalui aplikasi KTA AGPAII DIGITAL sebelum tanggal {$user->expired_at->format('d-m-Y')}. Jika ada kendala, silahkan hubungi admin melalui aplikasi KTA AGPAII DIGITAL. Terima kasih.");
 
-                $this->info("{$percentage}% ({$u}/{$count}) {$user->name} Telah dikirim pesan whatsapp ke nomer {$user->profile->contact}");
+                $phone_number = $this->phone_format($user->profile->contact);
 
+                $date = date('d-m-Y', strtotime($user->expired_at));
+
+                $message = "Assalamualaikum Bpk/Ibu {$user->name} \n\nSudah saatnya iuran 6 bulan AGPAII, yuk lakukan iuran melalui Aplikasi AGPAII anda sebelum tanggal {$date}. \n\nJika ada kendala, silahkan hubungi admin melalui aplikasi KTA AGPAII DIGITAL. \n\nTerima kasih.";
+
+                $response = $taptalk->sendMessage($phone_number, $message);
+
+                $this->info($response->getBody()->getContents());
+
+                $this->info("{$percentage}% ({$u}/{$count}) Berhasil mengirim pesan whatsapp ke {$user->name} dengan nomer {$phone_number}");
             } catch (\Exception $e) {
                 $this->error("{$percentage}% ({$u}/{$count}) {$user->name} Gagal dikirim pesan whatsapp ke nomer {$user->profile->contact}");
             }
@@ -67,5 +81,26 @@ class SubscribeReminder extends Command
         }
 
         return 0;
+    }
+
+    public function phone_format($phone)
+    {
+        // buat dengan format +62
+        $phone = str_replace(' ', '', $phone);
+        $phone = str_replace('-', '', $phone);
+        $phone = str_replace('(', '', $phone);
+        $phone = str_replace(')', '', $phone);
+
+        if (substr($phone, 0, 1) == '0') {
+            $phone = substr($phone, 1);
+        }
+
+        if (substr($phone, 0, 2) == '62') {
+            $phone = '+' . $phone;
+        } else {
+            $phone = '+62' . $phone;
+        }
+
+        return $phone;
     }
 }
