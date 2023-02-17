@@ -81,7 +81,10 @@ class SyncRegisterPayment extends Command
                 } catch (\Exception $e) {
                     // $payment->delete();
                     $statusCode = $e->getCode();
-                    $this->info("{$percentage}% {$user->email} => orderId => {$payment->midtrans_id} => Pembayaran tanggal {$payment->created_at} => tidak ditemukan => {$statusCode}");
+                    if($statusCode == 404){
+                        $payment->delete();
+                        $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di hapus karena tidak ditemukan");
+                    }
                 }
             }
         }
