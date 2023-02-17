@@ -53,13 +53,18 @@ class FixFileSizeInformation extends Command
             }
             // $size = filesize("https://cdn-agpaiidigital.online/{$file->src}");
             // get size from storage
-            $size = Storage::disk('wasabi')->size($file->src);
-            // $this->info("{$file->src} => {$size}");
-            // update the file size
-            $file->update([
-                'size' => $size
-            ]);
-            $this->info("{$file->src} => {$size} => updated");
+            try{
+                $size = Storage::disk('wasabi')->size($file->src);
+                // $this->info("{$file->src} => {$size}");
+                // update the file size
+                $file->update([
+                    'size' => $size
+                ]);
+                $this->info("{$file->src} => {$size} => updated");
+            } catch (\Exception $e) {
+                $this->info("{$file->src} => {$size} => failed");
+            }
+
         }
         return 0;
     }
