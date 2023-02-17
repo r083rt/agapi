@@ -50,7 +50,7 @@ class SubscribeReminder extends Command
             ->whereDate('expired_at', $date->format('Y-m-d'))
             ->get();
 
-        return $this->info("{$users->last()->name} {$users[0]->expired_at}");
+        // return $this->info("{$users->last()->name} {$users[0]->expired_at}");
         // $users = User::has('profile')
         //     ->with('profile')
         //     ->where('email', 'zulham724@students.unnes.ac.id')
