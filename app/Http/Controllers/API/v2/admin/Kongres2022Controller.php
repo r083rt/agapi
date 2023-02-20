@@ -76,9 +76,16 @@ class Kongres2022Controller extends Controller
     public function searchMember($keyword)
     {
         $members = $this->member
-            ->where('name', 'like', '%' . $keyword . '%')
-            ->orWhere('email', 'like', '%' . $keyword . '%')
-            ->orWhere('kta_id', 'like', '%' . $keyword . '%')
+            // ->where('name', 'like', '%' . $keyword . '%')
+            // ->orWhere('email', 'like', '%' . $keyword . '%')
+            // ->orWhere('kta_id', 'like', '%' . $keyword . '%')
+            // nested where
+            ->where(function ($query) use ($keyword) {
+                $query
+                    ->where('name', 'like', '%' . $keyword . '%')
+                    ->orWhere('email', 'like', '%' . $keyword . '%')
+                    ->orWhere('kta_id', 'like', '%' . $keyword . '%');
+            })
             ->withCount(['payments as is_paid_kongres_panitia' => function ($query) {
                 $query
                     ->where('status', 'success')
