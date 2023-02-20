@@ -10,6 +10,33 @@ class Payment extends Model
 {
     protected $guarded = [];
 
+    public function buffRegister()
+    {
+        $date = date('Y-m-d H:i:s');
+        $user = $this->user()->update([
+            'user_activated_at' => $date,
+            'expired_at' => date('Y-m-d H:i:s', strtotime($date . ' +6 months')),
+        ]);
+
+        // Log::channel('payment')->debug("Payment Id {$this->attributes['id']} => key {$this->attributes['key']} User {$user->id} activated at {$date} and expired at {$user->expired_at}");
+
+        return $user;
+    }
+
+    public function buffSubscribe()
+    {
+        $date = date('Y-m-d H:i:s');
+        // expired_at = expired_at + 6 bulan dan user_activated_at = $date
+        $user = $this->user()->update([
+            'user_activated_at' => $date,
+            'expired_at' => date('Y-m-d H:i:s', strtotime($this->user->expired_at . ' +6 months')),
+        ]);
+
+        // Log::channel('payment')->debug("Payment Id {$this->attributes['id']} => key {$this->attributes['key']} User {$user->id} activated at {$date} and expired at {$user->expired_at}");
+
+        return $user;
+    }
+
     public function payment_vendor()
     {
         return $this->belongsTo('App\Models\PaymentVendor', 'payment_vendor_id', 'id');
@@ -184,32 +211,5 @@ class Payment extends Model
             }
         }
         return $payments;
-    }
-
-    public function buffRegister()
-    {
-        $date = date('Y-m-d H:i:s');
-        $user = $this->user()->update([
-            'user_activated_at' => $date,
-            'expired_at' => date('Y-m-d H:i:s', strtotime($date . ' +6 months')),
-        ]);
-
-        Log::channel('payment')->debug("Payment Id {$this->attributes['id']} => key {$this->attributes['key']} User {$user->id} activated at {$date} and expired at {$user->expired_at}");
-
-        return $user;
-    }
-
-    public function buffSubscribe()
-    {
-        $date = date('Y-m-d H:i:s');
-        // expired_at = expired_at + 6 bulan dan user_activated_at = $date
-        $user = $this->user()->update([
-            'user_activated_at' => $date,
-            'expired_at' => date('Y-m-d H:i:s', strtotime($this->user->expired_at . ' +6 months')),
-        ]);
-
-        Log::channel('payment')->debug("Payment Id {$this->attributes['id']} => key {$this->attributes['key']} User {$user->id} activated at {$date} and expired at {$user->expired_at}");
-
-        return $user;
     }
 }
