@@ -56,7 +56,7 @@ return [
         'cronjob' => [
             'driver' => 'daily',
             'path' => storage_path('logs/cronjob.log'),
-            'level' => 'info',
+            'level' => env('LOG_LEVEL', 'debug')
         ],
 
         'daily' => [
