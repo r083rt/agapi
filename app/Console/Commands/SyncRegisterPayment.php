@@ -24,6 +24,8 @@ class SyncRegisterPayment extends Command
      */
     protected $description = 'Command description';
 
+    private $log;
+
     /**
      * Create a new command instance.
      *
@@ -31,6 +33,7 @@ class SyncRegisterPayment extends Command
      */
     public function __construct()
     {
+        $this->log = Log::channel('cronjob');
         parent::__construct();
     }
 
@@ -70,17 +73,17 @@ class SyncRegisterPayment extends Command
                         $result = $payment->setSuccess();
 
                         $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di konfirmasi");
-                        Log::debug("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di konfirmasi");
+                        $this->log->debug("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di konfirmasi");
                     }
 
                     if ($status->transaction_status == 'expire') {
                         $result = $payment->setExpired();
 
                         $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di hapus karena expired");
-                        Log::debug("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di hapus karena expired");
+                        $this->log->debug("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di hapus karena expired");
                     } else {
                         $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran berstatus {$status->transaction_status}");
-                        Log::debug("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran berstatus {$status->transaction_status}");
+                        $this->log->debug("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran berstatus {$status->transaction_status}");
                     }
 
                 } catch (\Exception $e) {
@@ -89,7 +92,7 @@ class SyncRegisterPayment extends Command
                     if($statusCode == 404){
                         $payment->delete();
                         $this->info("{$percentage}% ({$u}/{$usersCount}){$user->email} => orderId => {$payment->midtrans_id} => Pembayaran tanggal {$payment->created_at} => tidak ditemukan dan dihapus => {$statusCode}");
-                        Log::debug("{$percentage}% ({$u}/{$usersCount}){$user->email} => orderId => {$payment->midtrans_id} => Pembayaran tanggal {$payment->created_at} => tidak ditemukan dan dihapus => {$statusCode}");
+                        $this->log->debug("{$percentage}% ({$u}/{$usersCount}){$user->email} => orderId => {$payment->midtrans_id} => Pembayaran tanggal {$payment->created_at} => tidak ditemukan dan dihapus => {$statusCode}");
                     }
                 }
             }

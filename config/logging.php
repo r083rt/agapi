@@ -53,6 +53,12 @@ return [
             'level' => 'info',
         ],
 
+        'cronjob' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/cronjob.log'),
+            'level' => 'info',
+        ],
+
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
