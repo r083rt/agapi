@@ -41,9 +41,9 @@ class PaymentController extends Controller
             $payments->where('key', request()->query('key'));
         }
 
-        $payments->paginate(request()->query('per_page'));
+        $result = $payments->paginate(request()->query('per_page'));
 
-        return response()->json($payments);
+        return response()->json($result);
     }
 
     /**
