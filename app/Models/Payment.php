@@ -25,11 +25,22 @@ class Payment extends Model
 
     public function buffSubscribe()
     {
+        // default $setExpiredAt = $date + 6 bulan
+        $setExpiredAt = date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s') . ' +6 months'));
+        // jika expired_at kurang dari now
+        if (strtotime($this->user->expired_at) < strtotime(date('Y-m-d H:i:s'))) {
+
+            $setExpiredAt = date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s') . ' +6 months'));
+        }
+        if (strtotime($this->user->expired_at) > strtotime(date('Y-m-d H:i:s'))) {
+            $setExpiredAt = date('Y-m-d H:i:s', strtotime($this->user->expired_at . ' +6 months'));
+        }
+
         $date = date('Y-m-d H:i:s');
         // expired_at = expired_at + 6 bulan dan user_activated_at = $date
         $user = $this->user()->update([
             'user_activated_at' => $date,
-            'expired_at' => date('Y-m-d H:i:s', strtotime($this->user->expired_at . ' +6 months')),
+            'expired_at' => $setExpiredAt,
         ]);
 
         // Log::channel('payment')->debug("Payment Id {$this->attributes['id']} => key {$this->attributes['key']} User {$user->id} activated at {$date} and expired at {$user->expired_at}");
