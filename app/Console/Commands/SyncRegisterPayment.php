@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\User;
 use App\Helper\Midtrans;
+// save as log file text
+use Illuminate\Support\Facades\Log;
 
 class SyncRegisterPayment extends Command
 {
@@ -68,14 +70,17 @@ class SyncRegisterPayment extends Command
                         $result = $payment->setSuccess();
 
                         $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di konfirmasi");
+                        Log::info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di konfirmasi");
                     }
 
                     if ($status->transaction_status == 'expire') {
                         $result = $payment->setExpired();
 
                         $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di hapus karena expired");
+                        Log::info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di hapus karena expired");
                     } else {
                         $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran berstatus {$status->transaction_status}");
+                        Log::info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran berstatus {$status->transaction_status}");
                     }
 
                 } catch (\Exception $e) {
@@ -84,6 +89,7 @@ class SyncRegisterPayment extends Command
                     if($statusCode == 404){
                         $payment->delete();
                         $this->info("{$percentage}% ({$u}/{$usersCount}){$user->email} => orderId => {$payment->midtrans_id} => Pembayaran tanggal {$payment->created_at} => tidak ditemukan dan dihapus => {$statusCode}");
+                        Log::info("{$percentage}% ({$u}/{$usersCount}){$user->email} => orderId => {$payment->midtrans_id} => Pembayaran tanggal {$payment->created_at} => tidak ditemukan dan dihapus => {$statusCode}");
                     }
                 }
             }

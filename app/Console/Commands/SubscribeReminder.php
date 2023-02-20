@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\User;
 use App\Helper\TapTalk;
+// save as log file text
+use Illuminate\Support\Facades\Log;
 
 class SubscribeReminder extends Command
 {
@@ -76,6 +78,10 @@ class SubscribeReminder extends Command
                 $this->info($response->getBody()->getContents());
 
                 $this->info("{$percentage}% ({$u}/{$count}) Berhasil mengirim pesan whatsapp ke {$user->name} dengan nomer {$phone_number}");
+
+                // save as log file text
+                Log::info("{$percentage}% ({$u}/{$count}) Berhasil mengirim pesan whatsapp ke {$user->name} dengan nomer {$phone_number}");
+
             } catch (\Exception $e) {
                 $this->error("{$percentage}% ({$u}/{$count}) {$user->name} Gagal dikirim pesan whatsapp ke nomer {$user->profile->contact}");
             }
