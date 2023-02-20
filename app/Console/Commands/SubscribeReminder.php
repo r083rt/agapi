@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Helper\TapTalk;
 // save as log file text
 use Illuminate\Support\Facades\Log;
+// email
+use Illuminate\Support\Facades\Mail;
 
 class SubscribeReminder extends Command
 {
@@ -45,6 +47,13 @@ class SubscribeReminder extends Command
      */
     public function handle()
     {
+        // kirim email ke ardata.indonesia@gmail.com kalau blast wa pengingat telah berjalan
+        Mail::raw('Blast WA pengingat telah berjalan', function ($message) {
+            $message->to('ardata.indonesia@gmail.com');
+            $message->setBody('Blast WA pengingat telah berjalan', 'text/html');
+            $message->setSubject('TapTalk');
+            $message->from(env('MAIL_USERNAME'), 'SISTEM AGPAII');
+        });
         // 7 hari dari sekarang
         $date = now()->addDays(7);
 
