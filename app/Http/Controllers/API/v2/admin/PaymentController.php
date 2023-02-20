@@ -245,4 +245,11 @@ class PaymentController extends Controller
             'updated' => $firstCount - $lastCount
         ]);
     }
+
+    public function getUniqueValue($key){
+        // ambil unique value dari key dalam bentuk array
+        $values = Payment::whereNotNull('key')->groupBy($key)->get();
+        $values = $values->pluck($key)->toArray();
+        return response()->json($values);
+    }
 }
