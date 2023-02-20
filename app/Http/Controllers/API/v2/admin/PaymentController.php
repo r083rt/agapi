@@ -140,27 +140,27 @@ class PaymentController extends Controller
         // ambil sum value payments yang key nya pendaftaran lalu di group berdasarkan tanggal
         $registerPayments = Payment::where('status', 'success')
             ->where('key', 'pendaftaran')
-            ->whereYear('updated_at', $year)
-            ->whereMonth('updated_at', $month)
-            ->selectRaw('sum(value) as value, DATE(updated_at) as date')
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->selectRaw('sum(value) as value, DATE(created_at) as date')
             ->groupBy('date')
             ->get();
 
         // ambil sum value payments yang key nya perpanjangan_anggota lalu di group berdasarkan tanggal
         $subscribe = Payment::where('status', 'success')
             ->where('key', 'perpanjangan_anggota')
-            ->whereYear('updated_at', $year)
-            ->whereMonth('updated_at', $month)
-            ->selectRaw('sum(value) as value, DATE(updated_at) as date')
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->selectRaw('sum(value) as value, DATE(created_at) as date')
             ->groupBy('date')
             ->get();
 
         $etcs = Payment::where('status', 'success')
             // where key nya bukan pendaftaran dan perpanjangan_anggota
             ->whereNotIn('key', ['pendaftaran', 'perpanjangan_anggota'])
-            ->whereYear('updated_at', $year)
-            ->whereMonth('updated_at', $month)
-            ->selectRaw('sum(value) as value, DATE(updated_at) as date')
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->selectRaw('sum(value) as value, DATE(created_at) as date')
             ->groupBy('date')
             ->get();
 
