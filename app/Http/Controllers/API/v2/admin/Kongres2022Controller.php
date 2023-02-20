@@ -13,7 +13,7 @@ class Kongres2022Controller extends Controller
 
     public function __construct()
     {
-        $this->member = User::whereHas('role', function ($query) {
+        $this->member = User::whereNotNull('user_activated_at')->whereHas('role', function ($query) {
             $query->whereIn('id', [2, 7, 9, 10, 11]);
         });
     }
