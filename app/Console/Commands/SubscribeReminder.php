@@ -29,8 +29,12 @@ class SubscribeReminder extends Command
      *
      * @return void
      */
+
+    private $log;
+
     public function __construct()
     {
+        $this->log = Log::channel('cronjob');
         parent::__construct();
     }
 
@@ -80,7 +84,7 @@ class SubscribeReminder extends Command
                 $this->info("{$percentage}% ({$u}/{$count}) Berhasil mengirim pesan whatsapp ke {$user->name} dengan nomer {$phone_number}");
 
                 // save as log file text
-                Log::info("{$percentage}% ({$u}/{$count}) Berhasil mengirim pesan whatsapp ke {$user->name} dengan nomer {$phone_number}");
+                $this->log->debug("{$percentage}% ({$u}/{$count}) Berhasil mengirim pesan whatsapp ke {$user->name} dengan nomer {$phone_number}");
 
             } catch (\Exception $e) {
                 $this->error("{$percentage}% ({$u}/{$count}) {$user->name} Gagal dikirim pesan whatsapp ke nomer {$user->profile->contact}");
