@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+// use Log
+use Illuminate\Support\Facades\Log;
 
 class Payment extends Model
 {
@@ -50,11 +52,18 @@ class Payment extends Model
     {
 
         $this->attributes['status'] = 'success';
-        $date = date('Y-m-d H:i:s');
-        $user = $this->user()->update([
-            'user_activated_at' => $date,
-            'expired_at' => date('Y-m-d H:i:s', strtotime($date . ' +6 months')),
-        ]);
+
+        switch ($this->attributes['key']) {
+            case 'pendaftaran':
+                $this->buffRegister();
+                break;
+            case 'perpanjangan_anggota':
+                $this->buffSubscribe();
+                break;
+            default:
+                break;
+        }
+
         self::save();
         return $this;
     }
@@ -175,5 +184,32 @@ class Payment extends Model
             }
         }
         return $payments;
+    }
+
+    public function buffRegister()
+    {
+        $date = date('Y-m-d H:i:s');
+        $user = $this->user()->update([
+            'user_activated_at' => $date,
+            'expired_at' => date('Y-m-d H:i:s', strtotime($date . ' +6 months')),
+        ]);
+
+        Log::channel('payment')->debug("Payment Id {$this->attributes['id']} => key {$this->attributes['key']} User {$user->id} activated at {$date} and expired at {$user->expired_at}");
+
+        return $user;
+    }
+
+    public function buffSubscribe()
+    {
+        $date = date('Y-m-d H:i:s');
+        // expired_at = expired_at + 6 bulan dan user_activated_at = $date
+        $user = $this->user()->update([
+            'user_activated_at' => $date,
+            'expired_at' => date('Y-m-d H:i:s', strtotime($this->user->expired_at . ' +6 months')),
+        ]);
+
+        Log::channel('payment')->debug("Payment Id {$this->attributes['id']} => key {$this->attributes['key']} User {$user->id} activated at {$date} and expired at {$user->expired_at}");
+
+        return $user;
     }
 }
