@@ -25,10 +25,12 @@ class PaymentController extends Controller
 
         // if have search query
         if(request()->query('search')) {
-            $payments->whereHas('user', function($query) {
+            $payments
+            ->whereHas('user', function($query) {
                 $query->where('name', 'like', '%' . request()->query('search') . '%')
                 ->orWhere('email', 'like', '%' . request()->query('search') . '%');
-            });
+            })
+            ->orWhere('midtrans_id', 'like', '%' . request()->query('search') . '%');
         }
 
         // if have status query
