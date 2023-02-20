@@ -30,6 +30,7 @@ Route::group(['as' => 'api.v2.admin.'], function () {
         'islamic-study' => 'IslamicStudyController',
         'user' => 'UserController',
         'user.file' => 'UserFileController',
+        'payment' => 'PaymentController',
     ]);
 });
 

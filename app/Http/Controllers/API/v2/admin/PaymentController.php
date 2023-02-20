@@ -17,6 +17,33 @@ class PaymentController extends Controller
     public function index()
     {
         //
+        $payments = Payment::has('user.profile')->with('user.profile');
+
+        if(request()->query('user_id')) {
+            $payments->where('user_id', request()->query('user_id'));
+        }
+
+        // if have search query
+        if(request()->query('search')) {
+            $payments->whereHas('user', function($query) {
+                $query->where('name', 'like', '%' . request()->query('search') . '%')
+                ->orWhere('email', 'like', '%' . request()->query('search') . '%');
+            });
+        }
+
+        // if have status query
+        if(request()->query('status')) {
+            $payments->where('status', request()->query('status'));
+        }
+
+        // if have key query
+        if(request()->query('key')) {
+            $payments->where('key', request()->query('key'));
+        }
+
+        $payments->paginate(request()->query('per_page'));
+
+        return response()->json($payments);
     }
 
     /**
