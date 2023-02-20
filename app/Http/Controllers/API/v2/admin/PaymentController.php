@@ -17,7 +17,7 @@ class PaymentController extends Controller
     public function index()
     {
         //
-        $payments = Payment::has('user.profile')->with('user.profile');
+        $payments = Payment::has('user.profile')->with('user.profile')->orderBy('created_at','desc');
 
         if(request()->query('user_id')) {
             $payments->where('user_id', request()->query('user_id'));
