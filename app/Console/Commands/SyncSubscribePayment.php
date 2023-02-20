@@ -15,7 +15,7 @@ class SyncSubscribePayment extends Command
      *
      * @var string
      */
-    protected $signature = 'payment:fix-subscribe-payment';
+    protected $signature = 'payment:sync-subscribe-payment';
 
     /**
      * The console command description.
