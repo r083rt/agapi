@@ -80,9 +80,6 @@ class SyncSubscribePayment extends Command
 
                         $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di hapus karena expired");
                         $this->log->debug("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran telah di hapus karena expired");
-                    } else {
-                        $this->info("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran berstatus {$status->transaction_status}");
-                        $this->log->debug("{$percentage}% ({$u}/{$usersCount}) {$user->email} => Pembayaran berstatus {$status->transaction_status}");
                     }
                 } catch (\Exception $e) {
                     // $payment->delete();
