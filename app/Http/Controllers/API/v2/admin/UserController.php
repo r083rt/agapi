@@ -14,12 +14,27 @@ class UserController extends Controller
     {
         $users = User::where('user_activated_at', '!=', null)
             ->whereHas('role', function ($query) {
-                $query->whereIn('name', ['user']);
+                $query->whereNotIn('name', ['student']);
             })
-            ->with('role')
-            ->paginate(request()->query('per_page'));
+            ->with('role');
 
-        return response()->json($users);
+        if(request()->query('search')) {
+            $users->where('name', 'like', '%' . request()->query('search') . '%')
+                ->orWhere('email', 'like', '%' . request()->query('search') . '%')
+                ->orWhere('kta_id', 'like', '%' . request()->query('search') . '%');
+        }
+
+        if(request()->query('role')) {
+            $users->whereHas('role', function ($query) {
+                $query->where('name', request()->query('role'));
+            });
+        }
+
+        $users->orderBy('created_at', 'desc');
+
+        $result = $users->paginate(request()->query('per_page'));
+
+        return response()->json($result);
     }
 
     public function search($keyword)
