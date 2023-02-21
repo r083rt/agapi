@@ -87,4 +87,12 @@ class UserController extends Controller
             'usersGrowthPercentageTillNow' => round($usersGrowthPercentageTillNow, 2),
         ]);
     }
+
+    public function getUniqueValue($key)
+    {
+        // ambil unique value dari key dalam bentuk array
+        $values = User::whereNotNull($key)->groupBy($key)->get();
+        $values = $values->pluck($key)->toArray();
+        return response()->json($values);
+    }
 }
