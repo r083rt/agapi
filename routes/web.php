@@ -49,6 +49,14 @@ Route::get('/', function () {
 //     return $test;
 // });
 
+// Route::get('ceking',function(){
+//     $res = \App\Models\User::where('user_activated_at','!=',null)
+//     ->whereDoesntHave('payments',function($q){
+//         $q->where('status','success')->where('key','pendaftaran');
+//     })
+//     ->get();
+// });
+
 Route::get('/perpanjangcepat', 'PaymentController@perpanjangcepat');
 Route::get('/watzap/user/active/{total}/from/{startDate}/to/{toDate}', 'WatzapController@getActiveUsers');
 Route::get('/watzap/perpanjang/{total}', 'UserController@perpanjangv1');

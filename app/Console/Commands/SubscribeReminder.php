@@ -47,13 +47,6 @@ class SubscribeReminder extends Command
      */
     public function handle()
     {
-        // kirim email ke ardata.indonesia@gmail.com kalau blast wa pengingat telah berjalan
-        Mail::raw('Blast WA pengingat telah berjalan', function ($message) {
-            $message->to('ardata.indonesia@gmail.com');
-            $message->setBody('Blast WA pengingat telah berjalan', 'text/html');
-            $message->setSubject('TapTalk');
-            $message->from(env('MAIL_USERNAME'), 'SISTEM AGPAII');
-        });
         // 7 hari dari sekarang
         $date = now()->addDays(7);
 
@@ -72,6 +65,14 @@ class SubscribeReminder extends Command
         //     ->get();
 
         $count = $users->count();
+
+        // kirim email ke ardata.indonesia@gmail.com kalau blast wa pengingat telah berjalan
+        Mail::raw('Blast WA pengingat telah berjalan', function ($message) {
+            $message->to('ardata.indonesia@gmail.com');
+            $message->setBody("Blast WA pengingat akun akan expired telah berjalan ke {$count} anggota", 'text/html');
+            $message->setSubject('TapTalk');
+            $message->from(env('MAIL_USERNAME'), 'SISTEM AGPAII');
+        });
 
         foreach ($users as $u => $user) {
             $percentage = round(($u + 1) / $count * 100, 2);

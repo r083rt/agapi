@@ -9,6 +9,8 @@ class TapTalk {
     }
 
     public function sendMessage($phone_number, $message) {
+
+        $phone_number = $this->phone_format($phone_number);
         $client = new \GuzzleHttp\Client();
         $response = $client->request(
             'POST',
@@ -28,5 +30,26 @@ class TapTalk {
         );
 
         return $response;
+    }
+
+    public function phone_format($phone)
+    {
+        // buat dengan format +62
+        $phone = str_replace(' ', '', $phone);
+        $phone = str_replace('-', '', $phone);
+        $phone = str_replace('(', '', $phone);
+        $phone = str_replace(')', '', $phone);
+
+        if (substr($phone, 0, 1) == '0') {
+            $phone = substr($phone, 1);
+        }
+
+        if (substr($phone, 0, 2) == '62') {
+            $phone = '+' . $phone;
+        } else {
+            $phone = '+62' . $phone;
+        }
+
+        return $phone;
     }
 }
