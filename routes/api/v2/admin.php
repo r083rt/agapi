@@ -31,16 +31,17 @@ Route::group(['as' => 'api.v2.admin.'], function () {
         'user' => 'UserController',
         'user.file' => 'UserFileController',
         'payment' => 'PaymentController',
+        'role' => 'RoleController'
     ]);
 });
 
 Route::get('/payment/attribute/{key}/get-unique-value', 'PaymentController@getUniqueValue');
 
-Route::get('/user/attribute/{key}/get-unique-value', 'UserController@getUniqueValue');
+// Route::get('/user/attribute/{key}/get-unique-value', 'UserController@getUniqueValue');
 
 Route::get('/user/analytic/growth', 'UserController@memberGrowth');
 
-Route::get('/payment/analytic/growth','PaymentController@paymentGrowth');
+Route::get('/payment/analytic/growth', 'PaymentController@paymentGrowth');
 
 Route::get('/payment/statistic/year/{year}/month/{month}', 'PaymentController@statistic');
 
