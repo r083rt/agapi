@@ -30,8 +30,6 @@ class UserController extends Controller
             });
         }
 
-        $users->orderBy('created_at', 'desc');
-
         $result = $users->paginate(request()->query('per_page'));
 
         return response()->json($result);
