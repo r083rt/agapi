@@ -14,7 +14,7 @@ class UserController extends Controller
     {
         $users = User::where('user_activated_at', '!=', null)
             ->whereHas('role', function ($query) {
-                $query->whereNotIn('name', ['student']);
+                $query->whereNotIn('name', ['student','admin']);
             })
             ->with('role');
 
