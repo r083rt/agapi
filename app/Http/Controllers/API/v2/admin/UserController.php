@@ -26,7 +26,7 @@ class UserController extends Controller
 
         if(request()->query('role')) {
             $users->whereHas('role', function ($query) {
-                $query->where('name', request()->query('role'));
+                $query->where('display_name', request()->query('role'));
             });
         }
 
