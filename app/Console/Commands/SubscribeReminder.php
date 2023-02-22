@@ -67,7 +67,7 @@ class SubscribeReminder extends Command
         $count = $users->count();
 
         // kirim email ke ardata.indonesia@gmail.com kalau blast wa pengingat telah berjalan
-        Mail::raw('Blast WA pengingat telah berjalan', function ($message) {
+        Mail::raw('Blast WA pengingat telah berjalan', function ($message) use ($count) {
             $message->to('ardata.indonesia@gmail.com');
             $message->setBody("Blast WA pengingat akun akan expired telah berjalan ke {$count} anggota", 'text/html');
             $message->setSubject('TapTalk');
