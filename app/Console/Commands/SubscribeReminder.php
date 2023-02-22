@@ -81,7 +81,7 @@ class SubscribeReminder extends Command
                 // kirim message whatsapp via taptalk
                 $taptalk = new TapTalk();
 
-                $phone_number = $this->phone_format($user->profile->contact);
+                $phone_number = $user->profile->contact;
 
                 $date = date('d-m-Y', strtotime($user->expired_at));
 
@@ -105,26 +105,5 @@ class SubscribeReminder extends Command
         }
 
         return 0;
-    }
-
-    public function phone_format($phone)
-    {
-        // buat dengan format +62
-        $phone = str_replace(' ', '', $phone);
-        $phone = str_replace('-', '', $phone);
-        $phone = str_replace('(', '', $phone);
-        $phone = str_replace(')', '', $phone);
-
-        if (substr($phone, 0, 1) == '0') {
-            $phone = substr($phone, 1);
-        }
-
-        if (substr($phone, 0, 2) == '62') {
-            $phone = '+' . $phone;
-        } else {
-            $phone = '+62' . $phone;
-        }
-
-        return $phone;
     }
 }
