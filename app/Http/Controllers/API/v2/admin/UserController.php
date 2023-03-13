@@ -40,7 +40,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $user->update($request->all());
 
-        return response()->json($user);
+        return response()->json($user->load(['role','profile']));
     }
 
     public function search($keyword)
