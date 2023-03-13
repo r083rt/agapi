@@ -43,7 +43,8 @@ class UserController extends Controller
         return response()->json($user->load(['role','profile']));
     }
 
-    public function show(User $user){
+    public function show($id){
+        $user = User::findOrFail($id);
         return response()->json($user->load(['role','profile']));
     }
 
