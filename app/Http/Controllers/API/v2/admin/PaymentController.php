@@ -43,6 +43,11 @@ class PaymentController extends Controller
             $payments->where('key', request()->query('key'));
         }
 
+        if(request()->query('from') && request()->query('to')) {
+            $payments->whereDate('created_at', '>=', request()->query('from'))
+                ->whereDate('created_at', '<=', request()->query('to'));
+        }
+
         $result = $payments->paginate(request()->query('per_page'));
 
         return response()->json($result);
