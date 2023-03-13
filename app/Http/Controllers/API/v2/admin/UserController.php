@@ -48,6 +48,12 @@ class UserController extends Controller
         return response()->json($user->load(['role','profile']));
     }
 
+    public function destroy($id){
+        $user = User::findOrFail($id);
+        $user->delete();
+        return response()->json($user);
+    }
+
     public function search($keyword)
     {
         $users = User::where('name', 'like', '%' . $keyword . '%')
