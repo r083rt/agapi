@@ -7,6 +7,7 @@ use App\Models\Payment;
 use Illuminate\Http\Request;
 use App\Helper\Midtrans;
 use App\Models\User;
+
 class PaymentController extends Controller
 {
     /**
@@ -17,35 +18,38 @@ class PaymentController extends Controller
     public function index()
     {
         //
-        $payments = Payment::has('user.profile')->with('user.profile')->orderBy('created_at','desc');
+        $payments = Payment::has('user.profile')->with('user.profile')->orderBy('created_at', 'desc');
 
-        if(request()->query('user_id')) {
+        if (request()->query('user_id')) {
             $payments->where('user_id', request()->query('user_id'));
         }
 
         // if have search query
-        if(request()->query('search')) {
+        if (request()->query('search')) {
             $payments
-            ->whereHas('user', function($query) {
-                $query->where('name', 'like', '%' . request()->query('search') . '%')
-                ->orWhere('email', 'like', '%' . request()->query('search') . '%');
-            })
-            ->orWhere('midtrans_id', 'like', '%' . request()->query('search') . '%');
+                ->whereHas('user', function ($query) {
+                    $query->where('name', 'like', '%' . request()->query('search') . '%')
+                        ->orWhere('email', 'like', '%' . request()->query('search') . '%');
+                })
+                ->orWhere('midtrans_id', 'like', '%' . request()->query('search') . '%');
         }
 
         // if have status query
-        if(request()->query('status')) {
+        if (request()->query('status')) {
             $payments->where('status', request()->query('status'));
         }
 
         // if have key query
-        if(request()->query('key')) {
+        if (request()->query('key')) {
             $payments->where('key', request()->query('key'));
         }
 
-        if(request()->query('from') && request()->query('to')) {
-            $payments->whereDate('created_at', '>=', request()->query('from'))
-                ->whereDate('created_at', '<=', request()->query('to'));
+        if (request()->query('from') && request()->query('to')) {
+            $from = \Carbon\Carbon::createFromFormat('d-m-Y', request()->query('from'));
+            $to = \Carbon\Carbon::createFromFormat('d-m-Y', request()->query('to'));
+
+            $payments->whereDate('created_at', '>=', $from)
+                ->whereDate('created_at', '<=', $to);
         }
 
         $result = $payments->paginate(request()->query('per_page'));
@@ -218,7 +222,7 @@ class PaymentController extends Controller
             ->count();
 
         foreach ($payments as $payment) {
-            try{
+            try {
                 $status = Midtrans::status($payment->midtrans_id);
                 // return response()->json($status);
                 if ($status->transaction_status == 'settlement') {
@@ -233,7 +237,7 @@ class PaymentController extends Controller
                         ]);
                     }
                 }
-            } catch(\Exception $e){
+            } catch (\Exception $e) {
                 // return response()->json($e->getMessage());
             }
         }
@@ -251,7 +255,8 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function getUniqueValue($key){
+    public function getUniqueValue($key)
+    {
         // ambil unique value dari key dalam bentuk array
         $values = Payment::whereNotNull('key')->groupBy($key)->get();
         $values = $values->pluck($key)->toArray();
