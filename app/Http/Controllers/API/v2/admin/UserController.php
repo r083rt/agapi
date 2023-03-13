@@ -43,6 +43,10 @@ class UserController extends Controller
         return response()->json($user->load(['role','profile']));
     }
 
+    public function show(User $user){
+        return response()->json($user->load(['role','profile']));
+    }
+
     public function search($keyword)
     {
         $users = User::where('name', 'like', '%' . $keyword . '%')
