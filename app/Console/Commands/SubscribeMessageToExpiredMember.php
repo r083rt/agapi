@@ -10,14 +10,14 @@ use Illuminate\Support\Facades\Log;
 // email
 use Illuminate\Support\Facades\Mail;
 
-class SubscribeReminder extends Command
+class SubscribeMessageToExpiredMember extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'taptalk:send-subscribe-reminder';
+    protected $signature = 'command:name';
 
     /**
      * The console command description.
@@ -26,14 +26,12 @@ class SubscribeReminder extends Command
      */
     protected $description = 'Command description';
 
+    private $log;
     /**
      * Create a new command instance.
      *
      * @return void
      */
-
-    private $log;
-
     public function __construct()
     {
         $this->log = Log::channel('cronjob');
@@ -52,8 +50,8 @@ class SubscribeReminder extends Command
 
         // users yang masa expired_at nya tinggal 7 hari lagi
         $users = User::whereHas('profile', function ($query) {
-                $query->where('contact', '!=', null);
-            })
+            $query->where('contact', '!=', null);
+        })
             ->with('profile')
             ->whereDate('expired_at', $date->format('Y-m-d'))
             ->get();
@@ -95,7 +93,6 @@ class SubscribeReminder extends Command
 
                 // save as log file text
                 $this->log->debug("{$percentage}% ({$u}/{$count}) Berhasil mengirim pesan whatsapp ke {$user->name} dengan nomer {$phone_number}");
-
             } catch (\Exception $e) {
                 $this->error("{$percentage}% ({$u}/{$count}) {$user->name} Gagal dikirim pesan whatsapp ke nomer {$user->profile->contact}");
             }

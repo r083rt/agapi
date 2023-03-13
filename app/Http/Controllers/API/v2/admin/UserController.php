@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\v2\admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Payment;
-
+use Illuminate\Http\Request;
 class UserController extends Controller
 {
     //
@@ -33,6 +33,14 @@ class UserController extends Controller
         $result = $users->paginate(request()->query('per_page'));
 
         return response()->json($result);
+    }
+
+    public function update(Request $request, $id){
+        //
+        $user = User::findOrFail($id);
+        $user->update($request->all());
+
+        return response()->json($user);
     }
 
     public function search($keyword)

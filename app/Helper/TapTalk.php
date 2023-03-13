@@ -1,14 +1,18 @@
 <?php
+
 namespace App\Helper;
 
-class TapTalk {
+class TapTalk
+{
     private $api_key;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->api_key = env('TAPTALK_API_KEY', 'e76558b14f95cc32bea7aec24c9fbd7cc8166706b9e3a7757e2bba729d21e8ae');
     }
 
-    public function sendMessage($phone_number, $message) {
+    public function sendMessage($phone_number, $message, $type = 'otp')
+    {
 
         $phone_number = $this->phone_format($phone_number);
         $client = new \GuzzleHttp\Client();
@@ -23,7 +27,7 @@ class TapTalk {
                 ],
                 'json' => [
                     'phone' => $phone_number,
-                    'messageType' => 'otp',
+                    'messageType' => $type,
                     'body' => $message,
                 ]
             ]
