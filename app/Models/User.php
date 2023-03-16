@@ -28,6 +28,11 @@ class User extends \TCG\Voyager\Models\User
         'user_activated_at',
     ];
 
+    // appends age
+    protected $appends = [
+        'age',
+    ];
+
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -361,5 +366,12 @@ class User extends \TCG\Voyager\Models\User
     public function kongres_2022_surat_mandat()
     {
         return $this->morphOne('App\Models\File', 'fileable')->where('key', 'kongres_2022_surat_mandat');
+    }
+
+    public function getAgeAttribute()
+    {
+        $birthdate = new \Carbon\Carbon($this->profile->birthdate);
+        $now = \Carbon\Carbon::now();
+        return $now->diffInYears($birthdate);
     }
 }

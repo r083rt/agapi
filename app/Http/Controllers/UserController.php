@@ -126,6 +126,10 @@ class UserController extends Controller
         $content = "nama,no_hp,email";
         $content .= "\n";
         $users = User::where('user_activated_at', '<', (new \Carbon\Carbon)->submonths(6))
+            ->whereHas('role', function ($q) {
+                // pakai array karena ada 2 role yang tidak boleh
+                $q->whereNotIn('name', ['admin', 'pensiun', 'siswa']);
+            })
             ->select(
                 DB::raw('users.*'),
                 DB::raw('DATEDIFF(users.user_activated_at,NOW()) as date_diff'),
@@ -148,7 +152,6 @@ class UserController extends Controller
                 $content .= "$name,$contact,$user->email";
                 $content .= "\n";
             }
-
         }
 
         // file name that will be used in the download
@@ -161,7 +164,6 @@ class UserController extends Controller
         ];
         // make a response, with the content, a 200 response code and the headers
         return response()->make($content, 200, $headers);
-
     }
 
     public function perpanjangv2($total, $startDate, $endDate)
@@ -169,8 +171,12 @@ class UserController extends Controller
         $content = "nama,no_hp,email";
         $content .= "\n";
         // ambil data user yang expired dari tanggal startDate sampai endDate
-        $users = User::
-            whereDate('expired_at', '>=', $startDate)->whereDate('expired_at', '<=', $endDate)
+        $users = User::whereDate('expired_at', '>=', $startDate)->whereDate('expired_at', '<=', $endDate)
+            // yang punya role selain admin dan pensiun
+            ->whereHas('role', function ($q) {
+                // pakai array karena ada 2 role yang tidak boleh
+                $q->whereNotIn('name', ['admin', 'pensiun', 'siswa']);
+            })
             ->select(
                 DB::raw('users.*'),
                 DB::raw('DATEDIFF(users.user_activated_at,NOW()) as date_diff'),
@@ -193,7 +199,6 @@ class UserController extends Controller
                 $content .= "$name,$contact,$user->email";
                 $content .= "\n";
             }
-
         }
 
         // file name that will be used in the download
@@ -206,15 +211,13 @@ class UserController extends Controller
         ];
         // make a response, with the content, a 200 response code and the headers
         return response()->make($content, 200, $headers);
-
     }
 
     public function guruPns($total)
     {
         $content = "nama,no_hp,email";
         $content .= "\n";
-        $users = User::
-            has('profile')
+        $users = User::has('profile')
             ->with('profile', 'pns_status')
             ->whereHas('pns_status', function ($query) {
                 $query->where('is_pns', 1);
@@ -234,7 +237,6 @@ class UserController extends Controller
                 $content .= "$name,$contact,$user->email";
                 $content .= "\n";
             }
-
         }
 
         // file name that will be used in the download
@@ -247,7 +249,6 @@ class UserController extends Controller
         ];
         // make a response, with the content, a 200 response code and the headers
         return response()->make($content, 200, $headers);
-
     }
 
     public function guruNonPns($total)
@@ -275,7 +276,6 @@ class UserController extends Controller
                 $content .= "$name,$contact,$user->email";
                 $content .= "\n";
             }
-
         }
 
         // file name that will be used in the download
@@ -288,7 +288,6 @@ class UserController extends Controller
         ];
         // make a response, with the content, a 200 response code and the headers
         return response()->make($content, 200, $headers);
-
     }
 
     public function userreport2()
@@ -319,6 +318,5 @@ class UserController extends Controller
         // buat tanggal expired dari user_activated_at ditambah 6 bulan di user yang ada user_activated_at dalam bentuk mysql native
         $db = DB::update('update users set expired_at = DATE_ADD(user_activated_at, INTERVAL 6 MONTH)');
         return response()->json($db);
-
     }
 }

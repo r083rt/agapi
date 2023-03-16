@@ -57,6 +57,32 @@ Route::get('/', function () {
 //     ->get();
 // });
 
+Route::get('/fix-status-pensiun', function () {
+
+    // $c = \App\Models\User::whereHas('role', function ($q) {
+    //     $q->whereIn('name', ['pensiun', 'admin', 'siswwa']);
+    // })->count();
+    // return $c;
+    // user yang umur nya lebih dari 60 tahun di set role nya menjadi pensiun dengan role_id 13
+
+    $users = \App\Models\User::where('user_activated_at', '!=', null)
+        ->where('role_id', '!=', 13)
+        ->whereHas('profile', function ($q) {
+            // yang umur nya lebih dari 60 tahun
+            $q->where('birthdate', '<', \Carbon\Carbon::now()->subYears(60)->format('Y-m-d'));
+        });
+
+    $res = $users->count();
+
+    $users->update(['role_id' => 13]);
+
+
+    return response()->json([
+        'message' => 'success',
+        'data' => "total user yang di set role_id menjadi pensiun adalah $res"
+    ]);
+});
+
 Route::get('/perpanjangcepat', 'PaymentController@perpanjangcepat');
 Route::get('/watzap/user/active/{total}/from/{startDate}/to/{toDate}', 'WatzapController@getActiveUsers');
 Route::get('/watzap/perpanjang/{total}', 'UserController@perpanjangv1');
