@@ -370,7 +370,10 @@ class User extends \TCG\Voyager\Models\User
 
     public function getAgeAttribute()
     {
-        $birthdate = new \Carbon\Carbon($this->profile()->first()->birthdate);
+        if(!$this->profile){
+            return null;
+        }
+        $birthdate = new \Carbon\Carbon($this->profile->birthdate);
         $now = \Carbon\Carbon::now();
         return $now->diffInYears($birthdate);
     }
