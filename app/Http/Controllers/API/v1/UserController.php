@@ -28,7 +28,17 @@ class UserController extends Controller
     {
         $res = User::with('profile', 'role')
             ->where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role',function($query){
+                $query->whereIn('name',[
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->paginate();
 
         return response()->json($res);
@@ -379,7 +389,17 @@ class UserController extends Controller
     {
         $count_user = User::
             where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role', function ($query) {
+                $query->whereIn('name', [
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->count();
         return response()->json($count_user);
     }
@@ -416,7 +436,17 @@ class UserController extends Controller
     {
         $users = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role', function ($query) {
+                $query->whereIn('name', [
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->whereHas('profile', function ($query) use ($provinceId) {
                 $query->where('province_id', $provinceId);
             })->paginate();
@@ -427,7 +457,17 @@ class UserController extends Controller
     {
         $users = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role', function ($query) {
+                $query->whereIn('name', [
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->whereHas('profile', function ($query) use ($provinceId) {
                 $query->where('province_id', $provinceId);
             })
@@ -440,7 +480,17 @@ class UserController extends Controller
     {
         $users = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role', function ($query) {
+                $query->whereIn('name', [
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->whereHas('profile', function ($query) use ($provinceId) {
                 $query->where('province_id', $provinceId);
             })->count();
@@ -451,7 +501,17 @@ class UserController extends Controller
     {
         $res = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role', function ($query) {
+                $query->whereIn('name', [
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->whereHas('profile', function ($query) use ($cityId) {
                 $query->where('city_id', $cityId);
             })->paginate();
@@ -462,7 +522,17 @@ class UserController extends Controller
     {
         $res = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role', function ($query) {
+                $query->whereIn('name', [
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->whereHas('profile', function ($query) use ($cityId) {
                 $query->where('city_id', $cityId);
             })
@@ -475,7 +545,17 @@ class UserController extends Controller
     {
         $res = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role',function($query){
+                $query->whereIn('name',[
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->whereHas('profile', function ($query) use ($cityId) {
                 $query->where('city_id', $cityId);
             })->count();
@@ -486,7 +566,17 @@ class UserController extends Controller
     {
         $res = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role', function ($query) {
+                $query->whereIn('name', [
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->whereHas('profile', function ($query) use ($districtId) {
                 $query->where('district_id', $districtId);
             })->get();
@@ -497,7 +587,17 @@ class UserController extends Controller
     {
         $res = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role',function($query){
+                $query->whereIn('name',[
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->whereHas('profile', function ($query) use ($districtId) {
                 $query->where('district_id', $districtId);
             })
@@ -510,7 +610,17 @@ class UserController extends Controller
     {
         $res = User::with('role', 'profile')
             ->where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role',function($query){
+                $query->whereIn('name',[
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->whereHas('profile', function ($query) use ($districtId) {
                 $query->where('district_id', $districtId);
             })->count();
@@ -520,7 +630,17 @@ class UserController extends Controller
     public function searchbyname($key)
     {
         $users = User::with('profile')
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role', function ($query) {
+                $query->whereIn('name', [
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->where([
                 ['user_activated_at', '!=', null],
                 ['name', 'like', '%' . $key . '%'],
@@ -711,7 +831,17 @@ class UserController extends Controller
         $res = User::
             where('user_activated_at', '!=', null)
             ->whereDate('user_activated_at', '<', \Carbon\Carbon::now()->subMonths(6)->format('Y-m-d'))
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role', function ($query) {
+                $query->whereIn('name', [
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->count();
         return response()->json($res);
     }
@@ -736,7 +866,17 @@ class UserController extends Controller
     public function getActiveUsers()
     {
         $res = User::where('user_activated_at', '!=', null)
-            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            // ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('role', function ($query) {
+                $query->whereIn('name', [
+                    'user',
+                    'observer',
+                    'Anggota Luar Biasa',
+                    'kehormatan',
+                    'headmaster',
+                    'pensiun'
+                ]);
+            })
             ->count();
         return response()->json($res);
     }
