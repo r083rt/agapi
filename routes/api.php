@@ -25,7 +25,7 @@ Route::middleware([
     // 'verified'
 ])->get('/user', function (Request $request) {
     $query = $request->query("exclude");
-    
+
     $loads=[
         //'bank_account',
         'pns_status',
@@ -132,9 +132,11 @@ Route::middleware([
             }
         }
     }
-   
+
 //    return $loads;
-    $res = $request->user()
+$userId = $request->user()->id;
+
+    $res = \App\Models\User::find($userId)
         ->load($loads)
         ->loadCount([
             'lesson_plans',
