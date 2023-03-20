@@ -2,8 +2,22 @@
 
 use Illuminate\Support\Facades\Route;
 
+// api untuk login
+Route::post('/login','AuthController@login');
 // api untuk daftar guru ke aplikasi agpaii digital
 Route::post('/register', 'AuthController@register');
+
+// Kartu tanda anggota ---------------------------------------------------------------
+
+Route::get('/membercard/generate/front', 'MemberCardController@generateFrontCard');
+
+Route::get('/membercard/renew/front', 'MemberCardController@renewFrontCard');
+
+Route::get('/membercard/generate/back', 'MemberCardController@generateBackCard');
+
+Route::get('/membercard/renew/back', 'MemberCardController@renewBackCard');
+
+// End Kartu tanda anggota -----------------------------------------------------------
 
 // api untuk forgot password via otp
 Route::get('/otp-client/user/search/{phone_number}', 'OtpClientController@searchUser');

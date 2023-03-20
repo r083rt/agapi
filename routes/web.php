@@ -25,6 +25,35 @@ Route::get('/', function () {
     return Redirect::to('https://web.agpaiidigital.org');
 });
 
+Route::get('/user/{userId}/membercard/front', 'MemberCardController@previewFrontCard')->name('member-card-front');
+
+Route::get('/user/{userId}/membercard/back', 'MemberCardController@previewBackCard')->name('member-card-back');
+
+Route::get('/azwar/year/{year}/month/{month}', function ($year, $month) {
+    $perpanjangan = \App\Models\Payment::where('key', 'perpanjangan_anggota')
+        ->whereYear('created_at', $year)
+        ->whereMonth('created_at', $month)
+        ->where('status', 'success');
+    $sumPerpanjangan = $perpanjangan->sum('value');
+    $countPerpanjangan = $perpanjangan->count();
+
+    $pendaftaran = \App\Models\Payment::where('key', 'pendaftaran')
+        ->whereYear('created_at', $year)
+        ->whereMonth('created_at', $month)
+        ->where('status', 'success');
+    $sumPendaftaran = $pendaftaran->sum('value');
+    $countPendaftaran = $pendaftaran->count();
+
+    // feePendaftaran = 10 ribu dari each pendaftaran
+    $feePendaftaran = $countPendaftaran * 10000;
+    $feePerpanjangan = $countPerpanjangan * 30000;
+
+    return response()->json([
+        'total' => $sumPendaftaran + $sumPerpanjangan,
+        'hasil' => $feePendaftaran + $feePerpanjangan,
+    ]);
+});
+
 // Route::get('/midtrans',function(){
 //     $test = Midtrans::createTransaction([
 //         'transaction_details' => [
