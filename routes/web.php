@@ -49,6 +49,10 @@ Route::get('/azwar/year/{year}/month/{month}', function ($year, $month) {
     $feePerpanjangan = $countPerpanjangan * 30000;
 
     return response()->json([
+        'pendaftaran' => $countPendaftaran,
+        'perpanjangan' => $countPerpanjangan,
+        'pendaftaran_total' => $sumPendaftaran,
+        'perpanjangan_total' => $sumPerpanjangan,
         'total' => $sumPendaftaran + $sumPerpanjangan,
         'hasil' => $feePendaftaran + $feePerpanjangan,
     ]);
