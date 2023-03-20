@@ -54,7 +54,8 @@ Route::get('/azwar/year/{year}/month/{month}', function ($year, $month) {
         'pendaftaran_total' => $sumPendaftaran,
         'perpanjangan_total' => $sumPerpanjangan,
         'total' => $sumPendaftaran + $sumPerpanjangan,
-        'hasil' => $feePendaftaran + $feePerpanjangan,
+        'ardata' => $feePendaftaran + $feePerpanjangan,
+        'azwar' => ($sumPendaftaran + $sumPerpanjangan) * 30 / 100,
     ]);
 });
 
