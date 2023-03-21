@@ -42,7 +42,7 @@ return [
     */
 
     'models' => [
-        //'namespace' => 'App\\',
+        'namespace' => 'App\\Models\\',
     ],
 
     /*
@@ -55,7 +55,8 @@ return [
     */
 
     'storage' => [
-        'disk' => env('FILESYSTEM_DRIVER', 'public'),
+        // 'disk' => env('FILESYSTEM_DRIVER', 'public'), // not support for aws-php-sdk v3
+        'disk' => 'public'
     ],
 
     /*

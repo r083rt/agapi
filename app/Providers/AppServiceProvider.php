@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Validator;
 use App\Models\AssigmentSession;
 use App\Models\Assigment;
 use App\Observers\AssigmentSessionObserver;
@@ -32,11 +33,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Validator::includeUnvalidatedArrayKeys();
         Schema::defaultStringLength(191);
         AssigmentSession::observe(AssigmentSessionObserver::class);
         Assigment::observe(AssigmentObserver::class);
         Session::observe(SessionObserver::class);
-        
+
         // Like::observe(LikeObserver::class);
 
     }

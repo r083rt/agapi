@@ -3,21 +3,10 @@
 use Illuminate\Support\Facades\Route;
 
 // api untuk login
-Route::post('/login','AuthController@login');
+Route::post('/login', 'AuthController@login');
+
 // api untuk daftar guru ke aplikasi agpaii digital
 Route::post('/register', 'AuthController@register');
-
-// Kartu tanda anggota ---------------------------------------------------------------
-
-Route::get('/membercard/generate/front', 'MemberCardController@generateFrontCard');
-
-Route::get('/membercard/renew/front', 'MemberCardController@renewFrontCard');
-
-Route::get('/membercard/generate/back', 'MemberCardController@generateBackCard');
-
-Route::get('/membercard/renew/back', 'MemberCardController@renewBackCard');
-
-// End Kartu tanda anggota -----------------------------------------------------------
 
 // api untuk forgot password via otp
 Route::get('/otp-client/user/search/{phone_number}', 'OtpClientController@searchUser');
@@ -26,9 +15,23 @@ Route::post('/otp-client/verify', 'OtpClientController@verify');
 Route::post('/otp-client/change-password', 'OtpClientController@changePassword');
 // end api forgot password
 
-Route::group(['middleware' => 'auth:api'], function () {
+Route::group(['middleware' => 'auth'], function () {
+
     // api untuk mendapatkan data user yang sedang login
     Route::get('/me', 'AuthController@getUserAccount');
+
+    // Kartu tanda anggota ---------------------------------------------------------------
+
+    Route::get('/membercard/generate/front', 'MemberCardController@generateFrontCard');
+
+    Route::get('/membercard/renew/front', 'MemberCardController@renewFrontCard');
+
+    Route::get('/membercard/generate/back', 'MemberCardController@generateBackCard');
+
+    Route::get('/membercard/renew/back', 'MemberCardController@renewBackCard');
+
+    // End Kartu tanda anggota -----------------------------------------------------------
+
     // api resources
     Route::resources([
         'post' => 'PostController',

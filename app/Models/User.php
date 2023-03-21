@@ -377,4 +377,14 @@ class User extends \TCG\Voyager\Models\User
         $now = \Carbon\Carbon::now();
         return $now->diffInYears($birthdate);
     }
+
+    public function front_membercard()
+    {
+        return $this->morphOne('App\Models\File', 'fileable')->where('key', 'front_membercard');
+    }
+
+    public function back_membercard()
+    {
+        return $this->morphOne('App\Models\File', 'fileable')->where('key', 'back_membercard');
+    }
 }

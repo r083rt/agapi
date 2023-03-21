@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\APi\v2\member;
+namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use App\Models\District;
