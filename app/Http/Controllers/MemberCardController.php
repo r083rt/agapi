@@ -10,7 +10,7 @@ class MemberCardController extends Controller
     //
     public function previewFrontCard($userId)
     {
-        $user = User::with('profile')->findOrFail($userId);
+        $user = User::with(['profile','role'])->findOrFail($userId);
         $storageUrl = env('STORAGE_URL');
 
         return view('template/MemberCardFront', ['user' => $user, 'storageUrl' => $storageUrl]);

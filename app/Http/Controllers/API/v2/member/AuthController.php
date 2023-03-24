@@ -111,8 +111,16 @@ class AuthController extends Controller
         // Get the client credentials
         $client = $clients->find(env('PASSPORT_CLIENT_ID', 2));
 
-        // Get the access token
-        $token = $this->performLogin($request, $client);
+        try{
+            // Get the access token
+            $token = $this->performLogin($request, $client);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'invalid_grant',
+                'error_description' => 'The user credentials were incorrect.',
+                'message' => 'The user credentials were incorrect.'
+            ], 401);
+        }
 
         // Return the access token response
         return response()->json([

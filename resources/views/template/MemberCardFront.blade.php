@@ -9,92 +9,114 @@
         integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
 
     <style>
-        .card {
+        .container {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            /* align-items: center; */
+            justify-content: space-between;
             background-image: url('/img/front_membercard.jpeg');
             background-size: contain;
             background-repeat: no-repeat;
+            background-position: center;
             height: 100vh;
             width: 100vw;
         }
 
-        .card-content {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            /* background-color: blue; */
-        }
-
-        .card-image {
-            flex: 2;
-            max-width: 50%;
-            margin-right: 20px;
-            /* center */
-            display: flex;
-            /* // full height */
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            /* background-color: red; */
-        }
-
-        .card-image img {
-            max-width: 100%;
-            /* height: auto; */
-        }
-
-        .card-info {
-            flex: 5;
+        #item1 {
+            /* flex: 7; */
+            /* Mengatur flex item pertama menjadi 2 */
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            /* color: white; */
+            justify-content: flex-end;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            /* background-color: rgba(151, 56, 56, 0.5); */
         }
 
-        .info-header {
-            height: 150px;
+        #item2 {
+            /* flex: 8; */
+            /* Mengatur flex item kedua menjadi 3 */
+            display: flex;
+            flex-direction: column;
+            /* justify-content: center; */
+            padding: 10px;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            /* background-color: rgba(37, 6, 6, 0.5); */
         }
 
-        .card-info h2 {
-            font-size: 1.5rem;
+        #item2 p {
+            font-size: 14px;
+            color: #202020;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        #item2 h3 {
+            font-size: 18px;
+            color: #202020;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        #item2 img {
+            margin-top: 20px;
             margin-bottom: 10px;
         }
 
-        .card-info p {
-            margin: 5px 0;
+        #item2 .qr-code {
+            width: 80%;
+            max-width: 200px;
+            margin-top: 20px;
+        }
+
+        #item2 .valid-until {
+            font-size: 14px;
+            font-weight: bold;
+            color: #202020;
+            margin-top: 20px;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="card">
-        <div class="card-content">
-            <div class="card-image">
-                <div class="info-header"></div>
-                <img src="{{ $storageUrl }}/{{ $user->avatar }}" alt="Foto Anggota" height="200px" width="150px">
-            </div>
-            <div class="card-info">
-                <div class="info-header"></div>
-                <h2>{{ $user->name }}</h2>
-                <p>NIB: {{ $user->kta_id }}</p>
-                <p>TTL: {{ $user->profile->birth_address }}, {{
-                    date('d F Y', strtotime($user->profile->birth_date))
-                }}</p>
-                <p>Gol Darah: {{ $user->profile->blood_type }}</p>
-                <p>Alamat: {{ $user->profile->address }}</p>
-                <p>Masa Berlaku: <b>Selamanya</b></p>
-            </div>
+    <div class="container">
+        <div id="item1">
+            <img src="{{ $storageUrl }}/{{ $user->avatar }}" alt="Foto Anggota" height="100px" width="100px"
+                style="
+                    border-radius: 50%;
+                    border: 5px solid #fff;
+                ">
+        </div>
+        <div id="item2">
+            <h3>{{ $user->name }}</h3>
+            <p>{{ $user->role->display_name }}</p>
+            <p>Nomor Kartu Tanda Anggota:</p>
+            <p> {{ $user->kta_id }}</p>
+            <p>{{ $user->profile->school_place }}</p>
+            <p>Email: {{ $user->email }}</p>
+            <div id="qrcode"></div>
+            <p class="valid-until">Masa Berlaku sampai tanggal {{ date('d M Y', strtotime($user->expired_at)) }}</p>
         </div>
     </div>
 
+    <script src="
+            https://cdn.jsdelivr.net/npm/qrcode-js-package@1.0.4/qrcode.min.js
+            "></script>
+    <script type="text/javascript">
+        const qrcode = {!! $user->kta_id !!}
 
-
+        new QRCode(document.getElementById("qrcode"), {
+            text: qrcode,
+            width: 100,
+            height: 100,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H,
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous">
     </script>
