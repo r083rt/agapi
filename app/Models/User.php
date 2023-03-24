@@ -380,11 +380,11 @@ class User extends \TCG\Voyager\Models\User
 
     public function front_membercard()
     {
-        return $this->morphOne('App\Models\File', 'fileable')->where('key', 'front_membercard');
+        return $this->morphOne('App\Models\File', 'file')->where('key', 'front_membercard');
     }
 
     public function back_membercard()
     {
-        return $this->morphOne('App\Models\File', 'fileable')->where('key', 'back_membercard');
+        return $this->morphOne('App\Models\File', 'file')->where('key', 'back_membercard');
     }
 }

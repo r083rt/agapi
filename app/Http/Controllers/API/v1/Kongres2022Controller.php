@@ -353,19 +353,34 @@ class Kongres2022Controller extends Controller
 
     public function getPaymentUserByProvince($provinceId)
     {
-        $payments = Payment::
-            join('users', 'payments.user_id', '=', 'users.id')
+        $payments = Payment::join('users', 'payments.user_id', '=', 'users.id')
             ->join('profiles', 'users.id', '=', 'profiles.user_id')
             ->join('cities', 'profiles.city_id', '=', 'cities.id')
             ->where('payment_type', 'App\Models\Event')
             ->whereIn('payment_id', [3642, 3643, 3644])
             ->where('status', 'success')
             ->where('profiles.province_id', $provinceId)
+            // ->with(['user.profile'=>function($query){
+            //     $query->with(['province','city']);
+            // }])
+            // ->whereHas('user.profile',function($query){
+            //     $query->where('city_id',3172);
+            // })
+            // ->select(
+            //     "*",
+            //     'payments.id as id_p'
+            // )
             ->select(
                 'cities.id as id',
                 DB::raw('count(payments.id) as total_payment'),
                 'cities.name as name'
             )
+            ->groupBy('name')
+            // ->select(
+            //     'cities.id as id',
+            //     DB::raw('count(payments.id) as total_payment'),
+            //     'cities.name as name'
+            // )
             ->get();
         return response()->json($payments);
     }

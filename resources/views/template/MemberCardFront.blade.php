@@ -16,12 +16,13 @@
             background-image: url('/img/front_membercard.jpeg');
             background-size: contain;
             background-repeat: no-repeat;
+            background-position: center;
             height: 100vh;
             width: 100vw;
         }
 
         #item1 {
-            flex: 4;
+            /* flex: 7; */
             /* Mengatur flex item pertama menjadi 2 */
             display: flex;
             flex-direction: column;
@@ -33,12 +34,12 @@
         }
 
         #item2 {
-            flex: 5;
+            /* flex: 8; */
             /* Mengatur flex item kedua menjadi 3 */
             display: flex;
             flex-direction: column;
             /* justify-content: center; */
-            padding: 25px;
+            padding: 10px;
             align-items: center;
             width: 100%;
             height: 100%;
@@ -55,7 +56,7 @@
         #item2 h3 {
             font-size: 18px;
             color: #202020;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             font-weight: bold;
         }
 

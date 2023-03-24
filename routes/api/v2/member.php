@@ -15,7 +15,7 @@ Route::post('/otp-client/verify', 'OtpClientController@verify');
 Route::post('/otp-client/change-password', 'OtpClientController@changePassword');
 // end api forgot password
 
-Route::group(['middleware' => 'auth'], function () {
+Route::group(['middleware' => 'auth:api'], function () {
 
     // api untuk mendapatkan data user yang sedang login
     Route::get('/me', 'AuthController@getUserAccount');
