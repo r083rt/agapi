@@ -69,7 +69,7 @@ class User extends \TCG\Voyager\Models\User
 
     public function banner()
     {
-        return $this->morphOne('App\Models\File', 'file')->orderBy('id', 'desc');
+        return $this->morphOne('App\Models\File', 'file')->where('key','banner')->orderBy('id', 'desc');
     }
 
     public function payment()

@@ -43,6 +43,7 @@ class UserBannerController extends Controller
             'src' => $path,
             'type' => $request->file('banner')->getMimeType(),
             'name' => $fileName,
+            'key' => 'banner'
         ]);
 
         return response()->json([
