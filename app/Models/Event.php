@@ -107,4 +107,9 @@ class Event extends Model
     {
         return $this->morphOne(Location::class, 'locationable');
     }
+
+    public function category()
+    {
+        return $this->belongsTo('App\Models\EventCategory', 'category_id');
+    }
 }

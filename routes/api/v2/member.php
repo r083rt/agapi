@@ -140,6 +140,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'classroom' => 'ClassRoomController', //
         'classroom.task' => 'ClassRoomTaskController', //
         'task.result' => 'TaskResultController', //
+        'training-event' => 'TrainingEventController', // untuk mendapatkan data acara pelatihan
         'file' => 'FileController', //
     ]);
 
@@ -177,7 +178,6 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     //generate cover module by id
     Route::post('/modules/generate/cover/selected', 'ModuleCoverController@generatecoverbycoverid');
-
 
     //generate cover lesson plan
     Route::post('/lesson-plans/generate/cover', 'LessonPlanCoverController@generatecover');
