@@ -41,8 +41,6 @@ class UserEventController extends Controller
             'address' => 'required|string|max:191',
         ]);
 
-
-
         //menambahkan data ke table event
         $event = new Event();
         $event->user_id = $request->user_id;

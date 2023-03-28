@@ -16,13 +16,13 @@ class TrainingEventController extends Controller
     public function index()
     {
         //
-        $events = Event::whereHas('category',function($query){
-            $query->where('name','Pelatihan');
+        $events = Event::whereHas('category', function ($query) {
+            $query->where('name', 'Pelatihan');
         });
 
         // if request query search
-        if(request()->query('search')){
-            $events->where('name','like','%'.request()->query('search').'%');
+        if (request()->query('search')) {
+            $events->where('name', 'like', '%' . request()->query('search') . '%');
         }
 
         $res = $events->paginate(request()->query('per_page'));
@@ -39,6 +39,42 @@ class TrainingEventController extends Controller
     public function store(Request $request)
     {
         //
+        $userId = auth('api')->user()->id;
+
+        $request->validate([
+            'name' => 'required',
+            'description' => 'required',
+            'type' => 'required',
+            'start_at' => 'required',
+            'end_at' => 'required',
+            // location not required
+            'category_id' => 'required',
+            // 'price' not 'required',
+            // 'image' not 'required',
+        ]);
+
+        $event = new Event;
+
+        $event->name = $request->name;
+        $event->description = $request->description;
+        $event->type = $request->type;
+        $event->start_at = $request->start_at;
+        $event->end_at = $request->end_at;
+
+        $event->category_id = $request->category_id;
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('public/events', 'wasabi');
+            $event->image = $path;
+        }
+
+        if($request->price) {
+            $event->price = $request->price;
+        }
+
+        $event->save();
+
+        return response()->json($event);
     }
 
     /**
