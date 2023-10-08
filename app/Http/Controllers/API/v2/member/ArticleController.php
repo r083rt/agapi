@@ -22,6 +22,17 @@ class ArticleController extends Controller
         return response()->json($articles);
     }
 
+    public function getLatestArticles()
+{
+    $articles = Article::with('author', 'thumbnail')
+        ->where('status', 'PUBLISHED')
+        ->orderBy('created_at', 'desc')
+        ->take(4) // Limit the result to the top 4 latest articles
+        ->get();
+
+    return response()->json($articles);
+}
+
     /**
      * Store a newly created resource in storage.
      *

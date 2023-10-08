@@ -5,6 +5,7 @@ namespace App\Models;
 // softDelete
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Event extends Model
 {
@@ -111,5 +112,26 @@ class Event extends Model
     public function category()
     {
         return $this->belongsTo('App\Models\EventCategory', 'category_id');
+    }
+
+    public function session_detail()
+    {
+        return $this->hasMany(EventSession::class, 'event_id', 'id');
+    }
+
+
+    // public function eventPresents()
+    // {
+    //     return $this->hasMany(EventPresents::class, 'kpi_header_id', 'kpi_header_id');
+    // }
+
+    public function province()
+    {
+        return $this->belongsTo(Province::class, 'province_id', 'id');
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class, 'city_id', 'id');
     }
 }

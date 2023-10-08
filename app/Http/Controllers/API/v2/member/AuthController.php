@@ -121,12 +121,34 @@ class AuthController extends Controller
                 'message' => 'The user credentials were incorrect.'
             ], 401);
         }
+        $user = User::where('email', $request->input('email'))->first();
+        $data = [
+            'user_id'=>$user->id,
+            'kta_id'=>$user->kta_id,
+            'name'=>$user->name,
+            'email'=>$user->email,
+            'user_activated_at'=>$user->user_activated_at,
+            'email_activated_at'=>$user->email_activated_at,
+            'avatar'=>$user->avatar,
+            'age'=>$user->age,
+            'profile_id'=>$user->profile->id,
+            'nip'=>$user->profile->nip,
+            'nik'=>$user->profile->nik,
+            'contact'=>$user->profile->contact,
+            'nip'=>$user->profile->nip,
 
+            
+        ];
+        
         // Return the access token response
         return response()->json([
+            'message'=>'Login success, welcome ' . $user->name,
+            'data' => $user,
             'token_type' => 'Bearer',
             'expires_in' => $token['expires_in'],
             'access_token' => $token['access_token'],
+            
+           
         ]);
     }
 
@@ -160,24 +182,65 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
-            'password_confirmation' => 'required|same:password',
-        ]);
+        // $request->validate([
+        //     'name' => 'required',
+        //     'email' => 'required|email|unique:users,email',
+        //     'password' => 'required|min:6',
+        //     'password_confirmation' => 'required|same:password',
+        // ]);
 
-        $user = new User;
-        $user->fill($request->all());
-        $user->password = bcrypt($request->password);
-        $user->save();
-        $profile = new Profile();
-        if ($request->has('profile')) {
-            $profile->fill($request->profile);
+        // $user = new User;
+        // $user->fill($request->all());
+        // $user->password = bcrypt($request->password);
+        // $user->save();
+        // $profile = new Profile();
+        // if ($request->has('profile')) {
+        //     $profile->fill($request->profile);
+        // }
+        // $user->profile()->save($profile);
+        // $success['access_token'] = $user->createToken('AGPAII DIGITAL')->accessToken;
+        // $success['token_type'] = 'Bearer';
+        // return response()->json($success);
+        try {
+            if (User::where('email', $request->email)->exists()) {
+                return response()->json(['error' => 'Gagal mendaftarkan akun.','message' => 'Email sudah pernah digunakan. Silahkan login atau klik reset password jika Anda lupa dengan password Anda.'], 400);
+            }
+    
+            $user = new User;
+            $user->fill($request->all());
+            $user->password = bcrypt($request->password);
+            $user->save();
+    
+            $profile = new Profile();
+            if ($request->has('profile')) {
+                $profile->fill($request->profile);
+            }
+            $user->profile()->save($profile);
+            $data = [
+                'user_id'=>$user->id,
+                'kta_id'=>$user->kta_id,
+                'name'=>$user->name,
+                'email'=>$user->email,
+                'user_activated_at'=>$user->user_activated_at,
+                'email_activated_at'=>$user->email_activated_at,
+                'avatar'=>$user->avatar,
+                'age'=>$user->age,
+                'profile_id'=>$user->profile->id,
+                'nip'=>$user->profile->nip,
+                'nik'=>$user->profile->nik,
+                'contact'=>$user->profile->contact,
+                'nip'=>$user->profile->nip,
+    
+                
+            ];
+            $success['data'] = $data;
+            $success['access_token'] = $user->createToken('AGPAII DIGITAL')->accessToken;
+            $success['token_type'] = 'Bearer';
+    
+            return response()->json($success);
+        } catch (\Exception $e) {
+            // Handle the exception here
+            return response()->json(['error' => 'Registration Failed', 'message' =>'Failed to register. Please try again.'], 500);
         }
-        $user->profile()->save($profile);
-        $success['access_token'] = $user->createToken('AGPAII DIGITAL')->accessToken;
-        $success['token_type'] = 'Bearer';
-        return response()->json($success);
     }
 }

@@ -44,6 +44,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         'event' => 'EventController', // untuk acara
         'event.participant' => 'EventParticipantController', // untuk mengelola peserta acara
         'event.barcode' => 'EventBarcodeController', // untuk mengelola barcode acara
+        // 'event.session' => 'EventSessionController',
+        
         'story' => 'StoryController', // untuk story
         'story.read' => 'StoryReadController', // untuk mengambil story yang sudah dibaca
         'user' => 'UserController', // untuk anggota
@@ -103,6 +105,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'city.district-pension-member' => 'CityDistrictPensionMemberController', // untuk mengambil anggota pensiun berdasarkan kota
         'district' => 'DistrictController', // untuk mengambil kecamatan
         'kta' => 'KtaController', // untuk generate kartu tanda anggota
+        'event-categories' => 'EventCategoryController',
         'educational-level' => 'EducationalLevelController', //untuk mendapatkan data jenjang ajar
         'grade' => 'GradeController', //untuk mendapatkan data kelas yang diajar
         'setting' => 'SettingController', //untuk mendapatkan data dari table setting
@@ -143,6 +146,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         'training-event' => 'TrainingEventController', // untuk mendapatkan data acara pelatihan
         'file' => 'FileController', //
     ]);
+
+    Route::get('/event/session/{id}', 'EventSessionController@show');
 
     Route::get('/classroom/search/{keyword}', 'ClassRoomController@search');
 
@@ -244,7 +249,10 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/event/{eventId}/participant/{userId}/generate-card', 'EventParticipantController@generateCard');
 
     //mendapatkan event berdasarkan tahun dan bulan
-    Route::get('event/month/{month}/year/{year}', 'EventController@geteventbydate');
+    Route::get('/event/month/{month}/year/{year}', 'EventController@geteventbydate');
+
+    //mendapatkan kategori event
+    Route::get('/event/category', 'EventController@geteventcategory');
 
     //mendapatkan event berdasarkan province_id, tahun dan bulan
     Route::get('/province/{province_id}/event/month/{month}/year/{year}', 'ProvinceEventController@getprovinceeventbydate');
