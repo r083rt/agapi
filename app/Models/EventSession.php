@@ -12,10 +12,10 @@ class EventSession extends Model
 
     protected $fillable = ['event_id','session_no', 'session_name', 'session_time'];
 
-    // public function event()
-    // {
-    //     return $this->belongsTo(Event::class, 'event_id', 'id');
-    // }
+    public function presents()
+    {
+        return $this->hasOne(EventPresents::class, 'session_id', 'id');
+    }
 
  
 }

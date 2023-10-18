@@ -57,6 +57,25 @@ class EventParticipantController extends Controller
         return response()->json($event_participant->load('user'));
     }
 
+    public function addParticipant($userId, $eventId)
+    {
+        try {
+            
+            $guest = new EventGuest([
+                'event_id' => $eventId,
+                'user_id' => $userId,
+            ]);
+    
+            $guest->save();
+    
+            return response()->json(['message' => 'Participant added successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to add participant: ' . $e->getMessage()], 500); // You can customize the response and status code
+        }
+
+
+    }
+
     /**
      * Display the specified resource.
      *
@@ -149,4 +168,84 @@ class EventParticipantController extends Controller
             'message' => 'Kartu absen',
         ]);
     }
+
+
+    public function getParticipatedEvents($userId)
+    {
+        // Get the user's participated events
+        $event_participant = EventGuest::with([
+            'event.author',
+            'event.category',
+            'event.city',
+            'event.province',
+            'event.session_detail',
+        ])
+        ->where('user_id', $userId)
+        ->orderBy('id', 'desc')
+        ->paginate(10);
+
+        // Transform the event data into the desired format
+        $formattedData = $event_participant->map(function ($item) {
+            return [
+                'id' => $item->event->id,
+                'event_id' => $item->event->event_id,
+                'user_id' => $item->user_id,
+                'created_at' => $item->created_at,
+                'updated_at' => $item->updated_at,
+                'name' => null,
+                'description' => null,
+                'address' => null,
+                'start_at' => null,
+                'event' => $item->event, // Include all event details
+            ];
+        });
+
+        $response = [
+            'current_page' => $event_participant->currentPage(),
+            'data' => $formattedData,
+            'first_page_url' => $event_participant->url(1),
+            'from' => $event_participant->firstItem(),
+            'last_page' => $event_participant->lastPage(),
+            'last_page_url' => $event_participant->url($event_participant->lastPage()),
+            'links' => [
+                [
+                    'url' => null,
+                    'label' => '&laquo; Previous',
+                    'active' => false,
+                ],
+                [
+                    'url' => $event_participant->nextPageUrl(),
+                    'label' => 'Next &raquo;',
+                    'active' => !is_null($event_participant->nextPageUrl()),
+                ],
+            ],
+            'next_page_url' => $event_participant->nextPageUrl(),
+            'path' => $event_participant->url($event_participant->currentPage()),
+            'per_page' => $event_participant->perPage(),
+            'prev_page_url' => $event_participant->previousPageUrl(),
+            'to' => $event_participant->lastItem(),
+            'total' => $event_participant->total(),
+        ];
+
+        return response()->json($response);
+    }
+
+    public function getEventParticipants($event_id)
+    {
+        //
+        $participants = EventGuest::where('event_id', $event_id)
+            ->with('user')
+            ->orderBy('id', 'desc')
+            ->paginate();
+
+        return response()->json($participants);
+    }
+
+    
+
+    
+
+
+
+
 }

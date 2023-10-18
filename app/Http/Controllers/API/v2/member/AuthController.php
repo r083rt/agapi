@@ -121,7 +121,9 @@ class AuthController extends Controller
                 'message' => 'The user credentials were incorrect.'
             ], 401);
         }
-        $user = User::where('email', $request->input('email'))->first();
+
+
+        $user = auth()->user();
         $data = [
             'user_id'=>$user->id,
             'kta_id'=>$user->kta_id,
@@ -139,11 +141,12 @@ class AuthController extends Controller
 
             
         ];
+
         
         // Return the access token response
         return response()->json([
             'message'=>'Login success, welcome ' . $user->name,
-            'data' => $user,
+            'data' => $data,
             'token_type' => 'Bearer',
             'expires_in' => $token['expires_in'],
             'access_token' => $token['access_token'],

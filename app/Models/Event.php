@@ -120,11 +120,6 @@ class Event extends Model
     }
 
 
-    // public function eventPresents()
-    // {
-    //     return $this->hasMany(EventPresents::class, 'kpi_header_id', 'kpi_header_id');
-    // }
-
     public function province()
     {
         return $this->belongsTo(Province::class, 'province_id', 'id');

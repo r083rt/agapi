@@ -40,6 +40,28 @@ class PostController extends Controller
         return response()->json($posts);
     }
 
+    public function userPost($user_id)
+    {
+        $posts = Post::with([
+            'images', 'videos',
+            'media.thumbnail',
+            'author.profile',
+            'author.role',
+            'last_like.user',
+            'last_comment.user',
+        ])
+            ->withCount(['comments', 'likes'])
+            ->whereHas('author', function ($query) use ($user_id) {
+                $query->where('role_id', '!=', 8)->where('id', $user_id);
+            })
+            // ->where('key', '!=', 'ad')
+            ->orderBy('created_at', 'desc')
+            ->paginate();
+
+        return response()->json($posts);
+    }
+
+
     /**
      * Store a newly created resource in storage.
      *

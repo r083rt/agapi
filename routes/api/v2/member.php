@@ -105,7 +105,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         'city.district-pension-member' => 'CityDistrictPensionMemberController', // untuk mengambil anggota pensiun berdasarkan kota
         'district' => 'DistrictController', // untuk mengambil kecamatan
         'kta' => 'KtaController', // untuk generate kartu tanda anggota
-        'event-categories' => 'EventCategoryController',
+        'event-categories' => 'EventCategoryController', // untuk mencari kategori event
         'educational-level' => 'EducationalLevelController', //untuk mendapatkan data jenjang ajar
         'grade' => 'GradeController', //untuk mendapatkan data kelas yang diajar
         'setting' => 'SettingController', //untuk mendapatkan data dari table setting
@@ -146,6 +146,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         'training-event' => 'TrainingEventController', // untuk mendapatkan data acara pelatihan
         'file' => 'FileController', //
     ]);
+
+    Route::get('/post/user/{id}', 'PostController@userPost');
 
     Route::get('/event/session/{id}', 'EventSessionController@show');
 
@@ -242,11 +244,32 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('/personal-conversation/search/{keyword}', 'PersonalConversationController@search');
 
+    Route::get('/users', 'UserController@index');
+
     Route::get('/users/search/{keyword}', 'UserController@search');
+
+    Route::get('/users/province/{province_id}', 'UserController@getUserByProvince');
+
+    Route::get('/users/province/{province_id}/search/{keyword}', 'UserController@searchInProvince');
+
+    
+
+    Route::get('/event/sessions/show/{id}/{user_id}', 'EventController@showSession');
+
+    Route::post('/event/{eventId}/sessions/{sessionId}/users/{userId}/presents', 'EventController@addPresents');
+
+    Route::post('/event/participant/{userId}/event/{eventId}', 'EventParticipantController@addParticipant');
+
+    Route::get('/event/participant/{user_id}', 'EventParticipantController@getParticipatedEvents');
+
+    Route::get('/event/all-participants/{event_id}', 'EventParticipantController@getEventParticipants');
 
     Route::get('/event/{event_id}/participant/search/{search}', 'EventParticipantController@search');
 
     Route::get('/event/{eventId}/participant/{userId}/generate-card', 'EventParticipantController@generateCard');
+
+    //mendapatkan event berdasarkan id pembuat
+    Route::get('/event/created/{userId}', 'EventController@getCreatedEvents');
 
     //mendapatkan event berdasarkan tahun dan bulan
     Route::get('/event/month/{month}/year/{year}', 'EventController@geteventbydate');
@@ -304,4 +327,6 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     //mendapatkan cs number
     Route::get('/cs-number', 'SettingController@getcsnumber');
+
+   
 });

@@ -25,6 +25,20 @@ class UserController extends Controller
         return response()->json($users);
     }
 
+
+    public function getUserByProvince($province_id)
+    {
+        //
+        $users = User::where('user_activated_at', '!=', null)
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->whereHas('profile', function ($query) use ($province_id) {
+                $query->where('province_id', $province_id);
+            })
+            ->paginate();
+
+        return response()->json($users);
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -134,6 +148,37 @@ class UserController extends Controller
             ->has('profile')
             ->with('profile')
             ->paginate();
+
+        return response()->json($users);
+    }
+
+    public function searchInProvince($province_id,$keyword)
+    {
+        // $users = User::where('user_activated_at', '!=', null)
+        //     ->whereIn('role_id', [2, 7, 9, 10, 11])
+        //     // ->where('name', 'like', '%' . $keyword . '%')
+        //     // ->orWhere('email', 'like', '%' . $keyword . '%')
+        //     // ->orWhere('kta_id', 'like', '%' . $keyword . '%')
+        //     ->whereHas('profile', function ($query) use ($province_id) {
+        //         $query->where('province_id', $province_id);
+        //     })
+        //     ->paginate();
+
+
+        $users = User::where('user_activated_at', '!=', null)
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->where(function ($query) use ($keyword) {
+                $query->where('name', 'like', '%' . $keyword . '%')
+                    ->orWhere('email', 'like', '%' . $keyword . '%')
+                    ->orWhere('kta_id', 'like', '%' . $keyword . '%');
+            })
+            ->whereHas('profile', function ($query) use ($province_id) {
+                $query->where('province_id', $province_id);
+            })
+            ->paginate();
+    
+            
+       
 
         return response()->json($users);
     }
