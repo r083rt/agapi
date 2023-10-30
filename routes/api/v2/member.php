@@ -9,7 +9,9 @@ Route::post('/login', 'AuthController@login');
 Route::post('/register', 'AuthController@register');
 
 // api untuk forgot password via otp
+Route::get('/otp-client/search/{email}', 'OtpClientController@searchUserByEmail');
 Route::get('/otp-client/user/search/{phone_number}', 'OtpClientController@searchUser');
+Route::get('/otp-client/search-name/{name}', 'OtpClientController@searchUserName');
 Route::resource('/otp-client', 'OtpClientController');
 Route::post('/otp-client/verify', 'OtpClientController@verify');
 Route::post('/otp-client/change-password', 'OtpClientController@changePassword');
@@ -252,7 +254,9 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('/users/province/{province_id}/search/{keyword}', 'UserController@searchInProvince');
 
-    
+
+   
+    // Events 
 
     Route::get('/event/sessions/show/{id}/{user_id}', 'EventController@showSession');
 
@@ -328,5 +332,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     //mendapatkan cs number
     Route::get('/cs-number', 'SettingController@getcsnumber');
 
+
+  
+    //Payment Status
+    Route::post('/payment/status', 'PaymentController@paymentNotif');
    
 });

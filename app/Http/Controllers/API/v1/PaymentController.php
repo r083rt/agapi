@@ -256,8 +256,10 @@ class PaymentController extends Controller
 
     public function notificationHandler(Request $request)
     {
+        new Midtrans();
+
         try {
-            $notif = Midtrans::notification();
+            $notif = new \Midtrans\Notification();
         } catch (\Exception $e) {
             exit($e->getMessage());
         }
@@ -283,6 +285,15 @@ class PaymentController extends Controller
                     // TODO set payment status in merchant's database to 'Success'
                     // $payment->addUpdate("Transaction order_id: " . $orderId ." successfully captured using " . $type);
                     $payment->setSuccess();
+                    $userId = $payment->user_id;
+                    User::where('id', $userId)->update([
+                        'user_activated_at' => date('Y-m-d H:i:s', strtotime($date)),
+                        'expired_at' => date('Y-m-d H:i:s', strtotime($date . ' + 6 months')),
+                    ]);
+
+
+                    
+
                 }
             }
         } elseif ($transaction == 'settlement') {
@@ -311,6 +322,9 @@ class PaymentController extends Controller
             // $payment->addUpdate("Payment using " . $type . " for transaction order_id: " . $orderId . " is canceled.");
             $payment->setFailed();
         }
+
+        
+        // $user = Users::where('id', $payment->user_id)->find();
         return response()->json([
             "status" => "success",
             'message' => 'Notification Handler',

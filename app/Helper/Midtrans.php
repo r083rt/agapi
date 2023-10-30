@@ -6,8 +6,13 @@ class Midtrans
 
     public function __construct()
     {
-        \Midtrans\Config::$serverKey = "Mid-server-Nm-f1lgAL6i3jYoxDBDBSQUJ";
-        \Midtrans\Config::$isProduction = true;
+        // \Midtrans\Config::$serverKey = "Mid-server-Nm-f1lgAL6i3jYoxDBDBSQUJ";
+        // \Midtrans\Config::$isProduction = true;
+        // \Midtrans\Config::$isSanitized = true;
+        // \Midtrans\Config::$is3ds = true;
+
+        \Midtrans\Config::$serverKey = "SB-Mid-server-f3kMDse4fDbYgXzVJk7vIVvU";
+        \Midtrans\Config::$isProduction = false;
         \Midtrans\Config::$isSanitized = true;
         \Midtrans\Config::$is3ds = true;
     }

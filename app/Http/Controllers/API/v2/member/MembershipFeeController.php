@@ -63,13 +63,87 @@ class MembershipFeeController extends Controller
             ],
         ];
 
+        $snapToken = Midtrans::getSnapToken($payload);
+        $payment->snap_token = $snapToken;
+        $payment->save();
         $paymentUrl = Midtrans::createTransaction($payload)->redirect_url;
+        
 
         return response()->json([
             "message" => "Link pembayaran berhasil dibuat",
             "data" => [
                 "payment_url" => $paymentUrl,
+                "snap_token"=> $snapToken,
+                "transaction_id"=>$midtransId
             ],
+            "payload" => $payload
+           
+        ]);
+    }
+
+
+    public function notificationHandler(Request $request)
+    {
+        try {
+            $notif = Midtrans::notification();
+        } catch (\Exception $e) {
+            exit($e->getMessage());
+        }
+
+        $transaction = $notif->transaction_status;
+        $type = $notif->payment_type;
+        $orderId = $notif->order_id;
+        $fraud = $notif->fraud_status;
+
+        $payment = Payment::where('midtrans_id', $orderId)->firstOrFail();
+
+        if ($transaction == 'capture') {
+
+            // For credit card transaction, we need to check whether transaction is challenge by FDS or not
+            if ($type == 'credit_card') {
+
+                if ($fraud == 'challenge') {
+                    // TODO set payment status in merchant's database to 'Challenge by FDS'
+                    // TODO merchant should decide whether this transaction is authorized or not in MAP
+                    // $payment->addUpdate("Transaction order_id: " . $orderId ." is challenged by FDS");
+                    $payment->setPending();
+                } else {
+                    // TODO set payment status in merchant's database to 'Success'
+                    // $payment->addUpdate("Transaction order_id: " . $orderId ." successfully captured using " . $type);
+                    $payment->setSuccess();
+                }
+            }
+        } elseif ($transaction == 'settlement') {
+
+            // TODO set payment status in merchant's database to 'Settlement'
+            // $payment->addUpdate("Transaction order_id: " . $orderId ." successfully transfered using " . $type);
+            $payment->setSuccess();
+        } elseif ($transaction == 'pending') {
+
+            // TODO set payment status in merchant's database to 'Pending'
+            // $payment->addUpdate("Waiting customer to finish transaction order_id: " . $orderId . " using " . $type);
+            $payment->setPending();
+        } elseif ($transaction == 'deny') {
+
+            // TODO set payment status in merchant's database to 'Failed'
+            // $payment->addUpdate("Payment using " . $type . " for transaction order_id: " . $orderId . " is Failed.");
+            $payment->setFailed();
+        } elseif ($transaction == 'expire') {
+
+            // TODO set payment status in merchant's database to 'expire'
+            // $payment->addUpdate("Payment using " . $type . " for transaction order_id: " . $orderId . " is expired.");
+            $payment->setExpired();
+        } elseif ($transaction == 'cancel') {
+
+            // TODO set payment status in merchant's database to 'Failed'
+            // $payment->addUpdate("Payment using " . $type . " for transaction order_id: " . $orderId . " is canceled.");
+            $payment->setFailed();
+        }
+        return response()->json([
+            "status" => "success",
+            'message' => 'Notification Handler',
+            'fraud' => $transaction,
+            'data' => $payment,
         ]);
     }
 
