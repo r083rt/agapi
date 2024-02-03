@@ -87,6 +87,45 @@ class PaymentController extends Controller
         return response()->json($this->response);
     }
 
+    public function extendMembership(Request $request)
+    {
+        // if($request->user()->payment()->exists()){
+        //     return abort(403,'Anda sudah melakukan pembayaran');
+        // }
+        $data = new Payment(['value'=>setting('admin.member_price')]);
+        $payment = $request->user()->payment()->save($data);
+        $data->id = '1212'+$payment->id;
+        $data->update();
+
+        $payload = [
+            'transaction_details' => [
+                'order_id'      => $data->id,
+                'gross_amount'  => $payment->value,
+            ],
+            'customer_details' => [
+                'first_name'    => $request->user()->name,
+                'email'         => $request->user()->email
+            ],
+            'item_details' => [
+                [
+                    'id'       => $payment->id,
+                    'price'    => $payment->value,
+                    'quantity' => 1,
+                    'name'     => ucwords(str_replace('_', ' ', 'Pembayaran Member KTA'))
+                ]
+            ]
+        ];
+
+        $snapToken = Veritrans_Snap::getSnapToken($payload);
+        $payment->snap_token = $snapToken;
+        $payment->update();
+
+        // Beri response snap token
+        $this->response['snap_token'] = $snapToken;
+
+        return response()->json($this->response);
+    }
+
     /**
      * Display the specified resource.
      *

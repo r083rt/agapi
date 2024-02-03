@@ -10,6 +10,7 @@ use App\Models\Like;
 use App\Models\Profile;
 use App\Models\Rating;
 use App\Models\User;
+use App\Models\PnsStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -259,6 +260,27 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
+    public function updateStatus(Request $request, $id){
+        $pns_status = PnsStatus::firstOrNew(['user_id' => $request->user()->id]);
+        if($request->is_pns == 1){
+            $pns_status->is_certification = $request->certification;
+            $pns_status->is_non_pns_inpassing = null;
+        } else {
+            $pns_status->is_non_pns_inpassing = $request->non_pns_inpassing;
+
+            $pns_status->is_certification = $request->certification;
+        }
+        $pns_status->bank_account_no = $request->bank_account_no;
+        $pns_status->employment_status = $request->employment_status;
+        $pns_status->save();
+
+        $res['status']='success';
+        $res['data'] = $pns_status;
+
+        return response()->json($res);
+
+    }
     public function update(Request $request, $id)
     {
         $user = User::with('profile')->findOrFail($id);

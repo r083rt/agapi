@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\v2\member;
 
 use App\Http\Controllers\Controller;
 use App\Models\user;
+use App\Models\PnsStatus;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -136,6 +137,29 @@ class UserController extends Controller
         return response()->json([
             'total' => $total
         ]);
+    }
+
+    public function updateStatus(Request $request, $id){
+        $pns_status = PnsStatus::firstOrNew(['user_id' => $id]);
+        if($request->is_pns == 1){
+            $pns_status->is_certification = $request->is_certification;
+            $pns_status->is_non_pns_inpassing = 0;
+        } else {
+            $pns_status->is_non_pns_inpassing = $request->is_non_pns_inpassing;
+
+            $pns_status->is_certification = $request->is_certification;
+        }
+        $pns_status->is_pns = $request->is_pns;
+        $pns_status->bank_name = $request->bank_name;
+        $pns_status->bank_account_no = $request->bank_account_no;
+        $pns_status->employment_status = $request->employment_status;
+        $pns_status->save();
+
+        $res['status']='success';
+        $res['data'] = $pns_status;
+
+        return response()->json($res);
+
     }
 
     public function search($keyword)

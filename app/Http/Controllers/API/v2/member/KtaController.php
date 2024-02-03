@@ -45,8 +45,9 @@ class KtaController extends Controller
         $district = District::with('profiles')->findOrFail($request->district_id);
         $member = User::whereHas('profile.district', function ($query) use ($district) {
             $query->where('id', $district->id);
-        })
-            ->where('kta_id', '!=', null);
+        })->where('kta_id', '!=', null);
+
+       
 
         if ($member->doesntExist()) {
             $user->kta_id = $district->id . '001';
@@ -69,6 +70,7 @@ class KtaController extends Controller
         return response()->json([
             'message' => 'KTA berhasil dibuat',
             'kta_id' => $user->kta_id,
+           
         ], 200);
 
     }

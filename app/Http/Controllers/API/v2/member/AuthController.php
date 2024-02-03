@@ -75,6 +75,7 @@ class AuthController extends Controller
                 'role',
                 'profile.city',
                 'profile.district',
+                'pns_status',
                 'banner'
             )
                 ->loadCount(

@@ -150,7 +150,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     ]);
 
     Route::get('/post/user/{id}', 'PostController@userPost');
-
+    Route::post('/post/update/{id}', 'PostController@updatePost');
     Route::get('/event/session/{id}', 'EventSessionController@show');
 
     Route::get('/classroom/search/{keyword}', 'ClassRoomController@search');
@@ -251,6 +251,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/users/search/{keyword}', 'UserController@search');
 
     Route::get('/users/province/{province_id}', 'UserController@getUserByProvince');
+
+    //Update status guru
+    Route::post('/users/{id}/updatestatus', 'UserController@updateStatus');
 
     Route::get('/users/province/{province_id}/search/{keyword}', 'UserController@searchInProvince');
 

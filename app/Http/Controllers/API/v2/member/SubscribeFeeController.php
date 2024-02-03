@@ -29,7 +29,7 @@ class SubscribeFeeController extends Controller
     {
         //
         $user = $request->user();
-        $payment_value = setting('admin.member_price');
+        $payment_value = 65000;
         // $payment_value = 2;
         $payment_text = "Pembayaran Iuran Anggota Selama 6 Bulan";
         $key = "perpanjangan_anggota";
@@ -64,13 +64,20 @@ class SubscribeFeeController extends Controller
             ],
         ];
 
+        // $paymentUrl = Midtrans::createTransaction($payload)->redirect_url;
+        $snapToken = Midtrans::getSnapToken($payload);
+        $payment->snap_token = $snapToken;
+        $payment->save();
         $paymentUrl = Midtrans::createTransaction($payload)->redirect_url;
 
         return response()->json([
             "message" => "Link pembayaran berhasil dibuat",
             "data" => [
                 "payment_url" => $paymentUrl,
+                "snap_token"=> $snapToken,
+                "transaction_id"=>$midtransId
             ],
+            "payload" => $payload
         ]);
     }
 
