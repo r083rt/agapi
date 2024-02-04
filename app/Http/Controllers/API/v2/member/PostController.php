@@ -166,7 +166,6 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
         $request->validate([
             'body' => "required",
         ]);
@@ -179,57 +178,56 @@ class PostController extends Controller
 
         if ($request->hasFile('files')) {
             foreach ($request->file('files') as $index => $file) {
-                $path = $request->$file->store('public/posts', 'wasabi');
-                // if (strpos($request->allFiles()['files'][$index]->getClientMimeType(), 'image') !== false) {
-                //     $image = new File();
-                //     $fileName = $user->id . '-' . $index . '-' . time() . '.' . $request->file('files')[$index]->extension();
+                if (strpos($request->allFiles()['files'][$index]->getClientMimeType(), 'image') !== false) {
+                    $image = new File();
+                    $fileName = $user->id . '-' . $index . '-' . time() . '.' . $request->file('files')[$index]->extension();
 
-                //     $compressedImage = \Image::make($request->file('files')[$index])
-                //         // ->resize(1080, null, function ($constraint) {
-                //         //     $constraint->aspectRatio("1:1");
-                //         // })
-                //         ->encode('jpg', 60);
+                    $compressedImage = \Image::make($request->file('files')[$index])
+                        // ->resize(1080, null, function ($constraint) {
+                        //     $constraint->aspectRatio("1:1");
+                        // })
+                        ->encode('jpg', 60);
 
-                //     $folderPath = "images";
-                //     $path = "{$folderPath}/{$fileName}";
+                    $folderPath = "images";
+                    $path = "{$folderPath}/{$fileName}";
 
-                //     // simpan gambar
-                //     Storage::disk(env('FILESYSTEM_DRIVER', 'public'))->put($path, $compressedImage);
+                    // simpan gambar
+                    Storage::disk(env('FILESYSTEM_DRIVER', 'public'))->put($path, $compressedImage);
 
-                //     $image->src = $path;
-                //     $image->type = $request->file('files')[$index]->getClientMimeType();
-                //     $post->images()->save($image);
-                // }
-                // if (strpos($request->allFiles()['files'][$index]->getClientMimeType(), 'video') !== false) {
-                //     $file = new File();
-                //     $path = $request->allFiles()['files'][$index]->store('videos', 'wasabi');
+                    $image->src = $path;
+                    $image->type = $request->file('files')[$index]->getClientMimeType();
+                    $post->images()->save($image);
+                }
+                if (strpos($request->allFiles()['files'][$index]->getClientMimeType(), 'video') !== false) {
+                    $file = new File();
+                    $path = $request->allFiles()['files'][$index]->store('videos', 'wasabi');
 
-                //     // file type is video
-                //     // set storage path to store the file (image generated for a given video)
-                //     $thumbnail_path = public_path() . '/storage/thumbnails';
-                //     //check if folder is exists
-                //     if (!Storage::disk('public')->exists('thumbnails')) {
-                //         Storage::disk('public')->makeDirectory('thumbnails', 0777, true); //creates directory
-                //     }
-                //     //------
-                //     // set thumbnail image name
-                //     $timestamp = str_replace([' ', ':'], '-', Carbon::now()->toDateTimeString());
-                //     $thumbnail_image = $request->user()->id . "." . $timestamp . ".jpg";
-                //     // get video length and process it
-                //     // assign the value to time_to_image (which will get screenshot of video at that specified seconds)
-                //     // $time_to_image    = floor(($data['video_length'])/2);
-                //     $time_to_image = 0.1;
-                //     $thumbnail_status = Thumbnail::getThumbnail($request->allFiles()['files'][$index], $thumbnail_path, $thumbnail_image, $time_to_image);
-                //     $storagePublic = Storage::disk('wasabi')->put('thumbnails/' . $thumbnail_image, Storage::disk('public')->get('thumbnails/' . $thumbnail_image));
-                //     // dd($storagePublic);
-                //     if ($storagePublic) {
-                //         Storage::disk('public')->delete('thumbnails/' . $thumbnail_image);
-                //     }
-                //     $file->src = $path;
-                //     $file->type = $request->allFiles()['files'][$index]->getClientMimeType();
-                //     $file->value = 'thumbnails/' . $thumbnail_image;
-                //     $post->files()->save($file);
-                // }
+                    // file type is video
+                    // set storage path to store the file (image generated for a given video)
+                    $thumbnail_path = public_path() . '/storage/thumbnails';
+                    //check if folder is exists
+                    if (!Storage::disk('public')->exists('thumbnails')) {
+                        Storage::disk('public')->makeDirectory('thumbnails', 0777, true); //creates directory
+                    }
+                    //------
+                    // set thumbnail image name
+                    $timestamp = str_replace([' ', ':'], '-', Carbon::now()->toDateTimeString());
+                    $thumbnail_image = $request->user()->id . "." . $timestamp . ".jpg";
+                    // get video length and process it
+                    // assign the value to time_to_image (which will get screenshot of video at that specified seconds)
+                    // $time_to_image    = floor(($data['video_length'])/2);
+                    $time_to_image = 0.1;
+                    $thumbnail_status = Thumbnail::getThumbnail($request->allFiles()['files'][$index], $thumbnail_path, $thumbnail_image, $time_to_image);
+                    $storagePublic = Storage::disk('wasabi')->put('thumbnails/' . $thumbnail_image, Storage::disk('public')->get('thumbnails/' . $thumbnail_image));
+                    // dd($storagePublic);
+                    if ($storagePublic) {
+                        Storage::disk('public')->delete('thumbnails/' . $thumbnail_image);
+                    }
+                    $file->src = $path;
+                    $file->type = $request->allFiles()['files'][$index]->getClientMimeType();
+                    $file->value = 'thumbnails/' . $thumbnail_image;
+                    $post->files()->save($file);
+                }
             }
         }
     
