@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Province;
 use Carbon\Carbon;
-
+use App\Models\User;
 class ProvinceExpiredMemberController extends Controller
 {
     /**
@@ -17,13 +17,17 @@ class ProvinceExpiredMemberController extends Controller
     public function index()
     {
         //
-        $province = Province::withCount(['users' => function ($query) {
+        $provinces = Province::withCount(['users' => function ($query) {
             //ambil user yang expired at lebih kecil dari tanggal sekarang
             $query->whereDate('user_activated_at', '<', \Carbon\Carbon::now()->subMonths(6)->format('Y-m-d'))
                 ->whereIn('role_id', [2, 7, 9, 10, 11]);
         }])->paginate();
+        $total = User::where('user_activated_at', '!=', null)
+            ->whereDate('user_activated_at', '<', \Carbon\Carbon::now()->subMonths(6)->format('Y-m-d'))
+            ->whereIn('role_id', [2, 7, 9, 10, 11])
+            ->count();
 
-        return response()->json($province);
+        return response()->json(['total'=>$total, 'member'=>$provinces]);
     }
 
     /**

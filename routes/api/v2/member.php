@@ -22,6 +22,11 @@ Route::group(['middleware' => 'auth:api'], function () {
     // api untuk mendapatkan data user yang sedang login
     Route::get('/me', 'AuthController@getUserAccount');
 
+    // Cari Anggota -------------------------------------
+
+    Route::get('/province/{provinceId}/search/{keyword}', 'MemberInfoProvinceController@searchMember');
+    Route::get('/district/{districtId}/search/{keyword}', 'MemberInfoDistrictController@searchMember');
+    Route::get('/city/{cityId}/search/{keyword}', 'MemberInfoCityController@searchMember');
     // Kartu tanda anggota ---------------------------------------------------------------
 
     Route::get('/membercard/generate/front', 'MemberCardController@generateFrontCard');
@@ -82,11 +87,22 @@ Route::group(['middleware' => 'auth:api'], function () {
         'notification' => 'NotificationController',
         'year.month.event' => 'YearMonthEventController', // untuk mengambil event berdasarkan tahun dan bulan
         'year.month.province.event' => 'YearMonthProvinceEventController', // untuk mengambil event berdasarkan tahun, bulan, dan provinsi
+        'member-all' => 'MemberInfoProvinceController',
+        
+        
         'province' => 'ProvinceController', // untuk mengambil provinsi
+        'province.province-member-info' => 'MemberInfoProvinceController',
+        'city.city-member-info' => 'MemberInfoCityController',
+        'district.district-member-info' => 'MemberInfoDistrictController',
+
         'province.city' => 'ProvinceCityController', // untuk mengambil kota
         'province.event' => 'ProvinceEventController', // untuk mengambil event berdasarkan provinsi
         'province.calendar-event' => 'ProvinceCalendarEventController', // untuk mengambil event berdasarkan provinsi
         'province-member' => 'ProvinceMemberController', // untuk mengambil member berdasarkan provinsi
+        'province-member-detail' => 'ProvinceMemberDetailController',
+        'province-certificate-member' => 'ProvinceCertificateController',
+        'province-inpassing-member' => 'ProvinceInpassingController',
+        'province-bsi-member' => 'ProvinceBSIController',
         'province-pns-member' => 'ProvincePnsMemberController', // untuk mengambil anggota pns berdasarkan provinsi
         'province-non-pns-member' => 'ProvinceNonPnsMemberController', // untuk mengambil anggota non pns berdasarkan provinsi
         'province-expired-member' => 'ProvinceExpiredMemberController', // untuk mengambil anggota yang sudah expired berdasarkan provinsi
@@ -97,14 +113,20 @@ Route::group(['middleware' => 'auth:api'], function () {
         'province.city-non-pns-member' => 'ProvinceCityNonPnsMemberController', // untuk mengambil anggota non pns berdasarkan provinsi dan kota
         'province.city-expired-member' => 'ProvinceCityExpiredMemberController', // untuk mengambil anggota yang sudah expired berdasarkan provinsi dan kota
         'province.city-extend-member' => 'ProvinceCityExtendMemberController', // untuk mengambil anggota yang sudah extend berdasarkan provinsi dan kota
-        'province.city-pension-member' => 'ProvinceCityPensionMemberController', // untuk mengambil anggota pensiun berdasarkan provinsi dan kota
+        'province.city-pension-member' => 'ProvinceCityPensionMemberController',
+        'province.city-certificate-member' => 'ProvinceCityCertificateController', // untuk mengambil anggota pensiun berdasarkan provinsi dan kota
+        'province.city-inpassing-member' => 'ProvinceCityInpassingController',
+        'province.city-bsi-member' => 'ProvinceCityBSIController',
         'city' => 'CityController', // untuk mengambil kota
         'city.district' => 'CityDistrictController', // untuk mengambil kecamatan
         'city.district-member' => 'CityDistrictMemberController', // untuk mengambil member berdasarkan kota dan kecamatan
         'city.district-pns-member' => 'CityDistrictPnsMemberController', // untuk mengambil anggota pns berdasarkan kota dan kecamatan
         'city.district-non-pns-member' => 'CityDistrictNonPnsMemberController', // untuk mengambil anggota non pns berdasarkan kota dan kecamatan
         'city.district-extend-member' => 'CityDistrictExtendMemberController', // untuk mengambil anggota yang sudah expired berdasarkan kota dan kecamatan
-        'city.district-pension-member' => 'CityDistrictPensionMemberController', // untuk mengambil anggota pensiun berdasarkan kota
+        'city.district-pension-member' => 'CityDistrictPensionMemberController',
+        'city.district-certificate-member' => 'CityDistrictCertificateController', // untuk mengambil anggota pensiun berdasarkan kota
+        'city.district-inpassing-member' => 'CityDistrictInpassingController',
+        'city.district-bsi-member' => 'CityDistrictBSIController',
         'district' => 'DistrictController', // untuk mengambil kecamatan
         'kta' => 'KtaController', // untuk generate kartu tanda anggota
         'event-categories' => 'EventCategoryController', // untuk mencari kategori event
@@ -318,7 +340,11 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/users/total-non-pns-member', 'UserController@gettotalnonpnsmember');
     Route::get('/users/total-expired-member', 'UserController@gettotalexpiredmember');
     Route::get('/users/total-pension-member', 'UserController@gettotalpensionmember');
+    Route::get('/users/total-certificate-member', 'UserController@gettotalcertificatemember');
+    Route::get('/users/total-inpassing-member', 'UserController@gettotalinpassingmember');
+    Route::get('/users/total-bsi-member', 'UserController@gettotalbsimember');
     Route::get('/payment/extended-total', 'PaymentController@gettotalextendmember');
+    
     //end total member
 
 

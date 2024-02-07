@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Province;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\Payment;
 class ProvinceExtendMemberController extends Controller
 {
     /**
@@ -25,7 +25,7 @@ class ProvinceExtendMemberController extends Controller
             // join ke table payments melalui users
             ->join('payments', 'users.id', '=', 'payments.user_id')
             ->where('payments.status', '=', 'success')
-            ->where('payments.value', 65000)
+            ->whereIn('payments.value', [65000, 200000, 1350000])
             ->select(
                 'provinces.id as id',
                 'provinces.name as name',
@@ -35,7 +35,10 @@ class ProvinceExtendMemberController extends Controller
             ->groupBy('name')
             ->paginate();
 
-        return response()->json($provinces);
+        $total = Payment::where('status', 'success')->whereIn('value',  [65000, 200000, 1350000])->count();
+   
+
+        return response()->json(['total'=>$total,'member'=>$provinces]);
     }
 
     /**

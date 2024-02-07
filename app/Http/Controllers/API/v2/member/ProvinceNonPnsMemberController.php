@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Province;
+use App\Models\User;
 
 class ProvinceNonPnsMemberController extends Controller
 {
@@ -16,13 +17,17 @@ class ProvinceNonPnsMemberController extends Controller
     public function index()
     {
         //
-        $province = Province::withCount(['users' => function ($query) {
+        $provinces = Province::withCount(['users' => function ($query) {
             $query->whereHas('pns_status', function ($query2) {
                 $query2->where('is_pns', '0');
             });
         }])->paginate();
 
-        return response()->json($province);
+        $total = User::whereHas('pns_status', function ($query) {
+            $query->where('is_pns', '0');
+        })->count();
+
+        return response()->json(['total'=>$total,'member'=>$provinces]);
     }
 
     /**

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API\v2\member;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Province;
+use App\Models\User;
+use App\Models\Payment;
 
 class ProvinceMemberController extends Controller
 {
@@ -20,7 +22,17 @@ class ProvinceMemberController extends Controller
             $query->where('user_activated_at', '!=', null)
             ->whereIn('role_id', [2, 7, 9, 10, 11]);
         }])->paginate();
-        return response()->json($provinces);
+
+        // $total = User::where('user_activated_at', '!=', null)
+        //     ->whereIn('role_id', [2, 7, 9, 10, 11])
+        //     ->count();
+        $total = Payment::where('value',35000)->where('status','success')->count();
+        return response()->json([
+            'total' => $total,
+            'member' => $provinces
+        ]);
+        
+        // return response()->json(['provinces'=>$provinces]);
     }
 
     /**

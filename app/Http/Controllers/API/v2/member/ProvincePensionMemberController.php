@@ -18,12 +18,17 @@ class ProvincePensionMemberController extends Controller
     {
         // ambil province beserta user->profile->birthdate lalu ambil yang umum nya sudah lebih dari 60 tahun lalu tiap province hitung total users nya
         $provinces = Province::withCount(['users' => function ($query) {
-            $query->whereHas('profile', function ($query) {
-                $query->where('birthdate', '<=', now()->subYears(60));
-            })->where('user_activated_at', '!=', 'null');
-        }])
+                $query->whereHas('profile', function ($query) {
+                    $query->where('birthdate', '<=', now()->subYears(60));
+                })->where('user_activated_at', '!=', 'null');
+            }])
             ->paginate();
-        return response()->json($provinces);
+
+        $total = User::whereHas('profile', function ($query) {
+            $query->where('birthdate', '<', now()->subYears(60))->where('user_activated_at', '!=', 'null');
+        })->count();
+
+         return response()->json(['total'=>$total,'member'=>$provinces]);
     }
 
     /**

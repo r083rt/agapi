@@ -242,6 +242,39 @@ class PostController extends Controller
         ])->loadCount(['comments', 'likes']));
     }
 
+
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'body' => "required",
+    //     ]);
+    //     // return response()->json([$request->hasFile('images')]);
+    //     $post = new Post($request->all());
+    //     $user = User::findOrFail(auth()->user()->id);
+
+    //     $post->slug = Str::random(8);
+    //     if ($request->hasFile('files')) {
+    //         foreach ($request->file('files') as $index => $file) {
+    //             $path = $file->store('public/images', 'wasabi');
+    //             $post->image = $path;
+    //         }
+            
+            
+    //     }
+    //     $request->user()->posts()->save($post);
+
+    
+
+    //     return response()->json($post->load([
+    //         'images', 'videos',
+    //         'media.thumbnail',
+    //         'author.profile',
+    //         'author.role',
+    //         'last_like.user',
+    //         'last_comment.user',
+    //     ])->loadCount(['comments', 'likes']));
+    // }
+
     /**
      * Display the specified resource.
      *

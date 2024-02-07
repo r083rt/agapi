@@ -117,6 +117,36 @@ class UserController extends Controller
         ]);
     }
 
+    public function gettotalcertificatemember()
+    {
+        $total = User::whereHas('pns_status', function ($query) {
+            $query->where('is_certification', '1');
+        })->count();
+        return response()->json([
+            'total' => $total
+        ]);
+    }
+
+    public function gettotalinpassingmember()
+    {
+        $total = User::whereHas('pns_status', function ($query) {
+            $query->where('is_non_pns_inpassing', '1');
+        })->count();
+        return response()->json([
+            'total' => $total
+        ]);
+    }
+
+    public function gettotalbsimember()
+    {
+        $total = User::whereHas('pns_status', function ($query) {
+            $query->where('bank_account_no','!=', '');
+        })->count();
+        return response()->json([
+            'total' => $total
+        ]);
+    }
+
     public function gettotalexpiredmember()
     {
         $total = User::where('user_activated_at', '!=', null)

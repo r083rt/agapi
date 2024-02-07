@@ -17,13 +17,18 @@ class ProvincePnsMemberController extends Controller
     public function index()
     {
         //
-        $province = Province::withCount(['users' => function ($query) {
+        $provinces = Province::withCount(['users' => function ($query) {
             $query->whereHas('pns_status', function ($query2) {
                 $query2->where('is_pns', '1');
             });
         }])->paginate();
+        $total = User::whereHas('pns_status', function ($query) {
+            $query->where('is_pns', '1');
+        })->count();
 
-        return response()->json($province);
+        return response()->json(['total'=>$total,'member'=>$provinces]);
+
+        // return response()->json($province);
     }
 
     /**
@@ -80,6 +85,12 @@ class ProvincePnsMemberController extends Controller
                 });
             }])
             ->paginate();
-        return response()->json($province);
+        $total = User::whereHas('pns_status', function ($query) {
+            $query->where('is_pns', '1');
+        })->count();
+        return response()->json([
+            'total' => $total,
+            'member' => $province
+        ]);
     }
 }
