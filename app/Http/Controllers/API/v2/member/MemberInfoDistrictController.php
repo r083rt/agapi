@@ -30,7 +30,8 @@ class MemberInfoDistrictController extends Controller
             $query->where('district_id', $districId)
                 ->whereDate('user_activated_at', '<', \Carbon\Carbon::now()->subMonths(6)->format('Y-m-d'))
                 ->whereIn('role_id', [2, 7, 9, 10, 11]);
-        })->where('name', 'like', '%' . $keyword . '%')->paginate();
+        })->where('name', 'like', '%' . $keyword . '%')
+        ->with('profile.province', 'role', 'profile.city', 'profile.district', 'pns_status', 'banner')->paginate();
 
 
         return response()->json($member);

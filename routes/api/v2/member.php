@@ -24,6 +24,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     // Cari Anggota -------------------------------------
 
+    Route::get('/province/search/{keyword}', 'MemberInfoProvinceController@searchAllMember');
     Route::get('/province/{provinceId}/search/{keyword}', 'MemberInfoProvinceController@searchMember');
     Route::get('/district/{districtId}/search/{keyword}', 'MemberInfoDistrictController@searchMember');
     Route::get('/city/{cityId}/search/{keyword}', 'MemberInfoCityController@searchMember');
